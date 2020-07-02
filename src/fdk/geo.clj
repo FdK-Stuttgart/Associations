@@ -128,7 +128,7 @@
                                 (extra-properties)))))))))))
 
 (defn geo-data
-  "(geo-data {:ms ms :format :geojson})"
+  "(geo-data {:ms data/ms :format :geojson})"
   [{:keys [ms format] :or {format
                            #_:geojson
                            :geocodejson}}]
