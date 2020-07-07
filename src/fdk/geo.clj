@@ -53,32 +53,40 @@
 (defn geojson [features]
   {:type "FeatureCollection" :features features})
 
-(defn geocodejson [features]
+(defn geocodejson
+  "
+  Test-direkt:    https://umap.openstreetmap.fr/de/map/stadtteilkarte_testversion_459974
+  Test-short-url: http://u.osmfr.org/m/459974/
+
+  Prod-direkt:    https://umap.openstreetmap.fr/de/map/stadtteilkarte_459647
+  Prod-short-url: http://u.osmfr.org/m/459647/
+  "
+  [features]
   {:type "umap"
-   :uri
-   "https://umap.openstreetmap.fr/de/map/citystuttgartmigrantenvereine_419649"
-   ;; short url
-   ;; "http://u.osmfr.org/m/419649/"
+   ;; test-short-url
+   :uri "http://u.osmfr.org/m/459974/"
    :properties
-   {:description "CityMapStuttgart"
+   {
+    :captionBar false
+    :datalayersControl true
+    :description "CityMapStuttgart"
+    :displayPopupFooter false
+    :easing true
+    :embedControl true
+    :fullscreenControl true
+    :licence ""
+    :limitBounds {}
+    :miniMap false
+    :moreControl true
+    :name "CityStuttgartMigrantenvereine"
+    :scaleControl true
+    :scrollWheelZoom true
+    :searchControl true
+    :slideshow {}
     :tilelayer {}
     :zoom 12
-    :miniMap false
-    :captionBar false
-    :name "CityStuttgartMigrantenvereine"
-    :fullscreenControl true
-    :datalayersControl true
-    :scaleControl true
-    :easing true
-    :moreControl true
-    :limitBounds {}
-    :licence ""
-    :embedControl true
     :zoomControl true
-    :slideshow {}
-    :displayPopupFooter false
-    :searchControl true
-    :scrollWheelZoom true}
+    }
    :geometry {:type "Point" :coordinates [9.148864746093752 48.760262727297]}
    :layers
    [{:type "FeatureCollection"
