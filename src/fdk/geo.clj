@@ -14,8 +14,8 @@
 (defn url
   "Returns the address-to-latlon mapping service url.
   E.g.
-  (url {:address \"adr\" :format :geojson})
-  (url {:address \"adr\" :format :geocodejson})"
+  (url {:address \"adr\" :format :umap})
+  (url {:address \"adr\" :format :geojson})"
   [{:keys [address format]}]
   (clojure.core/format
    "https://nominatim.openstreetmap.org/search?q=%s&format=%s" address (name format)))
@@ -28,7 +28,7 @@
               (client/get $ {:accept :json})
               (:body $)
               (json/read-json $))]
-      #_(Thread/sleep 1000)
+      #_(Thread/sleep 200)
       #_(println (str "[" tbeg ":" (te/tnow) " /" "get-json " url "]"))
       r)))
 
@@ -53,7 +53,7 @@
 (defn geojson [features]
   {:type "FeatureCollection" :features features})
 
-(defn geocodejson
+(defn umap
   "
   Test-direkt:    https://umap.openstreetmap.fr/de/map/stadtteilkarte_testversion_459974
   Test-short-url: http://u.osmfr.org/m/459974/
@@ -105,80 +105,98 @@
 
 (defn feature-collection
   "E.g.
-  (feature-collection {:format :geojson :features [1 2 3]})"
+  (feature-collection {:format :umap :features [1 2 3]})"
   [format features]
   (let [json-fn (case format
-                  :geocodejson geocodejson
-                  :geojson     geojson)]
+                  :umap    umap
+                  :geojson geojson)]
     (json-fn features)))
 
+(defn relevant-response?
+  "Created add-hoc. Hmm"
+  [count-features m]
+  (cond
+    (> count-features 1)
+    (or
+     (let [category (get-in m [:properties :category])
+           osm_type (get-in m [:properties :osm_type])]
+       (or
+        (in? ["building"] category)
+        (and (in? ["node"] osm_type)
+             (in? ["amenity"] category))))
+
+     (let [type (get-in m [:properties :geocoding :type])
+           osm_type (get-in m [:properties :geocoding :osm_type])]
+       (println "type" type)
+       (or
+        (and (in? ["way"] osm_type)
+             (in? ["yes"] type))
+        (and (in? ["node"] osm_type)
+             (in? ["library"] type)))))
+
+    (= count-features 1)
+    true
+
+    :else
+    (println "ERROR" "No matching condition for" m)))
+
 (defn update-features [m]
+  #_(def service-response m)
   (update-in
    m
    [:json :features]
    (fn [features]
-     (->> features
-          (filter (fn [m]
-                    (let [category (get-in m [:properties :category])
-                          osm_type (get-in m [:properties :osm_type])]
-                      (cond
-                        (> (count features) 1)
-                        (or
-                         (in? ["building"] category)
-                         (and (in? ["amenity"] category)
-                              (in? ["node"] osm_type)))
-
-                        (= (count features) 1)
-                        true
-
-                        :else
-                        (println "ERROR" "No matching condition for" m)))))
-          (mapv (fn [feature]
-                  (update-in
-                   feature
-                   [:properties]
-                   (fn [properties]
-                     (conj (assoc properties :display_name
-                                  (s/replace (:address m) "\n" ", "))
-                           (->> [:name :desc]
-                                (select-keys m)
-                                (extra-properties)))))))))))
+     (let [count-features (count features)]
+       (->> features
+            (filter (fn [m] (relevant-response? count-features m)))
+            (mapv (fn [feature]
+                    (update-in
+                     feature
+                     [:properties]
+                     (fn [properties]
+                       (conj (assoc properties :display_name
+                                    (s/replace (:address m) "\n" ", "))
+                             (->> [:name :desc]
+                                  (select-keys m)
+                                  (extra-properties))))))))))))
 
 (defn geo-data
-  "(geo-data {:ms data/ms :format :geojson})"
+  "(geo-data {:ms ods/ms :format :umap})"
   [{:keys [ms format] :or {format
                            #_:geojson
-                           :geocodejson}}]
-  (->>
-   ms
-   (map (fn [{:keys [address] :as m}]
-          (assoc m :url (url {:address (-> (s/replace address "\n" ", ")
-                                           (codec/url-encode))
-                              :format format}))))
-   (map (fn [{:keys [url] :as m}]
-          (assoc m :json (get-json url))))
-       ;; #_(doall)
-   (map (fn [{:keys [address] :as m}]
-          (assoc m :url (url {:address (-> (s/replace address "\n" ", ")
-                                           (codec/url-encode))
-                              :format format}))))
-   (map update-features)
-   (map (fn [m] (get-in m [:json :features])))
-   (reduce into [])
-   (feature-collection format)
-   ))
+                           :umap}}]
+  (let [request-format (if (= format :umap)
+                         :geocodejson
+                         format)]
+    (->>
+     ms
+     (map (fn [{:keys [address] :as m}]
+            (assoc m :url (url {:address (-> (s/replace address "\n" ", ")
+                                             (codec/url-encode))
+                                :format request-format}))))
+     (map (fn [{:keys [url] :as m}]
+            (assoc m :json (get-json url))))
+     ;; #_(doall)
+     (map (fn [{:keys [address] :as m}]
+            (assoc m :url (url {:address (-> (s/replace address "\n" ", ")
+                                             (codec/url-encode))
+                                :format request-format}))))
+     (map update-features)
+     (map (fn [m] (get-in m [:json :features])))
+     (reduce into [])
+     ;; not the request-format
+     (feature-collection format))))
 
 (defn save-json
-  "(save-json (geo-data {:ms data/ms :format :geojson})
-   \"resources/<filename>.geojson\")"
+  "(save-json (geo-data {:ms ods/ms :format :umap}) \"resources/<filename>.umap\")"
   [json filename]
   (spit filename
         (cheshire/generate-string
          json
-         #_(geo-data {:ms ms :format :geojson})
+         #_(geo-data {:ms ms :format :umap})
          {:pretty true})
         #_(json/write-str
-           (geo-data {:format :geojson}))))
+           (geo-data {:format :umap}))))
 
-#_(json/pprint (geo-data {:format :geojson}))
+#_(json/pprint (geo-data {:format :umap}))
 

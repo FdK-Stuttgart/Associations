@@ -64,10 +64,10 @@
 
 (def ms
   "A list of indexed hash-maps:
-  '({:idx 0 :name \"...\" :address \"...\"}
+  [{:idx 0 :name \"...\" :address \"...\"}
     {:idx 1 :name \"...\" :address \"...\"}
-    {:idx 2 :name \"...\" :address \"...\"})"
+    {:idx 2 :name \"...\" :address \"...\"}]"
   ;; TODO make sure the associations and addresses are:
   ;; 1. sorted and 2. of the same size
-  (map (fn [as ad] (merge as ad))
-       associations addresses))
+  (mapv (fn [as ad] (merge as ad))
+        associations addresses))
