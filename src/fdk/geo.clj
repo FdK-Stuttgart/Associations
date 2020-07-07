@@ -68,23 +68,30 @@
    :properties
    {
     :captionBar false
-    :datalayersControl true
-    :description "CityMapStuttgart"
-    :displayPopupFooter false
+    :datalayersControl nil
+    :description "Forum der Kulturen Testversion!!"
+    :displayPopupFooter true
     :easing true
+    :editinosmControl nil
     :embedControl true
     :fullscreenControl true
+    :labelInteractive true
     :licence ""
-    :limitBounds {}
+    :limitBounds {:east 12.041016 :west 6.767578 :north 49.94415 :south 47.997274}
+    :locateControl true
+    :measureControl nil
     :miniMap false
-    :moreControl true
-    :name "CityStuttgartMigrantenvereine"
+    :moreControl false
+    :name "Stadtteilkarte_Testversion"
+    :onLoadPanel "databrowser"
+    :popupShape "Panel"
     :scaleControl true
     :scrollWheelZoom true
-    :searchControl true
+    :searchControl nil
+    :showLabel nil
     :slideshow {}
-    :tilelayer {}
-    :zoom 12
+    :tilelayer {:tms false}
+    :tilelayersControl nil
     :zoomControl true
     }
    :geometry {:type "Point" :coordinates [9.148864746093752 48.760262727297]}
