@@ -62,12 +62,49 @@
        (map-indexed (fn [i a] {:idx i :name a}))
        ))
 
+(defn contact [row]
+  (text-at-position 5 row))
+
+(def contacts
+  "A list of indexed hash-maps:
+  '({:idx 0 :contact \"...\"}
+    {:idx 1 :contact \"...\"}
+    {:idx 2 :contact \"...\"})"
+  (->> (range (.getRowCount sheet))
+       (drop 1)  ;; skip column header
+       #_(take 3)
+       (map contact)
+       ;; trim right, (s/replace s "\n" " ") (s/replace s "  " " ")
+       (map s/trim)
+       (map-indexed (fn [i a] {:idx i :contact a}))
+       ))
+
+(defn web-page [row]
+  (text-at-position 6 row))
+
+(def web-pages
+  "A list of indexed hash-maps:
+  '({:idx 0 :web-page \"...\"}
+    {:idx 1 :web-page \"...\"}
+    {:idx 2 :web-page \"...\"})"
+  (->> (range (.getRowCount sheet))
+       (drop 1)  ;; skip column header
+       #_(take 3)
+       (map contact)
+       ;; trim right, (s/replace s "\n" " ") (s/replace s "  " " ")
+       (map s/trim)
+       (map-indexed (fn [i a] {:idx i :web-page a}))
+       ))
+
 (def ms
   "A list of indexed hash-maps:
-  [{:idx 0 :name \"...\" :address \"...\"}
-    {:idx 1 :name \"...\" :address \"...\"}
-    {:idx 2 :name \"...\" :address \"...\"}]"
+  [{:idx 0 :name \"...\" :address \"...\" :desc \"...\"}
+   {:idx 1 :name \"...\" :address \"...\" :desc \"...\"}
+   {:idx 2 :name \"...\" :address \"...\" :desc \"...\"}]"
   ;; TODO make sure the associations and addresses are:
   ;; 1. sorted and 2. of the same size
-  (mapv (fn [as ad] (merge as ad))
-        associations addresses))
+  (mapv (fn [as ad co we]
+          (let [contact (:contact co)
+                web-page (:web-page we)]
+            (merge as ad {:desc (format "%s\n\n%s" contact web-page)})))
+        associations addresses contacts web-pages))

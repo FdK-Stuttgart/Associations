@@ -34,7 +34,7 @@
 
 (defn extra-properties
   " E.g:
-  (foo {:name \"n\" :desc \"d\"})
+  (extra-properties {:name \"n\" :desc \"d\"})
   "
   [{:keys [desc name]}]
   (conj
@@ -84,7 +84,8 @@
     :moreControl false
     :name "Stadtteilkarte_Testversion"
     :onLoadPanel "databrowser"
-    :popupShape "Panel"
+    :popupShape "Default"
+    :popupTemplate "Default"
     :scaleControl true
     :scrollWheelZoom true
     :searchControl nil
@@ -127,7 +128,6 @@
 
      (let [type (get-in m [:properties :geocoding :type])
            osm_type (get-in m [:properties :geocoding :osm_type])]
-       (println "type" type)
        (or
         (and (in? ["way"] osm_type)
              (in? ["yes"] type))
@@ -154,8 +154,14 @@
                      feature
                      [:properties]
                      (fn [properties]
-                       (conj (assoc properties :display_name
-                                    (s/replace (:address m) "\n" ", "))
+                       (conj (assoc properties
+
+                                    :display_name
+                                    (s/replace (:address m) "\n" ", ")
+
+                                    :description
+                                    (:desc m)
+                                    )
                              (->> [:name :desc]
                                   (select-keys m)
                                   (extra-properties))))))))))))
