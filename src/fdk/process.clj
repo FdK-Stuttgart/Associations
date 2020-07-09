@@ -1,10 +1,9 @@
 (ns fdk.process
   "Combine all the partial results etc."
-  (:require [fdk.data :refer :all]
-            [utils.core :refer :all]
-            [clj-fuzzy.metrics :as fuzzy]
-            [fdk.cities :refer :all]
-            [fdk.datasrc.filemaker :refer :all]))
+  (:require
+   [clj-fuzzy.metrics :as fuzzy]
+   [fdk.cities :refer :all]
+   [utils.core :refer :all]))
 
 (def columns
   [{:idx 1 :k :association}
