@@ -3,98 +3,110 @@
    [utils.core :refer :all]
    [clojure.string :as s]
    [fdk.data :as data]
+   [djy.char :as djy]
    [clojure.inspector :refer :all])
   (:import org.odftoolkit.simple.SpreadsheetDocument))
+
+(defn- row-idx [row-letter]
+  {:pre [(char? row-letter)]}
+  (.indexOf (djy/char-range \A \Z) (djy/upper-case row-letter)))
 
 (defn document []
   (SpreadsheetDocument/loadDocument
    "resources/Vereinsinformationen_öffentlich_Stadtteilkarte.ods"))
 
 (def sheet (-> (document) (.getSheetByIndex 0)))
+(def sheet-content (->> (range (.getRowCount sheet))
+                        (drop 1)  ;; skip column header
+                        #_(take 3)))
 
 (defn text-at-position [p row]
   (-> sheet
       (.getCellByPosition p row)
       (.getDisplayText)))
 
-(defn address [row]
-  (text-at-position 2 row))
+(defn address [row] (text-at-position (row-idx \C) row))
+
+(defn- cleanup [a]
+  ((apply comp (reverse [
+                         s/trim
+                         ;; repeating twice should be enough; simple and dirty
+                         (fn [a] (s/replace a " \n" "\n"))
+                         (fn [a] (s/replace a " \n" "\n"))
+                         (fn [a] (s/replace a "  " " "))
+                         (fn [a] (s/replace a "  " " "))
+                         (fn [a] (s/replace a " " " "))
+                         (fn [a] (s/replace a "e. V." "e.V."))
+                         ]))
+   a))
 
 (def addresses
   "A list of indexed hash-maps:
   '({:idx 0 :address \"...\"}
     {:idx 1 :address \"...\"}
     {:idx 2 :address \"...\"})"
-  (->> (range (.getRowCount sheet))
-       (drop 1)  ;; skip column header
-       #_(take 3)
+  (->> sheet-content
        (map address)
-       ;; trim right, (s/replace s "\n" " ") (s/replace s "  " " ")
-       (map s/trim)
-       (map (fn [a] (s/replace a " \n" "\n")))
-       (map (fn [a] (s/replace a " \n" "\n")))
-       (map (fn [a] (s/replace a "\n" ", ")))
-       (map (fn [a] (s/replace a "  " " ")))
-       (map (fn [a] (s/replace a "  " " ")))
-       (map (fn [a] (s/replace a " " " ")))
-       (map-indexed (fn [i a] {:idx i :address a}))
-       ))
+       (map cleanup)
+       (map (comp
+             (fn [a] (s/replace a "\n" ", "))
+             cleanup))
+       (map-indexed (fn [i s] {:idx i :address s}))))
 
-(defn association [row]
-  (text-at-position 0 row))
+(defn association [row] (text-at-position (row-idx \A) row))
 
 (def associations
   "A list of indexed hash-maps:
   '({:idx 0 :name \"...\"}
     {:idx 1 :name \"...\"}
     {:idx 2 :name \"...\"})"
-  (->> (range (.getRowCount sheet))
-       (drop 1)  ;; skip column header
-       #_(take 3)
+  (->> sheet-content
        (map association)
-       ;; trim right, (s/replace s "\n" " ") (s/replace s "  " " ")
-       (map s/trim)
-       (map (fn [a] (s/replace a "\n" " ")))
-       (map (fn [a] (s/replace a "  " " ")))
-       (map (fn [a] (s/replace a "  " " ")))
-       (map (fn [a] (s/replace a "e. V." "e.V.")))
-       (map (fn [a] (s/replace a " " " ")))
-       (map-indexed (fn [i a] {:idx i :name a}))
-       ))
+       (map (comp
+             (fn [a] (s/replace a "\n" " "))
+             cleanup))
+       (map-indexed (fn [i s] {:idx i :name s}))))
 
-(defn contact [row]
-  (text-at-position 5 row))
+(defn contact [row] (text-at-position (row-idx \F) row))
 
 (def contacts
   "A list of indexed hash-maps:
   '({:idx 0 :contact \"...\"}
     {:idx 1 :contact \"...\"}
     {:idx 2 :contact \"...\"})"
-  (->> (range (.getRowCount sheet))
-       (drop 1)  ;; skip column header
-       #_(take 3)
+  (->> sheet-content
        (map contact)
-       ;; trim right, (s/replace s "\n" " ") (s/replace s "  " " ")
-       (map s/trim)
-       (map-indexed (fn [i a] {:idx i :contact a}))
-       ))
+       (map cleanup)
+       (map-indexed (fn [i s] {:idx i :contact s}))))
 
-(defn web-page [row]
-  (text-at-position 6 row))
+(defn web-page [row] (text-at-position (row-idx \G) row))
 
 (def web-pages
   "A list of indexed hash-maps:
   '({:idx 0 :web-page \"...\"}
     {:idx 1 :web-page \"...\"}
     {:idx 2 :web-page \"...\"})"
-  (->> (range (.getRowCount sheet))
-       (drop 1)  ;; skip column header
-       #_(take 3)
+  (->> sheet-content
        (map contact)
-       ;; trim right, (s/replace s "\n" " ") (s/replace s "  " " ")
-       (map s/trim)
-       (map-indexed (fn [i a] {:idx i :web-page a}))
-       ))
+       (map cleanup)
+       (map-indexed (fn [i a] {:idx i :web-page a}))))
+
+(defn engagement [row] (text-at-position (row-idx \H) row))
+
+(def engagements
+  "
+  TODO Natural Language Understanding (NLU)
+  See https://github.com/huggingface/transformers
+  Or just count word frequency
+
+  A list of indexed hash-maps:
+  '({:idx 0 :engagement \"...\"}
+    {:idx 1 :engagement \"...\"}
+    {:idx 2 :engagement \"...\"})"
+  (->> sheet-content
+       (map engagement)
+       (map cleanup)
+       (map-indexed (fn [i s] {:idx i :engagement s}))))
 
 (def ms
   "A list of indexed hash-maps:

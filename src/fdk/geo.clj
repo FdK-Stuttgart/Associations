@@ -5,7 +5,7 @@
             [clj-time-ext.core :as te]
             [clojure.data.json :as json]
             [clojure.string :as s]
-            [utils.core :refer :all]
+            [utils.core :refer [in?]]
             [fdk.data :as data]
             [fdk.datasrc.ods :as ods]
             [clojure.inspector :refer :all]
@@ -167,7 +167,10 @@
                                   (extra-properties))))))))))))
 
 (defn geo-data
-  "(geo-data {:ms ods/ms :format :umap})"
+  "E.g.:
+  (geo-data {:ms ods/ms :format :umap})
+  (geo-data {:ms data/ms :format :umap})
+  "
   [{:keys [ms format] :or {format
                            #_:geojson
                            :umap}}]
@@ -194,7 +197,10 @@
      (feature-collection format))))
 
 (defn save-json
-  "(save-json (geo-data {:ms ods/ms :format :umap}) \"resources/<filename>.umap\")"
+  "E.g.:
+  (save-json (geo-data {:ms ods/ms :format :umap}) \"resources/<filename>.umap\")
+  (save-json (geo-data {:ms ods/ms :format :umap}) \"resources/<filename>.umap\")
+  "
   [json filename]
   (spit filename
         (cheshire/generate-string

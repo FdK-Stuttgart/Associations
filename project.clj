@@ -30,19 +30,28 @@
    [hickory "0.7.1"]
 
    ;; read and write M$ Office documents
-   [dk.ative/docjure "1.13.0"]
+   [dk.ative/docjure "1.14.0"]
 
    ;; https://mvnrepository.com/artifact/org.odftoolkit/simple-odf
    [org.odftoolkit/simple-odf "0.9.0-RC1"]
 
+   ;; debugging
+   ;; https://github.com/vvvvalvalval/scope-capture
+   [vvvvalvalval/scope-capture "0.3.2"]
 
    ;; TODO https://github.com/LibrePDF/OpenPDF
 
    [org.clojure/core.memoize "1.0.236"]
 
-   ;; compute string similarity
+   ;; compute string similarity - identify of what is the association name and
+   ;; what is not when web-scrapping association address search results
    ;; https://yomguithereal.github.io/clj-fuzzy/clojure.html
-   [clj-fuzzy "0.4.1"]]
+   [clj-fuzzy "0.4.1"]
+
+   ;; character utility functions
+   [djy "0.2.1"]
+
+   ]
   :plugins
   [
    ;; project version from git
