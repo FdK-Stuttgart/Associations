@@ -28,7 +28,7 @@
               (client/get $ {:accept :json})
               (:body $)
               (json/read-json $))]
-      #_(Thread/sleep 200)
+      (Thread/sleep 200)
       #_(println (str "[" tbeg ":" (te/tnow) " /" "get-json " url "]"))
       r)))
 
@@ -115,60 +115,62 @@
 
 (defn relevant-response?
   "Created add-hoc. Hmm"
-  [count-features m]
+  [count-features srvc-response]
   (cond
     (> count-features 1)
     (or
-     (let [category (get-in m [:properties :category])
-           osm_type (get-in m [:properties :osm_type])]
+     (let [category (get-in srvc-response [:properties :category])
+           osm_type (get-in srvc-response [:properties :osm_type])]
        (or
         (in? ["building"] category)
-        (and (in? ["node"] osm_type)
-             (in? ["amenity"] category))))
+        (and (in? ["amenity"] category)
+             (in? ["node"] osm_type))))
 
-     (let [type (get-in m [:properties :geocoding :type])
-           osm_type (get-in m [:properties :geocoding :osm_type])]
+     (let [type (get-in srvc-response [:properties :geocoding :type])
+           osm_type (get-in srvc-response [:properties :geocoding :osm_type])]
        (or
         (and (in? ["way"] osm_type)
              (in? ["yes"] type))
         (and (in? ["node"] osm_type)
-             (in? ["library"] type)))))
+             (in? ["library" "parking"] type)))))
 
     (= count-features 1)
     true
 
     :else
-    (println "ERROR" "No matching condition for" m)))
+    (println "ERROR" "No matching condition for:\n" srvc-response)))
 
-(defn update-features [m]
-  #_(def service-response m)
+(defn update-features [srvc-response]
+  (def srvc-response srvc-response)
   (update-in
-   m
+   srvc-response
    [:json :features]
    (fn [features]
      (let [count-features (count features)]
        (->> features
-            (filter (fn [m] (relevant-response? count-features m)))
+            (filter (fn [srvc-response] (relevant-response? count-features srvc-response)))
             (mapv (fn [feature]
+                    (def feature feature)
                     (update-in
                      feature
                      [:properties]
                      (fn [properties]
+                       (def properties properties)
                        (conj (assoc properties
 
                                     :display_name
-                                    (s/replace (:address m) "\n" ", ")
+                                    (s/replace (:address srvc-response) "\n" ", ")
 
                                     :description
-                                    (:desc m)
+                                    (:desc srvc-response)
                                     )
                              (->> [:name :desc]
-                                  (select-keys m)
+                                  (select-keys srvc-response)
                                   (extra-properties))))))))))))
 
 (defn geo-data
   "E.g.:
-  (geo-data {:ms ods/ms :format :umap})
+  (geo-data {:ms (ods/ms) :format :umap})
   (geo-data {:ms data/ms :format :umap})
   "
   [{:keys [ms format] :or {format
@@ -193,22 +195,29 @@
      (map update-features)
      (map (fn [m] (get-in m [:json :features])))
      (reduce into [])
-     ;; not the request-format
+     ((fn [coll]
+        (println "Coordinates found" (count coll))
+        coll))
+     ;; The right param of `feature-collection` is `format` not the
+     ;; `request-format`
      (feature-collection format))))
 
 (defn save-json
   "E.g.:
-  (save-json (geo-data {:ms ods/ms :format :umap}) \"resources/<filename>.umap\")
-  (save-json (geo-data {:ms ods/ms :format :umap}) \"resources/<filename>.umap\")
+  (save-json (geo-data {:ms (ods/ms) :format :umap}) \"resources/<filename>.umap\")
+  (save-json (geo-data {:ms data/ms :format :umap}) \"resources/<filename>.umap\")
   "
   [json filename]
+  (def json json)
   (spit filename
         (cheshire/generate-string
          json
          #_(geo-data {:ms ms :format :umap})
          {:pretty true})
         #_(json/write-str
-           (geo-data {:format :umap}))))
+           (geo-data {:format :umap})))
+  (println "See (inspect-tree json)")
+  )
 
 #_(json/pprint (geo-data {:format :umap}))
 

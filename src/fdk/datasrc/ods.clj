@@ -15,13 +15,13 @@
   (SpreadsheetDocument/loadDocument
    "resources/Vereinsinformationen_öffentlich_Stadtteilkarte.ods"))
 
-(def sheet (-> (document) (.getSheetByIndex 0)))
-(def sheet-content (->> (range (.getRowCount sheet))
-                        (drop 1)  ;; skip column header
-                        #_(take 3)))
+(defn sheet [] (-> (document) (.getSheetByIndex 0)))
+(defn sheet-content [] (->> (range (.getRowCount (sheet)))
+                            (drop 1)  ;; skip column header
+                            #_(take 3)))
 
 (defn text-at-position [p row]
-  (-> sheet
+  (-> (sheet)
       (.getCellByPosition p row)
       (.getDisplayText)))
 
@@ -40,12 +40,12 @@
                          ]))
    a))
 
-(def addresses
+(defn addresses []
   "A list of indexed hash-maps:
   '({:idx 0 :address \"...\"}
     {:idx 1 :address \"...\"}
     {:idx 2 :address \"...\"})"
-  (->> sheet-content
+  (->> (sheet-content)
        (map address)
        (map cleanup)
        (map (comp
@@ -55,12 +55,13 @@
 
 (defn association [row] (text-at-position (row-idx \A) row))
 
-(def associations
+(defn associations
   "A list of indexed hash-maps:
   '({:idx 0 :name \"...\"}
     {:idx 1 :name \"...\"}
     {:idx 2 :name \"...\"})"
-  (->> sheet-content
+  []
+  (->> (sheet-content)
        (map association)
        (map (comp
              (fn [a] (s/replace a "\n" " "))
@@ -69,31 +70,33 @@
 
 (defn contact [row] (text-at-position (row-idx \F) row))
 
-(def contacts
+(defn contacts
   "A list of indexed hash-maps:
   '({:idx 0 :contact \"...\"}
     {:idx 1 :contact \"...\"}
     {:idx 2 :contact \"...\"})"
-  (->> sheet-content
+  []
+  (->> (sheet-content)
        (map contact)
        (map cleanup)
        (map-indexed (fn [i s] {:idx i :contact s}))))
 
 (defn web-page [row] (text-at-position (row-idx \G) row))
 
-(def web-pages
+(defn web-pages
   "A list of indexed hash-maps:
   '({:idx 0 :web-page \"...\"}
     {:idx 1 :web-page \"...\"}
     {:idx 2 :web-page \"...\"})"
-  (->> sheet-content
+  []
+  (->> (sheet-content)
        (map contact)
        (map cleanup)
        (map-indexed (fn [i a] {:idx i :web-page a}))))
 
 (defn engagement [row] (text-at-position (row-idx \H) row))
 
-(def engagements
+(defn engagements
   "
   TODO Natural Language Understanding (NLU)
   See https://github.com/huggingface/transformers
@@ -103,20 +106,22 @@
   '({:idx 0 :engagement \"...\"}
     {:idx 1 :engagement \"...\"}
     {:idx 2 :engagement \"...\"})"
-  (->> sheet-content
+  []
+  (->> (sheet-content)
        (map engagement)
        (map cleanup)
        (map-indexed (fn [i s] {:idx i :engagement s}))))
 
-(def ms
+(defn ms
   "A list of indexed hash-maps:
   [{:idx 0 :name \"...\" :address \"...\" :desc \"...\"}
    {:idx 1 :name \"...\" :address \"...\" :desc \"...\"}
    {:idx 2 :name \"...\" :address \"...\" :desc \"...\"}]"
+  []
   ;; TODO make sure the associations and addresses are:
   ;; 1. sorted and 2. of the same size
   (mapv (fn [as ad co we]
           (let [contact (:contact co)
                 web-page (:web-page we)]
             (merge as ad {:desc (format "%s\n\n%s" contact web-page)})))
-        associations addresses contacts web-pages))
+        (associations) (addresses) (contacts) (web-pages)))
