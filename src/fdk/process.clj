@@ -3,7 +3,8 @@
   (:require
    [clj-fuzzy.metrics :as fuzzy]
    [fdk.cities :refer :all]
-   [utils.core :refer :all]))
+   [fdk.data :refer :all]
+   [utils.core :refer [in?]]))
 
 (def columns
   [{:idx 1 :k :association}
