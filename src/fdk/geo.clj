@@ -1,15 +1,16 @@
 (ns fdk.geo
-  "Mapping of Address to Latitude and Longitude. Creation of a geojson file."
-  (:require [cheshire.core :as cheshire]
-            [clj-http.client :as client]
-            [clj-time-ext.core :as te]
-            [clojure.data.json :as json]
-            [clojure.string :as s]
-            [utils.core :refer [in?]]
-            [fdk.data :as data]
-            [fdk.datasrc.ods :as ods]
-            [clojure.inspector :refer :all]
-            [ring.util.codec :as codec]))
+  "Mapping of Address to Latitude and Longitude. Json file creation."
+  (:require
+   [cheshire.core :as cheshire]
+   [clj-http.client :as client]
+   [clj-time-ext.core :as te]
+   [clojure.data.json :as json]
+   [clojure.string :as s]
+   [utils.core :refer [in?]]
+   [fdk.data :as data]
+   [fdk.datasrc.ods :as ods]
+   [clojure.inspector :refer :all]
+   [ring.util.codec :as codec]))
 
 (defn url
   "Returns the address-to-latlon mapping service url.
@@ -28,7 +29,7 @@
               (client/get $ {:accept :json})
               (:body $)
               (json/read-json $))]
-      (Thread/sleep 200)
+      (Thread/sleep 500)
       #_(println (str "[" tbeg ":" (te/tnow) " /" "get-json " url "]"))
       r)))
 
@@ -53,6 +54,24 @@
 (defn geojson [features]
   {:type "FeatureCollection" :features features})
 
+(defn layer [idx layer-name features]
+  {:type "FeatureCollection"
+   :features features
+   :_umap_options
+   {:displayOnLoad true :browsable true :name layer-name
+    :color (nth ["Blue"
+                 "Red"
+                 "Gold"
+                 "LightSkyBlue"
+                 "DarkSlateBlue"
+                 "Chocolate"
+                 "Black"
+                 "MediumSlateBlue"
+                 "CadetBlue"
+                 ] idx)
+    :id (rand-int 1e7)}}
+  )
+
 (defn umap
   "
   Test-direkt:    https://umap.openstreetmap.fr/de/map/stadtteilkarte_testversion_459974
@@ -67,8 +86,8 @@
    :uri "http://u.osmfr.org/m/459974/"
    :properties
    {
-    :captionBar false
-    :datalayersControl nil
+    :captionBar true
+    :datalayersControl "collapsed"
     :description "Forum der Kulturen Testversion!!"
     :displayPopupFooter true
     :easing true
@@ -88,7 +107,7 @@
     :popupTemplate "Default"
     :scaleControl true
     :scrollWheelZoom true
-    :searchControl nil
+    :searchControl true
     :showLabel nil
     :slideshow {}
     :tilelayer {:tms false}
@@ -97,17 +116,24 @@
     }
    :geometry {:type "Point" :coordinates [9.148864746093752 48.760262727297]}
    :layers
-   [{:type "FeatureCollection"
- ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     :features features
- ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     :_umap_options
-     {:displayOnLoad true :browsable true :name "Ebene 1" :id 1165787}}]})
+   (let [cats ods/categories ;; (take 3 ods/categories)
+         feats features ;; (take 12 features)
+         groups (partition-all (inc (quot (count features) (count cats)))
+                               feats)]
+     #_(println "(count cats)" (count cats) "(count groups)" (count groups) "(count feats)" (count feats))
+     (->> groups
+          (map-indexed (fn [idx group]
+                         #_(println "idx" idx)
+                         (layer idx (nth ods/categories idx) group)))
+          (vec)
+          #_(inspect-tree)))})
 
 (defn feature-collection
   "E.g.
-  (feature-collection {:format :umap :features [1 2 3]})"
+  (feature-collection :umap features)
+  (feature-collection :umap [1 2 3])"
   [format features]
+  (def features features)
   (let [json-fn (case format
                   :umap    umap
                   :geojson geojson)]
@@ -206,6 +232,14 @@
   "E.g.:
   (save-json (geo-data {:ms (ods/ms) :format :umap}) \"resources/<filename>.umap\")
   (save-json (geo-data {:ms data/ms :format :umap}) \"resources/<filename>.umap\")
+  (save-json json \"resources/relevant.umap\")
+  (save-json (geo-data {:ms (fdk.relevant/ms) :format :umap}) \"resources/relevant.umap\")
+
+  (save-json (feature-collection :umap features) \"resources/relevant.umap\")
+
+  (save-json (geo-data {:ms (->> (fdk.relevant/ms)
+                                 (remove (fn [m] (in? associations-found (:name m)))))
+                        :format :umap}) \"resources/relevant.umap\")
   "
   [json filename]
   (def json json)
@@ -216,7 +250,7 @@
          {:pretty true})
         #_(json/write-str
            (geo-data {:format :umap})))
-  (println "See (inspect-tree json)")
+  (println "See" "(inspect-tree json) (inspect-tree features)")
   )
 
 #_(json/pprint (geo-data {:format :umap}))

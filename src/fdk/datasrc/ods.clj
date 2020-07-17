@@ -112,6 +112,23 @@
        (map cleanup)
        (map-indexed (fn [i s] {:idx i :engagement s}))))
 
+(def default-category "Sonstiges")
+
+(def categories
+  [
+   "Tanz"
+   "Musik & Gesang"
+   "Sport & Bewegung"
+   "Kunst"
+   "Kultur"
+   "Stammtisch"
+   "Integration, Sprachen, Unterricht"
+   default-category
+   ])
+
+(defn classify [categories association]
+  (rand-int (count categories)))
+
 (defn ms
   "A list of indexed hash-maps:
   [{:idx 0 :name \"...\" :address \"...\" :desc \"...\"}
