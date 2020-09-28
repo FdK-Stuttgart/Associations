@@ -7,7 +7,7 @@
    [clojure.inspector :refer :all])
   (:import org.odftoolkit.simple.SpreadsheetDocument))
 
-(defn- row-idx [row-letter]
+(defn- column-idx [row-letter]
   {:pre [(char? row-letter)]}
   (.indexOf (djy/char-range \A \Z) (djy/upper-case row-letter)))
 
@@ -25,7 +25,9 @@
       (.getCellByPosition p row)
       (.getDisplayText)))
 
-(defn address [row] (text-at-position (row-idx \C) row))
+(defn address [row] (text-at-position (column-idx \C) row))
+
+(defn row-nr [idx] (+ idx 2))
 
 (defn- cleanup [a]
   ((apply comp (reverse [
@@ -51,9 +53,9 @@
        (map (comp
              (fn [a] (s/replace a "\n" ", "))
              cleanup))
-       (map-indexed (fn [i s] {:idx i :address s}))))
+       (map-indexed (fn [i s] {:idx (row-nr i) :address s}))))
 
-(defn association [row] (text-at-position (row-idx \A) row))
+(defn association [row] (text-at-position (column-idx \A) row))
 
 (defn associations
   "A list of indexed hash-maps:
@@ -66,9 +68,9 @@
        (map (comp
              (fn [a] (s/replace a "\n" " "))
              cleanup))
-       (map-indexed (fn [i s] {:idx i :name s}))))
+       (map-indexed (fn [i s] {:idx (row-nr i) :name s}))))
 
-(defn contact [row] (text-at-position (row-idx \F) row))
+(defn contact [row] (text-at-position (column-idx \F) row))
 
 (defn contacts
   "A list of indexed hash-maps:
@@ -79,9 +81,9 @@
   (->> (sheet-content)
        (map contact)
        (map cleanup)
-       (map-indexed (fn [i s] {:idx i :contact s}))))
+       (map-indexed (fn [i s] {:idx (row-nr i) :contact s}))))
 
-(defn web-page [row] (text-at-position (row-idx \G) row))
+(defn web-page [row] (text-at-position (column-idx \G) row))
 
 (defn web-pages
   "A list of indexed hash-maps:
@@ -92,9 +94,9 @@
   (->> (sheet-content)
        (map contact)
        (map cleanup)
-       (map-indexed (fn [i a] {:idx i :web-page a}))))
+       (map-indexed (fn [i a] {:idx (row-nr i) :web-page a}))))
 
-(defn engagement [row] (text-at-position (row-idx \H) row))
+(defn engagement [row] (text-at-position (column-idx \H) row))
 
 (defn engagements
   "
@@ -110,7 +112,7 @@
   (->> (sheet-content)
        (map engagement)
        (map cleanup)
-       (map-indexed (fn [i s] {:idx i :engagement s}))))
+       (map-indexed (fn [i s] {:idx (row-nr i) :engagement s}))))
 
 (def default-category "Sonstiges")
 

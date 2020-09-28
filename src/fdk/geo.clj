@@ -1,5 +1,5 @@
 (ns fdk.geo
-  "Mapping of Address to Latitude and Longitude. Json file creation."
+  "Mapping of Address to Latitude and Longitude. umap-json file creation."
   (:require
    [cheshire.core :as cheshire]
    [clj-http.client :as client]
@@ -229,7 +229,8 @@
      (feature-collection format))))
 
 (defn save-json
-  "E.g.:
+  "During evaluation it defines the `json` var for debugging purposes. E.g.:
+
   (save-json (geo-data {:ms (ods/ms) :format :umap}) \"resources/<filename>.umap\")
   (save-json (geo-data {:ms data/ms :format :umap}) \"resources/<filename>.umap\")
   (save-json json \"resources/relevant.umap\")

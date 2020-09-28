@@ -13,7 +13,7 @@
    [environ                       "1.2.0"]
 
    ;; wget / get-json
-   [clj-http                      "3.10.1"]
+   [clj-http                      "3.10.3"]
 
    ;; pretty print json a string
    [cheshire                      "5.10.0"]
@@ -51,6 +51,8 @@
    ;; character utility functions
    [djy "0.2.1"]
 
+   ;; logging
+   [com.taoensso/timbre "5.0.1"]
    ]
   :plugins
   [
