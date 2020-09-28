@@ -6,30 +6,37 @@
    [clj-time-ext.core :as te]
    [clojure.data.json :as json]
    [clojure.string :as s]
-   [utils.core :refer [in?]]
+   [utils.core :refer [in? coll-and-not-empty? not-empty?]]
    [fdk.data :as data]
    [fdk.datasrc.ods :as ods]
    [clojure.inspector :refer :all]
-   [ring.util.codec :as codec]))
+   [ring.util.codec :as codec]
+   [taoensso.timbre :as timbre :refer :all]
+   [clojure.core :as cc]
 
-(defn url
+   [clojure.set :as set]))
+
+(defn create-url
   "Returns the address-to-latlon mapping service url.
   E.g.
-  (url {:address \"adr\" :format :umap})
-  (url {:address \"adr\" :format :geojson})"
+  (create-url {:address \"adr\" :format :umap})
+  (create-url {:address \"adr\" :format :geojson})"
   [{:keys [address format]}]
   (clojure.core/format
    "https://nominatim.openstreetmap.org/search?q=%s&format=%s" address (name format)))
 
+(def request-delay 200)
+
 (defn get-json [url]
   ;; TODO use monad for logging
+  (def url url)
   (let [tbeg (te/tnow)]
     #_(println (str "[" tbeg "             /" "get-json " url "]"))
     (let [r (as-> url $
               (client/get $ {:accept :json})
               (:body $)
               (json/read-json $))]
-      (Thread/sleep 500)
+      (Thread/sleep request-delay)
       #_(println (str "[" tbeg ":" (te/tnow) " /" "get-json " url "]"))
       r)))
 
@@ -81,6 +88,7 @@
   Prod-short-url: http://u.osmfr.org/m/459647/
   "
   [features]
+  (def features features)
   {:type "umap"
    ;; test-short-url
    :uri "http://u.osmfr.org/m/459974/"
@@ -139,21 +147,23 @@
                   :geojson geojson)]
     (json-fn features)))
 
-(defn relevant-response?
+(defn relevant-feature?
   "Created add-hoc. Hmm"
-  [count-features srvc-response]
+  [count-features feature]
+  (def count-features count-features)
+  (def feature feature)
   (cond
     (> count-features 1)
     (or
-     (let [category (get-in srvc-response [:properties :category])
-           osm_type (get-in srvc-response [:properties :osm_type])]
+     (let [category (get-in feature [:properties :category])
+           osm_type (get-in feature [:properties :osm_type])]
        (or
         (in? ["building"] category)
         (and (in? ["amenity"] category)
              (in? ["node"] osm_type))))
 
-     (let [type (get-in srvc-response [:properties :geocoding :type])
-           osm_type (get-in srvc-response [:properties :geocoding :osm_type])]
+     (let [type (get-in feature [:properties :geocoding :type])
+           osm_type (get-in feature [:properties :geocoding :osm_type])]
        (or
         (and (in? ["way"] osm_type)
              (in? ["yes"] type))
@@ -164,62 +174,62 @@
     true
 
     :else
-    (println "ERROR" "No matching condition for:\n" srvc-response)))
+    (error "No matching condition for:" feature)))
 
-(defn update-features [srvc-response]
-  (def srvc-response srvc-response)
-  (update-in
-   srvc-response
-   [:json :features]
-   (fn [features]
-     (let [count-features (count features)]
-       (->> features
-            (filter (fn [srvc-response] (relevant-response? count-features srvc-response)))
-            (mapv (fn [feature]
-                    (def feature feature)
-                    (update-in
-                     feature
-                     [:properties]
-                     (fn [properties]
-                       (def properties properties)
-                       (conj (assoc properties
-
-                                    :display_name
-                                    (s/replace (:address srvc-response) "\n" ", ")
-
-                                    :description
-                                    (:desc srvc-response)
-                                    )
-                             (->> [:name :desc]
-                                  (select-keys srvc-response)
-                                  (extra-properties))))))))))))
+(defn normalize-address [address]
+  (let [adr (s/replace address "\n" ", ")]
+    (if-let [old-house-nr (re-find #"[0-9] [A-z]," adr)]
+      (let [last-idx (.lastIndexOf adr old-house-nr)
+            new-house-nr (.replaceAll old-house-nr " " "")]
+        (.replaceFirst adr old-house-nr new-house-nr))
+      adr)))
 
 (defn geo-data
   "E.g.:
   (geo-data {:ms (ods/ms) :format :umap})
   (geo-data {:ms data/ms :format :umap})
   "
-  [{:keys [ms format] :or {format
-                           #_:geojson
-                           :umap}}]
-  (let [request-format (if (= format :umap)
-                         :geocodejson
-                         format)]
+  [{:keys [ms format] :or {format #_:geojson :umap}}]
+  (let [request-format (if (= format :umap) :geocodejson format)]
     (->>
      ms
      (map (fn [{:keys [address] :as m}]
-            (assoc m :url (url {:address (-> (s/replace address "\n" ", ")
-                                             (codec/url-encode))
-                                :format request-format}))))
-     (map (fn [{:keys [url] :as m}]
-            (assoc m :json (get-json url))))
-     ;; #_(doall)
-     (map (fn [{:keys [address] :as m}]
-            (assoc m :url (url {:address (-> (s/replace address "\n" ", ")
-                                             (codec/url-encode))
-                                :format request-format}))))
-     (map update-features)
-     (map (fn [m] (get-in m [:json :features])))
+            (let [norm-addr (normalize-address address)]
+              (let [all-features (->> norm-addr
+                                      (codec/url-encode)
+                                      (assoc {:format request-format}
+                                             :address)
+                                      (create-url)
+                                      (get-json)
+                                      :features)
+                    cnt-all-features (count all-features)]
+                (debug (cc/format "norm-addr: \"%s\"; cnt-all-features: %s"
+                                  norm-addr cnt-all-features))
+                (def all-features all-features)
+                (->> all-features
+                     (map-indexed (fn [i feature] [i feature]))
+                     (filter (fn [[idx feature]]
+                               (let [relevant (relevant-feature?
+                                               cnt-all-features feature)]
+                                 (debug
+                                  (cc/format
+                                   "norm-addr: \"%s\"; idx: %s; relevant: %s"
+                                   norm-addr idx relevant))
+                                 relevant)))
+                     (mapv (fn [[_ feature]] feature))
+                     (mapv (fn [feature]
+                             (def feature feature)
+                             (update-in
+                              feature
+                              [:properties]
+                              (fn [properties]
+                                (def properties properties)
+                                (conj (assoc properties
+                                             :display_name norm-addr
+                                             :description (:desc all-features))
+                                      (->> [:name :desc]
+                                           (select-keys all-features)
+                                           (extra-properties))))))))))))
      (reduce into [])
      ((fn [coll]
         (println "Coordinates found" (count coll))
@@ -227,6 +237,31 @@
      ;; The right param of `feature-collection` is `format` not the
      ;; `request-format`
      (feature-collection format))))
+
+(defn resolved-addresses
+  "
+  => (def json (geo-data {:ms (ods/ms) :format :umap}))
+  => (resolved-addresses json)"
+  [json]
+  (->> json
+       :layers
+       (map (fn [layer]
+              (->> (get-in layer [:features])
+                   (map (fn [feature]
+                          (get-in feature [:properties :display_name]))))))
+       (flatten)
+       (set)))
+
+(defn unresolved-addresses [json]
+  (let [resolved (resolved-addresses json)]
+    (->> (ods/addresses)
+         (remove (fn [{:keys [address idx]}]
+                   (empty? address)))
+         (map (fn [{:keys [address idx] :as m}]
+                (update-in m [:address] normalize-address)))
+         (remove (fn [{:keys [idx address]}]
+                   (in? resolved address)))
+         (map (fn [m] (clojure.set/rename-keys m {:idx :row}))))))
 
 (defn save-json
   "During evaluation it defines the `json` var for debugging purposes. E.g.:
@@ -251,7 +286,7 @@
          {:pretty true})
         #_(json/write-str
            (geo-data {:format :umap})))
-  (println "See" "(inspect-tree json) (inspect-tree features)")
+  (debug "See" "(inspect-tree json) (inspect-tree features)")
   )
 
 #_(json/pprint (geo-data {:format :umap}))
