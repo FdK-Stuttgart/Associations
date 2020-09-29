@@ -96,7 +96,7 @@
    {
     :captionBar true
     :datalayersControl "collapsed"
-    :description "Forum der Kulturen Testversion!!"
+    :description "Forum der Kulturen\nhttps://www.forum-der-kulturen.de/"
     :displayPopupFooter true
     :easing true
     :editinosmControl nil
@@ -193,7 +193,7 @@
   (let [request-format (if (= format :umap) :geocodejson format)]
     (->>
      ms
-     (map (fn [{:keys [address] :as m}]
+     (map (fn [{:keys [address name desc] :as m}]
             (let [norm-addr (normalize-address address)]
               (let [all-features (->> norm-addr
                                       (codec/url-encode)
@@ -226,8 +226,9 @@
                                 (def properties properties)
                                 (conj (assoc properties
                                              :display_name norm-addr
-                                             :description (:desc all-features))
-                                      (->> [:name :desc]
+                                             :description desc
+                                             :name name)
+                                      #_(->> [:name :desc]
                                            (select-keys all-features)
                                            (extra-properties))))))))))))
      (reduce into [])

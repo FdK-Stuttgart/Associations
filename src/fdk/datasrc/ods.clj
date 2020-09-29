@@ -92,7 +92,7 @@
     {:idx 2 :web-page \"...\"})"
   []
   (->> (sheet-content)
-       (map contact)
+       (map web-page)
        (map cleanup)
        (map-indexed (fn [i a] {:idx (row-nr i) :web-page a}))))
 
