@@ -45,18 +45,12 @@
   (extra-properties {:name \"n\" :desc \"d\"})
   "
   [{:keys [desc name]}]
-  (conj
-   {}
-   #_{
-    :_umap_options {
-                    :showLabel true
-                    :labelInteractive true
-                    ;; :iconUrl "/uploads/pictogram/theatre-24-white.png"
-                    ;; :iconClass "Default"
-                    }}
-   {
-    :name name
-    :description desc}))
+  (conj {} #_{:_umap_options
+              {:showLabel true
+               :labelInteractive true
+               #_#_:iconUrl "/uploads/pictogram/theatre-24-white.png"
+               #_#_:iconClass "Default"}}
+        {:name name :description desc}))
 
 (defn geojson [features]
   {:type "FeatureCollection" :features features})
@@ -76,8 +70,7 @@
                  "MediumSlateBlue"
                  "CadetBlue"
                  ] idx)
-    :id (rand-int 1e7)}}
-  )
+    :id (rand-int 1e7)}})
 
 (defn umap
   "
@@ -194,43 +187,44 @@
     (->>
      ms
      (map (fn [{:keys [address name desc] :as m}]
-            (let [norm-addr (normalize-address address)]
-              (let [all-features (->> norm-addr
-                                      (codec/url-encode)
-                                      (assoc {:format request-format}
-                                             :address)
-                                      (create-url)
-                                      (get-json)
-                                      :features)
-                    cnt-all-features (count all-features)]
-                (debug (cc/format "norm-addr: \"%s\"; cnt-all-features: %s"
-                                  norm-addr cnt-all-features))
-                (def all-features all-features)
-                (->> all-features
-                     (map-indexed (fn [i feature] [i feature]))
-                     (filter (fn [[idx feature]]
-                               (let [relevant (relevant-feature?
-                                               cnt-all-features feature)]
-                                 (debug
-                                  (cc/format
-                                   "norm-addr: \"%s\"; idx: %s; relevant: %s"
-                                   norm-addr idx relevant))
-                                 relevant)))
-                     (mapv (fn [[_ feature]] feature))
-                     (mapv (fn [feature]
-                             (def feature feature)
-                             (update-in
-                              feature
-                              [:properties]
-                              (fn [properties]
-                                (def properties properties)
-                                (conj (assoc properties
-                                             :display_name norm-addr
-                                             :description desc
-                                             :name name)
-                                      #_(->> [:name :desc]
+            (let [norm-addr (normalize-address address)
+                  all-features (->> norm-addr
+                                    (codec/url-encode)
+                                    (assoc {:format request-format}
+                                           :address)
+                                    (create-url)
+                                    (get-json)
+                                    :features)
+                  cnt-all-features (count all-features)]
+              (debug (cc/format "norm-addr: \"%s\"; cnt-all-features: %s"
+                                norm-addr cnt-all-features))
+              (def all-features all-features)
+              (->> all-features
+                   ;; this looks like a monadic container
+                   (map-indexed (fn [i feature] [i feature]))
+                   (filter (fn [[idx feature]]
+                             (let [relevant (relevant-feature?
+                                             cnt-all-features feature)]
+                               (debug
+                                (cc/format
+                                 "norm-addr: \"%s\"; idx: %s; relevant: %s"
+                                 norm-addr idx relevant))
+                               relevant)))
+                   (mapv (fn [[_ feature]] feature))
+                   (mapv (fn [feature]
+                           (def feature feature)
+                           (update-in
+                            feature
+                            [:properties]
+                            (fn [properties]
+                              (def properties properties)
+                              (conj (assoc properties
+                                           :display_name norm-addr
+                                           :description desc
+                                           :name name)
+                                    #_(->> [:name :desc]
                                            (select-keys all-features)
-                                           (extra-properties))))))))))))
+                                           (extra-properties)))))))))))
      (reduce into [])
      ((fn [coll]
         (println "Coordinates found" (count coll))
@@ -287,8 +281,6 @@
          {:pretty true})
         #_(json/write-str
            (geo-data {:format :umap})))
-  (debug "See" "(inspect-tree json) (inspect-tree features)")
-  )
+  (debug "See" "(inspect-tree json) (inspect-tree features)"))
 
 #_(json/pprint (geo-data {:format :umap}))
-
