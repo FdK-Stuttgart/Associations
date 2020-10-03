@@ -17,8 +17,7 @@
    [clojure.set :as set]))
 
 (defn create-url
-  "Returns the address-to-latlon mapping service url.
-  E.g.
+  "Returns the address-to-latlon mapping service url. E.g.:
   (create-url {:address \"adr\" :format :umap})
   (create-url {:address \"adr\" :format :geojson})"
   [{:keys [address format]}]
@@ -41,9 +40,8 @@
       r)))
 
 (defn extra-properties
-  " E.g:
-  (extra-properties {:name \"n\" :desc \"d\"})
-  "
+  "E.g.:
+  (extra-properties {:name \"n\" :desc \"d\"})"
   [{:keys [desc name]}]
   (conj {} #_{:_umap_options
               {:showLabel true
@@ -130,7 +128,7 @@
           #_(inspect-tree)))})
 
 (defn feature-collection
-  "E.g.
+  "E.g.:
   (feature-collection :umap features)
   (feature-collection :umap [1 2 3])"
   [format features]
@@ -180,8 +178,7 @@
 (defn geo-data
   "E.g.:
   (geo-data {:ms (ods/ms) :format :umap})
-  (geo-data {:ms data/ms :format :umap})
-  "
+  (geo-data {:ms data/ms  :format :umap})"
   [{:keys [ms format] :or {format #_:geojson :umap}}]
   (let [request-format (if (= format :umap) :geocodejson format)]
     (->>
@@ -234,9 +231,9 @@
      (feature-collection format))))
 
 (defn resolved-addresses
-  "
-  => (def json (geo-data {:ms (ods/ms) :format :umap}))
-  => (resolved-addresses json)"
+  "E.g.:
+  (def json (geo-data {:ms (ods/ms) :format :umap}))
+  (resolved-addresses json)"
   [json]
   (->> json
        :layers
@@ -247,7 +244,10 @@
        (flatten)
        (set)))
 
-(defn unresolved-addresses [json]
+(defn unresolved-addresses
+  "E.g.:
+  (unresolved-addresses json)"
+  [json]
   (let [resolved (resolved-addresses json)]
     (->> (ods/addresses)
          (remove (fn [{:keys [address idx]}]
@@ -260,18 +260,14 @@
 
 (defn save-json
   "During evaluation it defines the `json` var for debugging purposes. E.g.:
-
   (save-json (geo-data {:ms (ods/ms) :format :umap}) \"resources/<filename>.umap\")
   (save-json (geo-data {:ms data/ms :format :umap}) \"resources/<filename>.umap\")
   (save-json json \"resources/relevant.umap\")
   (save-json (geo-data {:ms (fdk.relevant/ms) :format :umap}) \"resources/relevant.umap\")
-
   (save-json (feature-collection :umap features) \"resources/relevant.umap\")
-
   (save-json (geo-data {:ms (->> (fdk.relevant/ms)
                                  (remove (fn [m] (in? associations-found (:name m)))))
-                        :format :umap}) \"resources/relevant.umap\")
-  "
+                        :format :umap}) \"resources/relevant.umap\")"
   [json filename]
   (def json json)
   (spit filename
