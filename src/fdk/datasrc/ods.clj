@@ -3,8 +3,11 @@
    [utils.core :refer :all]
    [clojure.string :as s]
    [fdk.data :as data]
+   [fdk.common :as com]
    [djy.char :as djy]
-   [clojure.inspector :refer :all])
+   [clojure.inspector :refer :all]
+   ;; [taoensso.timbre :as timbre :refer :all :exlude [spy]]
+   )
   (:import org.odftoolkit.simple.SpreadsheetDocument))
 
 (defn- column-idx [row-letter]
@@ -42,7 +45,7 @@
                          ]))
    a))
 
-(defn addresses []
+(defn calc-addresses-fn []
   "A list of indexed hash-maps:
   '({:idx 0 :address \"...\"}
     {:idx 1 :address \"...\"}
@@ -55,9 +58,15 @@
              cleanup))
        (map-indexed (fn [i s] {:idx (row-nr i) :address s}))))
 
+(defn addresses []
+  (let [ks [:addresses]]
+    (if-let [v (get-in @com/cache ks)]
+      v
+      (com/cache! calc-addresses-fn ks))))
+
 (defn association [row] (text-at-position (column-idx \A) row))
 
-(defn associations
+(defn calc-associations-fn
   "A list of indexed hash-maps:
   '({:idx 0 :name \"...\"}
     {:idx 1 :name \"...\"}
@@ -70,9 +79,15 @@
              cleanup))
        (map-indexed (fn [i s] {:idx (row-nr i) :name s}))))
 
+(defn associations []
+  (let [ks [:associations]]
+    (if-let [v (get-in @com/cache ks)]
+      v
+      (com/cache! calc-associations-fn ks))))
+
 (defn contact [row] (text-at-position (column-idx \F) row))
 
-(defn contacts
+(defn calc-contacts-fn
   "A list of indexed hash-maps:
   '({:idx 0 :contact \"...\"}
     {:idx 1 :contact \"...\"}
@@ -83,9 +98,15 @@
        (map cleanup)
        (map-indexed (fn [i s] {:idx (row-nr i) :contact s}))))
 
+(defn contacts []
+  (let [ks [:contacts]]
+    (if-let [v (get-in @com/cache ks)]
+      v
+      (com/cache! calc-contacts-fn ks))))
+
 (defn web-page [row] (text-at-position (column-idx \G) row))
 
-(defn web-pages
+(defn calc-web-pages-fn
   "A list of indexed hash-maps:
   '({:idx 0 :web-page \"...\"}
     {:idx 1 :web-page \"...\"}
@@ -95,6 +116,12 @@
        (map web-page)
        (map cleanup)
        (map-indexed (fn [i a] {:idx (row-nr i) :web-page a}))))
+
+(defn web-pages []
+  (let [ks [:web-pages]]
+    (if-let [v (get-in @com/cache ks)]
+      v
+      (com/cache! calc-web-pages-fn ks))))
 
 (defn engagement [row] (text-at-position (column-idx \H) row))
 
@@ -114,24 +141,7 @@
        (map cleanup)
        (map-indexed (fn [i s] {:idx (row-nr i) :engagement s}))))
 
-(def default-category "Sonstiges")
-
-(def categories
-  [
-   "Tanz"
-   "Musik & Gesang"
-   "Sport & Bewegung"
-   "Kunst"
-   "Kultur"
-   "Stammtisch"
-   "Integration, Sprachen, Unterricht"
-   default-category
-   ])
-
-(defn classify [categories association]
-  (rand-int (count categories)))
-
-(defn ms
+(defn calc-read-table-fn
   "A list of indexed hash-maps:
   [{:idx 0 :name \"...\" :address \"...\" :desc \"...\"}
    {:idx 1 :name \"...\" :address \"...\" :desc \"...\"}
@@ -144,3 +154,20 @@
                 web-page (:web-page we)]
             (merge as ad {:desc (format "%s\n\n%s" contact web-page)})))
         (associations) (addresses) (contacts) (web-pages)))
+
+(defn read-table []
+  (let [ks [:table]]
+    (if-let [v (get-in @com/cache ks)]
+      v
+      (com/cache! calc-read-table-fn ks))))
+
+(def default-category "Sonstiges")
+
+(defn reset-cache! []
+  (swap! com/cache (fn [_] {}))
+  (let [tbeg (System/currentTimeMillis)]
+    ;; enforce evaluation; can't be done by (force (all-rankings))
+    (dorun
+     (calc-read-table-fn))
+    (printf "%s chars cached in %s ms"
+            (count (str @com/cache)) (- (System/currentTimeMillis) tbeg))))

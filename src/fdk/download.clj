@@ -142,7 +142,8 @@
 (defn extract
   "E.g.
   (->> \"<association-name>\"
-       (download) (extract))
+       (download)
+       (extract))
   ;; => {:address \"...\" :phone \"...\"}"
   [{:keys [html association] :as prm}]
   (->> html

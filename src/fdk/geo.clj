@@ -13,8 +13,8 @@
    [ring.util.codec :as codec]
    [taoensso.timbre :as timbre :refer :all]
    [clojure.core :as cc]
-
-   [clojure.set :as set]))
+   [fdk.common :as com]
+   ))
 
 (defn create-url
   "Returns the address-to-latlon mapping service url. E.g.:
@@ -26,17 +26,17 @@
 
 (def request-delay 200)
 
-(defn get-json [url]
+(defn request [url]
   ;; TODO use monad for logging
   (def url url)
   (let [tbeg (te/tnow)]
-    #_(println (str "[" tbeg "             /" "get-json " url "]"))
+    #_(println (str "[" tbeg "             /" "request " url "]"))
     (let [r (as-> url $
               (client/get $ {:accept :json})
               (:body $)
               (json/read-json $))]
       (Thread/sleep request-delay)
-      #_(println (str "[" tbeg ":" (te/tnow) " /" "get-json " url "]"))
+      #_(println (str "[" tbeg ":" (te/tnow) " /" "request " url "]"))
       r)))
 
 (defn extra-properties
@@ -54,6 +54,9 @@
   {:type "FeatureCollection" :features features})
 
 (defn layer [idx layer-name features]
+  ;; (println "idx" idx)
+  ;; (println "layer-name" layer-name)
+  ;; (println "features" features)
   {:type "FeatureCollection"
    :features features
    :_umap_options
@@ -69,6 +72,89 @@
                  "CadetBlue"
                  ] idx)
     :id (rand-int 1e7)}})
+
+(defn fst-letters [hm]
+  (def hm hm)
+  (-> hm :properties :name (subs 0 1) (s/upper-case)))
+
+(defn assign-category-indexes [max-cat-size features]
+  (loop
+      [
+       coll features
+       init-letters (-> coll (first) (fst-letters))
+       cat {:cnt-in-cat 0 :idx 0}
+       acc []
+       ]
+    (if (empty? coll)
+      acc
+      (let [[e & es] coll
+            new-cat (let [{cnt-in-cat :cnt-in-cat idx :idx} cat]
+                      (cond
+                        (< cnt-in-cat (dec max-cat-size)) ;; this category
+                        {:cnt-in-cat (inc cnt-in-cat) :idx idx}
+
+                        :else ;; new category
+                        {:cnt-in-cat 0 :idx (inc idx)}))]
+        (recur es
+               (fst-letters e)
+               new-cat
+               (into acc [(assoc e :cat-idx (:idx cat))]))))))
+
+(defn two-letters [hm]
+  (-> hm :properties :name (subs 0 2) #_(s/upper-case)))
+
+(defn classified
+  "(classified (features))"
+  [features]
+  (let [cnt-categories 5
+        max-cat-size (int (/ (count features) cnt-categories))
+        coll (->> features
+                  (sort-by (fn [m]
+                             ;; need to sort it lower cased:
+                             ;; (sort ["AM" "Ab" "Aa"]) => ("AM" "Aa" "Ab")
+                             (clojure.string/lower-case
+                              (get-in m [:properties :name]))))
+                  (assign-category-indexes max-cat-size)
+                  (group-by :cat-idx)
+                  (sort))]
+    (->> coll
+         (map (fn [[cat-idx members]]
+                [
+                 (conj
+                  {:members members}
+                  {:cnt-members (count members)}
+                  {:cat-idx cat-idx
+                   :cat-name (s/join "-"
+                                     (map (fn [member]
+                                            (two-letters member))
+                                          [(first members) (last members)]))})]))
+         (flatten)
+         (map (fn [{:keys [members cat-name cat-idx cnt-members]}]
+                (map (fn [m] (assoc m
+                                   ;; :cat-idx cat-idx
+                                   ;; :cnt-members cnt-members
+                                   :cat-name cat-name))
+                     members)))
+         (reduce into [])
+         (map (fn [m]
+                (conj
+                 {:name (get-in m [:properties :name])}
+                 (select-keys m [:cat-name])))))))
+
+(defn create-groups [features]
+  (def fs features)
+  (let [classification (classified features)]
+    (->> features
+         (map (fn [m]
+                (let [f-name (get-in m [:properties :name])]
+                  (conj m
+                        {:cat-desc (->> classification
+                                        (filter (fn [c] (= f-name (get-in c [:name]))))
+                                        (first)
+                                        :cat-name)}))))
+         (group-by :cat-desc)
+         (sort)
+         (reverse))))
 
 (defn umap
   "
@@ -114,29 +200,32 @@
     :zoomControl true
     }
    :geometry {:type "Point" :coordinates [9.148864746093752 48.760262727297]}
-   :layers
-   (let [cats ods/categories ;; (take 3 ods/categories)
-         feats features ;; (take 12 features)
-         groups (partition-all (inc (quot (count features) (count cats)))
-                               feats)]
-     #_(println "(count cats)" (count cats) "(count groups)" (count groups) "(count feats)" (count feats))
-     (->> groups
-          (map-indexed (fn [idx group]
-                         #_(println "idx" idx)
-                         (layer idx (nth ods/categories idx) group)))
-          (vec)
-          #_(inspect-tree)))})
+   :layers (->> (create-groups features)
+                #_(map-indexed (fn [idx cat-members]
+                               #_(println "idx" idx)
+                               (layer idx
+                                      (nth ods/categories idx)  ;; here is the category
+                                      cat-members                     ;; members
+                                      )))
+                (map-indexed (fn [idx [cat-name cat-members]]
+                               #_(println "idx" idx)
+                               (layer idx
+                                      cat-name
+                                      cat-members
+                                      #_(sort-by :name cat-members))))
+                (vec)
+                #_(inspect-tree))})
 
 (defn feature-collection
   "E.g.:
   (feature-collection :umap features)
   (feature-collection :umap [1 2 3])"
   [format features]
-  (def features features)
   (let [json-fn (case format
                   :umap    umap
                   :geojson geojson)]
-    (json-fn features)))
+    (json-fn features)
+    #_(umap features)))
 
 (defn relevant-feature?
   "Created add-hoc. Hmm"
@@ -175,65 +264,62 @@
         (.replaceFirst adr old-house-nr new-house-nr))
       adr)))
 
-(defn geo-data
-  "E.g.:
-  (geo-data {:ms (ods/ms) :format :umap})
-  (geo-data {:ms data/ms  :format :umap})"
+(defn process-m [request-format {:keys [address name desc] :as m}]
+  (let [norm-addr (normalize-address address)
+        all-features (->> norm-addr
+                          (codec/url-encode)
+                          (assoc {:format request-format}
+                                 :address)
+                          (create-url)
+                          (request)
+                          :features)
+        cnt-all-features (count all-features)]
+    #_(debug (cc/format "norm-addr: \"%s\"; cnt-all-features: %s"
+                      norm-addr cnt-all-features))
+    #_(def all-features all-features)
+    (->> all-features
+         ;; this looks like a monadic container
+         (map-indexed (fn [i feature] [i feature]))
+         (filter (fn [[idx feature]]
+                   (let [relevant (relevant-feature?
+                                   cnt-all-features feature)]
+                     #_(debug
+                      (cc/format
+                       "norm-addr: \"%s\"; idx: %s; relevant: %s"
+                       norm-addr idx relevant))
+                     (if relevant
+                       relevant
+                       (do
+                        (debug
+                         (cc/format
+                          "norm-addr: \"%s\"; idx: %s; relevant: %s"
+                          norm-addr idx relevant)))))))
+         (mapv (fn [[_ feature]] feature))
+         (mapv (fn [feature]
+                 (def feature feature)
+                 (update-in
+                  feature
+                  [:properties]
+                  (fn [properties]
+                    (def properties properties)
+                    (conj (assoc properties
+                                 :display_name norm-addr
+                                 :description desc
+                                 :name name)
+                          #_(->> [:name :desc]
+                                 (select-keys all-features)
+                                 (extra-properties))))))))))
+(defn calc-geo-data-fn
   [{:keys [ms format] :or {format #_:geojson :umap}}]
   (let [request-format (if (= format :umap) :geocodejson format)]
-    (->>
-     ms
-     (map (fn [{:keys [address name desc] :as m}]
-            (let [norm-addr (normalize-address address)
-                  all-features (->> norm-addr
-                                    (codec/url-encode)
-                                    (assoc {:format request-format}
-                                           :address)
-                                    (create-url)
-                                    (get-json)
-                                    :features)
-                  cnt-all-features (count all-features)]
-              (debug (cc/format "norm-addr: \"%s\"; cnt-all-features: %s"
-                                norm-addr cnt-all-features))
-              (def all-features all-features)
-              (->> all-features
-                   ;; this looks like a monadic container
-                   (map-indexed (fn [i feature] [i feature]))
-                   (filter (fn [[idx feature]]
-                             (let [relevant (relevant-feature?
-                                             cnt-all-features feature)]
-                               (debug
-                                (cc/format
-                                 "norm-addr: \"%s\"; idx: %s; relevant: %s"
-                                 norm-addr idx relevant))
-                               relevant)))
-                   (mapv (fn [[_ feature]] feature))
-                   (mapv (fn [feature]
-                           (def feature feature)
-                           (update-in
-                            feature
-                            [:properties]
-                            (fn [properties]
-                              (def properties properties)
-                              (conj (assoc properties
-                                           :display_name norm-addr
-                                           :description desc
-                                           :name name)
-                                    #_(->> [:name :desc]
-                                           (select-keys all-features)
-                                           (extra-properties)))))))))))
-     (reduce into [])
-     ((fn [coll]
-        (println "Coordinates found" (count coll))
-        coll))
-     ;; The right param of `feature-collection` is `format` not the
-     ;; `request-format`
-     (feature-collection format))))
+    (->> ms
+         (map (fn [m] (process-m request-format m)))
+         (reduce into [])
+         ((fn [coll]
+            (println "Coordinates found" (count coll))
+            coll)))))
 
 (defn resolved-addresses
-  "E.g.:
-  (def json (geo-data {:ms (ods/ms) :format :umap}))
-  (resolved-addresses json)"
   [json]
   (->> json
        :layers
@@ -245,8 +331,6 @@
        (set)))
 
 (defn unresolved-addresses
-  "E.g.:
-  (unresolved-addresses json)"
   [json]
   (let [resolved (resolved-addresses json)]
     (->> (ods/addresses)
@@ -258,25 +342,34 @@
                    (in? resolved address)))
          (map (fn [m] (clojure.set/rename-keys m {:idx :row}))))))
 
+
+(defn geo-data [{:keys [ms format] :or {format #_:geojson :umap} :as prm}]
+  (let [ks [:geo-data]]
+    (if-let [v (get-in @com/cache ks)]
+      v
+      (com/cache! (fn [] (calc-geo-data-fn prm)) ks))))
+
+(defn calc-json-fn
+  "(calc-json-fn :umap)"
+  [format]
+  (->> (geo-data {:ms (ods/read-table) :format :umap})
+       ;; The correct param of `feature-collection` is `format` not the
+       ;; `request-format`
+       (feature-collection format)))
+
+(defn json [format]
+  (let [ks [:json]]
+    (if-let [v (get-in @com/cache ks)]
+      v
+      (com/cache! (fn [] (calc-json-fn format)) ks))))
+
 (defn save-json
   "During evaluation it defines the `json` var for debugging purposes. E.g.:
-  (save-json (geo-data {:ms (ods/ms) :format :umap}) \"resources/<filename>.umap\")
-  (save-json (geo-data {:ms data/ms :format :umap}) \"resources/<filename>.umap\")
-  (save-json json \"resources/relevant.umap\")
-  (save-json (geo-data {:ms (fdk.relevant/ms) :format :umap}) \"resources/relevant.umap\")
-  (save-json (feature-collection :umap features) \"resources/relevant.umap\")
-  (save-json (geo-data {:ms (->> (fdk.relevant/ms)
-                                 (remove (fn [m] (in? associations-found (:name m)))))
-                        :format :umap}) \"resources/relevant.umap\")"
+  (save-json (json :umap) \"resources/<filename>.umap\")
+  "
   [json filename]
-  (def json json)
   (spit filename
-        (cheshire/generate-string
-         json
-         #_(geo-data {:ms ms :format :umap})
-         {:pretty true})
-        #_(json/write-str
-           (geo-data {:format :umap})))
+        (cheshire/generate-string json {:pretty true}))
   (debug "See" "(inspect-tree json) (inspect-tree features)"))
 
 #_(json/pprint (geo-data {:format :umap}))
