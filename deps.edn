@@ -1,0 +1,57 @@
+{:deps
+ {
+  org.clojure/clojure           {:mvn/version "1.10.1"}
+  org.clojure/data.csv          {:mvn/version "1.0.0"}
+  ;; url encode
+  ring/ring-codec               {:mvn/version "1.1.2"}
+  ;; managing environment variables
+  environ/environ               {:mvn/version "1.2.0"}
+
+  ;; wget / get-json
+  clj-http/clj-http             {:mvn/version "3.10.3"}
+
+  ;; pretty print json a string
+  cheshire                      {:mvn/version "5.10.0"}
+
+  org.clojure/data.json         {:mvn/version "1.0.0"}
+
+  ;; transducers
+  net.cgrand/xforms             {:mvn/version "0.19.2"}
+
+  org.clojars.bost/clj-time-ext {:mvn/version "0.0.0-37-0x545c"}
+  org.clojars.bost/utils        {:mvn/version "0.0.0-37-0xc96a"}
+
+  ;; parse HTML into Clojure data structures - scrapping data from HTML tables
+  hickory {:mvn/version "0.7.1"}
+
+  ;; read and write M$ Office documents
+  dk.ative/docjure {:mvn/version "1.14.0"}
+
+  ;; https://mvnrepository.com/artifact/org.odftoolkit/simple-odf
+  org.odftoolkit/simple-odf {:mvn/version "0.9.0-RC1"}
+
+  ;; debugging
+  ;; https://github.com/vvvvalvalval/scope-capture
+  vvvvalvalval/scope-capture {:mvn/version "0.3.2"}
+
+  ;; TODO https://github.com/LibrePDF/OpenPDF
+
+  org.clojure/core.memoize {:mvn/version "1.0.236"}
+
+  ;; compute string similarity - identify of what is the association name and
+  ;; what is not when web-scrapping association address search results
+  ;; https://yomguithereal.github.io/clj-fuzzy/clojure.html
+  clj-fuzzy/clj-fuzzy {:mvn/version "0.4.1"}
+
+  ;; character utility functions: https://github.com/daveyarwood/djy
+  djy/djy {:mvn/version "0.2.1"}
+
+  ;; logging
+  com.taoensso/timbre {:mvn/version "5.1.0"}
+  }}
+  ;; :plugins
+  ;; [
+  ;;  ;; project version from git
+  ;;  [com.roomkey/lein-v "7.2.0"]
+  ;;  ]
+  ;; :repl-options {:init-ns fdk.download}
