@@ -106,7 +106,7 @@
 (defn classified
   "(classified (features))"
   [features]
-  (let [cnt-categories 5
+  (let [cnt-categories 1
         max-cat-size (int (/ (count features) cnt-categories))
         coll (->> features
                   (sort-by (fn [m]
@@ -357,7 +357,9 @@
        ;; `request-format`
        (feature-collection format)))
 
-(defn json [format]
+(defn json
+  "(json :umap)"
+  [format]
   (let [ks [:json]]
     (if-let [v (get-in @com/cache ks)]
       v

@@ -52,7 +52,7 @@
    [djy "0.2.1"]
 
    ;; logging
-   [com.taoensso/timbre "5.0.1"]
+   [com.taoensso/timbre "5.1.0"]
    ]
   :plugins
   [
