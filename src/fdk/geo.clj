@@ -11,7 +11,7 @@
    [fdk.datasrc.ods :as ods]
    [clojure.inspector :refer :all]
    [ring.util.codec :as codec]
-   [taoensso.timbre :as timbre :refer :all]
+   [taoensso.timbre :as timbre :refer [debugf infof errorf]]
    [clojure.core :as cc]
    [fdk.common :as com]
    ))
@@ -151,14 +151,15 @@
 
 (defn search-properties
   "(search-properties {:addr \"a\" :desc \"d\"})"
-  [{:keys [addr desc]}]
+  [{:keys [addr desc engagement]}]
   (conj {} #_{:_umap_options
               {:showLabel true
                :labelInteractive true
                #_#_:iconUrl "/uploads/pictogram/theatre-24-white.png"
                #_#_:iconClass "Default"}}
         {:search_address addr
-         :search_desc desc}))
+         :search_desc desc
+         :search_engagement engagement}))
 
 (defn umap
   "
@@ -185,7 +186,9 @@
     :fullscreenControl true
     :labelInteractive true
     :licence ""
-    :limitBounds {:east 9.662819 :west 9.003639 :north 48.892487 :south 48.667385}
+    :limitBounds
+    #_{:south 48.667385 :west 9.003639 :north 48.892487 :east 9.662819}
+    {:south 48.418264 :west 8.209534 :nord 49.317066 :east 10.846252}
     ;; there must be no space-char after ","!!!
     :filterKey (s/join "," (map name (into [:name] (keys (search-properties {})))))
     :locateControl true
@@ -236,8 +239,8 @@
 (defn relevant-feature?
   "Created add-hoc. Hmm"
   [count-features feature]
-  (def count-features count-features)
-  (def feature feature)
+  #_(def count-features count-features)
+  #_(def feature feature)
   (cond
     (> count-features 1)
     (or
@@ -260,7 +263,7 @@
     true
 
     :else
-    (error "No matching condition for:" feature)))
+    (errorf "No matching condition for feature: %s" feature)))
 
 (defn normalize-address [address]
   (let [adr (s/replace address "\n" ", ")]
@@ -270,7 +273,7 @@
         (.replaceFirst adr old-house-nr new-house-nr))
       adr)))
 
-(defn process-m [request-format {:keys [address name desc] :as m}]
+(defn process-m [request-format {:keys [address name desc engagement] :as m}]
   (let [norm-addr (normalize-address address)
         all-features (->> norm-addr
                           (codec/url-encode)
@@ -296,10 +299,9 @@
                      (if relevant
                        relevant
                        (do
-                        (debug
-                         (cc/format
-                          "norm-addr: \"%s\"; idx: %s; relevant: %s"
-                          norm-addr idx relevant)))))))
+                        (debugf
+                         "norm-addr: \"%s\"; idx: %s; relevant: %s"
+                         norm-addr idx relevant))))))
          (mapv (fn [[_ feature]] feature))
          (mapv (fn [feature]
                  #_(def feature feature)
@@ -310,9 +312,12 @@
                     #_(def properties properties)
                     (conj (assoc properties
                                  ;; the description does not appear in the properties-table ???
-                                 :description (format "%s\n\n%s" address desc)
+                                 :description (format "%s\n\n%s\n\n%s"
+                                                      address desc engagement)
                                  :name name)
-                          (search-properties {:addr norm-addr :desc desc})))))))))
+                          (search-properties {:addr norm-addr
+                                              :desc desc
+                                              :engagement engagement})))))))))
 
 (defn calc-geo-data-fn
   [{:keys [ms format] :or {format #_:geojson :umap}}]
@@ -321,7 +326,7 @@
          (map (fn [m] (process-m request-format m)))
          (reduce into [])
          ((fn [coll]
-            (println "Coordinates found" (count coll))
+            (infof "Coordinates found %s" (count coll))
             coll)))))
 
 (defn resolved-addresses
@@ -377,6 +382,6 @@
   [json filename]
   (spit filename
         (cheshire/generate-string json {:pretty true}))
-  (debug "See" "(inspect-tree json) (inspect-tree features)"))
+  (debugf "See (inspect-tree json) (inspect-tree features)"))
 
 #_(json/pprint (geo-data {:format :umap}))

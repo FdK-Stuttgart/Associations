@@ -6,7 +6,7 @@
    [fdk.common :as com]
    [djy.char :as djy]
    [clojure.inspector :refer :all]
-   ;; [taoensso.timbre :as timbre :refer :all :exlude [spy]]
+   [taoensso.timbre :as timbre :refer []]
    )
   (:import org.odftoolkit.simple.SpreadsheetDocument))
 
@@ -149,11 +149,11 @@
   []
   ;; TODO make sure the associations and addresses are:
   ;; 1. sorted and 2. of the same size
-  (mapv (fn [as ad co we]
+  (mapv (fn [as ad co we en]
           (let [contact (:contact co)
                 web-page (:web-page we)]
-            (merge as ad {:desc (format "%s\n\n%s" contact web-page)})))
-        (associations) (addresses) (contacts) (web-pages)))
+            (merge as ad en {:desc (format "%s\n\n%s" contact web-page)})))
+        (associations) (addresses) (contacts) (web-pages) (engagements)))
 
 (defn read-table []
   (let [ks [:table]]
