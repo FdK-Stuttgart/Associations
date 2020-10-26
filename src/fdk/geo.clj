@@ -39,17 +39,6 @@
       #_(println (str "[" tbeg ":" (te/tnow) " /" "request " url "]"))
       r)))
 
-(defn extra-properties
-  "E.g.:
-  (extra-properties {:name \"n\" :desc \"d\"})"
-  [{:keys [desc name]}]
-  (conj {} #_{:_umap_options
-              {:showLabel true
-               :labelInteractive true
-               #_#_:iconUrl "/uploads/pictogram/theatre-24-white.png"
-               #_#_:iconClass "Default"}}
-        {:name name :description desc}))
-
 (defn geojson [features]
   {:type "FeatureCollection" :features features})
 
@@ -106,40 +95,44 @@
 (defn classified
   "(classified (features))"
   [features]
-  (let [cnt-categories 1
-        max-cat-size (int (/ (count features) cnt-categories))
-        coll (->> features
-                  (sort-by (fn [m]
-                             ;; need to sort it lower cased:
-                             ;; (sort ["AM" "Ab" "Aa"]) => ("AM" "Aa" "Ab")
-                             (clojure.string/lower-case
-                              (get-in m [:properties :name]))))
-                  (assign-category-indexes max-cat-size)
-                  (group-by :cat-idx)
-                  (sort))]
-    (->> coll
-         (map (fn [[cat-idx members]]
-                [
-                 (conj
-                  {:members members}
-                  {:cnt-members (count members)}
-                  {:cat-idx cat-idx
-                   :cat-name (s/join "-"
-                                     (map (fn [member]
-                                            (two-letters member))
-                                          [(first members) (last members)]))})]))
-         (flatten)
-         (map (fn [{:keys [members cat-name cat-idx cnt-members]}]
-                (map (fn [m] (assoc m
-                                   ;; :cat-idx cat-idx
-                                   ;; :cnt-members cnt-members
-                                   :cat-name cat-name))
-                     members)))
-         (reduce into [])
-         (map (fn [m]
-                (conj
-                 {:name (get-in m [:properties :name])}
-                 (select-keys m [:cat-name])))))))
+  (let [default-cnt-categories 1
+        default-cat-name "Vereine"]
+    (let [cnt-categories default-cnt-categories
+          max-cat-size (int (/ (count features) cnt-categories))
+          coll (->> features
+                    (sort-by (fn [m]
+                               ;; need to sort it lower cased:
+                               ;; (sort ["AM" "Ab" "Aa"]) => ("AM" "Aa" "Ab")
+                               (clojure.string/lower-case
+                                (get-in m [:properties :name]))))
+                    (assign-category-indexes max-cat-size)
+                    (group-by :cat-idx)
+                    (sort))]
+      (->> coll
+           (map (fn [[cat-idx members]]
+                  [
+                   (conj
+                    {:members members}
+                    {:cnt-members (count members)}
+                    {:cat-idx cat-idx
+                     :cat-name (s/join "-"
+                                       (map (fn [member]
+                                              (two-letters member))
+                                            [(first members) (last members)]))})]))
+           (flatten)
+           (map (fn [{:keys [members cat-name cat-idx cnt-members]}]
+                  (map (fn [m] (assoc m
+                                     ;; :cat-idx cat-idx
+                                     ;; :cnt-members cnt-members
+                                     :cat-name
+                                     default-cat-name
+                                     #_cat-name))
+                       members)))
+           (reduce into [])
+           (map (fn [m]
+                  (conj
+                   {:name (get-in m [:properties :name])}
+                   (select-keys m [:cat-name]))))))))
 
 (defn create-groups [features]
   (def fs features)
@@ -155,6 +148,17 @@
          (group-by :cat-desc)
          (sort)
          (reverse))))
+
+(defn search-properties
+  "(search-properties {:addr \"a\" :desc \"d\"})"
+  [{:keys [addr desc]}]
+  (conj {} #_{:_umap_options
+              {:showLabel true
+               :labelInteractive true
+               #_#_:iconUrl "/uploads/pictogram/theatre-24-white.png"
+               #_#_:iconClass "Default"}}
+        {:search_address addr
+         :search_desc desc}))
 
 (defn umap
   "
@@ -181,7 +185,9 @@
     :fullscreenControl true
     :labelInteractive true
     :licence ""
-    :limitBounds {:east 12.041016 :west 6.767578 :north 49.94415 :south 47.997274}
+    :limitBounds {:east 9.662819 :west 9.003639 :north 48.892487 :south 48.667385}
+    ;; there must be no space-char after ","!!!
+    :filterKey (s/join "," (map name (into [:name] (keys (search-properties {})))))
     :locateControl true
     :measureControl nil
     :miniMap false
@@ -296,19 +302,18 @@
                           norm-addr idx relevant)))))))
          (mapv (fn [[_ feature]] feature))
          (mapv (fn [feature]
-                 (def feature feature)
+                 #_(def feature feature)
                  (update-in
                   feature
                   [:properties]
                   (fn [properties]
-                    (def properties properties)
+                    #_(def properties properties)
                     (conj (assoc properties
-                                 :display_name norm-addr
-                                 :description desc
+                                 ;; the description does not appear in the properties-table ???
+                                 :description (format "%s\n\n%s" address desc)
                                  :name name)
-                          #_(->> [:name :desc]
-                                 (select-keys all-features)
-                                 (extra-properties))))))))))
+                          (search-properties {:addr norm-addr :desc desc})))))))))
+
 (defn calc-geo-data-fn
   [{:keys [ms format] :or {format #_:geojson :umap}}]
   (let [request-format (if (= format :umap) :geocodejson format)]
