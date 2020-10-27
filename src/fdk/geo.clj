@@ -207,6 +207,7 @@
     :tilelayer {:tms false}
     :tilelayersControl nil
     :zoomControl true
+    :zoom 14 ;; default zoom level
     }
    :geometry {:type "Point" :coordinates [9.148864746093752 48.760262727297]}
    :layers (->> (create-groups features)
