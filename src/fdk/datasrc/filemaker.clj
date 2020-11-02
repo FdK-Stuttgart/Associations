@@ -105,7 +105,7 @@
                     :A-Namen-Notiz-Wdh :zip-code
                     :A-Ort-F-Liste :street-and-house-nr}))))))
 
-(def ms
+#_(def ms
   (->> "resources/fdk.csv"
       (slurp-csv)
       (csv-data->maps)

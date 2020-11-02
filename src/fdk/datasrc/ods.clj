@@ -85,6 +85,25 @@
       v
       (com/cache! calc-associations-fn ks))))
 
+(defn city-district [row] (text-at-position (column-idx \D) row))
+
+(defn calc-city-districts-fn
+  "A list of indexed hash-maps:
+  '({:idx 0 :city-district \"...\"}
+    {:idx 1 :city-district \"...\"}
+    {:idx 2 :city-district \"...\"})"
+  []
+  (->> (sheet-content)
+       (map city-district)
+       (map cleanup)
+       (map-indexed (fn [i s] {:idx (row-nr i) :city-district s}))))
+
+(defn city-districts []
+  (let [ks [:city-districts]]
+    (if-let [v (get-in @com/cache ks)]
+      v
+      (com/cache! calc-city-districts-fn ks))))
+
 (defn contact [row] (text-at-position (column-idx \F) row))
 
 (defn calc-contacts-fn
@@ -123,23 +142,45 @@
       v
       (com/cache! calc-web-pages-fn ks))))
 
-(defn engagement [row] (text-at-position (column-idx \H) row))
+(defn goal
+  "umbenannt auf Ziele des Vereins"
+  [row] (text-at-position (column-idx \H) row))
 
-(defn engagements
+(defn goals
   "
   TODO Natural Language Understanding (NLU)
   See https://github.com/huggingface/transformers
   Or just count word frequency
 
   A list of indexed hash-maps:
-  '({:idx 0 :engagement \"...\"}
-    {:idx 1 :engagement \"...\"}
-    {:idx 2 :engagement \"...\"})"
+  '({:idx 0 :goal \"...\"}
+    {:idx 1 :goal \"...\"}
+    {:idx 2 :goal \"...\"})"
   []
   (->> (sheet-content)
-       (map engagement)
+       (map goal)
        (map cleanup)
-       (map-indexed (fn [i s] {:idx (row-nr i) :engagement s}))))
+       (map-indexed (fn [i s] {:idx (row-nr i) :goal s}))))
+
+
+(defn activity
+  [row] (text-at-position (column-idx \I) row))
+
+(defn activities
+  "
+  TODO Natural Language Understanding (NLU)
+  See https://github.com/huggingface/transformers
+  Or just count word frequency
+
+  A list of indexed hash-maps:
+  '({:idx 0 :activity \"...\"}
+    {:idx 1 :activity \"...\"}
+    {:idx 2 :activity \"...\"})"
+  []
+  (->> (sheet-content)
+       (map activity)
+       (map cleanup)
+       (map-indexed (fn [i s] {:idx (row-nr i) :activity s}))))
 
 (defn calc-read-table-fn
   "A list of indexed hash-maps:
@@ -149,11 +190,18 @@
   []
   ;; TODO make sure the associations and addresses are:
   ;; 1. sorted and 2. of the same size
-  (mapv (fn [as ad co we en]
-          (let [contact (:contact co)
-                web-page (:web-page we)]
-            (merge as ad en {:desc (format "%s\n\n%s" contact web-page)})))
-        (associations) (addresses) (contacts) (web-pages) (engagements)))
+  (mapv (fn [associations addresses cdistricts
+            contacts web-pages goals activities]
+          (let [contact (:contact contacts)
+                web-page (:web-page web-pages)]
+            (merge associations
+                   addresses
+                   goals
+                   cdistricts
+                   {:desc (format "%s\n\n%s" contact web-page)}
+                   activities)))
+        (associations) (addresses) (city-districts)
+        (contacts) (web-pages) (goals) (activities)))
 
 (defn read-table []
   (let [ks [:table]]
@@ -163,7 +211,9 @@
 
 (def default-category "Sonstiges")
 
-(defn reset-cache! []
+(defn reset-cache!
+  "(fdk.datasrc.ods/reset-cache!)"
+  []
   (swap! com/cache (fn [_] {}))
   (let [tbeg (System/currentTimeMillis)]
     ;; enforce evaluation; can't be done by (force (all-rankings))

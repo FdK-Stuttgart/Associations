@@ -1,4 +1,4 @@
-(ns fdk.google-test
+(ns fdk.core-test
   (:require [clojure.test :refer :all]
             [fdk.geo :refer :all]))
 

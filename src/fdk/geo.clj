@@ -5,7 +5,7 @@
    [clj-http.client :as client]
    [clj-time-ext.core :as te]
    [clojure.data.json :as json]
-   [clojure.string :as s]
+   [clojure.string :as cstr]
    [utils.core :refer [in? coll-and-not-empty? not-empty?]]
    [fdk.data :as data]
    [fdk.datasrc.ods :as ods]
@@ -18,8 +18,8 @@
 
 (defn create-url
   "Returns the address-to-latlon mapping service url. E.g.:
-  (create-url {:address \"adr\" :format :umap})
-  (create-url {:address \"adr\" :format :geojson})"
+  (fdk.geo/create-url {:address \"adr\" :format :umap})
+  (fdk.geo/create-url {:address \"adr\" :format :geojson})"
   [{:keys [address format]}]
   (clojure.core/format
    "https://nominatim.openstreetmap.org/search?q=%s&format=%s" address (name format)))
@@ -64,7 +64,7 @@
 
 (defn fst-letters [hm]
   (def hm hm)
-  (-> hm :properties :name (subs 0 1) (s/upper-case)))
+  (-> hm :properties :name (subs 0 1) (cstr/upper-case)))
 
 (defn assign-category-indexes [max-cat-size features]
   (loop
@@ -90,10 +90,10 @@
                (into acc [(assoc e :cat-idx (:idx cat))]))))))
 
 (defn two-letters [hm]
-  (-> hm :properties :name (subs 0 2) #_(s/upper-case)))
+  (-> hm :properties :name (subs 0 2) #_(cstr/upper-case)))
 
 (defn classified
-  "(classified (features))"
+  "(fdk.geo/classified (features))"
   [features]
   (let [default-cnt-categories 1
         default-cat-name "Vereine"]
@@ -115,7 +115,7 @@
                     {:members members}
                     {:cnt-members (count members)}
                     {:cat-idx cat-idx
-                     :cat-name (s/join "-"
+                     :cat-name (cstr/join "-"
                                        (map (fn [member]
                                               (two-letters member))
                                             [(first members) (last members)]))})]))
@@ -150,16 +150,18 @@
          (reverse))))
 
 (defn search-properties
-  "(search-properties {:addr \"a\" :desc \"d\"})"
-  [{:keys [addr desc engagement]}]
+  "(fdk.geo/search-properties {:addr \"a\" :desc \"d\" ...})"
+  [{:keys [addr city-district desc goal activity]}]
   (conj {} #_{:_umap_options
               {:showLabel true
                :labelInteractive true
                #_#_:iconUrl "/uploads/pictogram/theatre-24-white.png"
                #_#_:iconClass "Default"}}
         {:search_address addr
+         :search_district city-district
          :search_desc desc
-         :search_engagement engagement}))
+         :search_goal goal
+         :search_activity activity}))
 
 (defn umap
   "
@@ -170,7 +172,7 @@
   Prod-short-url: http://u.osmfr.org/m/459647/
   "
   [features]
-  (def features features)
+  ;; (def features features)
   {:type "umap"
    ;; test-short-url
    :uri "http://u.osmfr.org/m/459974/"
@@ -190,7 +192,7 @@
     #_{:south 48.667385 :west 9.003639 :north 48.892487 :east 9.662819}
     {:south 48.418264 :west 8.209534 :nord 49.317066 :east 10.846252}
     ;; there must be no space-char after ","!!!
-    :filterKey (s/join "," (map name (into [:name] (keys (search-properties {})))))
+    :filterKey (cstr/join "," (map name (into [:name] (keys (search-properties {})))))
     :locateControl true
     :measureControl nil
     :miniMap false
@@ -228,8 +230,8 @@
 
 (defn feature-collection
   "E.g.:
-  (feature-collection :umap features)
-  (feature-collection :umap [1 2 3])"
+  (fdk.geo/feature-collection :umap features)
+  (fdk.geo/feature-collection :umap [1 2 3])"
   [format features]
   (let [json-fn (case format
                   :umap    umap
@@ -267,14 +269,16 @@
     (errorf "No matching condition for feature: %s" feature)))
 
 (defn normalize-address [address]
-  (let [adr (s/replace address "\n" ", ")]
+  (let [adr (cstr/replace address "\n" ", ")]
     (if-let [old-house-nr (re-find #"[0-9] [A-z]," adr)]
       (let [last-idx (.lastIndexOf adr old-house-nr)
             new-house-nr (.replaceAll old-house-nr " " "")]
         (.replaceFirst adr old-house-nr new-house-nr))
       adr)))
 
-(defn process-m [request-format {:keys [address name desc engagement] :as m}]
+(defn process-m [request-format {:keys [address city-district name desc goal
+                                        activity
+                                        ] :as m}]
   (let [norm-addr (normalize-address address)
         all-features (->> norm-addr
                           (codec/url-encode)
@@ -284,19 +288,12 @@
                           (request)
                           :features)
         cnt-all-features (count all-features)]
-    #_(debug (cc/format "norm-addr: \"%s\"; cnt-all-features: %s"
-                      norm-addr cnt-all-features))
-    #_(def all-features all-features)
     (->> all-features
          ;; this looks like a monadic container
          (map-indexed (fn [i feature] [i feature]))
          (filter (fn [[idx feature]]
                    (let [relevant (relevant-feature?
                                    cnt-all-features feature)]
-                     #_(debug
-                      (cc/format
-                       "norm-addr: \"%s\"; idx: %s; relevant: %s"
-                       norm-addr idx relevant))
                      (if relevant
                        relevant
                        (do
@@ -312,18 +309,26 @@
                   (fn [properties]
                     #_(def properties properties)
                     (conj (assoc properties
-                                 ;; the description does not appear in the properties-table ???
-                                 :description (format "%s\n\n%s\n\n%s"
-                                                      address desc engagement)
+                                 :description
+                                 (str
+                                  (if (empty? (cstr/trim address))       "" (format "%s\n\n" address))
+                                  ;; TODO this (empty? ...) doesn't work
+                                  (if (empty? (cstr/trim desc))          "" (format "%s\n\n" desc))
+                                  (if (empty? (cstr/trim city-district)) "" (format "Aktiv in Stadtteil(en): %s\n\n" city-district))
+                                  (if (empty? (cstr/trim goal))          "" (format "Ziele des Vereins: %s\n\n" goal))
+                                  (if (empty? (cstr/trim activity))      "" (format "Aktivitätsbereiche: %s" activity)))
                                  :name name)
                           (search-properties {:addr norm-addr
                                               :desc desc
-                                              :engagement engagement})))))))))
+                                              :city-district city-district
+                                              :goal goal
+                                              :activity activity})))))))))
 
 (defn calc-geo-data-fn
   [{:keys [ms format] :or {format #_:geojson :umap}}]
   (let [request-format (if (= format :umap) :geocodejson format)]
     (->> ms
+         ;; (map (fn [{:keys [desc]}] (process-m request-format m)))
          (map (fn [m] (process-m request-format m)))
          (reduce into [])
          ((fn [coll]
@@ -361,7 +366,7 @@
       (com/cache! (fn [] (calc-geo-data-fn prm)) ks))))
 
 (defn calc-json-fn
-  "(calc-json-fn :umap)"
+  "(fdk.geo/calc-json-fn :umap)"
   [format]
   (->> (geo-data {:ms (ods/read-table) :format :umap})
        ;; The correct param of `feature-collection` is `format` not the
@@ -369,7 +374,7 @@
        (feature-collection format)))
 
 (defn json
-  "(json :umap)"
+  "(fdk.geo/json :umap)"
   [format]
   (let [ks [:json]]
     (if-let [v (get-in @com/cache ks)]
@@ -378,11 +383,9 @@
 
 (defn save-json
   "During evaluation it defines the `json` var for debugging purposes. E.g.:
-  (save-json (json :umap) \"resources/<filename>.umap\")
+  (fdk.geo/save-json (fdk.geo/json :umap) \"resources/<filename>.umap\")
   "
   [json filename]
   (spit filename
         (cheshire/generate-string json {:pretty true}))
   (debugf "See (inspect-tree json) (inspect-tree features)"))
-
-#_(json/pprint (geo-data {:format :umap}))
