@@ -7,6 +7,7 @@
    [clojure.data.json :as json]
    [clojure.string :as cstr]
    [utils.core :as utc]
+   [utils.num :as utn]
    [fdk.datasrc.ods :as ods]
    #_[clojure.inspector :refer :all]
    [ring.util.codec :as codec]
@@ -196,7 +197,7 @@
     :zoomControl true
     :zoom 14 ;; default zoom level
     }
-   :geometry {:type "Point" :coordinates [9.148864746093752 48.760262727297]}
+   :geometry {:type "Point" :coordinates [9.148864  48.760262]}
    :layers (->> (create-groups features)
                 #_(map-indexed (fn [idx cat-members]
                                #_(println "idx" idx)
@@ -275,11 +276,14 @@
          (filter (fn [[idx feature]]
                    (let [relevant (relevant-feature?
                                    cnt-all-features feature)]
-                     (if relevant
-                       relevant
-                       (debugf
-                        "norm-addr: \"%s\"; idx: %s; relevant: %s"
-                        norm-addr idx relevant)))))
+                     (debugf "%s; line %s; %s" norm-addr (:idx row)
+                             (if relevant
+                               (cstr/join " "
+                                          (map (fn [v] (utn/round-precision v 6))
+                                               (get-in feature [:geometry :coordinates])))
+                               ""))
+                     relevant)))
+
          (mapv (fn [[_ feature]] feature))
          (mapv (fn [feature]
                  #_(def feature feature)
