@@ -19,14 +19,15 @@
    "resources/Vereinsinformationen_öffentlich_Stadtteilkarte.ods"))
 
 (defn sheet [] (-> (document) (.getSheetByIndex 0)))
-(defn sheet-content [] (->> (range (.getRowCount (sheet)))
-                            (drop 1)  ;; skip column header
-                            #_(take 3)))
+(defn sheet-content []
+  (
+   identity
+   ;; take 6
+   (drop 1 ;; skip column header
+         (range (.getRowCount (sheet))))))
 
 (defn text-at-position [p row]
-  (-> (sheet)
-      (.getCellByPosition p row)
-      (.getDisplayText)))
+  (.getDisplayText (.getCellByPosition (sheet) p row)))
 
 (defn address [row] (text-at-position (column-idx \C) row))
 
@@ -41,7 +42,8 @@
                          (fn [a] (s/replace a "  " " "))
                          (fn [a] (s/replace a "  " " "))
                          (fn [a] (s/replace a " " " "))
-                         (fn [a] (s/replace a "e. V." "e.V."))
+                         ;; e.V. without space is incorrect
+                         ;; (fn [a] (s/replace a "e. V." "e.V."))
                          ]))
    a))
 
@@ -51,11 +53,11 @@
     {:idx 1 :address \"...\"}
     {:idx 2 :address \"...\"})"
   (->> (sheet-content)
-       (map address)
-       (map cleanup)
        (map (comp
+             cleanup
              (fn [a] (s/replace a "\n" ", "))
-             cleanup))
+             cleanup
+             address))
        (map-indexed (fn [i s] {:idx (row-nr i) :address s}))))
 
 (defn addresses []
@@ -73,10 +75,10 @@
     {:idx 2 :name \"...\"})"
   []
   (->> (sheet-content)
-       (map association)
        (map (comp
              (fn [a] (s/replace a "\n" " "))
-             cleanup))
+             cleanup
+             association))
        (map-indexed (fn [i s] {:idx (row-nr i) :name s}))))
 
 (defn associations []
@@ -94,8 +96,9 @@
     {:idx 2 :city-district \"...\"})"
   []
   (->> (sheet-content)
-       (map city-district)
-       (map cleanup)
+       (map (comp
+             cleanup
+             city-district))
        (map-indexed (fn [i s] {:idx (row-nr i) :city-district s}))))
 
 (defn city-districts []
@@ -104,7 +107,7 @@
       v
       (com/cache! calc-city-districts ks))))
 
-(defn coordinates [row] (text-at-position (column-idx \E) row))
+(defn table-coordinates [row] (text-at-position (column-idx \E) row))
 
 (defn calc-coordinates
   "A list of indexed hash-maps:
@@ -113,11 +116,12 @@
     {:idx 2 :coordinates \"...\"})"
   []
   (->> (sheet-content)
-       (map coordinates)
-       (map cleanup)
+       (map (comp
+             cleanup
+             table-coordinates))
        (map-indexed (fn [i s] {:idx (row-nr i) :coordinates s}))))
 
-(defn coordinatess []
+(defn coordinates []
   (let [ks [:coordinates]]
     (if-let [v (get-in @com/cache ks)]
       v
@@ -132,8 +136,9 @@
     {:idx 2 :contact \"...\"})"
   []
   (->> (sheet-content)
-       (map contact)
-       (map cleanup)
+       (map (comp
+             cleanup
+             contact))
        (map-indexed (fn [i s] {:idx (row-nr i) :contact s}))))
 
 (defn contacts []
@@ -151,8 +156,9 @@
     {:idx 2 :web-page \"...\"})"
   []
   (->> (sheet-content)
-       (map web-page)
-       (map cleanup)
+       (map (comp
+             cleanup
+             web-page))
        (map-indexed (fn [i a] {:idx (row-nr i) :web-page a}))))
 
 (defn web-pages []
@@ -177,8 +183,9 @@
     {:idx 2 :goal \"...\"})"
   []
   (->> (sheet-content)
-       (map goal)
-       (map cleanup)
+       (map (comp
+             cleanup
+             goal))
        (map-indexed (fn [i s] {:idx (row-nr i) :goal s}))))
 
 (defn activity
@@ -196,8 +203,9 @@
     {:idx 2 :activity \"...\"})"
   []
   (->> (sheet-content)
-       (map activity)
-       (map cleanup)
+       (map (comp
+             cleanup
+             activity))
        (map-indexed (fn [i s] {:idx (row-nr i) :activity s}))))
 
 (defn calc-read-table
@@ -209,7 +217,8 @@
   ;; TODO make sure the associations and addresses are:
   ;; 1. sorted and 2. of the same size
   (mapv (fn [associations addresses cdistricts
-            contacts web-pages goals activities]
+            contacts web-pages goals activities
+            coordinates]
           (let [contact (:contact contacts)
                 web-page (:web-page web-pages)]
             (merge associations
@@ -217,9 +226,11 @@
                    goals
                    cdistricts
                    {:desc (format "%s\n\n%s" contact web-page)}
-                   activities)))
+                   activities
+                   coordinates)))
         (associations) (addresses) (city-districts)
-        (contacts) (web-pages) (goals) (activities)))
+        (contacts) (web-pages) (goals) (activities)
+        (coordinates)))
 
 (defn read-table []
   (let [ks [:table]]

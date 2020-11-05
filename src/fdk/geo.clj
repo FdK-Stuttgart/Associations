@@ -28,12 +28,12 @@
 (def request-delay 200)
 
 (defn request [url]
+  (debugf "[request] %s" url)
   (let [r (as-> url $
             (client/get $ {:accept :json})
             (:body $)
             (json/read-json $))]
     (Thread/sleep request-delay)
-    #_(println (str "[" tbeg ":" (te/tnow) " /" "request " url "]"))
     r))
 
 (defn geojson [features]
@@ -260,16 +260,24 @@
 
 (defn process-table-row
   [request-format
-   {:keys [address city-district name desc goal activity] :as row}]
+   {:keys [address city-district name desc goal activity coordinates] :as row}]
   (let [norm-addr (normalize-address address)
-        all-features (->> norm-addr
-                          (codec/url-encode)
-                          (assoc {:format request-format}
-                                 :address)
-                          (create-url)
-                          (request)
-                          :features)
+        all-features
+        (if (empty? coordinates)
+          (->> (codec/url-encode norm-addr)
+               (assoc {:format request-format}
+                      :address)
+               (create-url)
+               (request)
+               :features)
+          [{:type "Feature"
+            :properties {:geocoding {:name ""}}
+            :geometry {:type "Point"
+                       :coordinates
+                       (read-string (format "[%s]" coordinates))}}])
+
         cnt-all-features (count all-features)]
+    ;; (debugf "type %s; empty? %s; %s" (type coordinates) (empty? coordinates) coordinates)
     (->> all-features
          ;; this looks like a monadic container
          (map-indexed (fn [i feature] [i feature]))
