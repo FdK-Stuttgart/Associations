@@ -257,8 +257,9 @@
       (.replaceFirst adr old-house-nr (.replaceAll old-house-nr " " ""))
       adr)))
 
-(defn process-m [request-format {:keys [address city-district name desc goal
-                                        activity]}]
+(defn process-table-row
+  [request-format
+   {:keys [address city-district name desc goal activity] :as row}]
   (let [norm-addr (normalize-address address)
         all-features (->> norm-addr
                           (codec/url-encode)
@@ -303,12 +304,11 @@
                                               :goal goal
                                               :activity activity})))))))))
 
-(defn calc-geo-data-fn
-  [{:keys [ms format] :or {format #_:geojson :umap}}]
+(defn calc-geo-data
+  [{:keys [ods-table format] :or {format #_:geojson :umap}}]
   (let [request-format (if (= format :umap) :geocodejson format)]
-    (->> ms
-         ;; (map (fn [{:keys [desc]}] (process-m request-format m)))
-         (map (fn [m] (process-m request-format m)))
+    (->> ods-table
+         (map (fn [table-row] (process-table-row request-format table-row)))
          (reduce into [])
          ((fn [coll]
             (infof "Coordinates found %s" (count coll))
@@ -338,16 +338,16 @@
          (map (fn [m] (cset/rename-keys m {:idx :row}))))))
 
 
-(defn geo-data [prm]
+(defn get-geo-data [prm]
   (let [ks [:geo-data]]
     (if-let [v (get-in @com/cache ks)]
       v
-      (com/cache! (fn [] (calc-geo-data-fn prm)) ks))))
+      (com/cache! (fn [] (calc-geo-data prm)) ks))))
 
 (defn calc-json-fn
   "(fdk.geo/calc-json-fn :umap)"
   [format]
-  (->> (geo-data {:ms (ods/read-table) :format :umap})
+  (->> (get-geo-data {:ods-table (ods/read-table) :format :umap})
        ;; The correct param of `feature-collection` is `format` not the
        ;; `request-format`
        (feature-collection format)))
