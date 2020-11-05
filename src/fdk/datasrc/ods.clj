@@ -1,12 +1,10 @@
 (ns fdk.datasrc.ods
   (:require
-   [utils.core :refer :all]
-   [clojure.string :as s]
-   [fdk.data :as data]
+   [clojure.string :as cstr]
    [fdk.common :as com]
    [djy.char :as djy]
-   [clojure.inspector :refer :all]
-   [taoensso.timbre :as timbre :refer []]
+   ;; [clojure.inspector :refer :all]
+   ;; [taoensso.timbre :as timbre :refer []]
    )
   (:import org.odftoolkit.simple.SpreadsheetDocument))
 
@@ -35,27 +33,28 @@
 
 (defn- cleanup [a]
   ((apply comp (reverse [
-                         s/trim
+                         cstr/trim
                          ;; repeating twice should be enough; simple and dirty
-                         (fn [a] (s/replace a " \n" "\n"))
-                         (fn [a] (s/replace a " \n" "\n"))
-                         (fn [a] (s/replace a "  " " "))
-                         (fn [a] (s/replace a "  " " "))
-                         (fn [a] (s/replace a " " " "))
+                         (fn [a] (cstr/replace a " \n" "\n"))
+                         (fn [a] (cstr/replace a " \n" "\n"))
+                         (fn [a] (cstr/replace a "  " " "))
+                         (fn [a] (cstr/replace a "  " " "))
+                         (fn [a] (cstr/replace a " " " "))
                          ;; e.V. without space is incorrect
-                         ;; (fn [a] (s/replace a "e. V." "e.V."))
+                         ;; (fn [a] (cstr/replace a "e. V." "e.V."))
                          ]))
    a))
 
-(defn calc-addresses []
+(defn calc-addresses
   "A list of indexed hash-maps:
   '({:idx 0 :address \"...\"}
     {:idx 1 :address \"...\"}
     {:idx 2 :address \"...\"})"
+  []
   (->> (sheet-content)
        (map (comp
              cleanup
-             (fn [a] (s/replace a "\n" ", "))
+             (fn [a] (cstr/replace a "\n" ", "))
              cleanup
              address))
        (map-indexed (fn [i s] {:idx (row-nr i) :address s}))))
@@ -76,7 +75,7 @@
   []
   (->> (sheet-content)
        (map (comp
-             (fn [a] (s/replace a "\n" " "))
+             (fn [a] (cstr/replace a "\n" " "))
              cleanup
              association))
        (map-indexed (fn [i s] {:idx (row-nr i) :name s}))))
