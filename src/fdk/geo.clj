@@ -6,14 +6,14 @@
    [clj-time-ext.core :as te]
    [clojure.data.json :as json]
    [clojure.string :as cstr]
-   [utils.core :refer [in? coll-and-not-empty? not-empty?]]
-   [fdk.data :as data]
+   [utils.core :as utc]
    [fdk.datasrc.ods :as ods]
-   [clojure.inspector :refer :all]
+   #_[clojure.inspector :refer :all]
    [ring.util.codec :as codec]
    [taoensso.timbre :as timbre :refer [debugf infof errorf]]
    [clojure.core :as cc]
    [fdk.common :as com]
+   [clojure.set :as cset]
    ))
 
 (defn create-url
@@ -27,17 +27,13 @@
 (def request-delay 200)
 
 (defn request [url]
-  ;; TODO use monad for logging
-  (def url url)
-  (let [tbeg (te/tnow)]
-    #_(println (str "[" tbeg "             /" "request " url "]"))
-    (let [r (as-> url $
-              (client/get $ {:accept :json})
-              (:body $)
-              (json/read-json $))]
-      (Thread/sleep request-delay)
-      #_(println (str "[" tbeg ":" (te/tnow) " /" "request " url "]"))
-      r)))
+  (let [r (as-> url $
+            (client/get $ {:accept :json})
+            (:body $)
+            (json/read-json $))]
+    (Thread/sleep request-delay)
+    #_(println (str "[" tbeg ":" (te/tnow) " /" "request " url "]"))
+    r))
 
 (defn geojson [features]
   {:type "FeatureCollection" :features features})
@@ -63,17 +59,13 @@
     :id (rand-int 1e7)}})
 
 (defn fst-letters [hm]
-  (def hm hm)
   (-> hm :properties :name (subs 0 1) (cstr/upper-case)))
 
 (defn assign-category-indexes [max-cat-size features]
   (loop
-      [
-       coll features
-       init-letters (-> coll (first) (fst-letters))
+      [coll features
        cat {:cnt-in-cat 0 :idx 0}
-       acc []
-       ]
+       acc []]
     (if (empty? coll)
       acc
       (let [[e & es] coll
@@ -85,7 +77,6 @@
                         :else ;; new category
                         {:cnt-in-cat 0 :idx (inc idx)}))]
         (recur es
-               (fst-letters e)
                new-cat
                (into acc [(assoc e :cat-idx (:idx cat))]))))))
 
@@ -120,13 +111,8 @@
                                               (two-letters member))
                                             [(first members) (last members)]))})]))
            (flatten)
-           (map (fn [{:keys [members cat-name cat-idx cnt-members]}]
-                  (map (fn [m] (assoc m
-                                     ;; :cat-idx cat-idx
-                                     ;; :cnt-members cnt-members
-                                     :cat-name
-                                     default-cat-name
-                                     #_cat-name))
+           (map (fn [{:keys [members]}]
+                  (map (fn [m] (assoc m :cat-name default-cat-name))
                        members)))
            (reduce into [])
            (map (fn [m]
@@ -135,7 +121,6 @@
                    (select-keys m [:cat-name]))))))))
 
 (defn create-groups [features]
-  (def fs features)
   (let [classification (classified features)]
     (->> features
          (map (fn [m]
@@ -242,25 +227,23 @@
 (defn relevant-feature?
   "Created add-hoc. Hmm"
   [count-features feature]
-  #_(def count-features count-features)
-  #_(def feature feature)
   (cond
     (> count-features 1)
     (or
      (let [category (get-in feature [:properties :category])
            osm_type (get-in feature [:properties :osm_type])]
        (or
-        (in? ["building"] category)
-        (and (in? ["amenity"] category)
-             (in? ["node"] osm_type))))
+        (utc/in? ["building"] category)
+        (and (utc/in? ["amenity"] category)
+             (utc/in? ["node"] osm_type))))
 
      (let [type (get-in feature [:properties :geocoding :type])
            osm_type (get-in feature [:properties :geocoding :osm_type])]
        (or
-        (and (in? ["way"] osm_type)
-             (in? ["yes"] type))
-        (and (in? ["node"] osm_type)
-             (in? ["library" "parking"] type)))))
+        (and (utc/in? ["way"] osm_type)
+             (utc/in? ["yes"] type))
+        (and (utc/in? ["node"] osm_type)
+             (utc/in? ["library" "parking"] type)))))
 
     (= count-features 1)
     true
@@ -271,14 +254,11 @@
 (defn normalize-address [address]
   (let [adr (cstr/replace address "\n" ", ")]
     (if-let [old-house-nr (re-find #"[0-9] [A-z]," adr)]
-      (let [last-idx (.lastIndexOf adr old-house-nr)
-            new-house-nr (.replaceAll old-house-nr " " "")]
-        (.replaceFirst adr old-house-nr new-house-nr))
+      (.replaceFirst adr old-house-nr (.replaceAll old-house-nr " " ""))
       adr)))
 
 (defn process-m [request-format {:keys [address city-district name desc goal
-                                        activity
-                                        ] :as m}]
+                                        activity]}]
   (let [norm-addr (normalize-address address)
         all-features (->> norm-addr
                           (codec/url-encode)
@@ -296,10 +276,9 @@
                                    cnt-all-features feature)]
                      (if relevant
                        relevant
-                       (do
-                        (debugf
-                         "norm-addr: \"%s\"; idx: %s; relevant: %s"
-                         norm-addr idx relevant))))))
+                       (debugf
+                        "norm-addr: \"%s\"; idx: %s; relevant: %s"
+                        norm-addr idx relevant)))))
          (mapv (fn [[_ feature]] feature))
          (mapv (fn [feature]
                  #_(def feature feature)
@@ -355,11 +334,11 @@
          (map (fn [{:keys [address idx] :as m}]
                 (update-in m [:address] normalize-address)))
          (remove (fn [{:keys [idx address]}]
-                   (in? resolved address)))
-         (map (fn [m] (clojure.set/rename-keys m {:idx :row}))))))
+                   (utc/in? resolved address)))
+         (map (fn [m] (cset/rename-keys m {:idx :row}))))))
 
 
-(defn geo-data [{:keys [ms format] :or {format #_:geojson :umap} :as prm}]
+(defn geo-data [prm]
   (let [ks [:geo-data]]
     (if-let [v (get-in @com/cache ks)]
       v
@@ -387,5 +366,4 @@
   "
   [json filename]
   (spit filename
-        (cheshire/generate-string json {:pretty true}))
-  (debugf "See (inspect-tree json) (inspect-tree features)"))
+        (cheshire/generate-string json {:pretty true})))
