@@ -19,7 +19,7 @@
   net.cgrand/xforms             {:mvn/version "0.19.2"}
 
   org.clojars.bost/clj-time-ext {:mvn/version "0.0.0-37-0x545c"}
-  org.clojars.bost/utils        {:mvn/version "0.0.0-37-0xc96a"}
+  org.clojars.bost/utils        {:mvn/version "0.0.0-43-0x8a82"}
 
   ;; parse HTML into Clojure data structures - scrapping data from HTML tables
   hickory {:mvn/version "0.7.1"}
