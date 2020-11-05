@@ -44,10 +44,15 @@
   clj-fuzzy/clj-fuzzy {:mvn/version "0.4.1"}
 
   ;; character utility functions: https://github.com/daveyarwood/djy
+  ;; Character range from A to Z
   djy/djy {:mvn/version "0.2.1"}
 
   ;; logging
   com.taoensso/timbre {:mvn/version "5.1.0"}
+
+  ;; low overhead sampling profiler
+  ;; start it from CLI with:  -J-Djdk.attach.allowAttachSelf
+  ;; com.clojure-goes-fast/clj-async-profiler {:mvn/version "0.4.1"}
   }}
   ;; :plugins
   ;; [

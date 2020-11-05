@@ -25,7 +25,10 @@
   (clojure.core/format
    "https://nominatim.openstreetmap.org/search?q=%s&format=%s" address (name format)))
 
-(def request-delay 200)
+(def request-delay
+  "We have only 2 requests - no delay needed"
+  0
+  #_200)
 
 (defn request [url]
   (debugf "[request] %s" url)
@@ -264,15 +267,20 @@
   (let [norm-addr (normalize-address address)
         all-features
         (if (empty? coordinates)
-          (->> (codec/url-encode norm-addr)
-               (assoc {:format request-format}
-                      :address)
-               (create-url)
-               (request)
-               :features)
-          [{:type "Feature"
+          (if (or (.contains norm-addr "keine")
+                  (.contains norm-addr "Postfach"))
+            []
+            (->> (codec/url-encode norm-addr)
+                 (assoc {:format request-format}
+                        :address)
+                 (create-url)
+                 (request)
+                 :features))
+          [{
+            :type "Feature"
             :properties {:geocoding {:name ""}}
-            :geometry {:type "Point"
+            :geometry {
+                       :type "Point"
                        :coordinates
                        (read-string (format "[%s]" coordinates))}}])
 
@@ -280,11 +288,10 @@
     ;; (debugf "type %s; empty? %s; %s" (type coordinates) (empty? coordinates) coordinates)
     (->> all-features
          ;; this looks like a monadic container
-         (map-indexed (fn [i feature] [i feature]))
-         (filter (fn [[idx feature]]
+         (filter (fn [feature]
                    (let [relevant (relevant-feature?
                                    cnt-all-features feature)]
-                     (debugf "%s; line %s; %s" norm-addr (:idx row)
+                     (debugf "%s; table-row %s; %s" norm-addr (:idx row)
                              (if relevant
                                (cstr/join " "
                                           (map (fn [v] (utn/round-precision v 6))
@@ -292,9 +299,7 @@
                                ""))
                      relevant)))
 
-         (mapv (fn [[_ feature]] feature))
          (mapv (fn [feature]
-                 #_(def feature feature)
                  (update-in
                   feature
                   [:properties]

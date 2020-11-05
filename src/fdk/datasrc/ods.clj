@@ -12,9 +12,12 @@
   {:pre [(char? row-letter)]}
   (.indexOf (djy/char-range \A \Z) (djy/upper-case row-letter)))
 
+(def document-data (SpreadsheetDocument/loadDocument
+                    "resources/Vereinsinformationen_öffentlich_Stadtteilkarte.ods"))
 (defn document []
-  (SpreadsheetDocument/loadDocument
-   "resources/Vereinsinformationen_öffentlich_Stadtteilkarte.ods"))
+  #_(SpreadsheetDocument/loadDocument
+     "resources/Vereinsinformationen_öffentlich_Stadtteilkarte.ods")
+  document-data)
 
 (defn sheet [] (-> (document) (.getSheetByIndex 0)))
 (defn sheet-content []
