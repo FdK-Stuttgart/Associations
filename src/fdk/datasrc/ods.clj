@@ -104,6 +104,25 @@
       v
       (com/cache! calc-city-districts ks))))
 
+(defn coordinates [row] (text-at-position (column-idx \E) row))
+
+(defn calc-coordinates
+  "A list of indexed hash-maps:
+  '({:idx 0 :coordinates \"...\"}
+    {:idx 1 :coordinates \"...\"}
+    {:idx 2 :coordinates \"...\"})"
+  []
+  (->> (sheet-content)
+       (map coordinates)
+       (map cleanup)
+       (map-indexed (fn [i s] {:idx (row-nr i) :coordinates s}))))
+
+(defn coordinatess []
+  (let [ks [:coordinates]]
+    (if-let [v (get-in @com/cache ks)]
+      v
+      (com/cache! calc-coordinates ks))))
+
 (defn contact [row] (text-at-position (column-idx \F) row))
 
 (defn calc-contacts
