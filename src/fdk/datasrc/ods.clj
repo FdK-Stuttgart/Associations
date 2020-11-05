@@ -45,7 +45,7 @@
                          ]))
    a))
 
-(defn calc-addresses-fn []
+(defn calc-addresses []
   "A list of indexed hash-maps:
   '({:idx 0 :address \"...\"}
     {:idx 1 :address \"...\"}
@@ -62,11 +62,11 @@
   (let [ks [:addresses]]
     (if-let [v (get-in @com/cache ks)]
       v
-      (com/cache! calc-addresses-fn ks))))
+      (com/cache! calc-addresses ks))))
 
 (defn association [row] (text-at-position (column-idx \A) row))
 
-(defn calc-associations-fn
+(defn calc-associations
   "A list of indexed hash-maps:
   '({:idx 0 :name \"...\"}
     {:idx 1 :name \"...\"}
@@ -83,11 +83,11 @@
   (let [ks [:associations]]
     (if-let [v (get-in @com/cache ks)]
       v
-      (com/cache! calc-associations-fn ks))))
+      (com/cache! calc-associations ks))))
 
 (defn city-district [row] (text-at-position (column-idx \D) row))
 
-(defn calc-city-districts-fn
+(defn calc-city-districts
   "A list of indexed hash-maps:
   '({:idx 0 :city-district \"...\"}
     {:idx 1 :city-district \"...\"}
@@ -102,11 +102,11 @@
   (let [ks [:city-districts]]
     (if-let [v (get-in @com/cache ks)]
       v
-      (com/cache! calc-city-districts-fn ks))))
+      (com/cache! calc-city-districts ks))))
 
 (defn contact [row] (text-at-position (column-idx \F) row))
 
-(defn calc-contacts-fn
+(defn calc-contacts
   "A list of indexed hash-maps:
   '({:idx 0 :contact \"...\"}
     {:idx 1 :contact \"...\"}
@@ -121,11 +121,11 @@
   (let [ks [:contacts]]
     (if-let [v (get-in @com/cache ks)]
       v
-      (com/cache! calc-contacts-fn ks))))
+      (com/cache! calc-contacts ks))))
 
 (defn web-page [row] (text-at-position (column-idx \G) row))
 
-(defn calc-web-pages-fn
+(defn calc-web-pages
   "A list of indexed hash-maps:
   '({:idx 0 :web-page \"...\"}
     {:idx 1 :web-page \"...\"}
@@ -140,7 +140,7 @@
   (let [ks [:web-pages]]
     (if-let [v (get-in @com/cache ks)]
       v
-      (com/cache! calc-web-pages-fn ks))))
+      (com/cache! calc-web-pages ks))))
 
 (defn goal
   "umbenannt auf Ziele des Vereins"
@@ -162,7 +162,6 @@
        (map cleanup)
        (map-indexed (fn [i s] {:idx (row-nr i) :goal s}))))
 
-
 (defn activity
   [row] (text-at-position (column-idx \I) row))
 
@@ -182,7 +181,7 @@
        (map cleanup)
        (map-indexed (fn [i s] {:idx (row-nr i) :activity s}))))
 
-(defn calc-read-table-fn
+(defn calc-read-table
   "A list of indexed hash-maps:
   [{:idx 0 :name \"...\" :address \"...\" :desc \"...\"}
    {:idx 1 :name \"...\" :address \"...\" :desc \"...\"}
@@ -207,7 +206,7 @@
   (let [ks [:table]]
     (if-let [v (get-in @com/cache ks)]
       v
-      (com/cache! calc-read-table-fn ks))))
+      (com/cache! calc-read-table ks))))
 
 (def default-category "Sonstiges")
 
@@ -218,6 +217,6 @@
   (let [tbeg (System/currentTimeMillis)]
     ;; enforce evaluation; can't be done by (force (all-rankings))
     (dorun
-     (calc-read-table-fn))
+     (calc-read-table))
     (printf "%s chars cached in %s ms"
             (count (str @com/cache)) (- (System/currentTimeMillis) tbeg))))
