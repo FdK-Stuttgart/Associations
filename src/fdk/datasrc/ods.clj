@@ -227,7 +227,7 @@
                    addresses
                    goals
                    cdistricts
-                   {:desc (format "%s\n\n%s" contact web-page)}
+                   {:desc (cstr/trim (cstr/join "\n\n" [contact web-page]))}
                    activities
                    coordinates)))
         (associations) (addresses) (city-districts)

@@ -291,14 +291,13 @@
          (filter (fn [feature]
                    (let [relevant (relevant-feature?
                                    cnt-all-features feature)]
-                     (debugf "%s; table-row %s; %s" norm-addr (:idx row)
+                     #_(debugf "%s; line %s; %s" norm-addr (:idx row)
                              (if relevant
                                (cstr/join " "
                                           (map (fn [v] (utn/round-precision v 6))
                                                (get-in feature [:geometry :coordinates])))
                                ""))
                      relevant)))
-
          (mapv (fn [feature]
                  (update-in
                   feature
@@ -307,13 +306,15 @@
                     #_(def properties properties)
                     (conj (assoc properties
                                  :description
-                                 (str
-                                  (if (empty? (cstr/trim address))       "" (format "%s\n\n" address))
-                                  ;; TODO this (empty? ...) doesn't work
-                                  (if (empty? (cstr/trim desc))          "" (format "%s\n\n" desc))
-                                  (if (empty? (cstr/trim city-district)) "" (format "Aktiv in Stadtteil(en): %s\n\n" city-district))
-                                  (if (empty? (cstr/trim goal))          "" (format "Ziele des Vereins: %s\n\n" goal))
-                                  (if (empty? (cstr/trim activity))      "" (format "Aktivitätsbereiche: %s" activity)))
+                                 (reduce str
+                                         (map (fn [[fmt s]]
+                                                (when-not (empty? (cstr/trim s))
+                                                  (format fmt s)))
+                                              [["%s\n\n" address]
+                                               ["%s\n\n" desc]
+                                               ["Aktiv in Stadtteil(en): %s\n\n" city-district]
+                                               ["Ziele des Vereins: %s\n\n" goal]
+                                               ["Aktivitätsbereiche: %s" activity]]))
                                  :name name)
                           (search-properties {:addr norm-addr
                                               :desc desc
