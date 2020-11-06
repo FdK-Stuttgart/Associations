@@ -21,11 +21,14 @@
 
 (defn sheet [] (-> (document) (.getSheetByIndex 0)))
 (defn sheet-content []
-  (
-   identity
-   ;; take 6
-   (drop 1 ;; skip column header
-         (range (.getRowCount (sheet))))))
+  (drop 1 ;; skip column header
+        (
+         identity
+         ;; drop 6
+         (
+          identity
+          ;; take 8
+          (range (.getRowCount (sheet)))))))
 
 (defn text-at-position [p row]
   (.getDisplayText (.getCellByPosition (sheet) p row)))

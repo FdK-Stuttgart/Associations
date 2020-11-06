@@ -284,14 +284,35 @@
                        :coordinates
                        (read-string (format "[%s]" coordinates))}}])
 
-        cnt-all-features (count all-features)]
+        cnt-all-features (count all-features)
+
+        img-size 14
+
+        desc-markdown
+        (cstr/join
+         "\n"
+         (map (fn [line]
+                (format (cond
+                          ;; 2 kB
+                          ;; https://cdn.iconscout.com/icon/free/png-256/facebook-108-432507.png
+                          (.startsWith line "https://www.facebook.com/")
+                          (str "{{https://cdn.iconscout.com/icon/free/png-256/facebook-108-432507.png|" img-size "}}"
+                               " [[%s|Facebook]]")
+
+                          ;; 15 kB
+                          (.startsWith line "https://www.instagram.com/")
+                          (str "{{https://cdn.iconscout.com/icon/free/png-256/instagram-188-498425.png|" img-size "}}"
+                               " [[%s|Instagram]]")
+
+                          :else "%s") line))
+              (cstr/split-lines desc)))]
     ;; (debugf "type %s; empty? %s; %s" (type coordinates) (empty? coordinates) coordinates)
     (->> all-features
          ;; this looks like a monadic container
          (filter (fn [feature]
                    (let [relevant (relevant-feature?
                                    cnt-all-features feature)]
-                     #_(debugf "%s; line %s; %s" norm-addr (:idx row)
+                     (debugf "%s; line %s; %s" norm-addr (:idx row)
                              (if relevant
                                (cstr/join " "
                                           (map (fn [v] (utn/round-precision v 6))
@@ -311,13 +332,13 @@
                                                 (when-not (empty? (cstr/trim s))
                                                   (format fmt s)))
                                               [["%s\n\n" address]
-                                               ["%s\n\n" desc]
+                                               ["%s\n\n" desc-markdown]
                                                ["Aktiv in Stadtteil(en): %s\n\n" city-district]
                                                ["Ziele des Vereins: %s\n\n" goal]
                                                ["Aktivitätsbereiche: %s" activity]]))
                                  :name name)
                           (search-properties {:addr norm-addr
-                                              :desc desc
+                                              :desc desc ;; not desc-markdown
                                               :city-district city-district
                                               :goal goal
                                               :activity activity})))))))))
@@ -329,7 +350,7 @@
          (map (fn [table-row] (process-table-row request-format table-row)))
          (reduce into [])
          ((fn [coll]
-            (infof "Coordinates found %s" (count coll))
+            #_(infof "Coordinates found %s" (count coll))
             coll)))))
 
 (defn resolved-addresses
