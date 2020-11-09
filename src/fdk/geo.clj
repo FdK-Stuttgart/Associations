@@ -49,7 +49,12 @@
   {:type "FeatureCollection"
    :features features
    :_umap_options
-   {:displayOnLoad true :browsable true :name layer-name
+   {:displayOnLoad true
+    :browsable true
+    :name layer-name
+    :type "Cluster"
+    ;; :cluster: {}
+    ;; :heat: {}
     :color (nth ["Blue"
                  "Red"
                  "Gold"
@@ -296,6 +301,10 @@
                           ;; 2 kB
                           ;; https://cdn.iconscout.com/icon/free/png-256/facebook-108-432507.png
                           (.startsWith line "https://www.facebook.com/")
+                          (str "{{https://cdn.iconscout.com/icon/free/png-256/facebook-108-432507.png|" img-size "}}"
+                               " [[%s|Facebook]]")
+
+                          (.startsWith line "https://de-de.facebook.com/")
                           (str "{{https://cdn.iconscout.com/icon/free/png-256/facebook-108-432507.png|" img-size "}}"
                                " [[%s|Facebook]]")
 
