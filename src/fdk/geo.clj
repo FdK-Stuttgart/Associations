@@ -55,7 +55,8 @@
     :type "Cluster"
     ;; :cluster: {}
     ;; :heat: {}
-    :color (nth ["Blue"
+    :color (nth ["#11b3d5" ;; FdK color spectrum - see email from Joe
+                 #_"Blue"
                  "Red"
                  "Gold"
                  "LightSkyBlue"
