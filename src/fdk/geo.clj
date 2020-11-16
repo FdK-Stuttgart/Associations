@@ -17,6 +17,10 @@
    [clojure.set :as cset]
    ))
 
+;; TODO icons https://nsa40.casimages.com/img/2020/11/09/mini_201109035055268763.png
+;; https://www.flaticon.com/authors/freepik
+;; https://www.flaticon.com/
+
 (defn create-url
   "Returns the address-to-latlon mapping service url. E.g.:
   (fdk.geo/create-url {:address \"adr\" :format :umap})
