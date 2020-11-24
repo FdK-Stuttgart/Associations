@@ -59,7 +59,7 @@
     :type "Cluster"
     ;; :cluster: {}
     ;; :heat: {}
-    :color (nth ["#11b3d5" ;; FdK color spectrum - see email from Joe
+    :color (nth ["#d13858" ;; FdK color spectrum - see email from Joe
                  #_"Blue"
                  "Red"
                  "Gold"
