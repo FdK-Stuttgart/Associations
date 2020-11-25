@@ -415,24 +415,30 @@
 
 (defn calc-json-fn
   "(fdk.geo/calc-json-fn :umap)"
-  [format]
-  (->> (get-geo-data {:ods-table (ods/read-table) :format :umap})
+  [fname format]
+  (->> (get-geo-data {:ods-table (ods/read-table fname) :format :umap})
        ;; The correct param of `feature-collection` is `format` not the
        ;; `request-format`
        (feature-collection format)))
 
 (defn json
   "(fdk.geo/json :umap)"
-  [format]
+  [fname format]
   (let [ks [:json]]
     (if-let [v (get-in @com/cache ks)]
       v
-      (com/cache! (fn [] (calc-json-fn format)) ks))))
+      (com/cache! (fn [] (calc-json-fn fname format)) ks))))
 
 (defn save-json
   "During evaluation it defines the `json` var for debugging purposes. E.g.:
-  (fdk.geo/save-json (fdk.geo/json :umap) \"resources/<filename>.umap\")
+  (fdk.geo/save-json (fdk.geo/json :umap) \"resources/out.umap\")
   "
   [json filename]
   (spit filename
         (cheshire/generate-string json {:pretty true})))
+
+(defn -main
+  "(fdk.geo/-main \"resources/Vereinsinformationen_öffentlich_Stadtteilkarte.ods\" \"out.umap\")"
+  [& [in-file out-file]]
+  #_(println "Hello")
+  (fdk.geo/save-json (fdk.geo/json in-file :umap) out-file))
