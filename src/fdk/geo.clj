@@ -15,7 +15,8 @@
    [clojure.core :as cc]
    [fdk.common :as com]
    [clojure.set :as cset]
-   ))
+   )
+  (:gen-class))
 
 ;; TODO icons https://nsa40.casimages.com/img/2020/11/09/mini_201109035055268763.png
 ;; https://www.flaticon.com/authors/freepik

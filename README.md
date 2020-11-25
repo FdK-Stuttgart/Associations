@@ -4,7 +4,21 @@ See [OpenStreetMap uMap](https://wiki.openstreetmap.org/wiki/UMap)
 
 ## Usage
 
-FIXME
+```bash
+# generate pom.xml (or create it manually)
+clojure -Spom
+
+# build
+clojure -X:uberjar
+
+# run - two alternatives:
+
+# 1. run unsing clojure
+clojure -M -m fdk.geo Vereinsinformationen_öffentlich_Stadtteilkarte.ods out.umap
+
+# 2. run from java
+java -jar fdk.jar -m fdk.geo Vereinsinformationen_öffentlich_Stadtteilkarte.ods out.umap
+```
 
 ## License
 
