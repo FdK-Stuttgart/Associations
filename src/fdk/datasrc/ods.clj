@@ -12,8 +12,11 @@
   {:pre [(char? row-letter)]}
   (.indexOf (djy/char-range \A \Z) (djy/upper-case row-letter)))
 
-(def document-data (SpreadsheetDocument/loadDocument
-                    "resources/Vereinsinformationen_öffentlich_Stadtteilkarte.ods"))
+(def document-data
+  "Reevaluate this when the ods file changed"
+  (SpreadsheetDocument/loadDocument
+   "resources/Vereinsinformationen_öffentlich_Stadtteilkarte.ods"))
+
 (defn document []
   #_(SpreadsheetDocument/loadDocument
      "resources/Vereinsinformationen_öffentlich_Stadtteilkarte.ods")
@@ -152,7 +155,33 @@
       v
       (com/cache! calc-contacts ks))))
 
-(defn web-page [row] (text-at-position (column-idx \G) row))
+(defn logo [row]
+  #_(println "logos" (text-at-position (column-idx \G) row))
+  (text-at-position (column-idx \G) row))
+
+(defn calc-logos
+  "A list of indexed hash-maps:
+  '({:idx 0 :web-page \"...\"}
+    {:idx 1 :web-page \"...\"}
+    {:idx 2 :web-page \"...\"})"
+  []
+  (->> (sheet-content)
+       (map (comp
+             (fn [urls]
+               #_(println "(cstr/split-lines urls)" (cstr/split-lines urls))
+               (cstr/split-lines urls))
+             cleanup
+             logo
+             ))
+       (map-indexed (fn [i a] {:idx (row-nr i) :logos a}))))
+
+(defn logos []
+  (let [ks [:web-pages]]
+    (if-let [v (get-in @com/cache ks)]
+      v
+      (com/cache! calc-logos ks))))
+
+(defn web-page [row] (text-at-position (column-idx \H) row))
 
 (defn calc-web-pages
   "A list of indexed hash-maps:
@@ -174,7 +203,7 @@
 
 (defn goal
   "umbenannt auf Ziele des Vereins"
-  [row] (text-at-position (column-idx \H) row))
+  [row] (text-at-position (column-idx \I) row))
 
 (defn goals
   "
@@ -194,7 +223,7 @@
        (map-indexed (fn [i s] {:idx (row-nr i) :goal s}))))
 
 (defn activity
-  [row] (text-at-position (column-idx \I) row))
+  [row] (text-at-position (column-idx \J) row))
 
 (defn activities
   "
@@ -223,7 +252,7 @@
   ;; 1. sorted and 2. of the same size
   (mapv (fn [associations addresses cdistricts
             contacts web-pages goals activities
-            coordinates]
+            coordinates logos]
           (let [contact (:contact contacts)
                 web-page (:web-page web-pages)]
             (merge associations
@@ -232,10 +261,12 @@
                    cdistricts
                    {:desc (cstr/trim (cstr/join "\n\n" [contact web-page]))}
                    activities
-                   coordinates)))
+                   coordinates
+                   logos)))
         (associations) (addresses) (city-districts)
         (contacts) (web-pages) (goals) (activities)
-        (coordinates)))
+        (coordinates)
+        (logos)))
 
 (defn read-table []
   (let [ks [:table]]

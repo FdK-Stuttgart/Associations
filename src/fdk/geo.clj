@@ -211,7 +211,15 @@
     :zoom 14 ;; default zoom level
     }
    :geometry {:type "Point" :coordinates [9.148864  48.760262]}
-   :layers (->> (create-groups features)
+   :layers (->> features
+                (mapv (fn [feature]
+                        (debugf "%s; coords %s"
+                                (get-in feature [:properties :search_address])
+                                  (cstr/join " "
+                                             (map (fn [v] (utn/round-precision v 6))
+                                                  (get-in feature [:geometry :coordinates]))))
+                        feature))
+                (create-groups)
                 #_(map-indexed (fn [idx cat-members]
                                #_(println "idx" idx)
                                (layer idx
@@ -271,9 +279,35 @@
       (.replaceFirst adr old-house-nr (.replaceAll old-house-nr " " ""))
       adr)))
 
+(def facebook-logo
+  "https://cdn.iconscout.com/icon/free/png-256/facebook-108-432507.png")
+(def instagram-logo
+  "https://cdn.iconscout.com/icon/free/png-256/instagram-188-498425.png")
+
+(defn encode-line [line]
+  (let [img-size 14]
+    (format
+     (cond
+       ;; 2 kB
+       ;; https://cdn.iconscout.com/icon/free/png-256/facebook-108-432507.png
+       (.startsWith line "https://www.facebook.com/")
+       (str "{{" facebook-logo "|" img-size "}}" " [[%s|Facebook]]")
+
+       (.startsWith line "https://de-de.facebook.com/")
+       (str "{{" facebook-logo "|" img-size "}}"
+            " [[%s|Facebook]]")
+
+       ;; 15 kB
+       (.startsWith line "https://www.instagram.com/")
+       (str "{{" instagram-logo "|" img-size "}}"
+            " [[%s|Instagram]]")
+
+       :else "%s") line)))
+
 (defn process-table-row
   [request-format
-   {:keys [address city-district name desc goal activity coordinates] :as row}]
+   {:keys [address city-district name desc goal activity coordinates
+           logos] :as row}]
   (let [norm-addr (normalize-address address)
         all-features
         (if (empty? coordinates)
@@ -296,43 +330,20 @@
 
         cnt-all-features (count all-features)
 
-        img-size 14
-
         desc-markdown
         (cstr/join
          "\n"
-         (map (fn [line]
-                (format (cond
-                          ;; 2 kB
-                          ;; https://cdn.iconscout.com/icon/free/png-256/facebook-108-432507.png
-                          (.startsWith line "https://www.facebook.com/")
-                          (str "{{https://cdn.iconscout.com/icon/free/png-256/facebook-108-432507.png|" img-size "}}"
-                               " [[%s|Facebook]]")
-
-                          (.startsWith line "https://de-de.facebook.com/")
-                          (str "{{https://cdn.iconscout.com/icon/free/png-256/facebook-108-432507.png|" img-size "}}"
-                               " [[%s|Facebook]]")
-
-                          ;; 15 kB
-                          (.startsWith line "https://www.instagram.com/")
-                          (str "{{https://cdn.iconscout.com/icon/free/png-256/instagram-188-498425.png|" img-size "}}"
-                               " [[%s|Instagram]]")
-
-                          :else "%s") line))
-              (cstr/split-lines desc)))]
+         (map encode-line (cstr/split-lines desc)))]
     ;; (debugf "type %s; empty? %s; %s" (type coordinates) (empty? coordinates) coordinates)
     (->> all-features
          ;; this looks like a monadic container
-         (filter (fn [feature]
-                   (let [relevant (relevant-feature?
-                                   cnt-all-features feature)]
-                     (debugf "%s; line %s; %s" norm-addr (:idx row)
-                             (if relevant
-                               (cstr/join " "
-                                          (map (fn [v] (utn/round-precision v 6))
-                                               (get-in feature [:geometry :coordinates])))
-                               ""))
-                     relevant)))
+         (filter (fn [feature] (relevant-feature? cnt-all-features feature)))
+         #_(mapv (fn [feature]
+                 (debugf "norm-addr %s; line %s; coords %s" norm-addr (:idx row)
+                         (cstr/join " "
+                                    (map (fn [v] (utn/round-precision v 6))
+                                         (get-in feature [:geometry :coordinates]))))
+                 feature))
          (mapv (fn [feature]
                  (update-in
                   feature
@@ -345,11 +356,16 @@
                                          (map (fn [[fmt s]]
                                                 (when-not (empty? (cstr/trim s))
                                                   (format fmt s)))
-                                              [["%s\n\n" address]
-                                               ["%s\n\n" desc-markdown]
-                                               ["Aktiv in Stadtteil(en): %s\n\n" city-district]
-                                               ["Ziele des Vereins: %s\n\n" goal]
-                                               ["Aktivitätsbereiche: %s" activity]]))
+                                              (into
+                                               (mapv (fn [logo] [
+                                                                "{{%s}}\n"
+                                                                #_"{{%s|269}}" logo]) logos)
+                                               [
+                                                ["%s\n\n" address]
+                                                ["%s\n\n" desc-markdown]
+                                                ["Aktiv in Stadtteil(en): %s\n\n" city-district]
+                                                ["Ziele des Vereins: %s\n\n" goal]
+                                                ["Aktivitätsbereiche: %s" activity]])))
                                  :name name)
                           (search-properties {:addr norm-addr
                                               :desc desc ;; not desc-markdown
