@@ -284,26 +284,53 @@
   "https://cdn.iconscout.com/icon/free/png-256/facebook-108-432507.png")
 (def instagram-logo
   "https://cdn.iconscout.com/icon/free/png-256/instagram-188-498425.png")
+(def youtube-logo
+  "https://cdn.iconscout.com/icon/free/png-256/youtube-82-189778.png")
 
 (defn encode-line [line]
   (let [img-size 14]
-    (format
-     (cond
-       ;; 2 kB
-       ;; https://cdn.iconscout.com/icon/free/png-256/facebook-108-432507.png
-       (.startsWith line "https://www.facebook.com/")
-       (str "{{" facebook-logo "|" img-size "}}" " [[%s|Facebook]]")
+    (cond
+      ;; 2 kB
+      ;; https://cdn.iconscout.com/icon/free/png-256/facebook-108-432507.png
+      (.startsWith line "https://www.facebook.com/")
+      (format (str "{{" facebook-logo "|" img-size "}}"
+                   " [[%s|Facebook]]")
+              line)
 
-       (.startsWith line "https://de-de.facebook.com/")
-       (str "{{" facebook-logo "|" img-size "}}"
-            " [[%s|Facebook]]")
+      (.startsWith line "https://de-de.facebook.com/")
+      (format (str "{{" facebook-logo "|" img-size "}}"
+                   " [[%s|Facebook]]")
+              line)
 
-       ;; 15 kB
-       (.startsWith line "https://www.instagram.com/")
-       (str "{{" instagram-logo "|" img-size "}}"
-            " [[%s|Instagram]]")
+      ;; 15 kB
+      (.startsWith line "https://www.instagram.com/")
+      (format (str "{{" instagram-logo "|" img-size "}}"
+                   " [[%s|Instagram]]")
+              line)
 
-       :else "%s") line)))
+      ;; 3.3 kB
+      (.startsWith line "https://www.youtube.com/")
+      (format (str "{{" youtube-logo "|" img-size "}}"
+                   " [[%s|YouTube]]")
+              line)
+
+      (.startsWith line "https://")
+      (format "[[%s|%s]]"
+              line
+              (let [fmt-line (if (.endsWith line "/")
+                               (.substring line 0 (dec (count line)))
+                               line)]
+                (.replaceFirst fmt-line "https://" "")))
+
+      (.startsWith line "http://")
+      (format "[[%s|%s]]"
+              line
+              (let [fmt-line (if (.endsWith line "/")
+                               (.substring line 0 (dec (count line)))
+                               line)]
+                (.replaceFirst fmt-line "http://" "")))
+
+      :else line)))
 
 (defn process-table-row
   [request-format
@@ -384,7 +411,7 @@
             #_(infof "Coordinates found %s" (count coll))
             coll)))))
 
-(defn resolved-addresses
+#_(defn resolved-addresses
   [json]
   (->> json
        :layers
@@ -395,7 +422,7 @@
        (flatten)
        (set)))
 
-(defn unresolved-addresses
+#_(defn unresolved-addresses
   [json]
   (let [resolved (resolved-addresses json)]
     (->> (ods/addresses)
@@ -441,5 +468,4 @@
 (defn -main
   "(fdk.geo/-main \"resources/Vereinsinformationen_öffentlich_Stadtteilkarte.ods\" \"out.umap\")"
   [& [in-file out-file]]
-  #_(println "Hello")
   (fdk.geo/save-json (fdk.geo/json in-file :umap) out-file))
