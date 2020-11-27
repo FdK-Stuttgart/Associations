@@ -281,17 +281,18 @@
       adr)))
 
 (def facebook-logo
+  "2 kB"
   "https://cdn.iconscout.com/icon/free/png-256/facebook-108-432507.png")
 (def instagram-logo
+  "15 kB"
   "https://cdn.iconscout.com/icon/free/png-256/instagram-188-498425.png")
 (def youtube-logo
+  "3.3 kB"
   "https://cdn.iconscout.com/icon/free/png-256/youtube-82-189778.png")
 
 (defn encode-line [line]
   (let [img-size 14]
     (cond
-      ;; 2 kB
-      ;; https://cdn.iconscout.com/icon/free/png-256/facebook-108-432507.png
       (.startsWith line "https://www.facebook.com/")
       (format (str "{{" facebook-logo "|" img-size "}}"
                    " [[%s|Facebook]]")
@@ -302,13 +303,11 @@
                    " [[%s|Facebook]]")
               line)
 
-      ;; 15 kB
       (.startsWith line "https://www.instagram.com/")
       (format (str "{{" instagram-logo "|" img-size "}}"
                    " [[%s|Instagram]]")
               line)
 
-      ;; 3.3 kB
       (.startsWith line "https://www.youtube.com/")
       (format (str "{{" youtube-logo "|" img-size "}}"
                    " [[%s|YouTube]]")
