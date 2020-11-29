@@ -214,11 +214,13 @@
    :geometry {:type "Point" :coordinates [9.148864  48.760262]}
    :layers (->> features
                 (mapv (fn [feature]
-                        (debugf "%s; coords %s"
+                        (debugf "%s; %s - %s: %s"
+                                (get-in feature [:properties :name])
                                 (get-in feature [:properties :search_address])
-                                  (cstr/join " "
-                                             (map (fn [v] (utn/round-precision v 6))
-                                                  (get-in feature [:geometry :coordinates]))))
+                                (get-in feature [:properties :search_district])
+                                (cstr/join " "
+                                           (map (fn [v] (utn/round-precision v 6))
+                                                (get-in feature [:geometry :coordinates]))))
                         feature))
                 (create-groups)
                 #_(map-indexed (fn [idx cat-members]
@@ -247,32 +249,54 @@
     (json-fn features)
     #_(umap features)))
 
+(defn ftype [feature] (get-in feature [:properties :geocoding :type]))
+
+(defn place-id [feature] (get-in feature [:properties :geocoding :place_id]))
+
+(defn osm-type [feature] (get-in feature [:properties :osm_type]))
+
+(defn category [feature] (get-in feature [:properties :category]))
+
 (defn relevant-feature?
   "Created add-hoc. Hmm"
-  [count-features feature]
-  (cond
-    (> count-features 1)
-    (or
-     (let [category (get-in feature [:properties :category])
-           osm_type (get-in feature [:properties :osm_type])]
-       (or
-        (utc/in? ["building"] category)
-        (and (utc/in? ["amenity"] category)
-             (utc/in? ["node"] osm_type))))
+  [all-features feature]
+  #_(def all-features all-features)
+  (let [count-features (count all-features)]
+    (cond
+      (> count-features 1)
+      (or
+       (let [category (category feature)
+             osm_type (osm-type feature)]
+         (or
+          (utc/in? ["building"] category)
+          (and (utc/in? ["amenity"] category)
+               (utc/in? ["node"] osm_type))))
+       (let [ftype (ftype feature)
+             osm_type (osm-type feature)]
+         (or
+          (and (utc/in? ["way"] osm_type)
+               (utc/in? ["yes"] ftype))
+          (and (utc/in? ["node"] osm_type)
+               (utc/in? ["library" "parking"] ftype))))
+       (let [all-administrative-features
+             (filter (fn [f] (utc/in? ["administrative"] (ftype f)))
+                     all-features)]
+         (and
+          (utc/in? ["administrative"] (ftype feature))
+          (= (place-id feature)
+             (place-id (if (= 1 (count all-administrative-features))
+                         (first all-administrative-features)
+                         (second all-administrative-features))))))
 
-     (let [type (get-in feature [:properties :geocoding :type])
-           osm_type (get-in feature [:properties :geocoding :osm_type])]
-       (or
-        (and (utc/in? ["way"] osm_type)
-             (utc/in? ["yes"] type))
-        (and (utc/in? ["node"] osm_type)
-             (utc/in? ["library" "parking"] type)))))
+       (let [ftype (ftype feature)]
+         (utc/in? ["square"] ftype))
+       )
 
-    (= count-features 1)
-    true
+      (= count-features 1)
+      true
 
-    :else
-    (errorf "No matching condition for feature: %s" feature)))
+      :else
+      (errorf "No matching condition for feature: %s" feature))))
 
 (defn normalize-address [address]
   (let [adr (cstr/replace address "\n" ", ")]
@@ -333,6 +357,13 @@
 
       :else line)))
 
+
+(defn query-param [{:keys [norm-addr city-district]}]
+  (if (or (.contains norm-addr "keine")
+          (.contains norm-addr "Postfach"))
+    city-district
+    norm-addr))
+
 (defn process-table-row
   [request-format
    {:keys [address city-district name desc goal activity coordinates
@@ -340,24 +371,24 @@
   (let [norm-addr (normalize-address address)
         all-features
         (if (empty? coordinates)
-          (if (or (.contains norm-addr "keine")
-                  (.contains norm-addr "Postfach"))
-            []
-            (->> (codec/url-encode norm-addr)
-                 (assoc {:format request-format}
-                        :address)
-                 (create-url)
-                 (request)
-                 :features))
-          [{
-            :type "Feature"
+          (let [query-prms (query-param {:norm-addr norm-addr
+                                         :city-district city-district})]
+
+            (if (empty? query-prms)
+              []
+              (let [req (->> (codec/url-encode query-prms)
+                             (assoc {:format request-format}
+                                    :address)
+                             (create-url)
+                             (request))]
+                #_(def req req)
+                (get-in req [:features]))))
+          [{:type "Feature"
             :properties {:geocoding {:name ""}}
             :geometry {
                        :type "Point"
                        :coordinates
                        (read-string (format "[%s]" coordinates))}}])
-
-        cnt-all-features (count all-features)
 
         desc-markdown
         (cstr/join
@@ -366,7 +397,7 @@
     ;; (debugf "type %s; empty? %s; %s" (type coordinates) (empty? coordinates) coordinates)
     (->> all-features
          ;; this looks like a monadic container
-         (filter (fn [feature] (relevant-feature? cnt-all-features feature)))
+         (filter (fn [feature] (relevant-feature? all-features feature)))
          #_(mapv (fn [feature]
                  (debugf "norm-addr %s; line %s; coords %s" norm-addr (:idx row)
                          (cstr/join " "
