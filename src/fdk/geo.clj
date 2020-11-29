@@ -290,6 +290,18 @@
   "3.3 kB"
   "https://cdn.iconscout.com/icon/free/png-256/youtube-82-189778.png")
 
+(defn format-link [line prefix]
+  (format "[[%s|%s%s]]"
+          line
+          (if (or (.endsWith line "mig.madeingermany-stuttgart.de")
+                  (.startsWith line (str prefix "www.")))
+            ""
+            "www.")
+          (let [fmt-line (if (.endsWith line "/")
+                           (.substring line 0 (dec (count line)))
+                           line)]
+            (.replaceFirst fmt-line prefix ""))))
+
 (defn encode-line [line]
   (let [img-size 14]
     (cond
@@ -314,20 +326,10 @@
               line)
 
       (.startsWith line "https://")
-      (format "[[%s|%s]]"
-              line
-              (let [fmt-line (if (.endsWith line "/")
-                               (.substring line 0 (dec (count line)))
-                               line)]
-                (.replaceFirst fmt-line "https://" "")))
+      (format-link line "https://")
 
       (.startsWith line "http://")
-      (format "[[%s|%s]]"
-              line
-              (let [fmt-line (if (.endsWith line "/")
-                               (.substring line 0 (dec (count line)))
-                               line)]
-                (.replaceFirst fmt-line "http://" "")))
+      (format-link line "http://")
 
       :else line)))
 
