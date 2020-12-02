@@ -499,5 +499,7 @@
 
 (defn -main
   "(fdk.geo/-main \"resources/Vereinsinformationen_öffentlich_Stadtteilkarte.ods\" \"out.umap\")"
-  [& [in-file out-file]]
-  (fdk.geo/save-json (fdk.geo/json in-file :umap) out-file))
+  [& [input-file output-file]]
+  (println "input-file" input-file)
+  (println "output-file" output-file)
+  (fdk.geo/save-json (fdk.geo/json input-file :umap) output-file))

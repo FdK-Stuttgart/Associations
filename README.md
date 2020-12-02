@@ -17,7 +17,7 @@ clojure -X:uberjar
 clojure -M -m fdk.geo Vereinsinformationen_öffentlich_Stadtteilkarte.ods out.umap
 
 # 2. run from java
-java -jar fdk.jar -m fdk.geo Vereinsinformationen_öffentlich_Stadtteilkarte.ods out.umap
+java -jar fdk.jar Vereinsinformationen_öffentlich_Stadtteilkarte.ods out.umap
 ```
 
 ## License
