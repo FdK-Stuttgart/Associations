@@ -260,7 +260,7 @@
 (defn relevant-feature?
   "Created add-hoc. Hmm"
   [all-features feature]
-  #_(def all-features all-features)
+  (def all-features all-features)
   (let [count-features (count all-features)]
     (cond
       (> count-features 1)
@@ -278,19 +278,19 @@
                (utc/in? ["yes"] ftype))
           (and (utc/in? ["node"] osm_type)
                (utc/in? ["library" "parking"] ftype))))
-       (let [all-administrative-features
-             (filter (fn [f] (utc/in? ["administrative"] (ftype f)))
+       (let [desired-feature-types ["administrative" "studio"]
+             all-desired-features
+             (filter (fn [f] (utc/in? desired-feature-types (ftype f)))
                      all-features)]
          (and
-          (utc/in? ["administrative"] (ftype feature))
+          (utc/in? desired-feature-types (ftype feature))
           (= (place-id feature)
-             (place-id (if (= 1 (count all-administrative-features))
-                         (first all-administrative-features)
-                         (second all-administrative-features))))))
+             (place-id (if (= 1 (count all-desired-features))
+                         (first all-desired-features)
+                         (second all-desired-features))))))
 
        (let [ftype (ftype feature)]
-         (utc/in? ["square"] ftype))
-       )
+         (utc/in? ["square"] ftype)))
 
       (= count-features 1)
       true
