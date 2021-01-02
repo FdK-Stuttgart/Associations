@@ -1,10 +1,13 @@
-# fdk
+# FdK
 
-See [OpenStreetMap uMap](https://wiki.openstreetmap.org/wiki/UMap)
+See also [OpenStreetMap uMap](https://wiki.openstreetmap.org/wiki/UMap)
+
+# Data conversion ods -> json
 
 ## Usage
 
 ```bash
+cd data
 # generate pom.xml (or create it manually)
 clojure -Spom
 
