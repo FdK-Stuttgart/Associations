@@ -1,0 +1,133 @@
+<p-blockUI [blocked]="blocked">
+  <p-progressSpinner></p-progressSpinner>
+  <div class="block-ui-text">&nbsp;Vereine laden...</div>
+</p-blockUI>
+
+<!-- MAP -->
+<div class="osm"
+     [ngClass]="{ 'with-sidebar': sidebarExpanded }"
+     #osmContainer>
+  <div id="osm-map" class="map"></div>
+</div>
+
+
+<!-- SIDEBAR WITH SEARCH OPTIONS -->
+<p-sidebar [(visible)]="sidebarExpanded"
+           [position]="'right'"
+           [showCloseIcon]="true"
+           [modal]="false">
+  <div class="sidebar-content">
+
+    <div class="logo">
+      <a href="https://house-of-resources-stuttgart.de/" title="House of Resources Stuttgart">
+        <img src="assets/forum-der-kulturen.svg" alt="Forum der Kulturen (Logo)" class="full-width logo-img"/>
+      </a>
+    </div>
+
+    <div class="full-width flex-align-center margin-top">
+      <p-autoComplete #autoComplete
+                      (completeMethod)="filterAssociations($event.query)"
+                      (onClear)="filterAssociations($event.query)"
+                      [field]="'name'"
+                      [inputStyleClass]="'padding-right'"
+                      [placeholder]="'Nach Verein suchen...'">
+      </p-autoComplete>
+
+      <i class="clickable offset-right big-button pi pi-times-circle"
+         *ngIf="autoComplete?.inputEL?.nativeElement?.value"
+         (click)="clearAutocomplete()">
+      </i>
+
+      <p-button (click)="showAdvancedSearchFilters()">
+        <i [class]="advancedSearchVisible ? 'pi pi-caret-up' : 'pi pi-filter'"></i>
+      </p-button>
+    </div>
+
+    <div class="full-width" *ngIf="advancedSearchVisible">
+      <h5 style="margin-bottom: 6px;">Erweiterte Suche</h5>
+
+      <app-grouped-multi-select [options]="districtOptions"
+                                [ngModel]="selectedDistricts"
+                                (ngModelChange)="selectDistricts($event)"
+                                [placeholder]="'Aktivitätsgebiet auswählen...'"
+                                [labelPlural]="'Aktivitätsgebiete'"
+                                [styleClass]="'sidebar-input-full-width input-margin-bottom'"
+                                [selectUpperCategories]="false">
+      </app-grouped-multi-select>
+
+      <app-grouped-multi-select [options]="activitiesOptions"
+                                [ngModel]="selectedActivities"
+                                (ngModelChange)="selectActivities($event)"
+                                [placeholder]="'Tätigkeitsfelder auswählen...'"
+                                [labelPlural]="'Tätigkeitsfelder'"
+                                [styleClass]="'sidebar-input-full-width'"
+                                [selectUpperCategories]="false">
+      </app-grouped-multi-select>
+    </div>
+
+    <hr class="hr"/>
+
+    <h3>
+      Vereine
+      <span
+        *ngIf="!associations?.length || (filteredAssociations?.length && associations.length === filteredAssociations.length); else filteredCount">
+        ({{associations?.length || 0}})
+      </span>
+      <ng-template #filteredCount>
+        ({{filteredAssociations?.length ? filteredAssociations.length : 0}}
+        von {{associations?.length ? associations.length : 0}})
+      </ng-template>
+    </h3>
+
+    <div class="full-width" *ngIf="(selectedDistricts?.length || selectedActivities?.length
+                                   || (!!autoComplete.inputEL?.nativeElement?.value && autoComplete.inputEL?.nativeElement?.value !== ''))">
+      <div class="filter-chips">
+        <span class="mini">Filter:</span>
+        <div *ngIf="!!autoComplete.inputEL?.nativeElement?.value && autoComplete.inputEL?.nativeElement?.value !== ''"
+             class="filter-chip">
+          Suchbegriff "{{ autoComplete.inputEL?.nativeElement?.value | truncate:16:false:'...' }}"
+          <i class="pi pi-times mini-button" (click)="clearAutocomplete();"></i>
+        </div>
+        <div class="filter-chip" *ngIf="selectedDistricts?.length">
+          Aktivitätsgebiete ({{ getSubOptions(selectedDistricts).length }}) <i class="pi pi-times mini-button"
+                                                                               (click)="resetDistrictsFilter()"></i>
+        </div>
+        <div class="filter-chip" *ngIf="selectedActivities?.length">
+          Tätigkeitsfelder ({{ getSubOptions(selectedActivities).length }}) <i class="pi pi-times mini-button"
+                                                                               (click)="resetActivitiesFilter()"></i>
+        </div>
+      </div>
+    </div>
+
+    <app-associations-list [associations]="filteredAssociations"
+                           [selectedAssociationField]="popupContentAssociationId"
+                           [identifiedByFieldName]="'id'"
+                           (selected)="selectAssociation($event)">
+    </app-associations-list>
+
+
+    <div *ngIf="(selectedDistricts?.length || selectedActivities?.length
+                || (!!autoComplete.inputEL?.nativeElement?.value && autoComplete.inputEL?.nativeElement?.value !== ''))"
+         class="clear-button">
+      <p-button (click)="clearFilters();">
+        Filter löschen
+      </p-button>
+    </div>
+    <div class="clear-button">
+      <p-button (click)="ngOnInit();">
+        <i class="pi pi-spinner"></i>&nbsp;&nbsp;Neu laden
+      </p-button>
+    </div>
+  </div>
+</p-sidebar>
+
+<div class="sidebar-trigger-button"
+     [ngClass]="{ 'expanded': sidebarExpanded }">
+  <p-button type="text"
+            [icon]="!sidebarExpanded ? 'pi pi-arrow-left' : 'pi pi-arrow-right'"
+            (click)="toggleSidebar()">
+  </p-button>
+</div>
+
+<!-- TOAST: used to display database connection issues -->
+<p-toast key="mapToast"></p-toast>

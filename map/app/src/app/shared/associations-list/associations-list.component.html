@@ -1,0 +1,23 @@
+<div class="association-entries"
+     *ngIf="associations?.length; else noAssociations">
+  <div class="association-entry"
+       [ngClass]="{ 'selected': association[identifiedByFieldName] === selectedAssociationField }"
+       *ngFor="let association of associations">
+    <a (click)="emitClick(association)">
+      <div class="icon-and-text">
+        <div class="icon">
+          <i class="{{ primeNgIconClass }} icon-padding"
+             *ngIf="association[identifiedByFieldName] === selectedAssociationField"></i>
+        </div>
+        <div class="text">
+          {{ association.name }}
+        </div>
+      </div>
+    </a>
+  </div>
+</div>
+<ng-template #noAssociations>
+  <div class="sidebar-entry empty-entry">
+    Es konnten keine Vereine gefunden werden.
+  </div>
+</ng-template>

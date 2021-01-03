@@ -1,0 +1,50 @@
+:host {
+  overflow: hidden;
+}
+
+.osm {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  transition: width 0.3s;
+
+  &.with-sidebar {
+    width: calc(100% - 320px) !important;
+  }
+
+  #osm-map {
+    width: 100%;
+    height: 100vh;
+  }
+}
+
+.flex-align-center {
+  display: flex;
+  align-items: center;
+}
+
+.margin-top {
+  margin-top: 24px;
+}
+
+.offset-right {
+  margin-left: -42px;
+  margin-right: 18px;
+  z-index: 1000;
+  background-color: #fff;
+  padding-left: 6px;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.big-button {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+}
+
+p-autoComplete ::ng-deep .padding-right {
+  padding-right: 36px;
+}
