@@ -1,0 +1,34 @@
+.group-header-option {
+  font-weight: 600;
+  background-color: #fff;
+  margin-left: -36px;
+  padding: 6px 6px 6px 8px;
+}
+
+.sub-option {
+  font-size: 75%;
+}
+
+p-multiSelect ::ng-deep {
+  .p-multiselect-header {
+    display: none !important;
+  }
+
+  .p-multiselect-panel {
+    max-width: min(100%, 288px) !important;
+  }
+
+  .p-multiselect-item {
+    &:hover {
+      .group-header-option {
+        background-color: #e9ecef !important;
+      }
+    }
+
+    &.p-highlight {
+      .group-header-option {
+        background-color: rgb(227, 242, 253) !important;
+      }
+    }
+  }
+}

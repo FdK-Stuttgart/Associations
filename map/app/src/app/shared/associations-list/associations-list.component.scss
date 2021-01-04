@@ -1,0 +1,33 @@
+.association-entry {
+  padding: 6px 4px;
+  border-bottom: #dedede 1px solid;
+  transition: background-color 0.5s;
+  background-color: transparent;
+
+  &:first-of-type {
+    border-top: #dedede 1px solid;
+  }
+
+  &.selected {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  &.empty-entry {
+    text-align: center;
+    padding-bottom: 24px;
+  }
+}
+
+.icon-padding {
+  padding-right: 4px;
+}
+
+.icon-and-text {
+  display: flex;
+  align-items: center;
+
+  .icon {
+    padding-right: 4px;
+    min-width: 24px;
+  }
+}

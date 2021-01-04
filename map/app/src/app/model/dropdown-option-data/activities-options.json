@@ -1,0 +1,386 @@
+[
+  {
+    "label": "Bildung",
+    "value": 100
+  },
+  {
+    "value": 101,
+    "label": "Sprachunterricht"
+  },
+  {
+    "value": 102,
+    "label": "Muttersprachlicher Unterricht"
+  },
+  {
+    "value": 103,
+    "label": "Nachhilfe"
+  },
+  {
+    "value": 104,
+    "label": "Hausaufgabenbetreuung"
+  },
+  {
+    "value": 105,
+    "label": "Workshops"
+  },
+  {
+    "value": 106,
+    "label": "Instrumentalunterricht"
+  },
+  {
+    "value": 107,
+    "label": "Musikunterricht"
+  },
+  {
+    "value": 108,
+    "label": "Übersetzungs- und Dolmetscherdienst"
+  },
+  {
+    "value": 109,
+    "label": "Interessenkurse"
+  },
+  {
+    "value": 110,
+    "label": "MINT"
+  },
+  {
+    "value": 111,
+    "label": "Hörbuch"
+  },
+  {
+    "value": 112,
+    "label": "Bücher"
+  },
+  {
+    "value": 113,
+    "label": "Politik"
+  },
+  {
+    "value": 115,
+    "label": "Gesellschaftliches"
+  },
+  {
+    "value": 116,
+    "label": "UNESCO"
+  },
+  {
+    "label": "Kultur und Kunst",
+    "value": 200
+  },
+  {
+    "value": 201,
+    "label": "Literaturveranstaltung"
+  },
+  {
+    "value": 202,
+    "label": "Lesung"
+  },
+  {
+    "value": 203,
+    "label": "Konferenz"
+  },
+  {
+    "value": 204,
+    "label": "Poesie"
+  },
+  {
+    "value": 205,
+    "label": "Sprach- und Kulturreisen"
+  },
+  {
+    "value": 206,
+    "label": "Kunst"
+  },
+  {
+    "value": 207,
+    "label": "Feste"
+  },
+  {
+    "value": 208,
+    "label": "Festivals"
+  },
+  {
+    "value": 209,
+    "label": "Feiern"
+  },
+  {
+    "value": 210,
+    "label": "Podiumsgespräch"
+  },
+  {
+    "value": 211,
+    "label": "Filmvorführung"
+  },
+  {
+    "value": 212,
+    "label": "Theaterveranstaltung"
+  },
+  {
+    "value": 213,
+    "label": "Theater"
+  },
+  {
+    "value": 214,
+    "label": "Stammtisch"
+  },
+  {
+    "value": 215,
+    "label": "Kinofestival"
+  },
+  {
+    "value": 216,
+    "label": "Konzerte"
+  },
+  {
+    "value": 217,
+    "label": "Konzertreihen"
+  },
+  {
+    "value": 218,
+    "label": "Kunstmarkt"
+  },
+  {
+    "value": 219,
+    "label": "Kunstführungen"
+  },
+  {
+    "value": 220,
+    "label": "Workshops"
+  },
+  {
+    "label": "Soziales und Gesundheit",
+    "value": 300
+  },
+  {
+    "value": 301,
+    "label": "Arbeit mit Senior*innen"
+  },
+  {
+    "value": 302,
+    "label": "Menschen mit Behinderung"
+  },
+  {
+    "value": 303,
+    "label": "Hilfsprojekte"
+  },
+  {
+    "value": 304,
+    "label": "Notversorgung"
+  },
+  {
+    "value": 305,
+    "label": "Verteilung von Lebensmitteln"
+  },
+  {
+    "label": "Entwicklung und Zusammenarbeit",
+    "value": 400
+  },
+  {
+    "value": 401,
+    "label": "Integrationshilfe"
+  },
+  {
+    "value": 402,
+    "label": "Freiwilligendienst"
+  },
+  {
+    "value": 403,
+    "label": "Spenden für Projektunterstützung"
+  },
+  {
+    "value": 404,
+    "label": "Patenschaften"
+  },
+  {
+    "label": "Engagement für Geflüchtete",
+    "value": 500
+  },
+  {
+    "value": 501,
+    "label": "Zusammenarbeit mit Asylbewerber*innen"
+  },
+  {
+    "value": 502,
+    "label": "Zusammenarbeit mit Geflüchteten"
+  },
+  {
+    "label": "Gastronomie",
+    "value": 600
+  },
+  {
+    "value": 601,
+    "label": "Essen"
+  },
+  {
+    "value": 602,
+    "label": "Traditionelles Essen"
+  },
+  {
+    "value": 603,
+    "label": "Catering"
+  },
+  {
+    "value": 604,
+    "label": "Fingerfood"
+  },
+  {
+    "value": 605,
+    "label": "Kochkurs"
+  },
+  {
+    "label": "Sport",
+    "value": 700
+  },
+  {
+    "value": 701,
+    "label": "Fußball"
+  },
+  {
+    "value": 702,
+    "label": "Basketball"
+  },
+  {
+    "value": 703,
+    "label": "Tanz"
+  },
+  {
+    "value": 704,
+    "label": "Traditioneller Tanz"
+  },
+  {
+    "value": 705,
+    "label": "Dance"
+  },
+  {
+    "value": 706,
+    "label": "Jazzdance"
+  },
+  {
+    "value": 707,
+    "label": "Flamenco"
+  },
+  {
+    "value": 708,
+    "label": "Tanzkurse"
+  },
+  {
+    "value": 709,
+    "label": "Yoga"
+  },
+  {
+    "value": 710,
+    "label": "Fitness"
+  },
+  {
+    "value": 711,
+    "label": "Capoeira"
+  },
+  {
+    "value": 712,
+    "label": "Öffentliche Sportveranstaltung"
+  },
+  {
+    "value": 713,
+    "label": "Trainings"
+  },
+  {
+    "label": "Musik",
+    "value": 800
+  },
+  {
+    "value": 801,
+    "label": "Chor-Gesang"
+  },
+  {
+    "value": 802,
+    "label": "Trommeln"
+  },
+  {
+    "value": 803,
+    "label": "Öffentliche Musikveranstaltung"
+  },
+  {
+    "value": 804,
+    "label": "Musikkonzert"
+  },
+  {
+    "value": 805,
+    "label": "Konzerte"
+  },
+  {
+    "value": 806,
+    "label": "Konzertreihen"
+  },
+  {
+    "value": 807,
+    "label": "Musikwerkstatt"
+  },
+  {
+    "value": 808,
+    "label": "Musikunterricht"
+  },
+  {
+    "value": 809,
+    "label": "Instrumentalunterricht"
+  },
+  {
+    "value": 810,
+    "label": "Klassisch"
+  },
+  {
+    "value": 811,
+    "label": "Jazz"
+  },
+  {
+    "value": 812,
+    "label": "Latin Jazz"
+  },
+  {
+    "value": 813,
+    "label": "Kinder"
+  },
+  {
+    "value": 814,
+    "label": "Jugendliche"
+  },
+  {
+    "value": 815,
+    "label": "Viertel"
+  },
+  {
+    "value": 816,
+    "label": "Stadtteil"
+  },
+  {
+    "label": "Podcast",
+    "value": 900
+  },
+  {
+    "value": 901,
+    "label": "Radio"
+  },
+  {
+    "value": 902,
+    "label": "YouTube"
+  },
+  {
+    "label": "Beratung",
+    "value": 1000
+  },
+  {
+    "value": 1001,
+    "label": "Telefonberatung"
+  },
+  {
+    "value": 1002,
+    "label": "Hotline"
+  },
+  {
+    "value": 1003,
+    "label": "Sofortberatung"
+  },
+  {
+    "value": 1004,
+    "label": "Veranstaltungsplanung"
+  }
+]

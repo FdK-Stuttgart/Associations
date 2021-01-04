@@ -1,0 +1,23 @@
+<p-multiSelect #multiSelect
+               [filter]="false"
+               [showToggleAll]="false"
+               [styleClass]="styleClass"
+               [panelStyleClass]="'grouped-multiselect-panel'"
+               [options]="internalGroupedOptions"
+               [ngModel]="value"
+               (onChange)="changeSelectedOptions($event)"
+               (ngModelChange)="multiSelect.value = $event"
+               [placeholder]="placeholder">
+
+  <ng-template pTemplate="selectedItems">
+    <span>{{ getSelectedItemsLabel() }}</span>
+  </ng-template>
+
+  <ng-template let-option let-i="index" pTemplate="item">
+    <div class="sidebar-input-full-width"
+         [ngClass]="{ 'group-header-option': !isSubOption(option), 'sub-option': isSubOption(option) }">
+      {{ option.label }}
+    </div>
+  </ng-template>
+
+</p-multiSelect>
