@@ -6,23 +6,62 @@ See also [OpenStreetMap uMap](https://wiki.openstreetmap.org/wiki/UMap)
 
 ## Setup
 
-1. Set up a mySQL database on your server. Current DB name of the database is
-   `reaper93_associations`. Can be renamed.
-2. Create user and grant permissions to database. Current user name is
-   `reaper93`. Can be renamed.
-3. Now, import the `.sql` file from the `map/database/db-export/` folder to your
-   database. This will automatically create all necessary tables with some
-   contents.
-
 Depending on your MySQL environment, you can do this using the
 [phpMyAdmin](https://www.phpmyadmin.net/) GUI interface or via the command line.
-In phpMyAdmin, you just click on the newly created database and select `Import`
-from the top menu. Then you can upload the `.sql` file to your database.
 
-3. In the `map/database/api` folder open `database.php`. Edit user name,
-   database name and password according to your changes in (1.), (2.) and (3.).
-4. Upload the `map/api` folder to a directory on your server.
-5. Open the `map/app` folder. In `map/app/src/environments/` open
+### From command line:
+
+1. Install MySQL and make sure it's running. On Ubuntu:
+   ```bash
+   sudo apt install mysql-server
+   systemctl status mysql.service
+   ```
+
+2. Set up a MySQL database on your server. Current DB name of the database is
+   `reaper93_associations`. Can be renamed.
+   ```mysql
+   DROP DATABASE IF EXISTS reaper93_associations;
+   CREATE DATABASE IF NOT EXISTS reaper93_associations;
+   ```
+
+3. Create user and grant permissions to database. Current user name is
+   `reaper93`. Can be renamed.
+   ```mysql
+   CREATE USER 'reaper93'@'localhost' IDENTIFIED BY ''; -- TODO clarify password
+   GRANT ALL PRIVILEGES ON reaper93_associations.* TO 'reaper93'@'localhost' WITH GRANT OPTION;
+   exit
+   ```
+
+4. Now, import the `.sql` file from the `map/database/db-export/` folder to your
+   database. This will automatically create all necessary tables with some
+   contents.
+   ```bash
+   mysql -ureaper93 --table reaper93_associations < map/database/db-export/reaper93_associations.sql
+   ```
+
+5. Verify the import. Login to the dbase:
+   ```bash
+   mysql -ureaper93 reaper93_associations
+   ```
+   Now in MySQL:
+   ```mysql
+   SHOW TABLES;
+   SHOW COLUMNS IN associations;
+   SHOW COLUMNS IN contacts;
+   SHOW COLUMNS IN images;
+   SHOW COLUMNS IN links;
+   SHOW COLUMNS IN socialmedia;
+   ```
+
+### Using [phpMyAdmin](https://www.phpmyadmin.net/) GUI interface:
+Click on the newly created database and select `Import` from the top menu. Then
+you can upload the `.sql` file to your database.
+
+1. In the `map/database/api` folder open `database.php`. Edit user name,
+   database name and password according to (1.), (2.) and (3.) from the previous
+   section.
+2. Upload the `map/api` folder to a directory on your server.
+3. Open the `map/app` folder. In `map/app/src/environments/` open
    `environments.prod.ts`. You will find the following:
 
 ```typescript
