@@ -348,11 +348,100 @@ app-simple-map-with-single-marker .ol-overlay-container.ol-selectable {
   color: rgb(247, 185, 42);
 }
 
-p-confirmDialog .p-dialog-header {
-  text-align: right;
-  justify-content: flex-end;
-}
-
 p-confirmDialog .p-dialog-content .p-confirm-dialog-message {
   margin: 0 !important;
+}
+
+.form-container {
+  margin: auto;
+  max-width: 768px;
+  padding: 20px;
+}
+
+.p-field {
+  margin-top: 16px;
+}
+
+.half-width-form-left, .half-width-form-right, .quarter-width-form-right, .third-width-form-right, .sixth-width-form-right {
+  display: inline-block;
+
+  .invalid-label, .hint {
+    margin-top: -6px;
+  }
+}
+
+.half-width-form-left {
+  width: 50%;
+  padding-right: 12px;
+}
+
+.half-width-form-right {
+  width: 50%;
+  padding-left: 12px;
+}
+
+.third-width-form-right, .sixth-width-form-right {
+  padding-left: 12px;
+
+  p-button {
+    margin-right: 6px;
+
+    .p-button {
+      position: relative;
+      top: 7px;
+      width: 51px;
+    }
+  }
+
+  .third-width-form-right {
+    width: 33%;
+  }
+
+  .sixth-width-form-right {
+    width: 16%;
+  }
+}
+
+fieldset, div.fieldset {
+  border: rgb(206, 212, 218) 1px solid;
+  border-radius: 3px;
+  margin-bottom: 24px;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.form-array-add, .form-array-remove {
+  margin-top: 12px;
+  text-align: center;
+  width: 100%;
+}
+
+.form-array-remove, .form-array-add {
+  p-button ::ng-deep .p-button-label {
+    display: none;
+  }
+}
+
+.submit, .reset {
+  ::ng-deep button.p-button {
+    margin-left: 6px !important;
+  }
+}
+
+.red {
+  color: #F74600;
+}
+
+.hint {
+  font-size: 75%;
+  color: rgb(247, 185, 42);
+}
+
+.invalid-label {
+  color: #F74600;
+  font-size: 75%;
+}
+
+.invalid-fieldset {
+  border-color: #F74600;
 }

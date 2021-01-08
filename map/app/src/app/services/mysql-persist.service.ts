@@ -25,6 +25,16 @@ export class MysqlPersistService {
       .pipe(catchError(this.handleError));
   }
 
+  createActivityOptions(postdata: any): Observable<HttpResponse<any>> {
+    return this.httpClient.post<HttpResponse<any>>(`${this.PHP_API_SERVER_PATH}/activities-options/create-activity-options.php`, postdata)
+      .pipe(catchError(this.handleError));
+  }
+
+  createDistrictOptions(postdata: any): Observable<HttpResponse<any>> {
+    return this.httpClient.post<HttpResponse<any>>(`${this.PHP_API_SERVER_PATH}/districts-options/create-district-options.php`, postdata)
+      .pipe(catchError(this.handleError));
+  }
+
   private handleError(error: HttpErrorResponse): Observable<never> {
     if (error.error instanceof ErrorEvent) {
       // A client-side or network error occurred. Handle it accordingly.
