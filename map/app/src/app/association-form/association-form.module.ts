@@ -12,10 +12,11 @@ import {BlockUIModule} from 'primeng/blockui';
 import {ProgressSpinnerModule} from 'primeng/progressspinner';
 import {SidebarModule} from 'primeng/sidebar';
 import {ConfirmDialogModule} from 'primeng/confirmdialog';
+import { OptionsEditFormComponent } from './options-edit-form/options-edit-form.component';
 
 
 @NgModule({
-  declarations: [AssociationFormComponent, AssociationEditFormComponent],
+  declarations: [AssociationFormComponent, AssociationEditFormComponent, OptionsEditFormComponent],
   imports: [
     CommonModule,
     FormsModule,

@@ -92,6 +92,9 @@ build an app, see here: [Angular Docs](https://angular.io/guide/setup-local)
 10. The edit form can be used at
     `http(s)://[YOUR_SERVER]/[PATH_TO_CHOSEN_LOCATION]/AssociationMap/form`.
 
+11. The edit forms for the dropdown options can be used at
+    `http(s)://[YOUR_SERVER]/[PATH_TO_CHOSEN_LOCATION]/AssociationMap/options-form`.
+
 # Data conversion ods -> json
 
 ## Usage

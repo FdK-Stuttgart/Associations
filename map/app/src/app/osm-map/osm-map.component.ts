@@ -9,8 +9,6 @@ import {Overlay} from 'ol';
 import OverlayPositioning from 'ol/OverlayPositioning';
 import {Coordinate} from 'ol/coordinate';
 import BaseEvent from 'ol/events/Event';
-import DistrictOptions from '../model/dropdown-option-data/district-options.json';
-import ActivitiesOptions from '../model/dropdown-option-data/activities-options.json';
 import {ResizeObserver} from 'resize-observer';
 import {Size} from 'ol/size';
 import {DropdownOption, getSubOptions} from '../model/dropdown-option';
@@ -34,8 +32,8 @@ export class OsmMapComponent implements OnInit, OnDestroy {
   blocked = true;
 
   advancedSearchVisible = false;
-  districtOptions: DropdownOption[] = DistrictOptions;
-  activitiesOptions: DropdownOption[] = ActivitiesOptions;
+  districtOptions: DropdownOption[] = [];
+  activitiesOptions: DropdownOption[] = [];
   selectedDistricts: number[] = [];
   selectedActivities: number[] = [];
 
@@ -72,6 +70,9 @@ export class OsmMapComponent implements OnInit, OnDestroy {
         return a.name.toLowerCase() > b.name.toLowerCase() ? 1 : (a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 0);
       }
     ) : [];
+
+    this.districtOptions = (await this.mySqlQueryService.getDistrictOptions())?.data || [];
+    this.activitiesOptions = (await this.mySqlQueryService.getActivitiesOptions())?.data || [];
 
     if (!this.associations?.length) {
       this.messageService.add({

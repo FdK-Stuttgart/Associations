@@ -2,8 +2,6 @@ import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '
 import {SocialMediaPlatform, Association} from '../../model/association';
 import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import {DropdownOption} from '../../model/dropdown-option';
-import DistrictOptions from '../../model/dropdown-option-data/district-options.json';
-import ActivitiesOptions from '../../model/dropdown-option-data/activities-options.json';
 import {v4 as uuidv4} from 'uuid';
 import {MysqlPersistService} from '../../services/mysql-persist.service';
 import {ConfirmationService, MessageService} from 'primeng/api';
@@ -79,8 +77,8 @@ export class AssociationEditFormComponent implements OnChanges {
   // @ts-ignore
   activityForm: FormGroup;
 
-  districtOptions: DropdownOption[] = DistrictOptions;
-  activitiesOptions: DropdownOption[] = ActivitiesOptions;
+  districtOptions: DropdownOption[] = [];
+  activitiesOptions: DropdownOption[] = [];
 
   readonly textBlockOptions = [
     {
@@ -128,6 +126,10 @@ export class AssociationEditFormComponent implements OnChanges {
    */
   private async initForm(): Promise<void> {
     this.blocked = true;
+
+    this.districtOptions = (await this.mySqlQueryService.getDistrictOptions())?.data || [];
+    this.activitiesOptions = (await this.mySqlQueryService.getActivitiesOptions())?.data || [];
+
     if (!this.isNew) {
       const httpResponse: MyHttpResponse<Association[]> = (await this.mySqlQueryService.getAssociations());
       this.associations = httpResponse?.data?.sort(
@@ -387,17 +389,23 @@ export class AssociationEditFormComponent implements OnChanges {
    * resets the form's value and queries the association's data from the database
    * @param id the selected association's id
    */
-  reset(id: string): void {
-    this.confirmationService.confirm({
-      message: 'Möchten Sie Ihre Änderungen am Verein wirklich zurücksetzen?',
-      acceptLabel: 'OK',
-      rejectLabel: 'Abbrechen',
-      closeOnEscape: true,
-      accept: async () => {
-        this.selectedAssociationId = id;
-        await this.initForm();
-      }
-    });
+  async reset(id: string): Promise<void> {
+    if (this.associationForm.dirty) {
+      this.confirmationService.confirm({
+        header: 'Änderungen zurücksetzen?',
+        message: 'Möchten Sie Ihre Änderungen am Verein wirklich zurücksetzen?',
+        acceptLabel: 'OK',
+        rejectLabel: 'Abbrechen',
+        closeOnEscape: true,
+        accept: async () => {
+          this.selectedAssociationId = id;
+          await this.initForm();
+        }
+      });
+    } else {
+      this.selectedAssociationId = id;
+      await this.initForm();
+    }
   }
 
   /**
@@ -433,6 +441,7 @@ export class AssociationEditFormComponent implements OnChanges {
    */
   deleteAssociation(id: string): void {
     this.confirmationService.confirm({
+      header: 'Löschen?',
       message: 'Möchten Sie den ausgewählten Verein wirklich löschen?',
       acceptLabel: 'OK',
       rejectLabel: 'Abbrechen',

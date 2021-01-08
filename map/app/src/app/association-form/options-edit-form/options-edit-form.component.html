@@ -1,0 +1,129 @@
+<p-blockUI [blocked]="blocked">
+  <p-progressSpinner></p-progressSpinner>
+  <div class="block-ui-text">{{ loadingText }}</div>
+</p-blockUI>
+
+<p-confirmDialog [baseZIndex]="10000"></p-confirmDialog>
+
+<div class="form-container" *ngIf="options?.length">
+  <h1>Optionstyp auswählen</h1>
+  <div class="full-width" style="margin-bottom: 32px">
+    <div class="half-width">
+      <a (click)="reset('activities')">Tätigkeitsfelder</a>
+    </div>
+    <div class="half-width">
+      <a (click)="reset('districts')">Aktivitätsgebiete</a>
+    </div>
+  </div>
+
+  <h1>{{ optionType === 'activities' ? 'Tätigkeitsfelder-' : optionType === 'districts' ? 'Aktivitätsgebiete-' : '' }}Optionen bearbeiten</h1>
+
+  <fieldset class="button-row">
+    <p-button (onClick)="submit()" [disabled]="!optionsForm.valid">
+      <i class="pi pi-save"></i>&nbsp;&nbsp;Speichern
+    </p-button>
+    <span class="delete-button">
+      <p-button (onClick)="reset()">
+        <i class="pi pi-backward"></i>&nbsp;&nbsp;Reset
+      </p-button>
+    </span>
+  </fieldset>
+
+  <form [formGroup]="optionsForm">
+    <div class="full-width"
+         *ngIf="getFormGroupsFromFormArray(optionsForm.controls.options)"
+         formArrayName="options">
+      <div class="form-row"
+           *ngFor="let optionForm of getFormGroupsFromFormArray(optionsForm.controls.options); index as i"
+           [formGroup]="optionForm"
+           [ngClass]="{ 'invalid-fieldset': !getFormArrayFormGroup('options', i)?.valid,
+                     'added': i === addedIndex }">
+        <h2 *ngIf="getFormArrayFormGroup('options', i)?.controls?.value?.value % 100 === 0"
+            style="padding-top: 24px;">
+          {{ getFormArrayFormGroup('options', i)?.controls?.label?.value || 'Unbetitelte Kategorie' }}
+        </h2>
+        <div class="p-fluid p-formgrid p-grid">
+          <div class="p-field half-width-form-left">
+            <label for="contact-{{i}}-label-input">Optionsname*</label>
+            <input pInputText
+                   id="contact-{{i}}-label-input"
+                   type="text"
+                   class="label-input"
+                   [formControl]="optionForm.controls.label"
+                   placeholder="Optionsname*"/>
+          </div>
+          <div class="p-field third-width-form-right">
+            <label for="contact-{{i}}-value-input">Wert*</label>
+            <input pInputText
+                   id="contact-{{i}}-value-input"
+                   type="number"
+                   [formControl]="optionForm.controls.value"
+                   placeholder="Wert*"/>
+          </div>
+          <div class="p-field sixth-width-form-right">
+            <span class="delete-button">
+              <p-button (onClick)="remove(optionsForm.controls.options, i)"
+                        [disabled]="hasSubOptions(getFormArrayFormGroup('options', i)?.controls?.value?.value)">
+                <i class="pi pi-trash"></i>
+              </p-button>
+            </span>
+          </div>
+        </div>
+        <div class="p-field half-width-form-left">
+          <p class="invalid-label"
+             *ngIf="errorHandlingForFormArray('options', i, 'label', 'required')">
+            Ein Optionsname muss angegeben werden.
+          </p>
+        </div>
+        <div class="p-field half-width-form-right">
+          <p class="invalid-label"
+             *ngIf="errorHandlingForFormArray('options', i, 'value', 'required')">
+            Ein Wert muss angegeben werden.
+          </p>
+        </div>
+        <p class="hint"
+           style="margin-top: 0;"
+           *ngIf="getFormArrayFormGroup('options', i)?.controls?.value?.value !== getFormArrayFormGroup('options', i)?.controls?._oldValue?.value">
+          Ändern Sie den Wert einer Option möglichst nur dann, wenn Sie sicher sind, dass diese Option noch keinem Verein zugeordnet wurde!
+        </p>
+
+        <div *ngIf="isLastSubcategory(getFormArrayFormGroup('options', i)?.controls?.value?.value)"
+             style="margin-top: 12px;">
+          <div class="form-array-add">
+            <p-button
+              [disabled]="!getNextAvailableSubOptionValue(getFormArrayFormGroup('options', i)?.controls?.value?.value)"
+              (onClick)="addOption(getNextAvailableSubOptionValue(getFormArrayFormGroup('options', i)?.controls?.value?.value))">
+              <i class="pi pi-plus"></i>&nbsp;&nbsp;Option hinzufügen
+            </p-button>
+          </div>
+        </div>
+      </div>
+      <hr>
+      <div class="form-array-add">
+        <p-button (onClick)="addUpperCategory()">
+          <i class="pi pi-plus"></i>&nbsp;&nbsp;Übergeordnete Kategorie einfügen
+        </p-button>
+      </div>
+
+      <div class="full-width">
+        <p class="invalid-label" *ngIf="duplicateValues?.length">Es wurden doppelte Werte vergeben: {{ duplicateValues?.join(', ') }}.
+          Bitte vergeben Sie eindeutige Werte für jede Option!
+        </p>
+        <p class="invalid-label" *ngIf="doAllOptionsHaveAnUpperCategory?.length">Einige Optionen wurden keiner übergeordneten Kategorie zugeordnet.
+          Bitte fügen Sie übergeordnete Kategorien mit folgenden Werten hinzu: {{ doAllOptionsHaveAnUpperCategory?.join(', ') }}.
+        </p>
+      </div>
+
+      <fieldset class="button-row">
+        <p-button (onClick)="submit()" [disabled]="!optionsForm.valid || !!duplicateValues?.length || !!doAllOptionsHaveAnUpperCategory?.length">
+          <i class="pi pi-save"></i>&nbsp;&nbsp;Speichern
+        </p-button>
+        <span class="delete-button">
+          <p-button (onClick)="reinitForm()">
+            <i class="pi pi-backward"></i>&nbsp;&nbsp;Reset
+          </p-button>
+        </span>
+      </fieldset>
+    </div>
+  </form>
+</div>
