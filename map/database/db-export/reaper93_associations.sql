@@ -2,10 +2,10 @@
 -- version 5.0.4
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1:60109
--- Erstellungszeit: 03. Jan 2021 um 17:32
--- Server-Version: 10.3.24-MariaDB
--- PHP-Version: 7.4.11
+-- Host: 127.0.0.1
+-- Erstellungszeit: 08. Jan 2021 um 12:07
+-- Server-Version: 10.4.17-MariaDB
+-- PHP-Version: 8.0.0
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -20,6 +20,120 @@ SET time_zone = "+00:00";
 --
 -- Datenbank: `reaper93_associations`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Tabellenstruktur für Tabelle `activities_options`
+--
+
+CREATE TABLE `activities_options` (
+  `label` varchar(512) NOT NULL,
+  `value` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Daten für Tabelle `activities_options`
+--
+
+INSERT INTO `activities_options` (`label`, `value`) VALUES
+('Bildung', 100),
+('Sprachunterricht', 101),
+('Muttersprachlicher Unterricht', 102),
+('Nachhilfe', 103),
+('Hausaufgabenbetreuung', 104),
+('Workshops', 105),
+('Instrumentalunterricht', 106),
+('Musikunterricht', 107),
+('Übersetzungs- und Dolmetscherdienst', 108),
+('Interessenkurse', 109),
+('MINT', 110),
+('Hörbuch', 111),
+('Bücher', 112),
+('Politik', 113),
+('Kulturwissenschaften', 114),
+('Gesellschaftliches', 115),
+('UNESCO', 116),
+('Kultur und Kunst', 200),
+('Literaturveranstaltung', 201),
+('Lesung', 202),
+('Konferenz', 203),
+('Poesie', 204),
+('Sprach- und Kulturreisen', 205),
+('Kunst', 206),
+('Feste', 207),
+('Festivals', 208),
+('Feiern', 209),
+('Podiumsgespräch', 210),
+('Filmvorführung', 211),
+('Theaterveranstaltung', 212),
+('Theater', 213),
+('Stammtisch', 214),
+('Kinofestival', 215),
+('Konzerte', 216),
+('Konzertreihen', 217),
+('Kunstmarkt', 218),
+('Kunstführungen', 219),
+('Workshops', 220),
+('Soziales und Gesundheit', 300),
+('Arbeit mit Senior*innen', 301),
+('Menschen mit Behinderung', 302),
+('Hilfsprojekte', 303),
+('Notversorgung', 304),
+('Verteilung von Lebensmitteln', 305),
+('Entwicklung und Zusammenarbeit', 400),
+('Integrationshilfe', 401),
+('Freiwilligendienst', 402),
+('Spenden für Projektunterstützung', 403),
+('Patenschaften', 404),
+('Engagement für Geflüchtete', 500),
+('Zusammenarbeit mit Asylbewerber*innen', 501),
+('Zusammenarbeit mit Geflüchteten', 502),
+('Gastronomie', 600),
+('Essen', 601),
+('Traditionelles Essen', 602),
+('Catering', 603),
+('Fingerfood', 604),
+('Kochkurs', 605),
+('Sport', 700),
+('Fußball', 701),
+('Basketball', 702),
+('Tanz', 703),
+('Traditioneller Tanz', 704),
+('Dance', 705),
+('Jazzdance', 706),
+('Flamenco', 707),
+('Tanzkurse', 708),
+('Yoga', 709),
+('Fitness', 710),
+('Capoeira', 711),
+('Öffentliche Sportveranstaltung', 712),
+('Trainings', 713),
+('Musik', 800),
+('Chor-Gesang', 801),
+('Trommeln', 802),
+('Öffentliche Musikveranstaltung', 803),
+('Musik-Konzert', 804),
+('Konzerte', 805),
+('Konzertreihen', 806),
+('Musikwerkstatt', 807),
+('Musikunterricht', 808),
+('Instrumentalunterricht', 809),
+('Klassisch', 810),
+('Jazz', 811),
+('Latin Jazz', 812),
+('Kinder', 813),
+('Jugendliche', 814),
+('Viertel', 815),
+('Stadtteil', 816),
+('Podcast', 900),
+('Radio', 901),
+('YouTube', 902),
+('Beratung', 1000),
+('Telefonberatung', 1001),
+('Hotline', 1002),
+('Sofortberatung', 1003),
+('Veranstaltungsplanung', 1004);
 
 -- --------------------------------------------------------
 
@@ -60,7 +174,7 @@ INSERT INTO `associations` (`id`, `name`, `lat`, `lng`, `addressLine1`, `address
 ('b90d8590-8068-462b-ae25-e9ec55f5e8c8', 'Internationales Forum für Wissenschaft, Bildung und Kultur e. V.', 48.808946920396, 9.229779374039, '', '', '', '', '', 'Stuttgart Bad-Cannstatt', 'Deutschland', 'plain', 'Popularisierung und Förderung der Wissenschaft, Bildung, Kunst und Kultur für alle Generationen, insbesondere für Kinder und Jugendliche auf regionaler, nationaler und internationaler Ebene. Der Verein bleibt bei der Verfolgung dieser Ziele politisch und konfessionell neutral.', 'plain', 'Bildung (MINT Projekt), Kultur und Kunst (Klassische Konzerte für Kinder und Jugendliche).', '[105,109,203,205,208,216,217,803,804,805,806,810,813,814,815,816,110]', '[101]'),
 ('bb6cbae9-5ad6-4d08-be2a-e2b0bd9791dd', 'COEXIST e. V.', 48.812831880518, 9.1587699981507, '', '', '', 'Kärntner Straße 40A', '70469', 'Stuttgart', 'Deutschland', 'plain', 'Der Verein Coexist hat den Anspruch bei gesamtgesellschaftlichen Diskursen mitzuwirken und bietet Menschen ein Sprachrohr.', 'plain', 'Bildung (Empowerment-Angebote, Workshops zum Thema \"Frauenrechte\", Aufklärung).', '[105,109]', '[106]'),
 ('eee41f26-5e5d-4b40-a5f4-f6c3272fd9bc', 'Latin Jazz Initiative', 48.77456828469, 9.1671889693137, '', '', '', 'Gutenbergstraße 3B', '70176', 'Stuttgart', 'Deutschland', 'plain', 'Die Latin Jazz Initiative entstand aus dem Bedürfnis neue Wege zu suchen, um das Jazz Publikum (nicht nur das Latin Jazz Publikum) auf diese wunderbare Musik aufmerksam zu machen. Durch Jazz entsteht Kommunikation unabhängig von Herkunft, Glauben oder anderen «Hindernissen», die in vielen anderen Bereichen das Zusammensein schwieriger machen.', 'plain', 'Beratung (Veranstaltungsplanung), Kunst und Kultur (Organisation und Durchführung von Festivals, Konzerte, Konzertreihen, Workshops, Jazz Open Stage, UNESCO-International Jazzday, UNESCO-International Danceday, United Jazz Ensemble, Musik im Viertel (Konzerte in kleinen Geschäften in verschiedenen Stadtteilen)), Bildung (Musikunterricht, Jazz-Workshops, Latin Jazz, Jazzdance und Latin Jazzdance, ein lebendiges Hörbuch, in dem der Autor seine eigenen Bücher liest und die Lesung musikalisch mit Stücken umrahmt, die extra hierfür komponiert werden).', '[111,116,208,802,804,805,806,808,812,815,816,1004]', '[101,105]'),
-('fef60c29-29db-4cd3-81d1-289d09400160', 'Africa Workshop Organisation e. V.', 48.772345034833, 9.1746099980449, '', '', '', 'Tübinger Straße 15', '70178', 'Stuttgart', 'Deutschland', 'plain', 'Bekanntmachung der afrikanischen Kultur, Unterstützung bei der Integration in die Stuttgarter Gesellschaft. Der Verein ist als humanitäre Selbsthilfegruppe und Völkerverständigungsverein seit 1988 in der Region Stuttgart aktiv.', 'plain', 'Bildung (Zielgruppe Kinder, Jugendliche, Eltern und Erwachsene), Soziales und Gesundheit (Arbeit mit Senior*innen, Menschen mit Behinderung), Entwicklung und Zusammenarbeit (Integrationshilfe), Engagement für Geflüchtete (Zusammenarbeit mit Geflüchteten).', '[401,105,115,205,206,207,220,403,402,404,501,502]', '[100,101,102,103,104,105,106,110,124,121,120,116,109]');
+('fef60c29-29db-4cd3-81d1-289d09400160', 'Africa Workshop Organisation e. V.', 48.772345034833, 9.1746099980449, '', '', '', 'Tübinger Straße 15', '70178', 'Stuttgart', 'Deutschland', 'plain', 'Bekanntmachung der afrikanischen Kultur, Unterstützung bei der Integration in die Stuttgarter Gesellschaft. Der Verein ist als humanitäre Selbsthilfegruppe und Völkerverständigungsverein seit 1988 in der Region Stuttgart aktiv.', 'plain', 'Bildung (Zielgruppe Kinder, Jugendliche, Eltern und Erwachsene), Soziales und Gesundheit (Arbeit mit Senior*innen, Menschen mit Behinderung), Entwicklung und Zusammenarbeit (Integrationshilfe), Engagement für Geflüchtete (Zusammenarbeit mit Geflüchteten).', '[401,105,115,205,206,207,220,403,402,404,501,502]', '[100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124]');
 
 -- --------------------------------------------------------
 
@@ -85,11 +199,63 @@ INSERT INTO `contacts` (`id`, `name`, `phone`, `mail`, `associationId`, `orderIn
 ('0cf6722d-4b4e-4d69-b52f-35b64096c7eb', '', '0179/5010311', 'post@latin-jazz-initiative.de', 'eee41f26-5e5d-4b40-a5f4-f6c3272fd9bc', 0),
 ('20208bac-48bb-448f-9bcd-33105dce0cd0', '', '0172/8578716', 'info@abada-capoeira.eu', '195c1cfc-2e0a-4842-8700-d2f716e43ae0', 0),
 ('32d4c59a-6d1c-4408-a76d-9ebf3bd281fd', '', '', '', '59f81c29-5f86-47ec-8a8a-322d53ae14ff', 0),
-('3d3460fd-f86b-46f3-8dfa-97c585c76548', 'Aylish Kerrigan', '0711/640 74 82', 'aylishk@aol.com', '70a5f5f0-8a8f-485c-9f76-f68484aadd75', 0),
+('3d3460fd-f86b-46f3-8dfa-97c585c76548', '', '0711/640 74 82', 'aylishk@aol.com', '70a5f5f0-8a8f-485c-9f76-f68484aadd75', 0),
 ('5bc8cd30-dea7-443d-ae14-a36b4c234e36', '', '0163/650 86 04', 'G.koeksal@gmx.de', '7b99b747-5a41-430e-8109-9ed96525cef7', 0),
 ('b829a6f2-847f-4df1-855c-e4c49a3c7214', '', '', 'coexist@t-online.de', 'bb6cbae9-5ad6-4d08-be2a-e2b0bd9791dd', 0),
 ('e840cc66-a1c3-4d0d-bb41-10d4a7a3816a', '', '0173/1912555', 'info@forum-wbk.de', 'b90d8590-8068-462b-ae25-e9ec55f5e8c8', 0),
 ('ece3d675-f0c9-41c5-9333-198aa23ffa4b', '', '07192/200 82', '2009ggsa@gmail.com', 'fef60c29-29db-4cd3-81d1-289d09400160', 0);
+
+-- --------------------------------------------------------
+
+--
+-- Tabellenstruktur für Tabelle `districts_options`
+--
+
+CREATE TABLE `districts_options` (
+  `label` varchar(512) NOT NULL,
+  `value` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Daten für Tabelle `districts_options`
+--
+
+INSERT INTO `districts_options` (`label`, `value`) VALUES
+('Stadt Stuttgart', 100),
+('Stuttgart-Mitte', 101),
+('Stuttgart-Nord', 102),
+('Stuttgart-Ost', 103),
+('Stuttgart-Süd', 104),
+('Stuttgart-West', 105),
+('Stuttgart-Bad-Cannstatt', 106),
+('Stuttgart-Birkach', 107),
+('Stuttgart-Botnang', 108),
+('Stuttgart-Degerloch', 109),
+('Stuttgart-Feuerbach', 110),
+('Stuttgart-Hedelfingen', 111),
+('Stuttgart-Möhringen', 112),
+('Stuttgart-Mühlhausen', 113),
+('Stuttgart-Münster', 114),
+('Stuttgart-Obertürkheim', 115),
+('Stuttgart-Plieningen', 116),
+('Stuttgart-Sillenbuch', 117),
+('Stuttgart-Stammheim', 118),
+('Stuttgart-Untertürkheim', 119),
+('Stuttgart-Vaihingen', 120),
+('Stuttgart-Wangen', 121),
+('Stuttgart-Weilimdorf', 122),
+('Stuttgart-Zazenhausen', 123),
+('Stuttgart-Zuffenhausen', 124),
+('Region Stuttgart', 300),
+('Esslingen', 301),
+('Fellbach', 302),
+('Waiblingen', 303),
+('Baden-Württemberg', 900),
+('Stuttgart und Region', 901),
+('Landesweit', 902),
+('International', 1000),
+('Türkei', 1001),
+('Russland', 1002);
 
 -- --------------------------------------------------------
 
@@ -136,7 +302,7 @@ CREATE TABLE `links` (
 --
 
 INSERT INTO `links` (`id`, `url`, `linkText`, `associationId`, `orderIndex`) VALUES
-('018ceb70-a7ae-42da-98c3-3d4d4786fc53', 'http://www.africa-workshop.de', 'www.africa-workshop.de', 'fef60c29-29db-4cd3-81d1-289d09400160', 1),
+('018ceb70-a7ae-42da-98c3-3d4d4786fc53', 'http://www.africa-workshop.de', 'Africa-workshop.de', 'fef60c29-29db-4cd3-81d1-289d09400160', 1),
 ('1e2afacc-9535-4f1a-8d2e-50e38d65d685', 'https://www.forum-wbk.de', 'Internationales Forum für Wissenschaft, Bildung und Kultur e.V.', 'b90d8590-8068-462b-ae25-e9ec55f5e8c8', 0),
 ('20fd455b-21b1-44de-ab55-add33b939978', 'https://www.latin-jazz-initiative.de', 'Latin Jazz Initiative', 'eee41f26-5e5d-4b40-a5f4-f6c3272fd9bc', 0),
 ('21bac2e2-095d-482b-8d6a-d849240523f4', 'https://www.sprachedermusik.de', 'Die Sprache der Musik', 'b90d8590-8068-462b-ae25-e9ec55f5e8c8', 1),
@@ -145,7 +311,7 @@ INSERT INTO `links` (`id`, `url`, `linkText`, `associationId`, `orderIndex`) VAL
 ('8bd03d7f-61f8-4ed0-b2c4-6a6134335953', 'http://www.coexistev.de', 'coexistev.de', 'bb6cbae9-5ad6-4d08-be2a-e2b0bd9791dd', 0),
 ('8d1a75e5-8e4f-4937-8cf4-69fdc963cd92', 'https://sprachedermusik.de/musik-ohne-grenzen', '\"Musik ohne Grenzen\" (Festival)', 'b90d8590-8068-462b-ae25-e9ec55f5e8c8', 2),
 ('a88f020f-b3b3-4907-a9bd-590077b86860', 'https://www.cydd-bw.de', 'cydd-bw.de', '00de259f-254a-491f-8555-1ed658c6a85b', 0),
-('fb4236d7-6026-4b82-b4ce-cb7bbb637576', 'http://www.afrikaworkshop.de', 'www.afrikaworkshop.de', 'fef60c29-29db-4cd3-81d1-289d09400160', 0),
+('fb4236d7-6026-4b82-b4ce-cb7bbb637576', 'http://www.afrikaworkshop.de', 'Afrikaworkshop.de', 'fef60c29-29db-4cd3-81d1-289d09400160', 0),
 ('fcc2e530-cbf4-4bf1-8011-295f21891636', 'https://www.afrikafestival-stuttgart.de', 'Afrikafestival Stuttgart', '59f81c29-5f86-47ec-8a8a-322d53ae14ff', 0);
 
 -- --------------------------------------------------------
@@ -169,6 +335,7 @@ CREATE TABLE `socialmedia` (
 
 INSERT INTO `socialmedia` (`id`, `platform`, `url`, `linkText`, `associationId`, `orderIndex`) VALUES
 ('00e3a4ef-9166-40e9-a825-2ac51074a29c', 'Instagram', 'https://www.instagram.com/antoniocuadrosdebejar/', '', 'eee41f26-5e5d-4b40-a5f4-f6c3272fd9bc', 0),
+('20c0ca31-1166-44cb-83b2-f93d2c0f26e1', 'Other', 'www.ggsa.de', '', 'fef60c29-29db-4cd3-81d1-289d09400160', 0),
 ('4ae543f9-301c-47ff-9eee-aaaf815d8fac', 'Facebook', 'https://www.facebook.com/sprachedermusik/', 'Facebook (Die Sprache der Musik)', 'b90d8590-8068-462b-ae25-e9ec55f5e8c8', 1),
 ('51546d2a-15b2-4832-8e04-e0b42401825a', 'Facebook', 'https://www.facebook.com/latinjazzfestival', '', 'eee41f26-5e5d-4b40-a5f4-f6c3272fd9bc', 1),
 ('5534c995-9922-4219-b56a-72e70c3bb8ae', 'Instagram', 'https://www.instagram.com/sprachedermusik/', 'Instagram (Die Sprache der Musik)', 'b90d8590-8068-462b-ae25-e9ec55f5e8c8', 2),
@@ -184,6 +351,12 @@ INSERT INTO `socialmedia` (`id`, `platform`, `url`, `linkText`, `associationId`,
 --
 
 --
+-- Indizes für die Tabelle `activities_options`
+--
+ALTER TABLE `activities_options`
+  ADD PRIMARY KEY (`value`);
+
+--
 -- Indizes für die Tabelle `associations`
 --
 ALTER TABLE `associations`
@@ -195,6 +368,12 @@ ALTER TABLE `associations`
 ALTER TABLE `contacts`
   ADD PRIMARY KEY (`id`),
   ADD KEY `contacts_ibfk_1` (`associationId`);
+
+--
+-- Indizes für die Tabelle `districts_options`
+--
+ALTER TABLE `districts_options`
+  ADD PRIMARY KEY (`value`);
 
 --
 -- Indizes für die Tabelle `images`
