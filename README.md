@@ -46,11 +46,13 @@ Depending on your MySQL environment, you can do this using the
    Now in MySQL:
    ```mysql
    SHOW TABLES;
-   SHOW COLUMNS IN associations;
-   SHOW COLUMNS IN contacts;
-   SHOW COLUMNS IN images;
-   SHOW COLUMNS IN links;
-   SHOW COLUMNS IN socialmedia;
+   SHOW COLUMNS activities_options;
+   SHOW COLUMNS associations;
+   SHOW COLUMNS contacts;
+   SHOW COLUMNS districts_options;
+   SHOW COLUMNS images;
+   SHOW COLUMNS links;
+   SHOW COLUMNS socialmedia;
    ```
 
 ### Using [phpMyAdmin](https://www.phpmyadmin.net/) GUI interface:
