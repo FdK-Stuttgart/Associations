@@ -28,7 +28,7 @@
 (defn sheet0 [fname] (-> (document
                          #_fname) (.getSheetByIndex 0)))
 
-(defn sheet-content [sheet]
+(defn sheet-rows [sheet]
   (drop 1 ;; skip column header
         (
          identity
@@ -66,7 +66,7 @@
     {:idx 2 :address \"...\"})"
   [sheet]
   (->> sheet
-       (sheet-content)
+       (sheet-rows)
        (map (comp
              (fn [a] (cstr/replace a "\n" ", "))
              cleanup
@@ -88,7 +88,7 @@
     {:idx 2 :name \"...\"})"
   [sheet]
   (->> sheet
-       (sheet-content)
+       (sheet-rows)
        (map (comp
              (fn [a] (cstr/replace a "\n" " "))
              cleanup
@@ -110,7 +110,7 @@
     {:idx 2 :city-district \"...\"})"
   [sheet]
   (->> sheet
-       (sheet-content)
+       (sheet-rows)
        (map (comp
              cleanup
              (fn [row] (city-district sheet row))))
@@ -131,7 +131,7 @@
     {:idx 2 :coordinates \"...\"})"
   [sheet]
   (->> sheet
-       (sheet-content)
+       (sheet-rows)
        (map (comp
              cleanup
              (fn [row] (table-coordinates sheet row))))
@@ -152,7 +152,7 @@
     {:idx 2 :contact \"...\"})"
   [sheet]
   (->> sheet
-       (sheet-content)
+       (sheet-rows)
        (map (comp
              cleanup
              (fn [row] (contact sheet row))))
@@ -175,7 +175,7 @@
     {:idx 2 :web-page \"...\"})"
   [sheet]
   (->> sheet
-       (sheet-content)
+       (sheet-rows)
        (map (comp
              (fn [urls]
                #_(println "(cstr/split-lines urls)" (cstr/split-lines urls))
@@ -199,7 +199,7 @@
     {:idx 2 :web-page \"...\"})"
   [sheet]
   (->> sheet
-       (sheet-content)
+       (sheet-rows)
        (map (comp
              cleanup
              (fn [row] (web-page sheet row))))
@@ -227,7 +227,7 @@
     {:idx 2 :goal \"...\"})"
   [sheet]
   (->> sheet
-       (sheet-content)
+       (sheet-rows)
        (map (comp
              cleanup
              (fn [row] (goal sheet row))))
@@ -254,7 +254,7 @@
     {:idx 2 :activity \"...\"})"
   [sheet]
   (->> sheet
-       (sheet-content)
+       (sheet-rows)
        (map (comp
              cleanup
              (fn [row] (activity sheet row))))
