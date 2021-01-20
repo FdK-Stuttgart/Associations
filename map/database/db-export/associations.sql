@@ -1,0 +1,515 @@
+-- phpMyAdmin SQL Dump
+-- version 5.0.4
+-- https://www.phpmyadmin.net/
+--
+-- Host: 127.0.0.1
+-- Erstellungszeit: 20. Jan 2021 um 18:32
+-- Server-Version: 10.4.17-MariaDB
+-- PHP-Version: 8.0.0
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Datenbank: `associations`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Tabellenstruktur für Tabelle `activities_options`
+--
+
+CREATE TABLE `activities_options` (
+  `label` varchar(512) NOT NULL,
+  `value` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Daten für Tabelle `activities_options`
+--
+
+INSERT INTO `activities_options` (`label`, `value`) VALUES
+('Bildung', 100),
+('Sprachunterricht', 101),
+('Muttersprachlicher Unterricht', 102),
+('Nachhilfe', 103),
+('Hausaufgabenbetreuung', 104),
+('Workshops', 105),
+('Instrumentalunterricht', 106),
+('Musikunterricht', 107),
+('Übersetzungs- und Dolmetscherdienst', 108),
+('Interessenkurse', 109),
+('MINT', 110),
+('Hörbuch', 111),
+('Bücher', 112),
+('Politik', 113),
+('Kulturwissenschaften', 114),
+('Gesellschaftliches', 115),
+('UNESCO', 116),
+('Kultur und Kunst', 200),
+('Literaturveranstaltung', 201),
+('Lesung', 202),
+('Konferenz', 203),
+('Poesie', 204),
+('Sprach- und Kulturreisen', 205),
+('Kunst', 206),
+('Feste', 207),
+('Festivals', 208),
+('Feiern', 209),
+('Podiumsgespräch', 210),
+('Filmvorführung', 211),
+('Theaterveranstaltung', 212),
+('Theater', 213),
+('Stammtisch', 214),
+('Kinofestival', 215),
+('Konzerte', 216),
+('Konzertreihen', 217),
+('Kunstmarkt', 218),
+('Kunstführungen', 219),
+('Workshops', 220),
+('Soziales und Gesundheit', 300),
+('Arbeit mit Senior*innen', 301),
+('Menschen mit Behinderung', 302),
+('Hilfsprojekte', 303),
+('Notversorgung', 304),
+('Verteilung von Lebensmitteln', 305),
+('Entwicklung und Zusammenarbeit', 400),
+('Integrationshilfe', 401),
+('Freiwilligendienst', 402),
+('Spenden für Projektunterstützung', 403),
+('Patenschaften', 404),
+('Engagement für Geflüchtete', 500),
+('Zusammenarbeit mit Asylbewerber*innen', 501),
+('Zusammenarbeit mit Geflüchteten', 502),
+('Gastronomie', 600),
+('Essen', 601),
+('Traditionelles Essen', 602),
+('Catering', 603),
+('Fingerfood', 604),
+('Kochkurs', 605),
+('Sport', 700),
+('Fußball', 701),
+('Basketball', 702),
+('Tanz', 703),
+('Traditioneller Tanz', 704),
+('Dance', 705),
+('Jazzdance', 706),
+('Flamenco', 707),
+('Tanzkurse', 708),
+('Yoga', 709),
+('Fitness', 710),
+('Capoeira', 711),
+('Öffentliche Sportveranstaltung', 712),
+('Trainings', 713),
+('Musik', 800),
+('Chor-Gesang', 801),
+('Trommeln', 802),
+('Öffentliche Musikveranstaltung', 803),
+('Musik-Konzert', 804),
+('Konzerte', 805),
+('Konzertreihen', 806),
+('Musikwerkstatt', 807),
+('Musikunterricht', 808),
+('Instrumentalunterricht', 809),
+('Klassisch', 810),
+('Jazz', 811),
+('Latin Jazz', 812),
+('Kinder', 813),
+('Jugendliche', 814),
+('Viertel', 815),
+('Stadtteil', 816),
+('Podcast', 900),
+('Radio', 901),
+('YouTube', 902),
+('Beratung', 1000),
+('Telefonberatung', 1001),
+('Hotline', 1002),
+('Sofortberatung', 1003),
+('Veranstaltungsplanung', 1004);
+
+-- --------------------------------------------------------
+
+--
+-- Tabellenstruktur für Tabelle `associations`
+--
+
+CREATE TABLE `associations` (
+  `id` varchar(36) NOT NULL,
+  `name` varchar(128) NOT NULL,
+  `lat` double NOT NULL,
+  `lng` double NOT NULL,
+  `addressLine1` varchar(128) DEFAULT NULL,
+  `addressLine2` varchar(128) DEFAULT NULL,
+  `addressLine3` varchar(128) DEFAULT NULL,
+  `street` varchar(128) DEFAULT NULL,
+  `postcode` varchar(128) DEFAULT NULL,
+  `city` varchar(128) DEFAULT NULL,
+  `country` varchar(128) DEFAULT NULL,
+  `goals_format` varchar(64) DEFAULT NULL,
+  `goals_text` text DEFAULT NULL,
+  `activities_format` varchar(64) DEFAULT NULL,
+  `activities_text` text DEFAULT NULL,
+  `activityIds` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`activityIds`)),
+  `districtIds` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`districtIds`))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Daten für Tabelle `associations`
+--
+
+INSERT INTO `associations` (`id`, `name`, `lat`, `lng`, `addressLine1`, `addressLine2`, `addressLine3`, `street`, `postcode`, `city`, `country`, `goals_format`, `goals_text`, `activities_format`, `activities_text`, `activityIds`, `districtIds`) VALUES
+('00de259f-254a-491f-8555-1ed658c6a85b', 'Verein zur Förderung der zeitgemäßen Lebensweise Baden-Württemberg e. V.', 48.76449, 9.17463, '', '', '', 'Filderstraße 19', '70180', 'Stuttgart', 'Deutschland', 'plain', '', 'plain', 'Bildung (Stipendien für Studierende in der Türkei, Vorträge), Musik (musikalische Früherziehung).', '[103,106,107,115,800,808]', '[1001,101,104,105]'),
+('030f5468-5e92-4232-aaa6-6780ed1db82c', 'Club Español Stuttgart e. V.', 48.780504677692, 9.1826130578386, 'keine öffentliche Anschrift', '', '', '', '', '', '', 'plain', 'Förderung, Erhalt und Entwicklung der spanischen Kultur und Sprache, traditionelles Brauchtum und das Miteinander von Spaniern, Deutschen und anderen spanischsprachigen Nationalitäten. Förderung von Sport und Internationaler Gesinnung, der Toleranz auf allen Gebieten der Kultur und des Völkerverständigungsgedankens. Unterstützung von hilfsbedürftigen Personen und Hilfsorganisationen.', 'plain', 'Bildung (Seminare, Vorträge, Workshops), Kultur und Kunst (Spanische Kulturtage, Kunst, Film, Theater), Gastronomie (Kochkurse, Stadtfeste), Sport (Fußsballturniere, Tanzkurse, traditioneller Tanz Flamenco)​, Musik (Konzerte).', '[105,220,213,206,211,212,207,209,205,605,703,704,707]', '[901]'),
+('04659eb2-e809-4543-b987-ad491468593b', 'Deutsch-Rumänisches Forum e. V.', 48.777184264012, 9.163700898045, '', '', '', 'Schloßstraße 76', '70176', 'Stuttgart', 'Deutschland', 'plain', 'Orientierung – Akkommodation, zivilgesellschaftliche Inklusion in Stuttgart für rumänische und moldauische Diaspora.', 'plain', 'Bildung (Multiplikator für Stuttgarter Bildung und Workshops), Kultur und Kunst (Kulturveranstaltungen als Treffen der Gemeinde zu diversen Themen und Traditionen Rumäniens), Beratung (Telefon Hotline – kostenlose Sofortberatung).', '[105,206,220,1003,1002]', '[105]'),
+('0991ef8a-2e54-4bb6-a2a9-523f35982a40', 'Asociación Ecuatoriana e. V.', 48.77558, 9.15534, '', '', '', 'Bebelstraße 22', '70193', 'Stuttgart', 'Deutschland', 'plain', 'Das Land Ecuador und seine Kultur der deutschen Bevölkerung näher bringen.', 'plain', 'Entwicklung und Zusammenarbeit (Integrationshilfe, Unterstützung von Ecuadorianer*innen in Deutschland), Gastronomie (traditionelles ecuadorianisches Essen), Sport (Tanz).', '[115,401,602,708,704,402]', '[902]'),
+('195c1cfc-2e0a-4842-8700-d2f716e43ae0', 'ABADÁ Capoeira e. V.', 48.804819846049, 9.2220602878746, '', '', '', '', '', '', '', 'plain', '', 'plain', 'Sport (Tanz-Kampfsport, Sport im Park, Functional Fitness).', '[703,710,713]', '[106]'),
+('19837db4-8b34-44ff-95fb-de5d88545f4d', 'Firkat, klassisch-türkischer Musikverein Stuttgart e. V.', 48.796885316347, 9.1935545980456, '', '', '', 'Mittnachtstraße 18', '70191', 'Stuttgart', 'Deutschland', 'plain', 'Eine Vereinigung und Verbindung zur Förderung der türkischen Kultur.', 'plain', 'Bildung (Noten- und Instrumentenunterricht für Kinder, Jugendliche, Eltern und Erwachsene), Kultur und Kunst (Konzerte), Musik (klassische türkische Musik, Chor-Gesang).', '[106,107,216,804,805,803,801,809,808,815,816,813,814]', '[102]'),
+('38e9abc6-dc51-4270-9568-2185a69ab0eb', 'Capoeira Stuttgart e. V.', 48.828291502175, 9.077781482704, '', '', '', 'Gottfried-Keller-Straße 41', '71254', 'Ditzingen', 'Deutschland', 'plain', 'Gemeinnütziger Sportverein, mit dem Ziel den brasilianischen Nationalsport Capoeira in Stuttgart bekannt zu machen und den Stuttgartern die Gelegenheit zu bieten, diesen zu erlernen.', 'plain', 'Kultur und Kunst (vielfältige kulturelle und karitative Veranstaltungen), Entwicklung und Zusammenarbeit (Integrationshilfe), Engagement für Geflüchtete (Zusammenarbeit mit Geflüchteten: Sport und Musik - Capoeira für Kinder und Erwachsene, Training in Flüchtlingsheimen Bürgerhospital und Mercedesstraße), Sport (regelmäßige Trainings).', '[206,202,401,501,502,711,713,712,802]', '[104,101,106]'),
+('3b10b0c7-dc5a-4d96-9ce4-c23200652a86', 'Deutsch-Türkisches Forum Stuttgart e. V.', 48.773773222107, 9.1755832403735, '', '', '', 'Hirschstraße 36', '70173', 'Stuttgart', 'Deutschland', 'plain', 'Förderung der kulturellen Begegnung, Verständigung und Zusammenarbeit. Mit Bildungsinitiativen und Kulturprogrammen leistet das DTF eigenständige Beiträge zur gesellschaftlichen Teilhabe türkeistämmiger Zuwanderer. Es tritt insbesondere für mehr Chancengleichheit in Bildung, Beruf und Gesellschaft ein. Dabei setzt es vor allem auf vielseitiges bürgerschaftliches Engagement. Das DTF ist partei- und konfessionsunabhängig.', 'plain', 'Bildung (Politik, Gesellschaftliches), Kultur und Kunst (zeitgenössische türkische Kunst und Künstler*innen).', '[113,115,206]', '[901]'),
+('3b72a4a4-024c-4049-ab75-9de2898f3ccd', 'Bolivianisches Kinderhilfswerk e. V.', 48.789164134661, 9.2051675845524, '', '', '', 'Hackstraße 76', '70190', 'Stuttgart', 'Deutschland', 'plain', 'Förderung von Kindern und Jugendlichen in Bolivien. Finanzielle Unterstützung von Bildungsprojekten in Bolivien. Vermittlung von engagierten Jugendlichen über Freiwilligendienste nach Bolivien bzw. Empfang von bolivianischen Freiwilligen in Deutschland.', 'plain', 'Entwicklung und Zusammenarbeit (Freiwilligendienst mit Einsatzland Bolivien, Spenden für Projektunterstützung in Bolivien, Patenschaften).', '[401,403,404,402,400,401,402,403,404]', '[901]'),
+('59f81c29-5f86-47ec-8a8a-322d53ae14ff', 'Afrikafestival Stuttgart e. V.', 48.762560093391, 9.1599946337737, '', '', '', 'Erwin-Schöttle-Platz', '70199', 'Stuttgart', 'Deutschland', 'plain', 'Die Kultur Afrikas den Menschen in Stuttgart und Umgebung näher zu bringen.', 'plain', 'Kultur und Kunst (Kunstmarkt, offene Bühne mit Konzerten und Tanzdarbietungen, Vorträge, Filmvorführungen, Workshops und Theateraufführungen, Deutsch-Afrikanischer Gottesdienst in der Matthäuskirche jährlich am 2. Juliwochenende), Gastronomie (traditionelles Essen), Sport (Tanz).', '[206,207,208,209,804,703,704,217,216,115,105,201,213,215]', '[104]'),
+('6de56a3e-f5b0-4f06-a77e-bbbd4858f9e9', 'Vietnam Community Stuttgart VCS', 48.710268969709, 9.2028536557142, '', '', '', 'Wollgrasweg 11', '70599', 'Stuttgart', '', 'plain', 'Forum für Vietnamesen und Nichtvietnamesen, Kontakte und kultureller Austausch, Vermittler für deutsche und vietnamesische Organisationen.', 'plain', 'Kultur und Kunst (Vorträge, Veranstaltungen in Deutsch und Vietnamesisch zu Themen Gesundheit, Sprachen, vietnamesische Literatur), Soziales und Gesundheit, Entwicklung und Zusammenarbeit (Integrationshilfe), Musik (traditionelle Musik).', '[205,214,1001]', '[901]'),
+('70a5f5f0-8a8f-485c-9f76-f68484aadd75', 'Akademie für internationalen Kulturaustausch e. V.', 48.768554943196, 9.1798170828064, '', '', '', 'Olgastraße 93B', '70180', 'Stuttgart', 'Deutschland', 'plain', 'Förderung des internationalen Kulturaustauschs durch Veranstaltungen mit Musik, Poesie und bildender Kunst aus verschiedenen Ländern unter Teilnahme interkultureller Künstler.', 'plain', 'Kultur und Kunst (Poesie, bildende Kunst in einer persönlichen, freundlichen Atmosphäre, wobei viel Gewicht auf Kommunikation zwischen Künstlern und Publikum gelegt wird), Musik (klassische und zeitgenössische Musik).', '[204,201,206,810,804,805,806]', '[101]'),
+('767f00c7-3388-4c4a-9d22-fad5c0156e23', 'Deutsch-Albanischer Verein für Kultur, Jugend und Sport „Pavarësia“ e. V.', 48.777298731323, 9.1825549201621, 'keine öffentliche Anschrift', '', '', '', '', '', '', 'plain', 'Förderung der Beziehungen zwischen deutschen und albanischen Bürgern, das Pflegen der albanischen Sprache, Kultur und Tradition, sowie die Förderung der Integration der albanischen Bevölkerung in die deutsche Gesellschaft.', 'plain', 'Bildung (muttersprachlicher Unterricht albanisch), Sport (traditioneller Tanz, albanischer Volkstanz, sportliche Aktivitäten), Kultur und Kunst (Vorträge über deutsche und albanische Literatur und Kunst, Land u. a., Dichterlesungen, Musik- und Tanzabende, Studienfahrten).', '[102,101,202,205,206,207,208,209,201,214,704,703,804,805]', '[104,103,106]'),
+('783ad9fb-1af7-48a2-b9f0-4c52a0167474', 'Baye-Fall e. V. senegalesisch-deutsche Vereinigung', 48.802644911453, 9.1095674557172, '', '', '', 'Kiebitzweg 7', '70499', 'Stuttgart', 'Deutschland', 'plain', 'Förderung von Kunst und Kultur, Förderung der internationalen Gesinnung und des Völkerverständigungsgedankens sowie die Förderung\nder Entwicklungszusammenarbeit.', 'plain', 'Bildung (Übersetzungs- und Dolmetscherdienst, Simultanübersetzungen bei Refugio Stuttgart e. V.), Kultur und Kunst (Kulturveranstaltungen, Teilnahme an Kulturveranstaltungen und Straßenfesten, Reparatur von westafrikanischen Trommeln), Gastronomie (Catering, traditionell senegalesiches Essen), Musik (westafrikanisch, Afrobeat, Reggae, Trommelworkshops).', '[108,207,209,601,603,602,802]', '[102,103,122]'),
+('7b99b747-5a41-430e-8109-9ed96525cef7', 'ADD Stuttgart – Verein zur Förderung der Ideen Atatürks e. V. Atatürk Düsünce Dernegi Stuttgart', 48.762020962057, 9.1597730404775, '', '', '', 'Möhringerstraße 56', '70199', 'Stuttgart', 'Deutschland', 'plain', '', 'plain', 'Bildung (Nachhilfe für Kinder und Jugendliche in Deutsch, Englisch und Mathematik, Seminare und Kurse für Eltern und Erwachsene im Umgang mit Teenagern und möglichen Problemen, für die Gleichberechtigung und Rechte der Frauen), Kultur und Kunst (Konferenzen mit Gastvorträgen in türkischer Sprache, Veranstaltungen bei türkischen Nationalfeiertagen).', '[101,103,105,109,115,203,206,210]', '[104]'),
+('954bf319-b5bc-4c5f-b4a2-3a6748e0ba7f', 'STELP e. V.', 48.77739265458, 9.1691614762846, '', '', '', 'Johannesstraße 35', '70176', 'Stuttgart', 'Deutschland', 'plain', 'Hilfe für Menschen in Not', 'plain', 'Bildung (Bildungsprojekte), Soziales und Gesundheit (Notversorgung: Verteilung von Lebensmitteln, Verteilung von Kleidung, Häuserbau, Suppenküchen).', '[109,105,115,303,304,305,402,403]', '[105]'),
+('97ac48a4-7218-4cff-a08a-810d971272ca', 'Forum Afrikanum Stuttgart e. V.', 48.762185005681, 9.1600409154624, 'keine öffentliche Anschrift', '', '', '', '', '', '', 'plain', 'Begegnungen schaffen, Austausch, Mitgestaltung des Kulturlebens in Stuttgart. Der Verein ist konfessionell und parteipolitisch neutral.', 'plain', 'Bildung (Vorträge, Workshops), Kultur und Kunst (Konzerte, Ausstellungen, Lesungen, Filme, Projekte).', '[216,217,215,213,207,202,115,105,211,220,804,805]', '[105,104]'),
+('9e425f18-8f1e-4c09-a828-df470bb9ad9b', 'Black Community Foundation Stuttgart', 48.780421943983, 9.1826557898861, 'keine öffentliche Anschrift', '', '', '', '', '', '', 'plain', 'Kampf gegen Rassismus gegen Schwarze, Empowerment der Black Community, Rassismus-Sensibilisierung.', 'plain', 'Bildung (Sensibilisierungs-Workshops und Arbeit gegen Rassismus im Fokus auf Anti-Schwarzen-Rassismus, Empowerment-Workshops zu verschiedenen Themen für die Black Community und PoCs); Beratung (Unterstützung von Blackowned Businesses und schwarzen Künstlern, wie Artists); Kultur und Kunst (Teilnahme an Diskussionsrunden, Aufklärung an Schulen, tägliches Aufklären verschiedener Themen auf unserem IG-Account).', '[109,115,220,1001,1003,210,206]', '[901]'),
+('b19c9166-b97f-45a9-9859-ce72012cb0a9', 'Freunde des Italienischen Kulturinstituts in Stuttgart e. V.', 48.76513531712, 9.1694913980446, '', '', '', 'Kolbstraße 6', '70178', 'Stuttgart', 'Deutschland', 'plain', 'Bekanntmachung der italienischen Kultur und Sprache.', 'plain', 'Bildung (Sprachunterricht, Italienischkurse für alle).', '[101,102,205]', '[104]'),
+('b7909656-0aaf-4e01-929f-a7dd3d9d3193', 'tigre vermelho e. V. Freundeskreis zur Förderung der Kultur Brasiliens', 48.799830620432, 9.4873745520176, '', '', '', 'Schorndorfer Straße 47', '73650', 'Winterbach', 'Deutschland', 'plain', 'Vermittlung brasilianischer Lebensfreude, Spenden an Projekte in Brasilien und Deutschland zum Wohl von Kindern.', 'plain', 'Kultur und Kunst (Karnevalsparty \"Carnaval dos Tigres\" im Römerkastell/Phönixhalle mit Tanzshows, DJs, \"Waiblinger Altstadtfest\" mit Samba-Shows, Partymusik, Cocktails), Gastronomie (Essen), Musik (brasilianische Band).', '[206,207,209,216,601,602,603,804,815,816,812,802]', '[106,303]'),
+('b90d8590-8068-462b-ae25-e9ec55f5e8c8', 'Internationales Forum für Wissenschaft, Bildung und Kultur e. V.', 48.808946920396, 9.229779374039, '', '', '', '', '', 'Stuttgart Bad-Cannstatt', 'Deutschland', 'plain', 'Popularisierung und Förderung der Wissenschaft, Bildung, Kunst und Kultur für alle Generationen, insbesondere für Kinder und Jugendliche auf regionaler, nationaler und internationaler Ebene. Der Verein bleibt bei der Verfolgung dieser Ziele politisch und konfessionell neutral.', 'plain', 'Bildung (MINT Projekt), Kultur und Kunst (Klassische Konzerte für Kinder und Jugendliche).', '[105,109,203,205,208,216,217,803,804,805,806,810,813,814,815,816,110]', '[101]'),
+('bb6cbae9-5ad6-4d08-be2a-e2b0bd9791dd', 'COEXIST e. V.', 48.812831880518, 9.1587699981507, '', '', '', 'Kärntner Straße 40A', '70469', 'Stuttgart', 'Deutschland', 'plain', 'Der Verein Coexist hat den Anspruch bei gesamtgesellschaftlichen Diskursen mitzuwirken und bietet Menschen ein Sprachrohr.', 'plain', 'Bildung (Empowerment-Angebote, Workshops zum Thema \"Frauenrechte\", Aufklärung).', '[105,109]', '[106]'),
+('c4a32813-94db-4931-9088-57ac9b1673bb', 'Forum der Kulturen Stuttgart e. V.', 48.775587476396, 9.177651784552, '', '', '', 'Marktplatz 4', '70173', 'Stuttgart', '', 'plain', 'Dachverband der Migrantenvereine und interkulturellen Einrichtungen\nStuttgarter Interkulturbüro\nMitglied im Bundesverband Netzwerke von Migrantenorganisationen e. V. (NeMO)', 'plain', '', '[115,114,207,209,208,220,303,1001,403]', '[901,902]'),
+('ccaf6bfa-1c4a-43ef-b8bc-e2da7412996a', 'China Kultur-Kreis e. V.', 48.808986293583, 9.2367213557174, '', '', '', 'Prießnitzweg 7', '70374', 'Stuttgart', 'Deutschland', 'plain', 'Vermittlung chinesischer Sprachkenntnisse und chinesischer Kultur, Pflege der chinesisch-deutschen Zusammenarbeit und des Dialogs, sowie Förderung interkultureller Kompetenzen. Der Verein gründete 1997 die „Chinesische Sprachschule Stuttgart“, um die chinesische Kultur und Sprache zu unterrichten. Die Schule ist eine Wochenendschule für die in Deutschland lebenden Kinder chinesischer Abstammung und alle Freunde, die sich für die chinesische Kultur und die chinesische Sprache interessieren.', 'plain', 'Bildung (muttersprachlicher Unterricht chinesisch, Kurse in der traditionellen chinesischen Kultur).', '[102,101,105,205]', '[110]'),
+('eee41f26-5e5d-4b40-a5f4-f6c3272fd9bc', 'Latin Jazz Initiative', 48.77456828469, 9.1671889693137, '', '', '', 'Gutenbergstraße 3B', '70176', 'Stuttgart', 'Deutschland', 'plain', 'Die Latin Jazz Initiative entstand aus dem Bedürfnis neue Wege zu suchen, um das Jazz Publikum (nicht nur das Latin Jazz Publikum) auf diese wunderbare Musik aufmerksam zu machen. Durch Jazz entsteht Kommunikation unabhängig von Herkunft, Glauben oder anderen «Hindernissen», die in vielen anderen Bereichen das Zusammensein schwieriger machen.', 'plain', 'Beratung (Veranstaltungsplanung), Kunst und Kultur (Organisation und Durchführung von Festivals, Konzerte, Konzertreihen, Workshops, Jazz Open Stage, UNESCO-International Jazzday, UNESCO-International Danceday, United Jazz Ensemble, Musik im Viertel (Konzerte in kleinen Geschäften in verschiedenen Stadtteilen)), Bildung (Musikunterricht, Jazz-Workshops, Latin Jazz, Jazzdance und Latin Jazzdance, ein lebendiges Hörbuch, in dem der Autor seine eigenen Bücher liest und die Lesung musikalisch mit Stücken umrahmt, die extra hierfür komponiert werden).', '[111,116,208,802,804,805,806,808,812,815,816,1004]', '[101,105]'),
+('fbc648a0-99da-4404-bc9f-3b13ad648277', 'Förderverein Hero\'s Academy AIC Stuttgart e. V.', 48.777637357309, 9.1513805953056, 'keine öffentliche Anschrift', '', '', '', '', '', '', 'plain', 'Verwirklichung von Projekten, um Kindern in Kenia zu helfen und ihnen eine Chance auf Bildung zu geben.', 'plain', 'Bildung (finanzielle Unterstützung des Unterhalts der Academy, Grundschule und Kindergarten), Entwicklung und Zusammenarbeit (Unterstützung bei der Instandsetzung und Einrichtung sowie evtl. Baumaßnahmen von Schule und Kindergarten, Hilfestellung zur Selbsthilfe des Unterhalts, anteilige finanzielle Unterstützung für Lehrmaterial, Vermittlung von Schulpatenschaften).', '[401,501,502,404,403,402]', '[105]'),
+('fef60c29-29db-4cd3-81d1-289d09400160', 'Africa Workshop Organisation e. V.', 48.772345034833, 9.1746099980449, '', '', '', 'Tübinger Straße 15', '70178', 'Stuttgart', 'Deutschland', 'plain', 'Bekanntmachung der afrikanischen Kultur, Unterstützung bei der Integration in die Stuttgarter Gesellschaft. Der Verein ist als humanitäre Selbsthilfegruppe und Völkerverständigungsverein seit 1988 in der Region Stuttgart aktiv.', 'plain', 'Bildung (Zielgruppe Kinder, Jugendliche, Eltern und Erwachsene), Soziales und Gesundheit (Arbeit mit Senior*innen, Menschen mit Behinderung), Entwicklung und Zusammenarbeit (Integrationshilfe), Engagement für Geflüchtete (Zusammenarbeit mit Geflüchteten).', '[401,105,115,205,206,207,220,403,402,404,501,502]', '[100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124]');
+
+-- --------------------------------------------------------
+
+--
+-- Tabellenstruktur für Tabelle `contacts`
+--
+
+CREATE TABLE `contacts` (
+  `id` varchar(36) NOT NULL,
+  `name` varchar(512) DEFAULT NULL,
+  `phone` varchar(512) DEFAULT NULL,
+  `mail` varchar(512) DEFAULT NULL,
+  `associationId` varchar(36) NOT NULL,
+  `orderIndex` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Daten für Tabelle `contacts`
+--
+
+INSERT INTO `contacts` (`id`, `name`, `phone`, `mail`, `associationId`, `orderIndex`) VALUES
+('0cf6722d-4b4e-4d69-b52f-35b64096c7eb', '', '0179/5010311', 'post@latin-jazz-initiative.de', 'eee41f26-5e5d-4b40-a5f4-f6c3272fd9bc', 0),
+('1e97a03d-3dee-40c0-ab81-b566f2742440', '', '0173 / 9718681', 'castillajor@aol.com', '030f5468-5e92-4232-aaa6-6780ed1db82c', 0),
+('20208bac-48bb-448f-9bcd-33105dce0cd0', '', '0172/8578716', 'info@abada-capoeira.eu', '195c1cfc-2e0a-4842-8700-d2f716e43ae0', 0),
+('32d4c59a-6d1c-4408-a76d-9ebf3bd281fd', '', '', '', '59f81c29-5f86-47ec-8a8a-322d53ae14ff', 0),
+('32f503ad-ab75-4352-9ea1-5400a643884e', '', '0711 / 8946890', 'info@bkhw.org', '3b72a4a4-024c-4049-ab75-9de2898f3ccd', 0),
+('39137b79-625c-4589-bbc3-d64d1e443a8d', '', '0711 / 248 44 41', 'info@dtf-stuttgart.de', '3b10b0c7-dc5a-4d96-9ce4-c23200652a86', 0),
+('3d3460fd-f86b-46f3-8dfa-97c585c76548', '', '0711/640 74 82', 'aylishk@aol.com', '70a5f5f0-8a8f-485c-9f76-f68484aadd75', 0),
+('55252607-6128-408b-beb7-1ff951a7889a', '', '0178 / 8346746', 'info@herosacademy.org', 'fbc648a0-99da-4404-bc9f-3b13ad648277', 0),
+('5bc8cd30-dea7-443d-ae14-a36b4c234e36', '', '0163/650 86 04', 'G.koeksal@gmx.de', '7b99b747-5a41-430e-8109-9ed96525cef7', 0),
+('63349d8c-c3cc-4d70-8e9b-857844aaca2c', '', '', 'info@capoeira-stuttgart.org', '38e9abc6-dc51-4270-9568-2185a69ab0eb', 0),
+('6911d7fc-6b4d-4dbc-8c52-6ea58479dcb1', '', '0173 / 412 71 83', 'Yalova@hotmail.de', '19837db4-8b34-44ff-95fb-de5d88545f4d', 0),
+('7d3b6176-a87e-45a8-a964-4a33f94a2a2e', '', '0157 / 790 78 470', 'info@forum-gerrum-stuttgart.de', '04659eb2-e809-4543-b987-ad491468593b', 0),
+('84140cd4-9232-4457-9a4b-8f9ed177ffef', '', '', 'info@tigre.de', 'b7909656-0aaf-4e01-929f-a7dd3d9d3193', 0),
+('90264513-3f4e-44e0-be69-7c8aabeef735', '', '0711 / 162 81 20', 'corsilingua.iicstuttgart@esteri.it', 'b19c9166-b97f-45a9-9859-ce72012cb0a9', 0),
+('a7acd88e-084c-4220-9889-b4c539b21b0b', '', '', 'bcf.stuttgart@gmail.com', '9e425f18-8f1e-4c09-a828-df470bb9ad9b', 0),
+('af5217c5-9e00-4fb6-b8ca-d85d35d67267', '', '', 'vietnamcommunitystuttgart@googlemail.com', '6de56a3e-f5b0-4f06-a77e-bbbd4858f9e9', 0),
+('b1283f93-aeb2-419a-899b-77e850ae86d2', '', '0176 / 24909496', 'team@stelp.eu', '954bf319-b5bc-4c5f-b4a2-3a6748e0ba7f', 0),
+('b829a6f2-847f-4df1-855c-e4c49a3c7214', '', '', 'coexist@t-online.de', 'bb6cbae9-5ad6-4d08-be2a-e2b0bd9791dd', 0),
+('c9b7d408-614e-44f8-9721-fe6ee0c77ec5', '', '0711 / 248 48 08-88 (Fax)', '', 'c4a32813-94db-4931-9088-57ac9b1673bb', 1),
+('cd72cf27-ac00-430f-b9be-b2520cc56b38', '', '0711 / 248 48 08-0', 'info@forum-der-kulturen.de', 'c4a32813-94db-4931-9088-57ac9b1673bb', 0),
+('e0ff3bfe-957f-4a45-9b29-4ea912b3b92a', '', '0711 / 8601304', 'baye_fall_ev@yahoo.com', '783ad9fb-1af7-48a2-b9f0-4c52a0167474', 0),
+('e1735047-e11f-46bb-96d7-cd16b09f4822', '', '0157 / 82965484', 'info@forum-afrikanum.de', '97ac48a4-7218-4cff-a08a-810d971272ca', 0),
+('e840cc66-a1c3-4d0d-bb41-10d4a7a3816a', '', '0173/1912555', 'info@forum-wbk.de', 'b90d8590-8068-462b-ae25-e9ec55f5e8c8', 0),
+('ece3d675-f0c9-41c5-9333-198aa23ffa4b', '', '07192/200 82', '2009ggsa@gmail.com', 'fef60c29-29db-4cd3-81d1-289d09400160', 0),
+('f7dd6842-1bae-4d1e-95ac-b2f9e24dbed4', '', '0176 / 456 751 31', 'info@vereinpavaresia.de', '767f00c7-3388-4c4a-9d22-fad5c0156e23', 0),
+('f84a5276-b4a3-439a-9a8c-ec3fe11ce2cc', '', '0711 / 528 67 36', 'info@chinesische-sprachschule-stuttgart.de', 'ccaf6bfa-1c4a-43ef-b8bc-e2da7412996a', 0),
+('fb929251-e589-451b-81c2-91c02fa8bd2b', '', '0711 / 60 44 06', 'schaal.stuttgart@freenet.de', '0991ef8a-2e54-4bb6-a2a9-523f35982a40', 0);
+
+-- --------------------------------------------------------
+
+--
+-- Tabellenstruktur für Tabelle `districts_options`
+--
+
+CREATE TABLE `districts_options` (
+  `label` varchar(512) NOT NULL,
+  `value` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Daten für Tabelle `districts_options`
+--
+
+INSERT INTO `districts_options` (`label`, `value`) VALUES
+('Stadt Stuttgart', 100),
+('Stuttgart-Mitte', 101),
+('Stuttgart-Nord', 102),
+('Stuttgart-Ost', 103),
+('Stuttgart-Süd', 104),
+('Stuttgart-West', 105),
+('Stuttgart-Bad-Cannstatt', 106),
+('Stuttgart-Birkach', 107),
+('Stuttgart-Botnang', 108),
+('Stuttgart-Degerloch', 109),
+('Stuttgart-Feuerbach', 110),
+('Stuttgart-Hedelfingen', 111),
+('Stuttgart-Möhringen', 112),
+('Stuttgart-Mühlhausen', 113),
+('Stuttgart-Münster', 114),
+('Stuttgart-Obertürkheim', 115),
+('Stuttgart-Plieningen', 116),
+('Stuttgart-Sillenbuch', 117),
+('Stuttgart-Stammheim', 118),
+('Stuttgart-Untertürkheim', 119),
+('Stuttgart-Vaihingen', 120),
+('Stuttgart-Wangen', 121),
+('Stuttgart-Weilimdorf', 122),
+('Stuttgart-Zazenhausen', 123),
+('Stuttgart-Zuffenhausen', 124),
+('Region Stuttgart', 300),
+('Esslingen', 301),
+('Fellbach', 302),
+('Waiblingen', 303),
+('Baden-Württemberg', 900),
+('Stuttgart und Region', 901),
+('Landesweit', 902),
+('International', 1000),
+('Türkei', 1001),
+('Russland', 1002);
+
+-- --------------------------------------------------------
+
+--
+-- Tabellenstruktur für Tabelle `images`
+--
+
+CREATE TABLE `images` (
+  `id` varchar(36) NOT NULL,
+  `url` varchar(512) NOT NULL,
+  `altText` varchar(512) DEFAULT NULL,
+  `associationId` varchar(36) NOT NULL,
+  `orderIndex` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Daten für Tabelle `images`
+--
+
+INSERT INTO `images` (`id`, `url`, `altText`, `associationId`, `orderIndex`) VALUES
+('01725d93-f3e7-489a-8e0e-dfed79c57852', 'https://house-of-resources-stuttgart.de/wp-content/uploads/2020/11/LogoJAZZ_OK.jpg', 'Latin Jazz Initiative', 'eee41f26-5e5d-4b40-a5f4-f6c3272fd9bc', 0),
+('0b676161-a7e5-43e5-8d13-e2f32786a561', 'https://house-of-resources-stuttgart.de/wp-content/uploads/2020/11/Forum_Afrikanum_Logo-scaled.jpg', 'Forum Afrikanum Stuttgart e. V.', '97ac48a4-7218-4cff-a08a-810d971272ca', 0),
+('0da83685-aa73-4175-8ccc-bc5c22b95b29', 'https://house-of-resources-stuttgart.de/wp-content/uploads/2020/11/Foerderverein-Heros-Academy-AIC-Stuttgart-e.-V.-scaled.jpg', 'Förderverein Hero\'s Academy AIC Stuttgart e. V.', 'fbc648a0-99da-4404-bc9f-3b13ad648277', 0),
+('441be4dc-62e2-43ce-aa75-7eb7c8855b67', 'https://house-of-resources-stuttgart.de/wp-content/uploads/2020/11/DTF-Projekte.png', 'Deutsch-Türkisches Forum Stuttgart e. V.', '3b10b0c7-dc5a-4d96-9ce4-c23200652a86', 0),
+('5e13a2bb-01e0-4a74-ad23-afcb9fdfadee', 'https://house-of-resources-stuttgart.de/wp-content/uploads/2020/11/China-Kultur-Kreis-e.-V.-scaled.jpg', 'China Kultur-Kreis e. V.', 'ccaf6bfa-1c4a-43ef-b8bc-e2da7412996a', 0),
+('60c2b984-91ff-4922-8879-61a432dd5084', 'https://forum-wbk.de/wp-content/uploads/10-1800x1080.jpg', 'Gruppenbild', 'b90d8590-8068-462b-ae25-e9ec55f5e8c8', 1),
+('678d4660-53ae-4868-9659-7f5ea73362f0', 'https://house-of-resources-stuttgart.de/wp-content/uploads/2020/11/Akademie-fuer-internationalen-Kulturaustausch-e.V.-Aylish-Kerrigan1.jpg', 'Aylish Kerrigan', '70a5f5f0-8a8f-485c-9f76-f68484aadd75', 1),
+('71e5f770-dd74-4594-9b9f-4c5a33cc80b4', 'https://house-of-resources-stuttgart.de/wp-content/uploads/2020/11/Stelp_Supporter_yellow-blue-min.png', 'STELP e. V.', '954bf319-b5bc-4c5f-b4a2-3a6748e0ba7f', 0),
+('92efe338-86bc-46e4-a05d-60435a1f3795', 'https://house-of-resources-stuttgart.de/wp-content/uploads/2020/11/Deutsch-Rumaenisches-Forum-Stuttgart-e.V..png', 'Deutsch-Rumänisches Forum e. V.', '04659eb2-e809-4543-b987-ad491468593b', 0),
+('97037571-c436-4863-aa0e-a411892852b5', 'https://house-of-resources-stuttgart.de/wp-content/uploads/2020/11/FdK_Logo_4c_rot.png', 'Forum der Kulturen Stuttgart e. V.', 'c4a32813-94db-4931-9088-57ac9b1673bb', 0),
+('bd4d9846-60df-4dcf-8ead-413a6f70ae8e', 'https://house-of-resources-stuttgart.de/wp-content/uploads/2020/11/Logo-Akademie-fuer-internationalen-Kulturaustausch-e.V.-scaled.jpg', 'Akademie für internationalen Kulturaustausch e. V.', '70a5f5f0-8a8f-485c-9f76-f68484aadd75', 0),
+('d5deb61e-507c-40fb-9439-66aba043a314', 'https://house-of-resources-stuttgart.de/wp-content/uploads/2020/11/IFWBK_logo_flyer.png', 'IFWBK-Logo', 'b90d8590-8068-462b-ae25-e9ec55f5e8c8', 0),
+('deed6764-76e4-4272-ac5c-ad4bc0c46292', 'https://house-of-resources-stuttgart.de/wp-content/uploads/2020/11/logo.jpg', 'Afrikafestival Stuttgart', '59f81c29-5f86-47ec-8a8a-322d53ae14ff', 0),
+('e1d65af5-5f21-4607-9ee5-8c9b3c437fe5', 'https://house-of-resources-stuttgart.de/wp-content/uploads/2020/11/Logo_Pavaresia.png', 'Deutsch-Albanischer Verein für Kultur, Jugend und Sport „Pavarësia“ e. V.', '767f00c7-3388-4c4a-9d22-fad5c0156e23', 0),
+('f989276b-9e8a-40ba-913b-364e0bc5c301', 'https://house-of-resources-stuttgart.de/wp-content/uploads/2020/11/Club_espanol_StuttgarLOGO.png', 'Club Español Stuttgart e. V.', '030f5468-5e92-4232-aaa6-6780ed1db82c', 0),
+('ffddf641-1fbc-4f8d-a701-11a466540178', 'https://house-of-resources-stuttgart.de/wp-content/uploads/2020/11/firkat_logo_rgb.jpg', 'Firkat, klassisch-türkischer Musikverein Stuttgart e. V.', '19837db4-8b34-44ff-95fb-de5d88545f4d', 0);
+
+-- --------------------------------------------------------
+
+--
+-- Tabellenstruktur für Tabelle `links`
+--
+
+CREATE TABLE `links` (
+  `id` varchar(36) NOT NULL,
+  `url` varchar(512) NOT NULL,
+  `linkText` varchar(512) DEFAULT NULL,
+  `associationId` varchar(36) NOT NULL,
+  `orderIndex` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Daten für Tabelle `links`
+--
+
+INSERT INTO `links` (`id`, `url`, `linkText`, `associationId`, `orderIndex`) VALUES
+('00435128-2c66-4883-a52a-4218b3f4f59b', 'https://www.forum-der-kulturen.de/', 'www.forum-der-kulturen.de', 'c4a32813-94db-4931-9088-57ac9b1673bb', 0),
+('018ceb70-a7ae-42da-98c3-3d4d4786fc53', 'http://www.africa-workshop.de', 'Africa-workshop.de', 'fef60c29-29db-4cd3-81d1-289d09400160', 1),
+('0e6d079e-f585-49fd-b2a3-0746f9fddb81', 'https://www.chinesische-sprachschule-stuttgart.de/', 'www.chinesische-sprachschule-stuttgart.de', 'ccaf6bfa-1c4a-43ef-b8bc-e2da7412996a', 0),
+('176b4a55-ba08-4b19-841e-a07453c39815', 'https://www.forum-afrikanum.de/', 'www.forum-afrikanum.de', '97ac48a4-7218-4cff-a08a-810d971272ca', 0),
+('1e2afacc-9535-4f1a-8d2e-50e38d65d685', 'https://www.forum-wbk.de', 'Internationales Forum für Wissenschaft, Bildung und Kultur e.V.', 'b90d8590-8068-462b-ae25-e9ec55f5e8c8', 0),
+('20d53c39-df3f-497b-a222-f6b4749be3a0', 'https://house-of-resources-stuttgart.de/', 'house-of-resources-stuttgart.de', 'c4a32813-94db-4931-9088-57ac9b1673bb', 1),
+('20fd455b-21b1-44de-ab55-add33b939978', 'https://www.latin-jazz-initiative.de', 'Latin Jazz Initiative', 'eee41f26-5e5d-4b40-a5f4-f6c3272fd9bc', 0),
+('21bac2e2-095d-482b-8d6a-d849240523f4', 'https://www.sprachedermusik.de', 'Die Sprache der Musik', 'b90d8590-8068-462b-ae25-e9ec55f5e8c8', 1),
+('2da14e08-ca3f-4cba-a9a5-a1c5d033c492', 'http://www.dtf-stuttgart.de/', 'www.dtf-stuttgart.de', '3b10b0c7-dc5a-4d96-9ce4-c23200652a86', 0),
+('2ec00bad-6aa5-422e-80e8-1afdf18c2b56', 'https://www.herosacademy.org/', 'www.herosacademy.org', 'fbc648a0-99da-4404-bc9f-3b13ad648277', 0),
+('309959b0-adc3-4c5e-8a88-1ac5f4506e1b', 'https://www.abada-capoeira.eu', 'ABADÁ Capoeira e. V.', '195c1cfc-2e0a-4842-8700-d2f716e43ae0', 0),
+('4fe93128-d645-4ded-919b-b2293cc506f0', 'http://www.memo-bw.de/', 'www.memo-bw.de', 'c4a32813-94db-4931-9088-57ac9b1673bb', 4),
+('51917066-c0a9-4ca9-afcd-94937b38b015', 'https://www.ecuador-freunde-stuttgart.com', 'www.ecuador-freunde-stuttgart.com', '0991ef8a-2e54-4bb6-a2a9-523f35982a40', 0),
+('5aaef8af-232f-4457-a725-e3b0fe50fef1', 'https://www.iicstoccarda.esteri.it/', 'www.iicstoccarda.esteri.it', 'b19c9166-b97f-45a9-9859-ce72012cb0a9', 0),
+('6c0008cc-7308-4c3f-aa10-87f53e5627b2', 'https://www.tigre.de/', 'www.tigre.de', 'b7909656-0aaf-4e01-929f-a7dd3d9d3193', 0),
+('7a6e1376-9747-480f-a512-ce76bd648a98', 'http://www.add-stuttgart.de', 'ADD Stuttgart', '7b99b747-5a41-430e-8109-9ed96525cef7', 0),
+('8bd03d7f-61f8-4ed0-b2c4-6a6134335953', 'http://www.coexistev.de', 'coexistev.de', 'bb6cbae9-5ad6-4d08-be2a-e2b0bd9791dd', 0),
+('8d1a75e5-8e4f-4937-8cf4-69fdc963cd92', 'https://sprachedermusik.de/musik-ohne-grenzen', '\"Musik ohne Grenzen\" (Festival)', 'b90d8590-8068-462b-ae25-e9ec55f5e8c8', 2),
+('8e1f64a7-1fc3-41f5-be78-c0b0e61dd615', 'http://www.clubespagnolestuttgart.de/', 'www.clubespagnolestuttgart.de', '030f5468-5e92-4232-aaa6-6780ed1db82c', 0),
+('a5fc877d-0476-4f3d-a8d5-1dcfb21fffe5', 'https://sommerfestival-der-kulturen.de/', 'sommerfestival-der-kulturen.de', 'c4a32813-94db-4931-9088-57ac9b1673bb', 2),
+('a7f3b8fc-ff12-441b-a872-589f09ad5e8f', 'https://mig.madeingermany-stuttgart.de/', 'mig.madeingermany-stuttgart.de', 'c4a32813-94db-4931-9088-57ac9b1673bb', 3),
+('a88f020f-b3b3-4907-a9bd-590077b86860', 'https://www.cydd-bw.de', 'cydd-bw.de', '00de259f-254a-491f-8555-1ed658c6a85b', 0),
+('b42b92ff-47be-44c6-8bba-ddb4db3ce1db', 'https://www.forum-gerrum-stuttgart.de/', 'www.forum-gerrum-stuttgart.de', '04659eb2-e809-4543-b987-ad491468593b', 0),
+('bf822c16-def9-4153-9748-1098e77f7482', 'https://bayefall-ev.com/', 'bayefall-ev.com', '783ad9fb-1af7-48a2-b9f0-4c52a0167474', 0),
+('cbfbc0f6-cd80-4c1a-b2ea-d0c55e12f5ce', 'https://stelp.eu/', 'www.stelp.eu', '954bf319-b5bc-4c5f-b4a2-3a6748e0ba7f', 0),
+('d507cd07-9d57-4012-bbd1-c7326b23b579', 'http://www.shoqatapavaresia.de/', 'www.shoqatapavaresia.de', '767f00c7-3388-4c4a-9d22-fad5c0156e23', 0),
+('e82a6533-be0c-4d34-94dc-5f94e5ffdf0e', 'http://www.firkat.de/', 'www.firkat.de', '19837db4-8b34-44ff-95fb-de5d88545f4d', 0),
+('f32fee8c-9b61-4c4f-94d6-5978859283e9', 'https://capoeira-stuttgart.org/', 'www.capoeira-stuttgart.org', '38e9abc6-dc51-4270-9568-2185a69ab0eb', 0),
+('f47e3c5d-f8e5-4d13-9e8c-dff978a86cd6', 'https://www.bkhw.org/', 'www.bkhw.org', '3b72a4a4-024c-4049-ab75-9de2898f3ccd', 0),
+('fb4236d7-6026-4b82-b4ce-cb7bbb637576', 'http://www.afrikaworkshop.de', 'Afrikaworkshop.de', 'fef60c29-29db-4cd3-81d1-289d09400160', 0),
+('fcc2e530-cbf4-4bf1-8011-295f21891636', 'https://www.afrikafestival-stuttgart.de', 'Afrikafestival Stuttgart', '59f81c29-5f86-47ec-8a8a-322d53ae14ff', 0);
+
+-- --------------------------------------------------------
+
+--
+-- Tabellenstruktur für Tabelle `socialmedia`
+--
+
+CREATE TABLE `socialmedia` (
+  `id` varchar(36) NOT NULL,
+  `platform` varchar(128) NOT NULL,
+  `url` varchar(512) NOT NULL,
+  `linkText` varchar(512) DEFAULT NULL,
+  `associationId` varchar(36) NOT NULL,
+  `orderIndex` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Daten für Tabelle `socialmedia`
+--
+
+INSERT INTO `socialmedia` (`id`, `platform`, `url`, `linkText`, `associationId`, `orderIndex`) VALUES
+('00e3a4ef-9166-40e9-a825-2ac51074a29c', 'Instagram', 'https://www.instagram.com/antoniocuadrosdebejar/', '', 'eee41f26-5e5d-4b40-a5f4-f6c3272fd9bc', 0),
+('03c222e0-093b-45c8-90e8-2de6128048e5', 'Facebook', 'https://www.facebook.com/DeutschTuerkischesForumStuttgart', '', '3b10b0c7-dc5a-4d96-9ce4-c23200652a86', 0),
+('20c0ca31-1166-44cb-83b2-f93d2c0f26e1', 'Other', 'www.ggsa.de', '', 'fef60c29-29db-4cd3-81d1-289d09400160', 0),
+('26ed1add-5e7d-4031-a580-f1075e582cee', 'Instagram', 'https://www.instagram.com/dtfstuttgart/', '', '3b10b0c7-dc5a-4d96-9ce4-c23200652a86', 1),
+('2b2de65f-7b09-4331-9cde-fb666532a261', 'Facebook', 'https://de-de.facebook.com/FDKStuttgart', '', 'c4a32813-94db-4931-9088-57ac9b1673bb', 0),
+('409e4b75-0d60-4a4c-8b4d-976cce23ea3f', 'Facebook', 'https://www.facebook.com/groups/ecuatorianosenstuttgart', '', '0991ef8a-2e54-4bb6-a2a9-523f35982a40', 0),
+('4ae543f9-301c-47ff-9eee-aaaf815d8fac', 'Facebook', 'https://www.facebook.com/sprachedermusik/', 'Facebook (Die Sprache der Musik)', 'b90d8590-8068-462b-ae25-e9ec55f5e8c8', 1),
+('51546d2a-15b2-4832-8e04-e0b42401825a', 'Facebook', 'https://www.facebook.com/latinjazzfestival', '', 'eee41f26-5e5d-4b40-a5f4-f6c3272fd9bc', 1),
+('52eca14c-beca-4f27-a030-74f515d49793', 'Instagram', 'https://www.instagram.com/forumderkulturen/', '', 'c4a32813-94db-4931-9088-57ac9b1673bb', 1),
+('5534c995-9922-4219-b56a-72e70c3bb8ae', 'Instagram', 'https://www.instagram.com/sprachedermusik/', 'Instagram (Die Sprache der Musik)', 'b90d8590-8068-462b-ae25-e9ec55f5e8c8', 2),
+('5580f167-630e-48d5-b2cd-54e3c2821bc3', 'Facebook', 'https://www.facebook.com/alicetakin', '', '59f81c29-5f86-47ec-8a8a-322d53ae14ff', 0),
+('5f006721-3b94-4123-9d47-3b164d44ff18', 'Facebook', 'https://www.facebook.com/tigrevermelhoev', '', 'b7909656-0aaf-4e01-929f-a7dd3d9d3193', 0),
+('61a49cd6-b8f2-45c4-82a7-83d3f93a316a', 'Facebook', 'https://de-de.facebook.com/NOVO-Capoeira-Stuttgart-1559519010778402', '', '38e9abc6-dc51-4270-9568-2185a69ab0eb', 0),
+('63124cd7-c621-4ccd-b366-6a5a3f80c6f1', 'Facebook', 'https://de-de.facebook.com/754953194581359', '', '6de56a3e-f5b0-4f06-a77e-bbbd4858f9e9', 0),
+('7660e744-781d-485a-85f1-ecd305c3b6ae', 'Facebook', 'https://www.facebook.com/alla.wbk.9', '', 'b90d8590-8068-462b-ae25-e9ec55f5e8c8', 0),
+('9ae45f52-91fe-4541-a7cc-5feb323652ca', 'Instagram', 'https://www.instagram.com/cyddbw/', '', '00de259f-254a-491f-8555-1ed658c6a85b', 1),
+('9d6e99ce-61ff-4279-b893-543fbec6cb4f', 'Facebook', 'https://www.facebook.com/bayefallev', '', '783ad9fb-1af7-48a2-b9f0-4c52a0167474', 0),
+('9ee07612-9cf5-4495-9de9-b86c186e458a', 'Facebook', 'https://www.facebook.com/cyddbw/', '', '00de259f-254a-491f-8555-1ed658c6a85b', 0),
+('a8bc6fca-d845-48e1-a43e-157ea1e950f4', 'Facebook', 'https://www.facebook.com/groups/439745146116192/', '', '97ac48a4-7218-4cff-a08a-810d971272ca', 0),
+('ae7281b3-944a-4a1c-bd29-73a843831bbd', 'Facebook', 'https://www.facebook.com/BolivianischesKinderhilfswerk', '', '3b72a4a4-024c-4049-ab75-9de2898f3ccd', 0),
+('b34c9f5f-65a2-4a92-872c-11f86b62e47e', 'Instagram', 'https://www.instagram.com/bcf.stuttgart/?hl=de', '', '9e425f18-8f1e-4c09-a828-df470bb9ad9b', 0),
+('bb45b6ba-9eb4-420b-884f-31f8547fcf3b', 'Facebook', 'https://www.facebook.com/Coexist-eV-410786919397394', '', 'bb6cbae9-5ad6-4d08-be2a-e2b0bd9791dd', 0),
+('be673039-5a9f-4996-8a2e-e1271824614d', 'Facebook', 'https://www.facebook.com/STELP.SupporterOnSite/', '', '954bf319-b5bc-4c5f-b4a2-3a6748e0ba7f', 0),
+('c8320533-56b7-4248-a202-3cc5df31709c', 'Instagram', 'https://www.instagram.com/bkhw_org', '', '3b72a4a4-024c-4049-ab75-9de2898f3ccd', 1),
+('dce39316-5c9a-49fb-8133-9298fb26a30f', 'Facebook', 'https://www.facebook.com/ShoqataPavaresiaStuttgart/', '', '767f00c7-3388-4c4a-9d22-fad5c0156e23', 0),
+('de5c79d9-7f4c-4fa7-96af-50535d839a38', 'Instagram', 'https://www.instagram.com/stelp_supporter_on_site/', '', '954bf319-b5bc-4c5f-b4a2-3a6748e0ba7f', 1),
+('e9200267-6605-41b0-9a5f-762414bb152d', 'Instagram', 'https://www.instagram.com/shoqatapavaresia/', '', '767f00c7-3388-4c4a-9d22-fad5c0156e23', 1),
+('edb8f55c-a2f6-4475-84c9-d5f154efeb4c', 'Instagram', 'https://www.instagram.com/coexist_e.v', '', 'bb6cbae9-5ad6-4d08-be2a-e2b0bd9791dd', 1),
+('f01525b5-2c80-44ea-9975-ec05acf4d6e2', 'Facebook', 'https://www.facebook.com/pages/category/Social-Club/Club-Espa%C3%B1ol-Stuttgart-Oficial-111439010486163/', '', '030f5468-5e92-4232-aaa6-6780ed1db82c', 0);
+
+--
+-- Indizes der exportierten Tabellen
+--
+
+--
+-- Indizes für die Tabelle `activities_options`
+--
+ALTER TABLE `activities_options`
+  ADD PRIMARY KEY (`value`);
+
+--
+-- Indizes für die Tabelle `associations`
+--
+ALTER TABLE `associations`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indizes für die Tabelle `contacts`
+--
+ALTER TABLE `contacts`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `contacts_ibfk_1` (`associationId`);
+
+--
+-- Indizes für die Tabelle `districts_options`
+--
+ALTER TABLE `districts_options`
+  ADD PRIMARY KEY (`value`);
+
+--
+-- Indizes für die Tabelle `images`
+--
+ALTER TABLE `images`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `societyId` (`associationId`);
+
+--
+-- Indizes für die Tabelle `links`
+--
+ALTER TABLE `links`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `societyId` (`associationId`);
+
+--
+-- Indizes für die Tabelle `socialmedia`
+--
+ALTER TABLE `socialmedia`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `societyId` (`associationId`);
+
+--
+-- Constraints der exportierten Tabellen
+--
+
+--
+-- Constraints der Tabelle `contacts`
+--
+ALTER TABLE `contacts`
+  ADD CONSTRAINT `contacts_ibfk_1` FOREIGN KEY (`associationId`) REFERENCES `associations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints der Tabelle `images`
+--
+ALTER TABLE `images`
+  ADD CONSTRAINT `images_ibfk_1` FOREIGN KEY (`associationId`) REFERENCES `associations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints der Tabelle `links`
+--
+ALTER TABLE `links`
+  ADD CONSTRAINT `links_ibfk_1` FOREIGN KEY (`associationId`) REFERENCES `associations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints der Tabelle `socialmedia`
+--
+ALTER TABLE `socialmedia`
+  ADD CONSTRAINT `socialmedia_ibfk_1` FOREIGN KEY (`associationId`) REFERENCES `associations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

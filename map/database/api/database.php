@@ -1,9 +1,9 @@
 <?php
 
-define('DB_HOST', 'localhost');
-define('DB_USER', 'reaper93');
-define('DB_PASS', 'shohShohmeim8dohz3so');
-define('DB_NAME', 'reaper93_associations');
+define('DB_HOST', 'mysql5.auskas.de');
+define('DB_USER', 'db264270_120');
+define('DB_PASS', 'vxP/qM>9c3tk');
+define('DB_NAME', 'db264270_120');
 
 header("Access-Control-Allow-Origin: http://localhost:4200");
 header("Access-Control-Allow-Methods: GET,POST,PUT,OPTIONS");

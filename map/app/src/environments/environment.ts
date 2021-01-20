@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  rootPath: 'http://localhost:4200/',
+  rootPath: 'http://localhost:4200',
   phpApi: {
     serverBasePath: 'http://localhost/AssociationMap/api'
   }

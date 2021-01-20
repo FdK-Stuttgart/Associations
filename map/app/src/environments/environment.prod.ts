@@ -1,7 +1,7 @@
 export const environment = {
   production: true,
-  rootPath: '/AssociationMap',
+  rootPath: '/',
   phpApi: {
-    serverBasePath: '/AssociationMap/api'
+    serverBasePath: '/api'
   }
 };

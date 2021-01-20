@@ -4,6 +4,7 @@
 # data
 .clj-kondo
 .lsp
+.idea
 /data/.cpcache/
 /data/target
 /data/classes

@@ -7,11 +7,11 @@ import {OptionsEditFormComponent} from './association-form/options-edit-form/opt
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: '/osm',
+    redirectTo: '/',
     pathMatch: 'full'
   },
   {
-    path: 'osm',
+    path: '',
     component: OsmMapComponent
   },
   {

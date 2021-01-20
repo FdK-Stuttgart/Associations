@@ -127,9 +127,9 @@ export class OsmMapComponent implements OnInit, OnDestroy {
       target: document.getElementById('osm-map') ?? undefined,
       layers: [rasterLayer],
       view: new View({
-        center: fromLonLat([9.179336633969378, 48.777691287676]),
-        zoom: 12,
-        minZoom: 3,
+        center: fromLonLat([9.179747886339912, 48.77860400126555]),
+        zoom: 14,
+        minZoom: 2,
         maxZoom: 20,
       })
     });
