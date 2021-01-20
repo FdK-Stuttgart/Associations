@@ -101,6 +101,7 @@ build an app, see here: [Angular Docs](https://angular.io/guide/setup-local)
 
 ## Usage
 
+### Clojure
 ```bash
 cd data
 # generate pom.xml (or create it manually)
@@ -117,6 +118,21 @@ clojure -M -m fdk.geo Vereinsinformationen_öffentlich_Stadtteilkarte.ods out.um
 # 2. run from java
 java -jar fdk.jar Vereinsinformationen_öffentlich_Stadtteilkarte.ods out.umap
 ```
+
+### Typescript
+
+```bash
+# install nodejs
+sudo npm install -g typescript
+npm install --save-dev @types/node
+npm install xlsx
+tsc ods.ts -w
+```
+Open a new console:
+```bash
+node ods.ts
+```
+
 
 ## License
 
