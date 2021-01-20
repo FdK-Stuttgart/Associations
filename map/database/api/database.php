@@ -5,7 +5,6 @@ define('DB_USER', 'db264270_120');
 define('DB_PASS', 'vxP/qM>9c3tk');
 define('DB_NAME', 'db264270_120');
 
-header("Access-Control-Allow-Origin: http://localhost:4200");
 header("Access-Control-Allow-Methods: GET,POST,PUT,OPTIONS");
 header("Access-Control-Allow-Headers:*");
 
