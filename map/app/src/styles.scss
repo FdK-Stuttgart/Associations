@@ -59,7 +59,7 @@ a {
   bottom: 40px;
   padding-top: 12px;
   padding-bottom: 12px;
-  z-index: 5000;
+  z-index: 9000;
   border-radius: 12px;
   box-shadow: 0 0 4px rgba(#333, 0.66);
 
@@ -249,7 +249,7 @@ p-autoComplete {
 }
 
 .on-top {
-  z-index: 5000;
+  z-index: 9000;
 }
 
 .grouped-multiselect-panel {
@@ -289,11 +289,11 @@ hr {
 }
 
 p-toast .p-toast {
-  z-index: 9999 !important;
+  z-index: 19000 !important;
 }
 
 p-blockUI .p-blockui-document {
-  z-index: 10000;
+  z-index: 30000;
   background-color: rgba(0, 0, 0, 0.67) !important;
 }
 
@@ -310,7 +310,7 @@ app-simple-map-with-single-marker .ol-overlay-container.ol-selectable {
   position: fixed;
   top: 45%;
   right: 0;
-  z-index: 5000;
+  z-index: 10000;
   transition: transform 0.3s;
 }
 

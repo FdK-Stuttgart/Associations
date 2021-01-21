@@ -7,6 +7,7 @@
   height: 100vh;
   overflow: hidden;
   transition: width 0.3s;
+  background-color: rgb(227,226,212);
 
   &.with-sidebar {
     width: calc(100% - 320px) !important;

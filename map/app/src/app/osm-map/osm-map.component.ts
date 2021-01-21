@@ -196,6 +196,10 @@ export class OsmMapComponent implements OnInit, OnDestroy {
 
         const element: HTMLImageElement = this.getMarkerActiveElement(lat, lng, id);
         marker.setElement(element);
+        const markerContainer = marker.getElement()?.parentElement;
+        if (markerContainer) {
+          markerContainer.style.zIndex = '6000';
+        }
       }
     }
   }
@@ -221,6 +225,10 @@ export class OsmMapComponent implements OnInit, OnDestroy {
 
         const element: HTMLImageElement = this.getMarkerInactiveElement(lat, lng, id);
         marker.setElement(element);
+        const markerContainer = marker.getElement()?.parentElement;
+        if (markerContainer) {
+          markerContainer.style.zIndex = '5000';
+        }
       }
     }
   }
@@ -229,19 +237,20 @@ export class OsmMapComponent implements OnInit, OnDestroy {
    * enables or disables map markers according to the filtered associations
    */
   enablesAndDisableMapMarkers(): void {
-    const activeAssociations = this.associations.filter((s: Association) => {
-      return this.filteredAssociations.includes(s);
-    });
     const inactiveAssociations = this.associations.filter((s: Association) => {
       return !this.filteredAssociations.includes(s);
     });
 
-    activeAssociations.forEach((s: Association) => {
-      this.enableMarker(s.id);
-    });
-
     inactiveAssociations.forEach((s: Association) => {
       this.disableMarker(s.id);
+    });
+
+    const activeAssociations = this.associations.filter((s: Association) => {
+      return this.filteredAssociations.includes(s);
+    });
+
+    activeAssociations.forEach((s: Association) => {
+      this.enableMarker(s.id);
     });
   }
 
@@ -556,7 +565,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
       content += `<div class="association-links"><h3>Links</h3>`;
       for (const link of association.links) {
         content += `<ul>`;
-        content += `<li><a href="${link.url}" title="${link.linkText || link.url}">${link.linkText || link.url}</a></li>`;
+        content += `<li><a href="${link.url}" title="${link.linkText || link.url}" target="_blank">${link.linkText || link.url}</a></li>`;
         content += `</ul>`;
       }
       content += `</div>`;
@@ -567,7 +576,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
       for (const socialMedia of association.socialMedia) {
         content += `<div class="social-media-link">`;
         content += this.getSocialMediaIcon(socialMedia.platform);
-        content += `<a href="${socialMedia.url}" title="${socialMedia.linkText || socialMedia.platform}">${socialMedia.linkText || socialMedia.platform}</a>`;
+        content += `<a href="${socialMedia.url}" title="${socialMedia.linkText || socialMedia.platform}" target="_blank">${socialMedia.linkText || socialMedia.platform}</a>`;
         content += `</div>`;
       }
       content += `</div>`;

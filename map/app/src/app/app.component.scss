@@ -2,13 +2,9 @@
   position: fixed;
   bottom: 12px;
   right: 12px;
-  z-index: 999999;
+  z-index: 20000;
 
   button ::ng-deep .p-button {
     background-color: #2196F3;
   }
-}
-
-.fullscreen-container {
-  background-color: rgb(227,226,212);
 }

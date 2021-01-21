@@ -58,6 +58,7 @@ export enum SocialMediaPlatform {
   SNAPCHAT = 'Snapchat',
   LINKEDIN = 'LinkedIn',
   WHATSAPP = 'WhatsApp',
+  YOUTUBE = 'YouTube',
   OTHER = 'Other'
 }
 
