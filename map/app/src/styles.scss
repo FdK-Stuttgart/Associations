@@ -25,7 +25,7 @@ body {
   margin: 0;
 }
 
-* {
+body * {
   font-family: 'Roboto', sans-serif;
   @include scrollbars(6px, #aaaaaa, #ffffff);
 }
