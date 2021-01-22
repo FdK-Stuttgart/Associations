@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Erstellungszeit: 22. Jan 2021 um 00:05
+-- Erstellungszeit: 22. Jan 2021 um 12:50
 -- Server-Version: 10.4.17-MariaDB
 -- PHP-Version: 8.0.0
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Datenbank: `associations`
+-- Datenbank: `reaper93_associations`
 --
 
 -- --------------------------------------------------------
@@ -207,7 +207,7 @@ INSERT INTO `associations` (`id`, `name`, `lat`, `lng`, `addressLine1`, `address
 ('bb6cbae9-5ad6-4d08-be2a-e2b0bd9791dd', 'COEXIST e. V.', 48.812831880518, 9.1587699981507, '', '', '', 'Kärntner Straße 40A', '70469', 'Stuttgart', 'Deutschland', 'plain', 'Der Verein Coexist hat den Anspruch bei gesamtgesellschaftlichen Diskursen mitzuwirken und bietet Menschen ein Sprachrohr.', 'plain', 'Bildung (Empowerment-Angebote, Workshops zum Thema \"Frauenrechte\", Aufklärung).', '[105,109]', '[106]'),
 ('bb8d0d54-21a3-4ead-be62-75f1f0ce90d6', 'Sri Lanka-Deutschland Freundeskreis e. V.', 48.809099556107, 9.23427437106, '', '', '', 'Kneippweg 7', '70374', 'Stuttgart', 'Deutschland', 'plain', 'Förderung internationaler Gesinnung, der Toleranz auf allen Gebieten der Kultur und des Völkerverständigungsgedankens und die Förderung mildtätiger Zwecke.', 'plain', 'Bildung (muttersprachlicher Unterricht, Workshops zum Thema Sri Lanka: Land, Leute, Kultur, Gesellschaft, Religion, Politik usw.), Gastronomie (Catering, traditionelles Essen, Kochkurse), Sport (traditioneller Tanz, Indischer Tanz), Musik (traditionelle Musik, Indische Musik, Musikunterricht (Violine).', '[102,703,704,808,601,602,603,605,809]', '[106,901]'),
 ('bf6d4d85-4016-4721-9bca-3404ff7db400', 'Lettischer Kulturverein SAIME e. V.', 48.762522833722, 9.1600062022539, 'keine öffentliche Anschrift', '', '', '', '', '', '', 'plain', 'Pflege der lettischen Kultur und Geschichte, Bräuche sowie Sprache in Wort und Schrift für und mit den Landsleuten in der neuen Heimat . Es werden Konzerte, Lesungen, Treffen, Feste, Theatervorstellungen, Vorträge, Infoabende, Filmvorführungen etc. zur Vermittlung und Erhaltung kultureller und historischer Traditionen durchgeführt. Beteiligung am gesellschaftlichen und kulturellen Leben sowie die Zusammenarbeit zwischen Letten und Bürgern unterschiedlicher Herkunft und Generationen.', 'plain', 'Bildung (muttersprachlicher Unterricht lettisch, Kinder-Kultur-Schule mit Sprach-, Gesangs- und Tanzunterricht), Kultur und Kunst (Kulturveranstaltungen), Sport (traditioneller Tanz, lettische Volkstanzgruppe \"Trejdeksnitis\").', '[101,102,107,703,704,206]', '[104,301,902]'),
-('c4a32813-94db-4931-9088-57ac9b1673bb', 'Forum der Kulturen Stuttgart e. V.', 48.775587476396, 9.177651784552, '', '', '', 'Marktplatz 4', '70173', 'Stuttgart', '', 'plain', 'Dachverband der Migrantenvereine und interkulturellen Einrichtungen\nStuttgarter Interkulturbüro\nMitglied im Bundesverband Netzwerke von Migrantenorganisationen e. V. (NeMO)', 'plain', '', '[115,114,207,209,208,220,303,1001,403]', '[901,902]'),
+('c4a32813-94db-4931-9088-57ac9b1673bb', 'Forum der Kulturen Stuttgart e. V.', 48.7754712, 9.1775913523032, '', '', '', 'Marktplatz 4', '70173', 'Stuttgart', 'Deutschland', 'plain', 'Dachverband der Migrantenvereine und interkulturellen Einrichtungen\nStuttgarter Interkulturbüro\nMitglied im Bundesverband Netzwerke von Migrantenorganisationen e. V. (NeMO)', 'plain', '', '[115,114,207,209,208,220,303,1001,403]', '[901,902]'),
 ('ccaf6bfa-1c4a-43ef-b8bc-e2da7412996a', 'China Kultur-Kreis e. V.', 48.808986293583, 9.2367213557174, '', '', '', 'Prießnitzweg 7', '70374', 'Stuttgart', 'Deutschland', 'plain', 'Vermittlung chinesischer Sprachkenntnisse und chinesischer Kultur, Pflege der chinesisch-deutschen Zusammenarbeit und des Dialogs, sowie Förderung interkultureller Kompetenzen. Der Verein gründete 1997 die „Chinesische Sprachschule Stuttgart“, um die chinesische Kultur und Sprache zu unterrichten. Die Schule ist eine Wochenendschule für die in Deutschland lebenden Kinder chinesischer Abstammung und alle Freunde, die sich für die chinesische Kultur und die chinesische Sprache interessieren.', 'plain', 'Bildung (muttersprachlicher Unterricht chinesisch, Kurse in der traditionellen chinesischen Kultur).', '[102,101,105,205]', '[110]'),
 ('cf10f76f-1a0b-4f6d-9dc7-80a68512032a', 'Serbisches Akademikernetzwerk - Nikola Tesla e. V.', 48.784878468878, 9.1786339557166, '', '', '', 'Kriegsbergstraße 28', '70174', 'Stuttgart', 'Deutschland', 'plain', 'Aktive Teilhabe an der deutschen Gesellschaft durch Projekte aus den Bereichen Bildung und Kultur. Die Vernetzung von deutschen und serbischen Institutionen und der aktive Wissensaustausch sind hierbei von großer Bedeutung, weshalb die Veranstaltungen für eine breite Öffentlichkeit zugänglich sind.', 'plain', 'Bildung (Bildungsprojekte z. B. Mobile Denkfabrik, Power Einwanderer), Kultur und Kunst (Filmfestival www.filmanak.de, Lesungen).', '[202,211,215]', '[901]'),
 ('d4fe1ebc-641b-416d-a51d-563ba733eb46', 'Mexikanische Tanzgruppe Adelitas Tapatías & Charros', 48.778569634971, 9.1798619013575, 'keine öffentliche Anschrift', '', '', '', '', '', '', 'plain', 'Verbreitung der mexikanischen Kultur in Deutschland.', 'plain', 'Sport (mexikanischer Tanz)', '[704,703]', '[901]'),
@@ -225,6 +225,7 @@ CREATE TABLE `contacts` (
   `id` varchar(36) NOT NULL,
   `name` varchar(512) DEFAULT NULL,
   `phone` varchar(512) DEFAULT NULL,
+  `fax` varchar(512) DEFAULT NULL,
   `mail` varchar(512) DEFAULT NULL,
   `associationId` varchar(36) NOT NULL,
   `orderIndex` int(11) DEFAULT NULL
@@ -234,55 +235,54 @@ CREATE TABLE `contacts` (
 -- Daten für Tabelle `contacts`
 --
 
-INSERT INTO `contacts` (`id`, `name`, `phone`, `mail`, `associationId`, `orderIndex`) VALUES
-('0a67370b-72c5-41d9-a309-e14d93ec6739', '', '0176 / 82078688', 'info@klangoase-derya.de', '171d9f6d-dd62-4113-b262-949692e790e8', 0),
-('0a86dd91-4791-4d27-84dd-0aa7988727b4', '', '', 'mail@punto-de-encuentro.net', '2417c64b-cb09-4e84-8d15-e972a8c6e313', 0),
-('0cf6722d-4b4e-4d69-b52f-35b64096c7eb', '', '0179/5010311', 'post@latin-jazz-initiative.de', 'eee41f26-5e5d-4b40-a5f4-f6c3272fd9bc', 0),
-('1e97a03d-3dee-40c0-ab81-b566f2742440', '', '0173 / 9718681', 'castillajor@aol.com', '030f5468-5e92-4232-aaa6-6780ed1db82c', 0),
-('20208bac-48bb-448f-9bcd-33105dce0cd0', '', '0172/8578716', 'info@abada-capoeira.eu', '195c1cfc-2e0a-4842-8700-d2f716e43ae0', 0),
-('2d36bd45-bca5-4dd5-8bf0-27750129567f', '', '0152 / 08790860', 'info@ndwenga-fellbach.de', '30d0925a-ca00-4d68-af44-0856092f2928', 0),
-('32d4c59a-6d1c-4408-a76d-9ebf3bd281fd', '', '', '', '59f81c29-5f86-47ec-8a8a-322d53ae14ff', 0),
-('32f503ad-ab75-4352-9ea1-5400a643884e', '', '0711 / 8946890', 'info@bkhw.org', '3b72a4a4-024c-4049-ab75-9de2898f3ccd', 0),
-('39137b79-625c-4589-bbc3-d64d1e443a8d', '', '0711 / 248 44 41', 'info@dtf-stuttgart.de', '3b10b0c7-dc5a-4d96-9ce4-c23200652a86', 0),
-('3d3460fd-f86b-46f3-8dfa-97c585c76548', '', '0711/640 74 82', 'aylishk@aol.com', '70a5f5f0-8a8f-485c-9f76-f68484aadd75', 0),
-('46094121-e04f-4ede-9cbf-a3065f2e2979', '', '0157 / 779577870', 'saime@latviesi.com', 'bf6d4d85-4016-4721-9bca-3404ff7db400', 0),
-('5027fd57-f728-4812-b0fb-f4928426f073', '', '', 'stuttgart@ada-netzwerk.com', '9f8cbfc7-3ee5-40bd-bc1f-748046eb4989', 0),
-('55252607-6128-408b-beb7-1ff951a7889a', '', '0178 / 8346746', 'info@herosacademy.org', 'fbc648a0-99da-4404-bc9f-3b13ad648277', 0),
-('5bc8cd30-dea7-443d-ae14-a36b4c234e36', '', '0163/650 86 04', 'G.koeksal@gmx.de', '7b99b747-5a41-430e-8109-9ed96525cef7', 0),
-('63349d8c-c3cc-4d70-8e9b-857844aaca2c', '', '', 'info@capoeira-stuttgart.org', '38e9abc6-dc51-4270-9568-2185a69ab0eb', 0),
-('6911d7fc-6b4d-4dbc-8c52-6ea58479dcb1', '', '0173 / 412 71 83', 'Yalova@hotmail.de', '19837db4-8b34-44ff-95fb-de5d88545f4d', 0),
-('6d29d7e0-117c-469a-a047-09472b4affd1', '', '0172 / 6334382', 'igboculturalfoundation@gmail.com', '96c2c20f-1fa6-4b47-9445-9f4eceba7d50', 0),
-('7d3b6176-a87e-45a8-a964-4a33f94a2a2e', '', '0157 / 790 78 470', 'info@forum-gerrum-stuttgart.de', '04659eb2-e809-4543-b987-ad491468593b', 0),
-('84140cd4-9232-4457-9a4b-8f9ed177ffef', '', '', 'info@tigre.de', 'b7909656-0aaf-4e01-929f-a7dd3d9d3193', 0),
-('8bd4d88d-fdce-4922-ba01-d9b23637bb5c', '', '0178 / 3888986', 'n.jayasuriya@gmx.de', '2991aab2-8d9d-48c3-8ee1-fda7a4335108', 0),
-('8cfa7275-960f-40c8-86dc-7e515871deda', '', '', 'info@nart-stuttgart.de', '884c0f37-fc6e-4f08-8028-8dd3ecb1a9a6', 0),
-('90264513-3f4e-44e0-be69-7c8aabeef735', '', '0711 / 162 81 20', 'corsilingua.iicstuttgart@esteri.it', 'b19c9166-b97f-45a9-9859-ce72012cb0a9', 0),
-('9217920e-046a-4d7a-ac9c-e11ebeac2eff', '', '0151 / 75859183', 'prosvjeta.stuttgart@gmx.de', '85e483d3-c84e-4f8b-99b2-2d1f4fb49e89', 0),
-('99336b66-117f-48ec-835b-2ab0a0ae90fa', '', '0170 / 582 6402', 'ozaharsha@gmail.com', '36a84dbb-4776-4f05-8dd7-69101a30755c', 0),
-('9c71bfae-f58e-4837-82ca-f34862a41390', '', '0711 / 8601188', '', '777032fb-0efd-4c57-a2ea-e8772c1dbd5b', 0),
-('a7acd88e-084c-4220-9889-b4c539b21b0b', '', '', 'bcf.stuttgart@gmail.com', '9e425f18-8f1e-4c09-a828-df470bb9ad9b', 0),
-('a9384ea6-41ec-40e7-bf01-a6b627029f46', '', '', 'sc-stuttgart@gmx.de', '712a34c7-2f5c-41c2-aeb7-9821a304dd5c', 0),
-('af5217c5-9e00-4fb6-b8ca-d85d35d67267', '', '', 'vietnamcommunitystuttgart@googlemail.com', '6de56a3e-f5b0-4f06-a77e-bbbd4858f9e9', 0),
-('b1283f93-aeb2-419a-899b-77e850ae86d2', '', '0176 / 24909496', 'team@stelp.eu', '954bf319-b5bc-4c5f-b4a2-3a6748e0ba7f', 0),
-('b34d02a4-c972-4fbf-9f30-776068efa2ad', '', '0711 / 94529847', 'info@stufem.de', '3f123c62-7a3c-4d9f-a09b-674926356b88', 0),
-('b829a6f2-847f-4df1-855c-e4c49a3c7214', '', '', 'coexist@t-online.de', 'bb6cbae9-5ad6-4d08-be2a-e2b0bd9791dd', 0),
-('c5488987-2795-46af-8379-c8094b875944', '', '0176 / 81057694', 'info@adelitas.de', 'd4fe1ebc-641b-416d-a51d-563ba733eb46', 0),
-('c9b7d408-614e-44f8-9721-fe6ee0c77ec5', '', '0711 / 248 48 08-88 (Fax)', '', 'c4a32813-94db-4931-9088-57ac9b1673bb', 1),
-('cd72cf27-ac00-430f-b9be-b2520cc56b38', '', '0711 / 248 48 08-0', 'info@forum-der-kulturen.de', 'c4a32813-94db-4931-9088-57ac9b1673bb', 0),
-('e0ff3bfe-957f-4a45-9b29-4ea912b3b92a', '', '0711 / 8601304', 'baye_fall_ev@yahoo.com', '783ad9fb-1af7-48a2-b9f0-4c52a0167474', 0),
-('e1735047-e11f-46bb-96d7-cd16b09f4822', '', '0157 / 82965484', 'info@forum-afrikanum.de', '97ac48a4-7218-4cff-a08a-810d971272ca', 0),
-('e21189f5-d009-4a29-a787-acadae3292c6', '', '', 'info@kd-slovenija.de', '219d2242-1c30-4493-be65-52cb9978f23e', 0),
-('e6303fe7-e13f-469d-9178-b2ed39e60ef1', '', '', 'office@sam-nt.de', 'cf10f76f-1a0b-4f6d-9dc7-80a68512032a', 0),
-('e8387d0a-eb6d-4fb4-ab23-cbc9156ec3ad', '', '0711 / 55 08 963', 'yputra@web.de', 'bb8d0d54-21a3-4ead-be62-75f1f0ce90d6', 0),
-('e840cc66-a1c3-4d0d-bb41-10d4a7a3816a', '', '0173/1912555', 'info@forum-wbk.de', 'b90d8590-8068-462b-ae25-e9ec55f5e8c8', 0),
-('ece3d675-f0c9-41c5-9333-198aa23ffa4b', '', '07192/200 82', '2009ggsa@gmail.com', 'fef60c29-29db-4cd3-81d1-289d09400160', 0),
-('efe65c64-8610-4b4c-995c-722888affb76', '', '0711 / 964 12 53', 'info@multicolor-stuttgart.de', 'afd58c27-cf61-466d-96e7-c4ea4c54ce03', 0),
-('f7dd6842-1bae-4d1e-95ac-b2f9e24dbed4', '', '0176 / 456 751 31', 'info@vereinpavaresia.de', '767f00c7-3388-4c4a-9d22-fad5c0156e23', 0),
-('f80f5226-bb28-4801-82dd-3f2130ded295', '', '0711 / 6143552', 'hif@afro-soleil.de', '0110dd61-0bf5-4e62-abe5-772e1bd92d03', 0),
-('f84a5276-b4a3-439a-9a8c-ec3fe11ce2cc', '', '0711 / 528 67 36', 'info@chinesische-sprachschule-stuttgart.de', 'ccaf6bfa-1c4a-43ef-b8bc-e2da7412996a', 0),
-('fb929251-e589-451b-81c2-91c02fa8bd2b', '', '0711 / 60 44 06', 'schaal.stuttgart@freenet.de', '0991ef8a-2e54-4bb6-a2a9-523f35982a40', 0),
-('fe969449-8f77-4180-a94e-b17ed3702dee', '', '', 'info@kalimera-ev.de', '7e655ac7-30c2-4479-b535-c3750ff9f4a3', 0),
-('ffccfe7b-de43-4159-ba9e-fe4d3ccfabad', '', '', 'info@dante-stuttgart.de', '2ffbfe6b-9a16-4e0d-9b60-4bd7c747fb34', 0);
+INSERT INTO `contacts` (`id`, `name`, `phone`, `fax`, `mail`, `associationId`, `orderIndex`) VALUES
+('0a67370b-72c5-41d9-a309-e14d93ec6739', '', '0176 / 82078688', NULL, 'info@klangoase-derya.de', '171d9f6d-dd62-4113-b262-949692e790e8', 0),
+('0a86dd91-4791-4d27-84dd-0aa7988727b4', '', '', NULL, 'mail@punto-de-encuentro.net', '2417c64b-cb09-4e84-8d15-e972a8c6e313', 0),
+('0cf6722d-4b4e-4d69-b52f-35b64096c7eb', '', '0179/5010311', NULL, 'post@latin-jazz-initiative.de', 'eee41f26-5e5d-4b40-a5f4-f6c3272fd9bc', 0),
+('1e97a03d-3dee-40c0-ab81-b566f2742440', '', '0173 / 9718681', NULL, 'castillajor@aol.com', '030f5468-5e92-4232-aaa6-6780ed1db82c', 0),
+('20208bac-48bb-448f-9bcd-33105dce0cd0', '', '0172/8578716', NULL, 'info@abada-capoeira.eu', '195c1cfc-2e0a-4842-8700-d2f716e43ae0', 0),
+('2d36bd45-bca5-4dd5-8bf0-27750129567f', '', '0152 / 08790860', NULL, 'info@ndwenga-fellbach.de', '30d0925a-ca00-4d68-af44-0856092f2928', 0),
+('32d4c59a-6d1c-4408-a76d-9ebf3bd281fd', '', '', NULL, '', '59f81c29-5f86-47ec-8a8a-322d53ae14ff', 0),
+('32f503ad-ab75-4352-9ea1-5400a643884e', '', '0711 / 8946890', NULL, 'info@bkhw.org', '3b72a4a4-024c-4049-ab75-9de2898f3ccd', 0),
+('39137b79-625c-4589-bbc3-d64d1e443a8d', '', '0711 / 248 44 41', NULL, 'info@dtf-stuttgart.de', '3b10b0c7-dc5a-4d96-9ce4-c23200652a86', 0),
+('3d3460fd-f86b-46f3-8dfa-97c585c76548', '', '0711/640 74 82', NULL, 'aylishk@aol.com', '70a5f5f0-8a8f-485c-9f76-f68484aadd75', 0),
+('46094121-e04f-4ede-9cbf-a3065f2e2979', '', '0157 / 779577870', NULL, 'saime@latviesi.com', 'bf6d4d85-4016-4721-9bca-3404ff7db400', 0),
+('5027fd57-f728-4812-b0fb-f4928426f073', '', '', NULL, 'stuttgart@ada-netzwerk.com', '9f8cbfc7-3ee5-40bd-bc1f-748046eb4989', 0),
+('55252607-6128-408b-beb7-1ff951a7889a', '', '0178 / 8346746', NULL, 'info@herosacademy.org', 'fbc648a0-99da-4404-bc9f-3b13ad648277', 0),
+('5bc8cd30-dea7-443d-ae14-a36b4c234e36', '', '0163/650 86 04', NULL, 'G.koeksal@gmx.de', '7b99b747-5a41-430e-8109-9ed96525cef7', 0),
+('63349d8c-c3cc-4d70-8e9b-857844aaca2c', '', '', NULL, 'info@capoeira-stuttgart.org', '38e9abc6-dc51-4270-9568-2185a69ab0eb', 0),
+('6911d7fc-6b4d-4dbc-8c52-6ea58479dcb1', '', '0173 / 412 71 83', NULL, 'Yalova@hotmail.de', '19837db4-8b34-44ff-95fb-de5d88545f4d', 0),
+('6d29d7e0-117c-469a-a047-09472b4affd1', '', '0172 / 6334382', NULL, 'igboculturalfoundation@gmail.com', '96c2c20f-1fa6-4b47-9445-9f4eceba7d50', 0),
+('7d3b6176-a87e-45a8-a964-4a33f94a2a2e', '', '0157 / 790 78 470', NULL, 'info@forum-gerrum-stuttgart.de', '04659eb2-e809-4543-b987-ad491468593b', 0),
+('84140cd4-9232-4457-9a4b-8f9ed177ffef', '', '', NULL, 'info@tigre.de', 'b7909656-0aaf-4e01-929f-a7dd3d9d3193', 0),
+('8bd4d88d-fdce-4922-ba01-d9b23637bb5c', '', '0178 / 3888986', NULL, 'n.jayasuriya@gmx.de', '2991aab2-8d9d-48c3-8ee1-fda7a4335108', 0),
+('8cfa7275-960f-40c8-86dc-7e515871deda', '', '', NULL, 'info@nart-stuttgart.de', '884c0f37-fc6e-4f08-8028-8dd3ecb1a9a6', 0),
+('90264513-3f4e-44e0-be69-7c8aabeef735', '', '0711 / 162 81 20', NULL, 'corsilingua.iicstuttgart@esteri.it', 'b19c9166-b97f-45a9-9859-ce72012cb0a9', 0),
+('9217920e-046a-4d7a-ac9c-e11ebeac2eff', '', '0151 / 75859183', NULL, 'prosvjeta.stuttgart@gmx.de', '85e483d3-c84e-4f8b-99b2-2d1f4fb49e89', 0),
+('99336b66-117f-48ec-835b-2ab0a0ae90fa', '', '0170 / 582 6402', NULL, 'ozaharsha@gmail.com', '36a84dbb-4776-4f05-8dd7-69101a30755c', 0),
+('9c71bfae-f58e-4837-82ca-f34862a41390', '', '0711 / 8601188', NULL, '', '777032fb-0efd-4c57-a2ea-e8772c1dbd5b', 0),
+('a7acd88e-084c-4220-9889-b4c539b21b0b', '', '', NULL, 'bcf.stuttgart@gmail.com', '9e425f18-8f1e-4c09-a828-df470bb9ad9b', 0),
+('a9384ea6-41ec-40e7-bf01-a6b627029f46', '', '', NULL, 'sc-stuttgart@gmx.de', '712a34c7-2f5c-41c2-aeb7-9821a304dd5c', 0),
+('af5217c5-9e00-4fb6-b8ca-d85d35d67267', '', '', NULL, 'vietnamcommunitystuttgart@googlemail.com', '6de56a3e-f5b0-4f06-a77e-bbbd4858f9e9', 0),
+('b1283f93-aeb2-419a-899b-77e850ae86d2', '', '0176 / 24909496', NULL, 'team@stelp.eu', '954bf319-b5bc-4c5f-b4a2-3a6748e0ba7f', 0),
+('b34d02a4-c972-4fbf-9f30-776068efa2ad', '', '0711 / 94529847', NULL, 'info@stufem.de', '3f123c62-7a3c-4d9f-a09b-674926356b88', 0),
+('b829a6f2-847f-4df1-855c-e4c49a3c7214', '', '', NULL, 'coexist@t-online.de', 'bb6cbae9-5ad6-4d08-be2a-e2b0bd9791dd', 0),
+('c5488987-2795-46af-8379-c8094b875944', '', '0176 / 81057694', NULL, 'info@adelitas.de', 'd4fe1ebc-641b-416d-a51d-563ba733eb46', 0),
+('cd72cf27-ac00-430f-b9be-b2520cc56b38', '', '0711 / 248 48 08-0', '0711 / 248 48 08-88', 'info@forum-der-kulturen.de', 'c4a32813-94db-4931-9088-57ac9b1673bb', 0),
+('e0ff3bfe-957f-4a45-9b29-4ea912b3b92a', '', '0711 / 8601304', NULL, 'baye_fall_ev@yahoo.com', '783ad9fb-1af7-48a2-b9f0-4c52a0167474', 0),
+('e1735047-e11f-46bb-96d7-cd16b09f4822', '', '0157 / 82965484', NULL, 'info@forum-afrikanum.de', '97ac48a4-7218-4cff-a08a-810d971272ca', 0),
+('e21189f5-d009-4a29-a787-acadae3292c6', '', '', NULL, 'info@kd-slovenija.de', '219d2242-1c30-4493-be65-52cb9978f23e', 0),
+('e6303fe7-e13f-469d-9178-b2ed39e60ef1', '', '', NULL, 'office@sam-nt.de', 'cf10f76f-1a0b-4f6d-9dc7-80a68512032a', 0),
+('e8387d0a-eb6d-4fb4-ab23-cbc9156ec3ad', '', '0711 / 55 08 963', NULL, 'yputra@web.de', 'bb8d0d54-21a3-4ead-be62-75f1f0ce90d6', 0),
+('e840cc66-a1c3-4d0d-bb41-10d4a7a3816a', '', '0173/1912555', NULL, 'info@forum-wbk.de', 'b90d8590-8068-462b-ae25-e9ec55f5e8c8', 0),
+('ece3d675-f0c9-41c5-9333-198aa23ffa4b', '', '07192/200 82', NULL, '2009ggsa@gmail.com', 'fef60c29-29db-4cd3-81d1-289d09400160', 0),
+('efe65c64-8610-4b4c-995c-722888affb76', '', '0711 / 964 12 53', NULL, 'info@multicolor-stuttgart.de', 'afd58c27-cf61-466d-96e7-c4ea4c54ce03', 0),
+('f7dd6842-1bae-4d1e-95ac-b2f9e24dbed4', '', '0176 / 456 751 31', NULL, 'info@vereinpavaresia.de', '767f00c7-3388-4c4a-9d22-fad5c0156e23', 0),
+('f80f5226-bb28-4801-82dd-3f2130ded295', '', '0711 / 6143552', NULL, 'hif@afro-soleil.de', '0110dd61-0bf5-4e62-abe5-772e1bd92d03', 0),
+('f84a5276-b4a3-439a-9a8c-ec3fe11ce2cc', '', '0711 / 528 67 36', NULL, 'info@chinesische-sprachschule-stuttgart.de', 'ccaf6bfa-1c4a-43ef-b8bc-e2da7412996a', 0),
+('fb929251-e589-451b-81c2-91c02fa8bd2b', '', '0711 / 60 44 06', NULL, 'schaal.stuttgart@freenet.de', '0991ef8a-2e54-4bb6-a2a9-523f35982a40', 0),
+('fe969449-8f77-4180-a94e-b17ed3702dee', '', '', NULL, 'info@kalimera-ev.de', '7e655ac7-30c2-4479-b535-c3750ff9f4a3', 0),
+('ffccfe7b-de43-4159-ba9e-fe4d3ccfabad', '', '', NULL, 'info@dante-stuttgart.de', '2ffbfe6b-9a16-4e0d-9b60-4bd7c747fb34', 0);
 
 -- --------------------------------------------------------
 

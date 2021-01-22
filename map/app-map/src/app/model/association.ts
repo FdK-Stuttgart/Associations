@@ -30,6 +30,7 @@ export interface Contact {
   id?: string;
   name?: string;
   mail?: string;
+  fax?: string;
   phone?: string;
   associationId?: string;
 }

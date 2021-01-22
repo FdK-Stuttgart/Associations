@@ -6,6 +6,7 @@ import TileLayer from 'ol/layer/Tile';
 import OSM from 'ol/source/OSM';
 import {Overlay} from 'ol';
 import OverlayPositioning from 'ol/OverlayPositioning';
+import * as geocoder from 'ol-geocoder';
 
 @Component({
   selector: 'app-simple-map-with-single-marker',
@@ -16,12 +17,24 @@ export class SimpleMapWithSingleMarkerComponent implements OnInit, OnChanges, On
   @Input() lat = 0;
   @Input() lng = 0;
 
+  @Input() showAddressField = true;
+
   private map?: Map;
   private marker?: Overlay;
 
   readonly markerId = 'central-marker';
 
   @Output() mapClick: EventEmitter<{ lat: number, lng: number }> = new EventEmitter<{ lat: number, lng: number }>();
+
+  geocoder = new geocoder('nominatim', {
+    provider: 'osm',
+    lang: 'gr',
+    placeholder: 'Nach Adresse suchen...',
+    limit: 5,
+    autoComplete: false,
+    featureStyle: undefined,
+    keepOpen: true
+  });
 
   constructor(private renderer2: Renderer2) {
   }
@@ -42,9 +55,24 @@ export class SimpleMapWithSingleMarkerComponent implements OnInit, OnChanges, On
       })
     });
 
+    if (this.showAddressField) {
+      this.geocoder.on('addresschosen', this.chooseAddressHandler);
+
+      this.map.addControl(this.geocoder);
+    }
+
     this.createMarker(this.lat, this.lng);
 
     this.map.addEventListener('click', this.mapClickHandler);
+  }
+
+  chooseAddressHandler = (event: any) => {
+    if (event && event.coordinate && event.coordinate.length && event.coordinate.length >= 2) {
+      const coordinate = toLonLat(event.coordinate);
+      this.mapClick.emit({lat: coordinate[1], lng: coordinate[0]});
+      return true;
+    }
+    return false;
   }
 
   mapClickHandler = (event: any) => {

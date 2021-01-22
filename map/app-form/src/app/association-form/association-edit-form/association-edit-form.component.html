@@ -157,6 +157,78 @@
         </div>
       </fieldset>
 
+      <h2>Kontakte</h2>
+      <div class="full-width"
+           *ngIf="getFormGroupsFromFormArray(associationForm.controls.contacts)"
+           formArrayName="contacts">
+        <fieldset *ngFor="let contactFormGroup of getFormGroupsFromFormArray(associationForm.controls.contacts); index as i"
+                  [formGroup]="contactFormGroup"
+                  [ngClass]="{ 'invalid-fieldset': !getFormArrayFormGroup('contacts', i)?.valid }">
+          <div class="p-fluid p-formgrid p-grid">
+            <div class="p-field">
+              <label for="contact-{{i}}-name-input">Name der Kontaktperson / des Ansprechpartners</label>
+              <input pInputText
+                     id="contact-{{i}}-name-input"
+                     type="text"
+                     [formControl]="contactFormGroup.controls.name"
+                     placeholder="Name der Kontaktperson / des Ansprechpartners"/>
+            </div>
+            <div class="p-field">
+              <label for="contact-{{i}}-phone-input">Telefonnummer</label>
+              <input pInputText
+                     id="contact-{{i}}-phone-input"
+                     type="text"
+                     [formControl]="contactFormGroup.controls.phone"
+                     placeholder="Telefonnummer"/>
+            </div>
+            <div class="p-field">
+              <label for="contact-{{i}}-fax-input">Faxnummber</label>
+              <input pInputText
+                     id="contact-{{i}}-fax-input"
+                     type="text"
+                     [formControl]="contactFormGroup.controls.fax"
+                     placeholder="Faxnummer"/>
+            </div>
+            <div class="p-field">
+              <label for="contact-{{i}}-mail-input">E-Mail-Adresse</label>
+              <input pInputText
+                     id="contact-{{i}}-mail-input"
+                     type="text"
+                     [formControl]="contactFormGroup.controls.mail"
+                     placeholder="E-Mail-Adresse"/>
+            </div>
+          </div>
+          <div class="association-links" style="text-align: center;">
+            <h4>Vorschau</h4>
+           <div class="association-contact">
+            <p *ngIf="contactFormGroup.value.name" class="name">{{ contactFormGroup.value.name }}</p>
+             <p *ngIf="contactFormGroup.value.phone" class="name">
+               <span [innerHTML]="getSocialMediaIcon('phone')"></span>
+               <a href="{{ telephoneLink(contactFormGroup.value.phone) }}">{{ contactFormGroup.value.phone }}</a>
+             </p>
+             <p *ngIf="contactFormGroup.value.fax" class="name">
+               <span [innerHTML]="getSocialMediaIcon('fax')"></span>
+               <a href="{{ telephoneLink(contactFormGroup.value.fax) }}">{{ contactFormGroup.value.fax }}</a>
+             </p>
+             <p *ngIf="contactFormGroup.value.mail" class="name">
+               <span [innerHTML]="getSocialMediaIcon('mail')"></span>
+               <a href="mailto:{{ contactFormGroup.value.mail }}">{{ contactFormGroup.value.mail }}</a>
+             </p>
+           </div>
+          </div>
+          <div class="form-array-remove">
+            <p-button (onClick)="formArrayRemoveAt(associationForm.controls.contacts, i)">
+              <i class="pi pi-trash"></i>
+            </p-button>
+          </div>
+        </fieldset>
+      </div>
+      <div class="form-array-add">
+        <p-button (onClick)="formArrayAdd(associationForm.controls.contacts,'contact', association?.id)">
+          <i class="pi pi-plus"></i>
+        </p-button>
+      </div>
+
       <h2>Textblöcke</h2>
       <fieldset>
         <h3>Ziele des Vereins</h3>
@@ -211,52 +283,6 @@
           </div>
         </div>
       </fieldset>
-
-      <h2>Kontakte</h2>
-      <div class="full-width"
-           *ngIf="getFormGroupsFromFormArray(associationForm.controls.contacts)"
-           formArrayName="contacts">
-        <fieldset *ngFor="let contactFormGroup of getFormGroupsFromFormArray(associationForm.controls.contacts); index as i"
-                  [formGroup]="contactFormGroup"
-                  [ngClass]="{ 'invalid-fieldset': !getFormArrayFormGroup('contacts', i)?.valid }">
-          <div class="p-fluid p-formgrid p-grid">
-            <div class="p-field">
-              <label for="contact-{{i}}-name-input">Name der Kontaktperson / des Ansprechpartners</label>
-              <input pInputText
-                     id="contact-{{i}}-name-input"
-                     type="text"
-                     [formControl]="contactFormGroup.controls.name"
-                     placeholder="Name der Kontaktperson / des Ansprechpartners"/>
-            </div>
-            <div class="p-field">
-              <label for="contact-{{i}}-phone-input">Telefonnummer</label>
-              <input pInputText
-                     id="contact-{{i}}-phone-input"
-                     type="text"
-                     [formControl]="contactFormGroup.controls.phone"
-                     placeholder="Telefonnummer"/>
-            </div>
-            <div class="p-field">
-              <label for="contact-{{i}}-mail-input">E-Mail-Adresse</label>
-              <input pInputText
-                     id="contact-{{i}}-mail-input"
-                     type="text"
-                     [formControl]="contactFormGroup.controls.mail"
-                     placeholder="E-Mail-Adresse"/>
-            </div>
-          </div>
-          <div class="form-array-remove">
-            <p-button (onClick)="formArrayRemoveAt(associationForm.controls.contacts, i)">
-              <i class="pi pi-trash"></i>
-            </p-button>
-          </div>
-        </fieldset>
-      </div>
-      <div class="form-array-add">
-        <p-button (onClick)="formArrayAdd(associationForm.controls.contacts,'contact', association?.id)">
-          <i class="pi pi-plus"></i>
-        </p-button>
-      </div>
 
       <h2>Bilder</h2>
       <div class="full-width"
@@ -339,12 +365,12 @@
             </div>
           </div>
           <div class="association-links" style="text-align: center;">
-            <h4>Vorschau</h4>
-            <div class="association-link">
-              <a [href]="associationForm.value.links[i].url" target="_blank"
-                 [title]="associationForm.value.links[i].linkText">{{ associationForm.value.links[i].linkText || associationForm.value.links[i].url }}</a>
-            </div>
+          <h4>Vorschau</h4>
+          <div class="association-link">
+            <a [href]="associationForm.value.links[i].url" target="_blank"
+               [title]="associationForm.value.links[i].linkText">{{ associationForm.value.links[i].linkText || associationForm.value.links[i].url }}</a>
           </div>
+        </div>
           <div class="form-array-remove">
             <p-button (onClick)="formArrayRemoveAt(associationForm.controls.links, i)">
               <i class="pi pi-trash"></i>

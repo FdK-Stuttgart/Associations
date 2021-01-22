@@ -15,6 +15,7 @@ function getEmptyFormArrayElement(type: 'contact' | 'link' | 'socialMedia' | 'im
         id: new FormControl(uuidv4()),
         name: new FormControl(''),
         phone: new FormControl(''),
+        fax: new FormControl(''),
         mail: new FormControl(''),
         associationId: new FormControl(associationId)
       });
@@ -80,16 +81,16 @@ export class AssociationEditFormComponent implements OnChanges {
   districtOptions: DropdownOption[] = [];
   activitiesOptions: DropdownOption[] = [];
 
-  readonly textBlockOptions = [
-    {
-      label: 'Plain Text',
-      value: 'plain'
-    },
-    {
-      label: 'HTML',
-      value: 'html'
-    }
-  ];
+  /*  readonly textBlockOptions = [
+      {
+        label: 'Plain Text',
+        value: 'plain'
+      },
+      {
+        label: 'HTML',
+        value: 'html'
+      }
+    ];*/
 
   readonly socialMediaOptions = Object.keys(SocialMediaPlatform)
     // @ts-ignore
@@ -209,6 +210,7 @@ export class AssociationEditFormComponent implements OnChanges {
           id: new FormControl(contact.id || uuidv4()),
           name: new FormControl(contact.name || ''),
           phone: new FormControl(contact.phone || ''),
+          fax: new FormControl(contact.fax || ''),
           mail: new FormControl(contact.mail || '')
         }));
       });
@@ -480,28 +482,19 @@ export class AssociationEditFormComponent implements OnChanges {
     return !!value && typeof value === 'string' && (value.startsWith('http://') || value.startsWith('https://'));
   }
 
- /* geocode(): any {
-    return Geocoder.geocode(this.givenAddress);
+  telephoneLink(input: string): string {
+    let output = 'tel:';
+    const num = input.match(/\d/g);
+    if (!num) {
+      return '';
+    }
+    let processedNum: string = num.join('');
+    if (processedNum.startsWith('0049')) {
+      processedNum = processedNum.replace('0049', '+49');
+    } else if (processedNum.startsWith('0')) {
+      processedNum = processedNum.replace('0', '+49');
+    }
+    output += processedNum;
+    return output;
   }
-
-  get givenAddress(): string {
-    const output = [];
-
-    if (this.associationForm.value?.street) {
-      output.push(this.associationForm.value.street);
-    }
-
-    if (this.associationForm.value?.postcode || this.associationForm.value?.city) {
-      let s = this.associationForm.value.postcode;
-      s += this.associationForm.value.postcode && this.associationForm.value.city ? ' ' : '';
-      s += this.associationForm.value.city;
-      output.push(s);
-    }
-
-    if (this.associationForm.value?.country) {
-      output.push(this.associationForm.value?.country);
-    }
-
-    return output.join(', ');
-  }*/
 }

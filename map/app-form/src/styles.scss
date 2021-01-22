@@ -445,3 +445,41 @@ fieldset, div.fieldset {
 .invalid-fieldset {
   border-color: #F74600;
 }
+
+#gcd-button-control {
+  display: none;
+}
+
+#gcd-container {
+  margin-top: -1px;
+  margin-left: 42px;
+  max-width: max(240px, 50%);
+  font-size: 70%;
+
+  .gcd-gl-control {
+    min-width: 240px;
+    width: 100%;
+    position: relative;
+    background-color: rgba(255, 255, 255, 0.75);
+    padding: 6px;
+    margin-top: 12px;
+
+    input {
+      width: 100%;
+    }
+  }
+
+  .gcd-gl-result {
+    padding: 4px 0 12px 24px;
+    background-color: rgba(255, 255, 255, 0.75);
+    margin: 0;
+
+    li {
+      text-align: left;
+    }
+  }
+}
+
+.invisible-marker {
+  display: none;
+}

@@ -23,7 +23,7 @@
             "allowedCommonJsDependencies": [
               "resize-observer"
             ],
-            "outputPath": "dist/AssociationMap",
+            "outputPath": "dist/",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",

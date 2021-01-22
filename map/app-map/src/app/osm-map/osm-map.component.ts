@@ -532,7 +532,13 @@ export class OsmMapComponent implements OnInit, OnDestroy {
           content += `<div class="association-contact">`;
           content += `<div class="association-contact-row">`;
           content += this.getSocialMediaIcon('phone', false);
-          content += `<p class="phone">${contact.phone}</p></div></div>`;
+          content += `<p class="phone"><a href="${telephoneLink(contact.phone)}">${contact.phone}</a></p></div></div>`;
+        }
+        if (contact.fax) {
+          content += `<div class="association-contact">`;
+          content += `<div class="association-contact-row">`;
+          content += this.getSocialMediaIcon('fax', false);
+          content += `<p class="fax"><a href="${telephoneLink(contact.fax)}">${contact.fax}</a></p></div></div>`;
         }
         if (contact.mail) {
           content += `<div class="association-contact">`;
@@ -700,4 +706,20 @@ export class OsmMapComponent implements OnInit, OnDestroy {
     document.getElementById('popup-close')?.removeEventListener('click', this.mapClickHandler);
     this.map?.removeEventListener('click', this.mapClickHandler);
   }
+}
+
+export function telephoneLink(input: string): string {
+  let output = 'tel:';
+  const num = input.match(/\d/g);
+  if (!num) {
+    return '';
+  }
+  let processedNum: string = num.join('');
+  if (processedNum.startsWith('0049')) {
+    processedNum = processedNum.replace('0049', '+49');
+  } else if (processedNum.startsWith('0')) {
+    processedNum = processedNum.replace('0', '+49');
+  }
+  output += processedNum;
+  return output;
 }

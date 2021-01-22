@@ -5,7 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "build:prod": "ng build --prod --base-href /",
+    "build:prod": "ng build --prod --base-href /edit/",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e"
@@ -25,6 +25,7 @@
     "@types/uuid": "^8.3.0",
     "angular-osm": "^1.2.2",
     "ol": "^6.4.3",
+    "ol-geocoder": "^4.1.2",
     "primeicons": "^4.1.0",
     "primeng": "^11.0.0",
     "resize-observer": "^1.0.0",
