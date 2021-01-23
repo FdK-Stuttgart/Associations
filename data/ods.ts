@@ -44,7 +44,7 @@ function drop(myArray, n) {
 }
 
 function sheetRows(sheet) {
-    return drop(range(getRowCount(sheet)), 1)
+    return drop(range(getRowCount(sheet)), 2) // WTF? indexing starts from 1?!?
 }
 
 function textAtPosition(sheet, p, row) {
@@ -61,7 +61,7 @@ function rowNr(idx) {
     return idx + 2
 }
 
-function replaceAll(s: string, match: string, replacement: string): string {
+export function replaceAll(s: string, match: string, replacement: string): string {
     // https://www.designcise.com/web/tutorial/how-to-replace-all-occurrences-of-a-word-in-a-javascript-string
     return s.replace(new RegExp(match, 'g'), replacement)
 }
@@ -107,8 +107,8 @@ export interface IHash {
 
 
 // hashmap keywords start with '_'
-const _idx = '_idx'
-const _address ='_address'
+export const _idx = '_idx'
+export const _address ='_address'
 
 function calcAddresses(sheet) {
     const f1 = (a: string) => replaceAll(a, '\n', ', ')
@@ -129,7 +129,7 @@ function association(sheet, row) {
     return textAtPosition(sheet, columnIdx('A'), row)
 }
 
-const _name = '_name'
+export const _name = '_name'
 function calcAssociations(sheet) {
     const f1 = (a: string) => replaceAll(a, '\n', ' ')
     const f2 = cleanup
@@ -149,7 +149,7 @@ function cityDistrict(sheet, row) {
     return textAtPosition(sheet, columnIdx('D'), row)
 }
 
-const _cityDistrict = '_cityDistrict'
+export const _cityDistrict = '_cityDistrict'
 function calcDistricts(sheet) {
     const f1 = identity
     const f2 = cleanup
@@ -169,7 +169,7 @@ function tableCoordinates(sheet, row) {
     return textAtPosition(sheet, columnIdx('E'), row)
 }
 
-const _coordinates = '_coordinates'
+export const _coordinates = '_coordinates'
 function calcCoordinates(sheet) {
     const f1 = identity
     const f2 = cleanup
@@ -189,7 +189,7 @@ function contact(sheet, row) {
     return textAtPosition(sheet, columnIdx('F'), row)
 }
 
-const _contact = '_contact'
+export const _contact = '_contact'
 function calcContacts(sheet) {
     const f1 = identity
     const f2 = cleanup
@@ -209,7 +209,7 @@ function logo(sheet, row) {
     return textAtPosition(sheet, columnIdx('G'), row)
 }
 
-const _logo = '_logo'
+export const _logo = '_logo'
 function calcLogos(sheet) {
     const f1 = identity
     const f2 = cleanup
@@ -229,7 +229,7 @@ function webPage(sheet, row) {
     return textAtPosition(sheet, columnIdx('H'), row)
 }
 
-const _webPage = '_webPage'
+export const _webPage = '_webPage'
 function calcWebPages(sheet) {
     const f1 = identity
     const f2 = cleanup
@@ -245,12 +245,11 @@ function calcWebPages(sheet) {
     })
 }
 
-
 function goal(sheet, row) {
     return textAtPosition(sheet, columnIdx('I'), row)
 }
 
-const _goal = '_goal'
+export const _goal = '_goal'
 function calcGoals(sheet) {
     const f1 = identity
     const f2 = cleanup
@@ -270,7 +269,7 @@ function activity(sheet, row) {
     return textAtPosition(sheet, columnIdx('J'), row)
 }
 
-const _activity = '_activity'
+export const _activity = '_activity'
 function calcActivities(sheet) {
     const f1 = identity
     const f2 = cleanup
@@ -286,7 +285,8 @@ function calcActivities(sheet) {
     })
 }
 
-function calcReadTable() {
+export const _desc = 'desc'
+export function calcReadTable() {
     var s0 = sheet0()
 
     var associations = calcAssociations(s0)
@@ -316,6 +316,7 @@ function calcReadTable() {
         m[_name]         = associations[y][_name]
         m[_address]      = addresses[y][_address]
         m[_cityDistrict] = districts[y][_cityDistrict]
+        m[_desc]         = (contacts[y][_contact] + "\n\n" + webPages[y][_webPage]).trim()
         m[_coordinates]  = coordinates[y][_coordinates]
         m[_contact]      = contacts[y][_contact]
         m[_logo]         = logos[y][_logo]
@@ -327,8 +328,8 @@ function calcReadTable() {
     return mm
 }
 
-var t = calcReadTable()
-// console.log('calcReadTable: '+t)
-for (var y in t) {
-    console.log('y: ' +y+ '; _name: ' + t[y][_name] + '; _address: ' + t[y][_address]);
-}
+// var t = calcReadTable()
+// // console.log('calcReadTable: '+t)
+// for (var y in t) {
+//     console.log('y: ' +y+ '; _name: ' + t[y][_name] + '; _address: ' + t[y][_address]);
+// }
