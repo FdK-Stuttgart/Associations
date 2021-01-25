@@ -16,14 +16,15 @@ export interface LatLng {
 export interface Association extends Address, LatLng {
   id: string;
   name: string;
+  shortName?: string;
   goals?: TextBlock;
   activities?: TextBlock;
   contacts?: Contact[];
   links?: Link[];
   socialMedia?: SocialMediaLink[];
   images?: Image[];
-  activityIds?: number[];
-  districtIds?: number[];
+  activityList?: any[];
+  districtList?: any[];
 }
 
 export interface Contact {

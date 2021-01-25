@@ -6,6 +6,7 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {AssociationFormModule} from './association-form/association-form.module';
 import {HttpClientModule} from '@angular/common/http';
 import {ButtonModule} from 'primeng/button';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 @NgModule({
   declarations: [
@@ -17,7 +18,8 @@ import {ButtonModule} from 'primeng/button';
         AppRoutingModule,
         HttpClientModule,
         AssociationFormModule,
-        ButtonModule
+        ButtonModule,
+        NgbModule
     ],
   bootstrap: [AppComponent]
 })

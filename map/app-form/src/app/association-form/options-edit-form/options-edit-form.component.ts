@@ -1,5 +1,9 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {DropdownOption} from '../../model/dropdown-option';
+import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
+import {
+  getInternalGroupedDropdownOptions,
+  getTopOptions,
+  InternalGroupedDropdownOption
+} from '../../model/dropdown-option';
 import {MysqlQueryService} from '../../services/mysql-query.service';
 import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import {MysqlPersistService} from '../../services/mysql-persist.service';
@@ -7,17 +11,7 @@ import {ConfirmationService, MessageService} from 'primeng/api';
 import {Subscription} from 'rxjs';
 import {ActivatedRoute, Router} from '@angular/router';
 import {environment} from '../../../environments/environment';
-
-function findDuplicates(arr: any[]): any[] {
-  const sortedArr = arr.sort();
-  const results = [];
-  for (let i = 0; i < sortedArr.length - 1; i++) {
-    if (sortedArr[i + 1] === sortedArr[i]) {
-      results.push(sortedArr[i]);
-    }
-  }
-  return results.sort();
-}
+import {v4 as uuidv4} from 'uuid';
 
 @Component({
   selector: 'app-edit-options-form',
@@ -31,7 +25,8 @@ function findDuplicates(arr: any[]): any[] {
 export class OptionsEditFormComponent implements OnInit, OnDestroy {
   optionType: 'activities' | 'districts' = 'activities';
 
-  options: DropdownOption[] = [];
+  options: InternalGroupedDropdownOption[] = [];
+  topOptions: InternalGroupedDropdownOption[] = [];
 
   optionsForm: FormGroup = new FormGroup({});
 
@@ -40,37 +35,17 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
   blocked = false;
   loadingText = 'Optionen werden abgerufen...';
 
+  jsonCollapsed = true;
+
   sub: Subscription | undefined;
 
-  get duplicateValues(): any[] {
-    if (!this.optionsForm?.value?.options?.length) {
-      return [];
-    }
-    const options = this.optionsForm.value.options;
-    const values = options.map((o: any) => o.value);
-    return findDuplicates(values);
-  }
-
-  get doAllOptionsHaveAnUpperCategory(): any[] {
-    if (!this.optionsForm?.value?.options?.length) {
-      return [];
-    }
-    const options = this.optionsForm.value.options;
-    const values: any[] = options.map((o: any) => o.value);
-    const missing: any[] = [];
-    values.forEach((v: number) => {
-      const floor100 = Math.floor(v / 100) * 100;
-      if (!values.includes(floor100) && !missing.includes(floor100)) {
-        missing.push(floor100);
-      }
-    });
-    return missing.sort();
-  }
+  sidebarExpanded = true;
 
   constructor(private mySqlQueryService: MysqlQueryService,
               private mySqlPersistService: MysqlPersistService,
               private messageService: MessageService,
               private confirmationService: ConfirmationService,
+              private cdr: ChangeDetectorRef,
               private formBuilder: FormBuilder,
               private router: Router,
               private route: ActivatedRoute) {
@@ -98,10 +73,13 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
     this.addedIndex = undefined;
 
     if (this.optionType === 'activities') {
-      this.options = (await this.mySqlQueryService.getActivitiesOptions())?.data || [];
+      this.options = getInternalGroupedDropdownOptions((await this.mySqlQueryService.getActivitiesOptions())?.data || []);
     } else if (this.optionType === 'districts') {
-      this.options = (await this.mySqlQueryService.getDistrictOptions())?.data || [];
+      this.options = getInternalGroupedDropdownOptions((await this.mySqlQueryService.getDistrictOptions())?.data || []);
     }
+
+    const selfTopOption = [{value: null, label: '(keine)', categoryLabel: null, isSubOption: false}];
+    this.topOptions = selfTopOption.concat(getTopOptions(this.options));
 
     this.optionsForm = new FormGroup({
       options: new FormArray([])
@@ -110,11 +88,13 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
     if (this.options?.length) {
       const optionControl = (this.optionsForm.controls.options as FormArray);
 
-      this.options.forEach((option: DropdownOption) => {
+      this.options.forEach((option: InternalGroupedDropdownOption) => {
         optionControl.push(this.formBuilder.group({
           value: new FormControl(option.value, [Validators.required, Validators.min(0)]),
-          _oldValue: new FormControl(option.value),
-          label: new FormControl(option.label, Validators.required)
+          category: new FormControl(option.category),
+          categoryLabel: this.optionsForm.controls.options.value.find(o => o.value === option.category)?.label || null,
+          label: new FormControl(option.label, Validators.required),
+          isSubOption: new FormControl(!!option.category)
         }));
       });
     }
@@ -178,98 +158,27 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * checks if a value is an upper category value
-   * @param value given option value
-   */
-  isUpperCategory(value: number): boolean {
-    return value % 100 === 0;
-  }
-
-  /**
-   * checks if an upper category has sub-options
-   * @param value the upper category value
-   */
-  hasSubOptions(value: number): boolean {
-    if (!this.isUpperCategory(value)) {
-      return false;
-    }
-
-    const options = this.optionsForm.controls.options.value;
-    const optionValues = options.map((o: any) => o.value);
-    const ceil100 = value + 100;
-
-    return optionValues.some((v: number) => v > value && v < ceil100);
-  }
-
-  /**
-   * checks if the given value is the last sub-option in an upper category
-   * @param value given sub-option value
-   */
-  isLastSubcategory(value: number): boolean {
-    if (this.isUpperCategory(value)) {
-      return false;
-    }
-
-    const options = this.optionsForm.controls.options.value;
-    const optionValues = options.map((o: any) => o.value);
-    const ceil100 = Math.ceil(value / 100) * 100;
-
-    return !optionValues.some((v: number) => v > value && v < ceil100);
-  }
-
-  /**
-   * returns the next available non-used upper category value
-   */
-  getNextAvailableUpperCategoryValue(): number {
-    const options = this.optionsForm.controls.options.value;
-    const upperCategories = options.filter((o: any) => o.value % 100 === 0).map((o: any) => o.value);
-    let i = 100;
-    while (upperCategories.includes(i)) {
-      i += 100;
-    }
-    return i;
-  }
-
-  /**
-   * returns the next available non-used sub option value (or undefined, if all values are already used)
-   * @param value value of the current sub-option
-   */
-  getNextAvailableSubOptionValue(value: number): number | undefined {
-    const floor100 = Math.floor(value / 100) * 100;
-    let ceil100 = Math.ceil(value / 100) * 100;
-    if (ceil100 === floor100) {
-      ceil100 += 100;
-    }
-    const options = this.optionsForm.controls.options.value;
-    const optionValues = options.map((o: any) => o.value).filter((v: number) => v > floor100 && v < ceil100);
-    let i = floor100;
-    do {
-      i++;
-    } while (optionValues.includes(i) && i < ceil100);
-    if (optionValues.includes(i)) {
-      return undefined;
-    }
-    return i;
-  }
-
-  /**
    * adds a sub-option to the form array
-   * @param value value of the option to add
+   * @param index position to insert
+   * @param category top category to add the option to
    */
-  addOption(value: number): void {
+  addOption(index: number, category: string): void {
     this.addedIndex = undefined;
+
+    const value = uuidv4();
 
     const formArray: FormArray = this.optionsForm.controls.options as FormArray;
 
     if (formArray) {
       const formGroup: FormGroup = this.formBuilder.group({
         value: new FormControl(value, [Validators.required, Validators.min(0)]),
-        _oldValue: new FormControl(value),
-        label: new FormControl('', Validators.required)
+        category: new FormControl(category),
+        label: new FormControl('', Validators.required),
+        categoryLabel: this.topOptions.find(o => o.value === category)?.label || null,
+        isSubOption: true
       });
 
-      formArray.push(formGroup);
-      formArray.controls = this.sortFormArray(this.optionsForm.controls.options as FormArray);
+      formArray.insert(index, formGroup);
 
       const added = formArray.controls.find((fc: AbstractControl) => fc === formGroup) as FormGroup;
       if (added) {
@@ -288,58 +197,6 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
         });
       }
     }
-  }
-
-  /**
-   * adds an upper category to the form array
-   */
-  addUpperCategory(): void {
-    this.addedIndex = undefined;
-
-    const formArray: FormArray = this.optionsForm.controls.options as FormArray;
-
-    if (formArray) {
-      const value = this.getNextAvailableUpperCategoryValue();
-      const formGroup: FormGroup = this.formBuilder.group({
-        value: new FormControl(value, [Validators.required, Validators.min(0)]),
-        _oldValue: new FormControl(value),
-        label: new FormControl('', Validators.required)
-      });
-
-      formArray.push(formGroup);
-      formArray.controls = this.sortFormArray(this.optionsForm.controls.options as FormArray);
-
-      const added = formArray.controls.find((fc: AbstractControl) => fc === formGroup) as FormGroup;
-      if (added) {
-        this.addedIndex = formArray.controls.indexOf(added);
-
-        this.optionsForm.updateValueAndValidity();
-
-        setTimeout(() => {
-          const elem = document.getElementsByClassName('added')?.item(0) as Element;
-          if (elem) {
-            const labelInput = elem.querySelector('.label-input');
-            if (labelInput) {
-              (labelInput as HTMLInputElement)?.focus();
-            }
-          }
-        });
-      }
-    }
-  }
-
-  /**
-   * sorts the form array by option values
-   * @param options all form array options
-   */
-  private sortFormArray(options: FormArray): AbstractControl[] {
-    if (!options?.length) {
-      return [];
-    }
-
-    return options.controls.sort((a: AbstractControl, b: AbstractControl) =>
-      a.value.value < b.value.value ? -1 : a.value.value > b.value.value ? 1 : 0
-    );
   }
 
   /**
@@ -395,9 +252,12 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
     const options = this.optionsForm.value.options.map((o: any) => {
       return {
         label: o.label,
-        value: o.value
+        value: o.value,
+        category: o.category === '' ? null : o.category
       };
-    });
+    }).sort((a: any, b: any) =>
+      !a.category && !!b.category ? -1 : !!a.category && !b.category ? 1 : 0
+    );
     if (this.optionType === 'activities') {
       await this.mySqlPersistService.createActivityOptions(options).toPromise()
         .then(async () => {
@@ -445,27 +305,188 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
    * checks if any changes were made in the form
    */
   private hasFormValueChanged(): boolean {
-    const oldOptions = this.options.map((o: DropdownOption) => {
+    const oldOptions = this.options.map((o: InternalGroupedDropdownOption) => {
       return {
         label: o.label,
-        value: o.value
+        value: o.value,
+        category: o.category === '' ? null : o.category
       };
-    }).sort((option1: DropdownOption, option2: DropdownOption) =>
+    }).sort((option1: any, option2: any) =>
       option1.value < option2.value ? -1 : (option1.value > option2.value ? 1 : (option1.label < option2.value ? -1 : 1))
     );
     const newOptions = this.optionsForm.value.options.map((o: any) => {
       return {
         label: o.label,
-        value: o.value
+        value: o.value,
+        category: o.category === '' ? null : o.category
       };
-    }).sort((option1: DropdownOption, option2: DropdownOption) =>
+    }).sort((option1: any, option2: any) =>
       option1.value < option2.value ? -1 : (option1.value > option2.value ? 1 : (option1.label < option2.value ? -1 : 1))
     );
 
     return JSON.stringify(oldOptions) !== JSON.stringify(newOptions);
   }
 
+  /**
+   * sorts the form array by option categories and values
+   * @param options all form array options
+   */
+  private sortFormArray(options: FormArray): AbstractControl[] {
+    this.blocked = true;
+    this.loadingText = 'Optionen sortieren...';
+    if (!options?.length) {
+      return [];
+    }
+
+    const sortedOptions = options.controls.sort((ac1: AbstractControl, ac2: AbstractControl) => {
+      const a: InternalGroupedDropdownOption = {
+        value: ac1.value.value,
+        label: ac1.value.label,
+        category: ac1.value.category,
+        categoryLabel: ac1.value.category != null
+          ? this.options.find((o: InternalGroupedDropdownOption) => o.category === ac1.value.category)?.categoryLabel || ac1.value.label
+          : ac1.value.label,
+        isSubOption: ac1.value.category != null
+      };
+
+      const b: InternalGroupedDropdownOption = {
+        value: ac2.value.value,
+        label: ac2.value.label,
+        category: ac2.value.category,
+        categoryLabel: ac2.value.category != null
+          ? this.options.find((o: InternalGroupedDropdownOption) => o.category === ac2.value.category)?.categoryLabel || ac2.value.label
+          : ac2.value.label,
+        isSubOption: ac2.value.category != null
+      };
+
+      return a.categoryLabel < b.categoryLabel ? -1 :
+        (a.categoryLabel > b.categoryLabel ? 1 :
+            (!!a.isSubOption && !b.isSubOption ? 1 :
+                (!a.isSubOption && !!b.isSubOption ? -1 :
+                    (a.label < b.label ? -1 :
+                        (a.label > b.label ? 1 : 0)
+                    )
+                )
+            )
+        );
+    });
+    this.blocked = false;
+    return sortedOptions;
+  }
+
+  changeCategoryDropdown(newCategory: any, options: AbstractControl, optionForm: FormGroup): void {
+    const value = optionForm.value.value;
+    const oldCategory = optionForm.value.category;
+
+    if (newCategory !== oldCategory) {
+      if (!newCategory || !oldCategory) {
+
+        this.confirmationService.confirm({
+          header: 'Achtung!',
+          message: `Wenn Sie eine Unterkategorie in eine übergeordnete Kategorie abändern oder<br>`
+            + `eine übergeordnete Kategorie in eine Unterkategorie verwandeln, kann dies zu<br>`
+            + `fehlerhaften Zuordnungen von `
+            + `${this.optionType === 'activities' ? 'Tätigkeitsfeldern' : (this.optionType === 'districts' ? 'Aktivitätsgebieten' : 'Optionen')} führen!`,
+          acceptLabel: 'OK',
+          rejectLabel: 'Abbrechen',
+          closeOnEscape: true,
+          accept: () => {
+            // set new category value
+            optionForm.controls.category.setValue(newCategory);
+
+            // set isSubOption control
+            const isSubOption = !!newCategory;
+            optionForm.controls.isSubOption.setValue(isSubOption);
+
+            // recalculate all top options, delete invalid top options from form and recalculate top options again
+            this.recalculateTopOptions();
+            this.deleteInvalidTopOptions();
+            this.recalculateTopOptions();
+
+            // sort options by category label and label
+            if (options instanceof FormArray) {
+              this.sortFormArray(options);
+            }
+
+            // scroll to shifted form input
+            this.scrollToShiftedElementWithValue(value);
+          },
+          reject: () => {
+            optionForm.controls.category.setValue(oldCategory);
+          }
+        });
+      } else {
+        // set new category value
+        optionForm.controls.category.setValue(newCategory);
+
+        // sort options by category label and label
+        if (options instanceof FormArray) {
+          this.sortFormArray(options);
+        }
+
+        // scroll to shifted form input
+        this.scrollToShiftedElementWithValue(value);
+      }
+    }
+  }
+
+  /**
+   * recalculates a list of all available top options
+   */
+  recalculateTopOptions(): void {
+    const selfTopOption = [{value: null, label: '(keine)', categoryLabel: null, isSubOption: false}];
+    const newTopOptions: InternalGroupedDropdownOption[] = (this.optionsForm.controls.options as FormArray).controls
+      .filter((formGroup: FormGroup) => {
+        return !formGroup.value.category;
+      }).map((formGroup: FormGroup) => {
+        return {
+          value: formGroup.value.value,
+          label: formGroup.value.label,
+          category: null,
+          categoryLabel: null,
+          isSubOption: false
+        };
+      });
+    this.topOptions = selfTopOption.concat(newTopOptions);
+  }
+
+  /**
+   * deletes invalid top options that are not existing anymore from form fields
+   */
+  deleteInvalidTopOptions(): void {
+    const options: FormArray = this.optionsForm.controls.options as FormArray;
+    options.controls.forEach((fg: FormGroup) => {
+      const categoryControl = fg.controls.category;
+      const categoryValue = categoryControl.value;
+      const topOptionValues = this.topOptions.map(to => to.value);
+      if (!topOptionValues.includes(categoryValue)) {
+        categoryControl.setValue(null);
+      }
+    });
+  }
+
+  /**
+   * sorts the form array, looks for the changed element by its value and scrolls to the element after sorting
+   * @param value the value to search for
+   */
+  scrollToShiftedElementWithValue(value: string): void {
+    // scroll to shifted form input
+    this.optionsForm.updateValueAndValidity();
+    this.cdr.detectChanges();
+    setTimeout(() => {
+      const element = document.querySelector('input[type="text"][value="' + value + '"]');
+
+      if (element) {
+        window.scrollTo({top: element.scrollTop, behavior: 'smooth'});
+      }
+    });
+  }
+
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
+  }
+
+  toggleSidebar(): void {
+    this.sidebarExpanded = !this.sidebarExpanded;
   }
 }

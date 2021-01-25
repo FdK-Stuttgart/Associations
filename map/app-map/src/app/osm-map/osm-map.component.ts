@@ -11,7 +11,7 @@ import {Coordinate} from 'ol/coordinate';
 import BaseEvent from 'ol/events/Event';
 import {ResizeObserver} from 'resize-observer';
 import {Size} from 'ol/size';
-import {DropdownOption, getSubOptions} from '../model/dropdown-option';
+import {DropdownOption, getSubOptions, InternalGroupedDropdownOption} from '../model/dropdown-option';
 import {AutoComplete} from 'primeng/autocomplete';
 import {MysqlQueryService} from '../services/mysql-query.service';
 import {MyHttpResponse} from '../model/http-response';
@@ -34,8 +34,8 @@ export class OsmMapComponent implements OnInit, OnDestroy {
   advancedSearchVisible = false;
   districtOptions: DropdownOption[] = [];
   activitiesOptions: DropdownOption[] = [];
-  selectedDistricts: number[] = [];
-  selectedActivities: number[] = [];
+  selectedDistricts: any[] = [];
+  selectedActivities: any[] = [];
 
   map?: Map;
   markers: Overlay[] = [];
@@ -275,19 +275,21 @@ export class OsmMapComponent implements OnInit, OnDestroy {
     }
 
     if (this.selectedActivities?.length || this.selectedDistricts?.length) {
+
       filteredResult = filteredResult.filter((s: Association) => {
         let filtered = true;
         if (this.selectedDistricts?.length) {
-          filtered = s.districtIds?.some((id: number) =>
-            this.selectedDistricts.includes(id)
+          filtered = s.districtList?.some((value: any) =>
+            this.selectedDistricts.includes(value)
           ) ?? false;
           if (!filtered) {
             return filtered;
           }
         }
+
         if (this.selectedActivities?.length) {
-          filtered = s.activityIds?.some((id: number) =>
-            this.selectedActivities.includes(id)
+          filtered = s.activityList?.some((value: any) =>
+            this.selectedActivities.includes(value)
           ) ?? false;
         }
         return filtered;
@@ -299,6 +301,19 @@ export class OsmMapComponent implements OnInit, OnDestroy {
     }
     return true;
   }
+
+  /**
+   * returns only the sub options for an array of selected options
+   * @param selectedItems an array of ids
+   * @param options the options array
+   */
+  getSubOptions(selectedItems: string[], options: DropdownOption[]): string[] {
+    return selectedItems.filter((s: string) => {
+      const option = options.find((o: DropdownOption) => o.value === s);
+      return option && !!option.category;
+    });
+  }
+
 
   /**
    * adds a new marker to the map
@@ -588,15 +603,15 @@ export class OsmMapComponent implements OnInit, OnDestroy {
       content += `</div>`;
     }
 
-    if ((association.districtIds && association.districtIds.length > 0)
-      || (association.activityIds && association.activityIds.length > 0)) {
+    if ((association.districtList && association.districtList.length > 0)
+      || (association.activityList && association.activityList.length > 0)) {
       content += `<h2>Schlagwörter</h2>`;
     }
 
-    if (association.districtIds && association.districtIds.length > 0) {
+    if (association.districtList && association.districtList.length > 0) {
       content += `<div class="association-active-in"><h3>Aktivitätsgebiete</h3>`;
       content += `<div class="association-chips-container">`;
-      for (const activeIn of getSubOptions(this.districtOptions, association.districtIds)) {
+      for (const activeIn of getSubOptions(this.districtOptions, association.districtList)) {
         content += `<div class="association-chips">`;
         content += activeIn.label;
         content += `</div>`;
@@ -605,10 +620,10 @@ export class OsmMapComponent implements OnInit, OnDestroy {
       content += `</div>`;
     }
 
-    if (association.activityIds && association.activityIds.length > 0) {
+    if (association.activityList && association.activityList.length > 0) {
       content += `<div class="association-chips-container"><h3>Tätigkeitsfelder</h3>`;
       content += `<div class="association-chips-container">`;
-      for (const activity of getSubOptions(this.activitiesOptions, association.activityIds)) {
+      for (const activity of getSubOptions(this.activitiesOptions, association.activityList)) {
         content += `<div class="association-chips">`;
         content += activity.label;
         content += `</div>`;
@@ -689,14 +704,6 @@ export class OsmMapComponent implements OnInit, OnDestroy {
   resetActivitiesFilter(): void {
     this.selectedActivities = [];
     this.filterAssociations();
-  }
-
-  /**
-   * returns only the sub options for an array of selected options
-   * @param selectedItems an array of ids
-   */
-  getSubOptions(selectedItems: number[]): number[] {
-    return selectedItems.filter((v: number) => v % 100 !== 0);
   }
 
   /**

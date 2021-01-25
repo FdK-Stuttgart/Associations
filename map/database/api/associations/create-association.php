@@ -22,6 +22,7 @@ if (isset($postdata) && !empty($postdata)) {
     // Sanitize.
     $id = mysqli_real_escape_string($con, trim($request->id));
     $name = mysqli_real_escape_string($con, trim($request->name));
+    $shortName = mysqli_real_escape_string($con, trim($request->shortName));
     $lat = mysqli_real_escape_string($con, trim($request->lat));
     $lng = mysqli_real_escape_string($con, trim($request->lng));
     $addressLine1 = mysqli_real_escape_string($con, trim($request->addressLine1));
@@ -35,8 +36,8 @@ if (isset($postdata) && !empty($postdata)) {
     $goals_text = mysqli_real_escape_string($con, trim($request->goals->text));
     $activities_format = mysqli_real_escape_string($con, trim($request->activities->format));
     $activities_text = mysqli_real_escape_string($con, trim($request->activities->text));
-    $activityIds = json_encode($request->activityIds);
-    $districtIds = json_encode($request->districtIds);
+    $activityList = json_encode($request->activityList, JSON_UNESCAPED_UNICODE);
+    $districtList = json_encode($request->districtList, JSON_UNESCAPED_UNICODE);
     
     $contacts = $request->contacts;
     $links = $request->links;
@@ -46,6 +47,7 @@ if (isset($postdata) && !empty($postdata)) {
     // Update.
     $sql = "REPLACE INTO associations SET id = '$id', 
                                        name = '$name', 
+                                       shortName = '$shortName',
                                        lat = $lat, 
                                        lng = $lng, 
                                        addressLine1 = '$addressLine1',
@@ -59,8 +61,8 @@ if (isset($postdata) && !empty($postdata)) {
                                        goals_text = '$goals_text',
                                        activities_format = '$activities_format',
                                        activities_text = '$activities_text',
-                                       districtIds = '$districtIds',
-                                       activityIds = '$activityIds';";
+                                       districtList = '$districtList',
+                                       activityList = '$activityList';";
 
     $sql .= "\n\nDELETE FROM contacts WHERE associationId = '$id';";
 
@@ -71,12 +73,14 @@ if (isset($postdata) && !empty($postdata)) {
             $contactName = mysqli_real_escape_string($con, trim($contact->name));
             $phone = mysqli_real_escape_string($con, trim($contact->phone));
             $mail = mysqli_real_escape_string($con, trim($contact->mail));
+			$fax = mysqli_real_escape_string($con, trim($contact->fax));
             $associationId = $id;
 
             $sql .= "\n\nINSERT INTO contacts SET id = '$contactId',
                                  name = '$contactName',
                                  phone = '$phone',
                                  mail = '$mail',
+								 fax = '$fax',
                                  associationId = '$id',
                                  orderIndex = $index;";
 
@@ -155,11 +159,7 @@ if (isset($postdata) && !empty($postdata)) {
                 }
                 mysqli_free_result($result);
             }
-
-            if (mysqli_more_results($con)) {
-                printf("-----------------\n");
-            }
-        } while (mysqli_next_result($con));
+        } while (mysqli_more_results($con) && mysqli_next_result($con));
 
         http_response_code(204);
 

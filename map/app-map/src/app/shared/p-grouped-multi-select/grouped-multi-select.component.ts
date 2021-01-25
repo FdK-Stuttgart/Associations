@@ -20,20 +20,20 @@ export class GroupedMultiSelectComponent implements OnInit, OnChanges, ControlVa
   @Input() styleClass = '';
   @Input() placeholder = '';
   @Input() labelPlural = 'Elemente';
-  @Input() selectUpperCategories = true;
+  @Input() selectTopOptions = true;
 
   @ViewChild('multiSelect', {static: true}) multiSelect!: MultiSelect;
 
   internalGroupedOptions: InternalGroupedDropdownOption[] = [];
 
   // tslint:disable-next-line:variable-name
-  private _value: number[] = [];
+  private _value: any[] = [];
 
-  get value(): number[] {
+  get value(): any[] {
     return this._value;
   }
 
-  set value(val: number[]) {
+  set value(val: any[]) {
     this._value = val;
     this.onChange(val);
     this.onTouch(val);
@@ -52,7 +52,7 @@ export class GroupedMultiSelectComponent implements OnInit, OnChanges, ControlVa
     this.onTouch = fn;
   }
 
-  writeValue(val: number[]): void {
+  writeValue(val: any[]): void {
     this.value = val;
     this.multiSelect.writeValue(val);
   }
@@ -81,7 +81,7 @@ export class GroupedMultiSelectComponent implements OnInit, OnChanges, ControlVa
       });
 
     const selectedLabels = selectedOptions?.length > 0 ? selectedOptions
-      .filter((o: any) => o.value % 100 !== 0)
+      .filter((o: any) => !!o.category)
       .map((o: InternalGroupedDropdownOption) => o.label) : [];
 
     if (!selectedLabels.length) {
@@ -97,34 +97,46 @@ export class GroupedMultiSelectComponent implements OnInit, OnChanges, ControlVa
 
   changeSelectedOptions(event: any): void {
     let selectedItems = this.value;
-    const itemChecked = event.value.length > this.value.length;
-    const groupHeader = event.itemValue % 100 === 0;
+    const isItemChecked = event.value.length > this.value.length;
+    const checkedItem = this.internalGroupedOptions.find((o: InternalGroupedDropdownOption) => o.value === event.itemValue);
+    const checkedItemCategory = checkedItem?.category || checkedItem?.value;
+    const isGroupHeader = !checkedItem?.isSubOption;
 
-    if (itemChecked) {
+    if (isItemChecked) {
       selectedItems.push(event.itemValue);
-      if (groupHeader) {
+      if (isGroupHeader) {
         const subOptionsToAdd = this.internalGroupedOptions.filter(
-          (o: InternalGroupedDropdownOption) => o.value > event.itemValue && o.value < (event.itemValue + 100)
+          (o: InternalGroupedDropdownOption) => o.category === checkedItemCategory
         );
         if (subOptionsToAdd.length) {
           subOptionsToAdd.forEach((optionToAdd: InternalGroupedDropdownOption) => {
-            selectedItems.push(optionToAdd.value);
+            if (!selectedItems.includes(optionToAdd.value)) {
+              selectedItems.push(optionToAdd.value);
+            }
           });
         }
       }
     } else {
       selectedItems = selectedItems.filter((v: any) => v !== event.itemValue);
-      if (groupHeader) {
+      if (isGroupHeader) {
         selectedItems = selectedItems.filter(
-          (v: any) => v < event.itemValue || v >= (event.itemValue + 100)
+          (v: any) => {
+            const option = this.internalGroupedOptions.find((o: InternalGroupedDropdownOption) => o.value === v);
+            return !!option && option.category !== checkedItemCategory;
+          }
         );
       }
     }
 
-
-    if (this.selectUpperCategories) {
-      selectedItems = this.selectAllUpperCategories(selectedItems);
+    if (this.selectTopOptions) {
+      selectedItems = this.selectAllTopCategories(selectedItems);
     }
+
+    // make sure only available options are left in the array
+    selectedItems = selectedItems.filter((value: any) => {
+      return !!value && this.internalGroupedOptions.map(o => o.value).includes(value);
+    });
+
     this.writeValue(selectedItems);
   }
 
@@ -132,11 +144,14 @@ export class GroupedMultiSelectComponent implements OnInit, OnChanges, ControlVa
     return option.isSubOption;
   }
 
-  private selectAllUpperCategories(tempSelectedOptions: number[]): number[] {
-    tempSelectedOptions.forEach((val: number) => {
-      const floored = Math.floor(val / 100) * 100;
-      if (!tempSelectedOptions.includes(floored)) {
-        tempSelectedOptions.push(floored);
+  private selectAllTopCategories(tempSelectedOptions: any[]): any[] {
+    tempSelectedOptions.forEach((val: any) => {
+      const option = this.internalGroupedOptions.find((o: InternalGroupedDropdownOption) => o.value === val);
+      const topOption = this.internalGroupedOptions.find(
+        (o: InternalGroupedDropdownOption) => option && !o.isSubOption && o.value === option?.category
+      );
+      if (topOption && !tempSelectedOptions.includes(topOption.value)) {
+        tempSelectedOptions.push(topOption.value);
       }
     });
     return tempSelectedOptions.sort();

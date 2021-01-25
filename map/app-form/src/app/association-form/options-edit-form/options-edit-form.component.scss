@@ -10,26 +10,41 @@
   }
 }
 
-.button-row {
-  margin-top: 24px;
-  text-align: center;
-  padding: 12px;
+.hidden-input {
+  visibility: hidden;
+}
 
-  p-button ::ng-deep button.p-button {
-    margin-right: 6px;
-    margin-top: 6px;
+.option-entry {
+  padding: 4px;
+  border-bottom: #dedede 1px solid;
+  transition: background-color 0.5s;
+  background-color: transparent;
+
+  &:first-of-type {
+    border-top: #dedede 1px solid;
+  }
+
+  &.selected {
+    background-color: rgba(0, 0, 0, 0.05);
   }
 }
 
-.added {
-  background-color: rgba(221, 220, 212, 0.25);
-  margin-left: -20px;
-  margin-right: -20px;
-  padding-left: 20px;
-  padding-right: 20px;
+.empty-entry {
+  text-align: center;
+  padding-bottom: 24px;
+  padding-top: 24px;
 }
 
-.form-row {
-  padding-bottom: 12px;
-  transition: background-color 2s;
+.icon-padding {
+  padding-right: 4px;
+}
+
+.icon-and-text {
+  display: flex;
+  align-items: center;
+
+  .icon {
+    padding-right: 4px;
+    min-width: 24px;
+  }
 }

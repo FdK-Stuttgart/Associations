@@ -17,7 +17,8 @@ $sql = "SELECT
             links.id AS linkId, 
             socialmedia.id AS socialMediaId, 
             contacts.id AS contactId,
-            associations.name AS name,            
+            associations.name AS name,
+            shortName,            
             lat,
             lng,
             addressLine1,
@@ -31,11 +32,12 @@ $sql = "SELECT
             goals_text,
             activities_format,
             activities_text,
-            activityIds,
-            districtIds,
+            activityList,
+            districtList,
             contacts.name AS contactName,
             phone,
-            mail,            
+            mail,      
+			fax,
             contacts.orderIndex AS contactOrderIndex,
             links.url AS linkUrl,
             links.linkText AS linkLinkText,
@@ -71,6 +73,7 @@ if ($result = mysqli_query($con, $sql)) {
 
             $associations[$j]['id'] = $id;
             $associations[$j]['name'] = $row['name'];
+            $associations[$j]['shortName'] = $row['shortName'];
             $associations[$j]['lat'] = $row['lat'];
             $associations[$j]['lng'] = $row['lng'];
             $associations[$j]['addressLine1'] = $row['addressLine1'];
@@ -89,8 +92,8 @@ if ($result = mysqli_query($con, $sql)) {
             unset($associations[$j]['goals_format']);
             unset($associations[$j]['goals_text']);
 
-            $associations[$j]['activityIds'] = $row['activityIds'];
-            $associations[$j]['districtIds'] = $row['districtIds'];
+            $associations[$j]['activityList'] = $row['activityList'];
+            $associations[$j]['districtList'] = $row['districtList'];
 
             $associations[$j]['images'] = array();
             $associations[$j]['links'] = array();
@@ -156,6 +159,7 @@ if ($result = mysqli_query($con, $sql)) {
             $contact['id'] = $contactId;
             $contact['name'] = $row['contactName'];
             $contact['phone'] = $row['phone'];
+			$contact['fax'] = $row['fax'];
             $contact['mail'] = $row['mail'];
             $contact['associationId'] = $id;
             $contact['orderIndex'] = $row['contactOrderIndex'];

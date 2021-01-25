@@ -4,10 +4,15 @@ h2 {
 
 label {
   font-size: 75%;
+  margin-top: 16px;
 }
 
 h4 {
-  margin-bottom: 4px;
+  margin-top: 24px;
+  margin-bottom: -4px;
+}
+h6 {
+  margin-top: 16px;
 }
 
 app-grouped-multi-select {

@@ -1,12 +1,21 @@
 import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
 import {SocialMediaPlatform, Association} from '../../model/association';
-import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
+import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators} from '@angular/forms';
 import {DropdownOption} from '../../model/dropdown-option';
 import {v4 as uuidv4} from 'uuid';
 import {MysqlPersistService} from '../../services/mysql-persist.service';
 import {ConfirmationService, MessageService} from 'primeng/api';
 import {MyHttpResponse} from '../../model/http-response';
 import {MysqlQueryService} from '../../services/mysql-query.service';
+
+function contactFilledValidator(): ValidatorFn {
+  return (control: FormGroup): { [key: string]: boolean } | null => {
+    if (!control.value.name && !control.value.phone && !control.value.fax && !control.value.mail) {
+      return {contactfilled: true};
+    }
+    return null;
+  };
+}
 
 function getEmptyFormArrayElement(type: 'contact' | 'link' | 'socialMedia' | 'image', associationId: string): FormGroup {
   switch (type) {
@@ -18,7 +27,7 @@ function getEmptyFormArrayElement(type: 'contact' | 'link' | 'socialMedia' | 'im
         fax: new FormControl(''),
         mail: new FormControl(''),
         associationId: new FormControl(associationId)
-      });
+      }, contactFilledValidator());
     case 'link':
       return new FormGroup({
         id: new FormControl(uuidv4()),
@@ -55,10 +64,6 @@ function getEmptyFormArrayElement(type: 'contact' | 'link' | 'socialMedia' | 'im
   ]
 })
 export class AssociationEditFormComponent implements OnChanges {
-
-  blocked = false;
-  loadingText = 'Verein wird gespeichert...';
-
   jsonCollapsed = true;
 
   associations: Association[] = [];
@@ -81,16 +86,7 @@ export class AssociationEditFormComponent implements OnChanges {
   districtOptions: DropdownOption[] = [];
   activitiesOptions: DropdownOption[] = [];
 
-  /*  readonly textBlockOptions = [
-      {
-        label: 'Plain Text',
-        value: 'plain'
-      },
-      {
-        label: 'HTML',
-        value: 'html'
-      }
-    ];*/
+  @Output() blockUi: EventEmitter<{ block: boolean, message?: string }> = new EventEmitter<{ block: boolean, message?: string }>();
 
   readonly socialMediaOptions = Object.keys(SocialMediaPlatform)
     // @ts-ignore
@@ -126,7 +122,7 @@ export class AssociationEditFormComponent implements OnChanges {
    * queries all associations, fill in the edited association data into the form
    */
   private async initForm(): Promise<void> {
-    this.blocked = true;
+    this.emitBlockUi(true, 'Verein wird abgerufen...');
 
     this.districtOptions = (await this.mySqlQueryService.getDistrictOptions())?.data || [];
     this.activitiesOptions = (await this.mySqlQueryService.getActivitiesOptions())?.data || [];
@@ -144,7 +140,7 @@ export class AssociationEditFormComponent implements OnChanges {
           detail: httpResponse?.errorMessage || '',
           key: 'formToast'
         });
-        this.blocked = false;
+        this.emitBlockUi(false);
         return;
       } else {
         this.association = this.associations.find((s: Association) => s.id === this.selectedAssociationId);
@@ -155,7 +151,7 @@ export class AssociationEditFormComponent implements OnChanges {
             detail: `Der Verein mit der id ${this.selectedAssociationId}} konnte nicht in der Datenbank gefunden werden.`,
             key: 'formToast'
           });
-          this.blocked = false;
+          this.emitBlockUi(false);
           return;
         }
       }
@@ -183,6 +179,7 @@ export class AssociationEditFormComponent implements OnChanges {
     this.associationForm = new FormGroup({
       id: new FormControl(id),
       name: new FormControl(this.association?.name || '', Validators.required),
+      shortName: new FormControl(this.association?.shortName || '', [Validators.maxLength(50)]),
       lat: new FormControl(this.association?.lat || 0, [Validators.required, Validators.min(-90), Validators.max(90)]),
       lng: new FormControl(this.association?.lng || 0, [Validators.required, Validators.min(-180), Validators.max(180)]),
       addressLine1: new FormControl(this.association?.addressLine1 || ''),
@@ -198,8 +195,8 @@ export class AssociationEditFormComponent implements OnChanges {
       socialMedia: new FormArray([]),
       goals: this.goalsForm,
       activities: this.activityForm,
-      districtIds: new FormControl(this.association?.districtIds || []),
-      activityIds: new FormControl(this.association?.activityIds || [])
+      districtList: new FormControl(this.association?.districtList || []),
+      activityList: new FormControl(this.association?.activityList || [])
     });
 
     if (this.association?.contacts?.length) {
@@ -212,8 +209,10 @@ export class AssociationEditFormComponent implements OnChanges {
           phone: new FormControl(contact.phone || ''),
           fax: new FormControl(contact.fax || ''),
           mail: new FormControl(contact.mail || '')
-        }));
+        }, {validators: contactFilledValidator()}));
       });
+    } else {
+      this.formArrayAdd(this.associationForm.controls.contacts as FormArray, 'contact', this.associationForm.value.id);
     }
 
     if (this.association?.links?.length) {
@@ -258,7 +257,7 @@ export class AssociationEditFormComponent implements OnChanges {
       this.associationForm.updateValueAndValidity();
     });
 
-    this.blocked = false;
+    this.emitBlockUi(false);
   }
 
   /**
@@ -340,6 +339,15 @@ export class AssociationEditFormComponent implements OnChanges {
   }
 
   /**
+   * checks if a specific form group has a specific error
+   * @param formGroup the form group control to check
+   * @param error the error to check for
+   */
+  public errorHandlingFormGroup(formGroup: FormGroup, error: string): boolean {
+    return formGroup.hasError(error);
+  }
+
+  /**
    * checks if a specific form control in a specific form array has a specific error
    * @param array the form array to check
    * @param index the index of the form group to check
@@ -414,11 +422,10 @@ export class AssociationEditFormComponent implements OnChanges {
    * submits form data, creates or updated the edited association
    */
   async submit(): Promise<void> {
-    this.blocked = true;
-    this.loadingText = 'Verein wird gespeichert...';
+    this.emitBlockUi(true, 'Verein wird gespeichert...');
     await this.mySqlPersistService.createOrUpdateAssociation(this.associationForm.value).toPromise()
       .then(() => {
-        this.blocked = false;
+        this.emitBlockUi(false);
         this.messageService.add({
           severity: 'success',
           summary: 'Verein wurde gespeichert.',
@@ -427,7 +434,7 @@ export class AssociationEditFormComponent implements OnChanges {
         this.reload.emit(this.associationForm.value.id);
       })
       .catch((reason) => {
-        this.blocked = false;
+        this.emitBlockUi(false);
         this.messageService.add({
           severity: 'error',
           summary: 'Verein konnte nicht gespeichert werden.',
@@ -449,11 +456,10 @@ export class AssociationEditFormComponent implements OnChanges {
       rejectLabel: 'Abbrechen',
       closeOnEscape: true,
       accept: async () => {
-        this.blocked = true;
-        this.loadingText = 'Verein wird gelöscht...';
+        this.emitBlockUi(true, 'Verein wird gelöscht...');
         await this.mySqlPersistService.deleteAssociation(id).toPromise()
           .then(() => {
-            this.blocked = false;
+            this.emitBlockUi(false);
             this.messageService.add({
               severity: 'success',
               summary: 'Verein wurde gelöscht.',
@@ -462,7 +468,7 @@ export class AssociationEditFormComponent implements OnChanges {
             this.reload.emit(undefined);
           })
           .catch((reason) => {
-            this.blocked = false;
+            this.emitBlockUi(false);
             this.messageService.add({
               severity: 'error',
               summary: 'Verein konnte nicht gelöscht werden.',
@@ -496,5 +502,12 @@ export class AssociationEditFormComponent implements OnChanges {
     }
     output += processedNum;
     return output;
+  }
+
+  emitBlockUi(block: boolean, message?: string): void {
+    this.blockUi.emit({
+      block,
+      message
+    });
   }
 }

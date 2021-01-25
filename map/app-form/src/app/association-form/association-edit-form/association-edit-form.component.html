@@ -1,14 +1,494 @@
-<p-blockUI [blocked]="blocked">
-  <p-progressSpinner></p-progressSpinner>
-  <div class="block-ui-text">Verein wird abgerufen...</div>
-</p-blockUI>
-
 <p-confirmDialog [baseZIndex]="10000"></p-confirmDialog>
 
 <div class="form-container" *ngIf="association">
+  <h1>{{ !isNew ? 'Verein bearbeiten' : 'Verein erstellen' }}</h1>
+  <h2 *ngIf="association?.name" style="margin-top: 0;">{{ association?.name }}</h2>
+
   <form [formGroup]="associationForm">
-    <h1>{{ !isNew ? 'Verein bearbeiten' : 'Verein erstellen' }}</h1>
-    <h2 *ngIf="association?.name" style="margin-top: 0;">{{ association?.name }}</h2>
+    <div class="row">
+      <div class="col-12">
+        <h4>Basisdaten</h4>
+
+        <div class="row p-fluid">
+          <div class="p-field col-xs-12 col-md-12"
+               [ngClass]="{'invalid-block' : !associationForm.controls.name.valid }">
+            <label for="name-input">Name des Vereins*</label>
+            <input pInputText
+                   id="name-input"
+                   type="text"
+                   formControlName="name"
+                   placeholder="Name des Vereins*"/>
+            <p class="invalid-label"
+               *ngIf="errorHandling('name', 'required')">
+              Ein Name für den Verein muss angegeben werden.
+            </p>
+          </div>
+        </div>
+        <div class="row p-fluid">
+          <div class="p-field col-xs-12 col-md-12">
+            <label for="short-name-input">Kurzbezeichnung</label>
+            <input pInputText
+                   id="short-name-input"
+                   type="text"
+                   formControlName="shortName"
+                   placeholder="Kurzbezeichnung"/>
+            <p class="invalid-label"
+               *ngIf="errorHandling('shortName', 'maxlength')">
+              Bitte wählen Sie eine Kurzbezeichnung mit maximal 50 Zeichen.
+            </p>
+          </div>
+        </div>
+        <div class="row p-fluid">
+          <div class="p-field col-xs-12 col-md-12">
+            <label for="street-input">Straße und Hausnummer</label>
+            <input pInputText
+                   id="street-input"
+                   type="text"
+                   formControlName="street"
+                   placeholder="Straße und Hausnummer"/>
+          </div>
+        </div>
+        <div class="row p-fluid">
+          <div class="p-field col-xs-12 col-md-6">
+            <label for="postcode-input">PLZ</label>
+            <input pInputText
+                   id="postcode-input"
+                   type="text"
+                   formControlName="postcode"
+                   placeholder="PLZ"/>
+          </div>
+          <div class="p-field col-xs-12 col-md-6">
+            <label for="city-input">Ort</label>
+            <input pInputText
+                   id="city-input"
+                   type="text"
+                   formControlName="city"
+                   placeholder="Ort"/>
+          </div>
+        </div>
+        <div class="row p-fluid">
+          <div class="p-field col-xs-12 col-md-12">
+            <label for="address-line-1-input">Zusätzliche Adresszeilen (optional)</label>
+            <input pInputText
+                   id="address-line-1-input"
+                   type="text"
+                   formControlName="addressLine1"
+                   placeholder="Zusätzliche Adresszeile"/>
+            <input pInputText
+                   id="address-line-2-input"
+                   type="text"
+                   formControlName="addressLine2"
+                   placeholder="Zusätzliche Adresszeile"
+                   style="margin-top: 12px;"/>
+            <p style="font-size: 75%; margin-bottom: 12px;">
+              Zusätzliche Adresszeilen werden im Popup oberhalb der Adresse (Straße, PLZ, Ort, ...) angezeigt.
+            </p>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12">
+            <h4>Koordinaten</h4>
+          </div>
+        </div>
+        <div class="row p-fluid"
+             [ngClass]="{ 'invalid-block': !associationForm.controls.lat.valid || !associationForm.controls.lng.valid }">
+          <div class="p-field col-xs-12 col-md-6">
+            <label for="lat-input">Breitengrad*</label>
+            <input pInputText
+                   id="lat-input"
+                   type="number"
+                   formControlName="lat"
+                   placeholder="Breitengrad*"/>
+            <p class="invalid-label"
+               *ngIf="errorHandling('lat', 'required')">
+              Ein Breitengrad muss angegeben werden.
+            </p>
+            <p class="invalid-label"
+               *ngIf="errorHandling('lat', 'min') || errorHandling('lat', 'max')">
+              Der Breitengrad ist eine Zahl zwischen -180 und 180.
+            </p>
+          </div>
+          <div class="p-field col-xs-12 col-md-6">
+            <label for="lng-input">Längengrad*</label>
+            <input pInputText
+                   id="lng-input"
+                   type="number"
+                   formControlName="lng"
+                   placeholder="Längengrad*"/>
+            <p class="invalid-label"
+               *ngIf="errorHandling('lng', 'required')">
+              Ein Längengrad muss angegeben werden.
+            </p>
+            <p class="invalid-label"
+               *ngIf="errorHandling('lng', 'min') || errorHandling('lng', 'max')">
+              Der Längengrad ist eine Zahl zwischen -90 und 90.
+            </p>
+          </div>
+          <div class="col-12">
+            <h6>Vorschau</h6>
+            <p style="font-size: 75%; margin-bottom: 12px;">Klicken Sie auf die Karte, um die Marker-Position zu
+              verändern oder suchen Sie nach einer Adresse.</p>
+            <app-simple-map-with-single-marker [lat]="getCoordinate(associationForm.value.lat, 90)"
+                                               [lng]="getCoordinate(associationForm.value.lng, 180)"
+                                               (mapClick)="mapClick($event)"
+                                               style="margin: auto;">
+            </app-simple-map-with-single-marker>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <h4>Kontakte</h4>
+      </div>
+    </div>
+    <div class="row"
+         *ngIf="getFormGroupsFromFormArray(associationForm.controls.contacts)"
+         formArrayName="contacts">
+      <div class="col-12"
+           *ngFor="let contactFormGroup of getFormGroupsFromFormArray(associationForm.controls.contacts); index as i"
+           [formGroup]="contactFormGroup">
+        <div class="row p-fluid"
+             [ngClass]="{ 'invalid-block': !getFormArrayFormGroup('contacts', i)?.valid
+                        || (!contactFormGroup.value.name && !contactFormGroup.value.phone && !contactFormGroup.value.fax && !contactFormGroup.value.mail)}">
+          <div class="p-field col-xs-12 col-md-6">
+            <label for="contact-{{i}}-name-input">Name der Kontaktperson / des Ansprechpartners</label>
+            <input pInputText
+                   id="contact-{{i}}-name-input"
+                   type="text"
+                   [formControl]="contactFormGroup.controls.name"
+                   placeholder="Name der Kontaktperson / des Ansprechpartners"/>
+          </div>
+          <div class="p-field col-xs-12 col-md-6">
+            <label for="contact-{{i}}-phone-input">Telefonnummer</label>
+            <input pInputText
+                   id="contact-{{i}}-phone-input"
+                   type="text"
+                   [formControl]="contactFormGroup.controls.phone"
+                   placeholder="Telefonnummer"/>
+          </div>
+          <div class="p-field col-xs-12 col-md-6">
+            <label for="contact-{{i}}-fax-input">Faxnummber</label>
+            <input pInputText
+                   id="contact-{{i}}-fax-input"
+                   type="text"
+                   [formControl]="contactFormGroup.controls.fax"
+                   placeholder="Faxnummer"/>
+          </div>
+          <div class="p-field col-xs-12 col-md-6">
+            <label for="contact-{{i}}-mail-input">E-Mail-Adresse</label>
+            <input pInputText
+                   id="contact-{{i}}-mail-input"
+                   type="text"
+                   [formControl]="contactFormGroup.controls.mail"
+                   placeholder="E-Mail-Adresse"/>
+          </div>
+          <div class="col-12">
+            <p class="invalid-label"
+               *ngIf="errorHandlingFormGroup(contactFormGroup, 'contactfilled')">
+              Bitte geben Sie eine Kontaktmöglichkeit an (oder löschen Sie den Kontakt-Block).
+            </p>
+          </div>
+        </div>
+        <div
+          *ngIf="!contactFormGroup.errors"
+          class="col-12 association-links"
+          style="text-align: center;">
+          <h6>Vorschau</h6>
+          <div class="association-contact">
+            <p *ngIf="contactFormGroup.value.name" class="name">{{ contactFormGroup.value.name }}</p>
+            <p *ngIf="contactFormGroup.value.phone" class="name">
+              <span [innerHTML]="getSocialMediaIcon('phone')"></span>
+              <a href="{{ telephoneLink(contactFormGroup.value.phone) }}">{{ contactFormGroup.value.phone }}</a>
+            </p>
+            <p *ngIf="contactFormGroup.value.fax" class="name">
+              <span [innerHTML]="getSocialMediaIcon('fax')"></span>
+              <a href="{{ telephoneLink(contactFormGroup.value.fax) }}">{{ contactFormGroup.value.fax }}</a>
+            </p>
+            <p *ngIf="contactFormGroup.value.mail" class="name">
+              <span [innerHTML]="getSocialMediaIcon('mail')"></span>
+              <a href="mailto:{{ contactFormGroup.value.mail }}">{{ contactFormGroup.value.mail }}</a>
+            </p>
+          </div>
+        </div>
+        <div class="col-12 form-array-remove">
+          <p-button (onClick)="formArrayRemoveAt(associationForm.controls.contacts, i)">
+            <i class="pi pi-trash"></i>
+          </p-button>
+        </div>
+      </div>
+
+
+    </div>
+    <div class="form-array-add">
+      <p-button (onClick)="formArrayAdd(associationForm.controls.contacts,'contact', association?.id)">
+        <i class="pi pi-plus"></i>
+      </p-button>
+    </div>
+
+    <div class="row">
+      <div class="col-12">
+        <h4 style="margin-bottom: 4px;">Ziele des Vereins</h4>
+      </div>
+    </div>
+    <div class="row p-fluid">
+      <div class="p-field col-xs-12 col-md-12"
+           *ngIf="getNestedFormGroupControl(associationForm.controls.goals, 'text')">
+        <textarea type="text"
+                  id="goals-text-input"
+                  rows="4"
+                  pInputTextarea
+                  [placeholder]="'Textinhalt: Ziele des Vereins'"
+                  [formControl]="getNestedFormGroupControl(associationForm.controls.goals, 'text')">
+          </textarea>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <h4 style="margin-bottom: 4px;">Aktivitäten</h4>
+      </div>
+    </div>
+    <div class="row p-fluid">
+      <div class="p-field col-xs-12 col-md-12"
+           *ngIf="getNestedFormGroupControl(associationForm.controls.activities, 'text')">
+        <textarea type="text"
+                  id="activities-text-input"
+                  rows="4"
+                  pInputTextarea
+                  [placeholder]="'Textinhalt: Aktivitäten'"
+                  [formControl]="getNestedFormGroupControl(associationForm.controls.activities, 'text')">
+          </textarea>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <h4>Bilder</h4>
+      </div>
+    </div>
+    <div class="row"
+         *ngIf="getFormGroupsFromFormArray(associationForm.controls.images)"
+         formArrayName="contacts">
+      <div class="col-12"
+           *ngFor="let imageFormGroup of getFormGroupsFromFormArray(associationForm.controls.images); index as i"
+           [formGroup]="imageFormGroup">
+        <div class="row p-fluid"
+             [ngClass]="{ 'invalid-block': !getFormArrayFormGroup('images', i)?.valid }">
+          <div class="p-field col-xs-12 col-md-12">
+            <label for="image-{{i}}-format-input">Bild-URL*</label>
+            <input pInputText
+                   id="image-{{i}}-format-input"
+                   type="text"
+                   [formControl]="imageFormGroup.controls.url"
+                   placeholder="Bild-URL*"/>
+            <p class="invalid-label"
+               *ngIf="errorHandlingForFormArray('images', i, 'url', 'required')">
+              Eine URL muss angegeben werden.
+            </p>
+            <p class="hint"
+               *ngIf="!isExternalLink(imageFormGroup.controls.url.value)">Externe Links müssen mit
+              <strong>http://</strong> oder <strong>https://</strong> beginnen.
+            </p>
+          </div>
+          <div class="p-field col-xs-12 col-md-12">
+            <label for="image-{{i}}-alt-text-input">Alternativtext</label>
+            <input pInputText
+                   id="image-{{i}}-alt-text-input"
+                   type="text"
+                   [formControl]="imageFormGroup.controls.altText"
+                   placeholder="Alternativtext"/>
+          </div>
+        </div>
+        <div *ngIf="associationForm.value.images[i].url"
+             class="col-12 association-images"
+             style="text-align: center;">
+          <h6>Vorschau</h6>
+          <div class="association-image">
+            <img [src]="associationForm.value.images[i].url"
+                 [alt]="associationForm.value.images[i].altText"/>
+          </div>
+        </div>
+        <div class="form-array-remove">
+          <p-button (onClick)="formArrayRemoveAt(associationForm.controls.images, i)">
+            <i class="pi pi-trash"></i>
+          </p-button>
+        </div>
+      </div>
+    </div>
+    <div class="form-array-add">
+      <p-button (onClick)="formArrayAdd(associationForm.controls.images,'image', association?.id)">
+        <i class="pi pi-plus"></i>
+      </p-button>
+    </div>
+
+    <div class="row">
+      <div class="col-12">
+        <h4>Links</h4>
+      </div>
+    </div>
+    <div class="row"
+         *ngIf="getFormGroupsFromFormArray(associationForm.controls.images)"
+         formArrayName="links">
+      <div class="col-12"
+           *ngFor="let linkFormGroup of getFormGroupsFromFormArray(associationForm.controls.links); index as i"
+           [formGroup]="linkFormGroup">
+        <div class="row p-fluid"
+             [ngClass]="{ 'invalid-block': !getFormArrayFormGroup('links', i)?.valid }">
+          <div class="p-field col-xs-12 col-md-6">
+            <label for="link-{{i}}-url-input">URL*</label>
+            <input pInputText
+                   id="link-{{i}}-url-input"
+                   type="text"
+                   [formControl]="linkFormGroup.controls.url"
+                   placeholder="URL*"/>
+            <p class="hint" *ngIf="!isExternalLink(linkFormGroup.controls.url.value)">Externe Links müssen mit
+              <strong>http://</strong> oder <strong>https://</strong> beginnen.</p>
+            <p class="invalid-label"
+               *ngIf="errorHandlingForFormArray('links', i, 'url', 'required')">
+              Eine URL muss angegeben werden.
+            </p>
+          </div>
+          <div class=" col-xs-12 col-md-6">
+            <label for="link-{{i}}-text-input">Link-Text</label>
+            <input pInputText
+                   id="link-{{i}}-text-input"
+                   type="text"
+                   [formControl]="linkFormGroup.controls.linkText"
+                   placeholder="Link-Text"/>
+          </div>
+        </div>
+        <div *ngIf="linkFormGroup.value.url"
+             class="col-12 association-links"
+             style="text-align: center;">
+          <h6>Vorschau</h6>
+          <div class="association-link">
+            <a [href]="associationForm.value.links[i].url" target="_blank"
+               [title]="associationForm.value.links[i].linkText">{{ associationForm.value.links[i].linkText || associationForm.value.links[i].url }}</a>
+          </div>
+        </div>
+        <div class="form-array-remove">
+          <p-button (onClick)="formArrayRemoveAt(associationForm.controls.links, i)">
+            <i class="pi pi-trash"></i>
+          </p-button>
+        </div>
+      </div>
+    </div>
+    <div class="form-array-add">
+      <p-button (onClick)="formArrayAdd(associationForm.controls.links,'link', association?.id)">
+        <i class="pi pi-plus"></i>
+      </p-button>
+    </div>
+
+    <h4>Social Media</h4>
+    <div class="row"
+         *ngIf="getFormGroupsFromFormArray(associationForm.controls.socialMedia)"
+         formArrayName="socialMedia">
+      <div class="col-12"
+           *ngFor="let linkFormGroup of getFormGroupsFromFormArray(associationForm.controls.socialMedia); index as i"
+           [formGroup]="linkFormGroup">
+        <div class="row p-fluid"
+             [ngClass]="{ 'invalid-block': !getFormArrayFormGroup('socialMedia', i)?.valid }">
+          <div class="p-field col-xs-12 col-md-4">
+            <label for="social-media-{{i}}-platform-input">Plattform</label>
+            <p-dropdown id="social-media-{{i}}-platform-input"
+                        [options]="socialMediaOptions"
+                        [formControl]="linkFormGroup.controls.platform"
+                        placeholder="Plattform">
+            </p-dropdown>
+            <p class="invalid-label"
+               *ngIf="errorHandlingForFormArray('socialMedia', i, 'platform', 'required')">
+              Eine Plattform muss angegeben werden.
+            </p>
+          </div>
+          <div class="p-field col-xs-12 col-md-4">
+            <label for="social-media-{{i}}-url-input">URL*</label>
+            <input pInputText
+                   id="social-media-{{i}}-url-input"
+                   type="text"
+                   [formControl]="linkFormGroup.controls.url"
+                   placeholder="URL*"/>
+            <p class="hint" *ngIf="!isExternalLink(linkFormGroup.controls.url.value)">Externe Links müssen mit
+              <strong>http://</strong> oder <strong>https://</strong> beginnen.</p>
+            <p class="invalid-label"
+               *ngIf="errorHandlingForFormArray('socialMedia', i, 'url', 'required')">
+              Eine URL muss angegeben werden.
+            </p>
+          </div>
+          <div class="p-field col-xs-12 col-md-4">
+            <label for="social-media-{{i}}-text-input">Link-Text</label>
+            <input pInputText
+                   id="social-media-{{i}}-text-input"
+                   type="text"
+                   [formControl]="linkFormGroup.controls.linkText"
+                   placeholder="Link-Text"/>
+          </div>
+        </div>
+        <div *ngIf="linkFormGroup.value.url"
+             class="col-12 association-social-media"
+             style="text-align: center;">
+          <h6>Vorschau</h6>
+          <div class="association-social-media-link">
+            <span [innerHTML]="getSocialMediaIcon(associationForm.value.socialMedia[i].platform)"></span>
+            <a [href]="associationForm.value.socialMedia[i].url" target="_blank" style="vertical-align: 3px;"
+               [title]="associationForm.value.socialMedia[i].linkText">{{ associationForm.value.socialMedia[i].linkText || associationForm.value.socialMedia[i].platform }}</a>
+          </div>
+        </div>
+        <div class="form-array-remove">
+          <p-button (onClick)="formArrayRemoveAt(associationForm.controls.socialMedia, i)">
+            <i class="pi pi-trash"></i>
+          </p-button>
+        </div>
+      </div>
+    </div>
+    <div class="form-array-add">
+      <p-button (onClick)="formArrayAdd(associationForm.controls.socialMedia,'socialMedia', association?.id)">
+        <i class="pi pi-plus"></i>
+      </p-button>
+    </div>
+
+    <h4>Schlagwörter</h4>
+    <div class="row p-fluid">
+      <div class="p-field col-xs-12 col-md-6">
+        <label for="districts-input">Aktivitätsgebiete</label>
+        <app-grouped-multi-select [options]="districtOptions"
+                                  [formControl]="associationForm.controls.districtList"
+                                  id="districts-input"
+                                  [placeholder]="'Aktivitätsgebiet auswählen...'"
+                                  [labelPlural]="'Aktivitätsgebiete'"
+                                  [selectTopOptions]="false"
+                                  [styleClass]="'full-width input-margin-bottom'">
+        </app-grouped-multi-select>
+      </div>
+
+      <div class="p-field col-xs-12 col-md-6">
+        <label for="activities-input">Tätigkeitsfelder</label>
+        <app-grouped-multi-select [options]="activitiesOptions"
+                                  [formControl]="associationForm.controls.activityList"
+                                  id="activities-input"
+                                  [placeholder]="'Tätigkeitsfelder auswählen...'"
+                                  [labelPlural]="'Tätigkeitsfelder'"
+                                  [selectTopOptions]="false"
+                                  [styleClass]="'full-width'">
+        </app-grouped-multi-select>
+      </div>
+    </div>
+
+    <h4>Datensatz &ndash; Vorschau</h4>
+
+    <div style="text-align: center; margin-bottom: 12px;">
+      <p-button (onClick)="jsonCollapsed = !jsonCollapsed">
+        <span *ngIf="jsonCollapsed">
+          <i class="pi pi-eye icon-padding"></i> JSON anzeigen
+        </span>
+        <span *ngIf="!jsonCollapsed">
+          <i class="pi pi-eye-slash icon-padding"></i> JSON verbergen
+        </span>
+      </p-button>
+    </div>
+
+    <div class="fieldset overflow-x" *ngIf="!jsonCollapsed">
+        <pre
+          style="font-family: 'Courier New', monospace; white-space: pre-wrap;">{{ associationForm.value | json }}</pre>
+    </div>
 
     <fieldset class="button-row">
       <p-button (onClick)="submit()" [disabled]="!associationForm.valid" class="submit">
@@ -25,490 +505,6 @@
         </p-button>
       </span>
     </fieldset>
-
-    <div class="full-width">
-      <h2>Basisdaten</h2>
-      <div class="p-fluid p-formgrid p-grid">
-        <div class="p-field">
-          <label for="name-input">Name des Vereins*</label>
-          <input pInputText
-                 id="name-input"
-                 type="text"
-                 formControlName="name"
-                 placeholder="Name des Vereins*"/>
-          <p class="invalid-label"
-             *ngIf="errorHandling('name', 'required')">
-            Ein Name für den Verein muss angegeben werden.
-          </p>
-        </div>
-        <div class="p-field">
-          <label for="street-input">Straße und Hausnummer</label>
-          <input pInputText
-                 id="street-input"
-                 type="text"
-                 formControlName="street"
-                 placeholder="Straße und Hausnummer"/>
-        </div>
-        <div class="p-field half-width-form-left">
-          <label for="postcode-input">PLZ</label>
-          <input pInputText
-                 id="postcode-input"
-                 type="text"
-                 formControlName="postcode"
-                 placeholder="PLZ"/>
-        </div>
-        <div class="p-field half-width-form-right">
-          <label for="city-input">Ort</label>
-          <input pInputText
-                 id="city-input"
-                 type="text"
-                 formControlName="city"
-                 placeholder="Ort"/>
-        </div>
-<!--        <div class="p-field">
-          <label for="country-input">Land</label>
-          <input pInputText
-                 id="country-input"
-                 type="text"
-                 formControlName="country"
-                 placeholder="Land"/>
-        </div>-->
-        <div class="p-field">
-          <label for="address-line-1-input">Zusätzliche Adresszeilen (optional)</label>
-          <input pInputText
-                 id="address-line-1-input"
-                 type="text"
-                 formControlName="addressLine1"
-                 placeholder="Zusätzliche Adresszeile"/>
-          <input pInputText
-                 id="address-line-2-input"
-                 type="text"
-                 formControlName="addressLine2"
-                 placeholder="Zusätzliche Adresszeile"
-                 style="margin-top: 12px;"/>
-          <input pInputText
-                 id="address-line-3-input"
-                 type="text"
-                 formControlName="addressLine3"
-                 placeholder="Zusätzliche Adresszeile"
-                 style="margin-top: 12px;"/>
-          <p style="font-size: 75%; margin-bottom: 12px;">
-            Zusätzliche Adresszeilen werden im Popup oberhalb der Adresse (Straße, PLZ, Ort, ...) angezeigt.
-          </p>
-        </div>
-      </div>
-      <h2>Koordinaten</h2>
-      <fieldset [ngClass]="{ 'invalid-fieldset': !associationForm.controls.lat.valid || !associationForm.controls.lng.valid }">
-        <div class="p-fluid p-formgrid p-grid">
-          <div class="p-field half-width-form-left">
-            <label for="lat-input">Breitengrad*</label>
-            <input pInputText
-                   id="lat-input"
-                   type="number"
-                   formControlName="lat"
-                   placeholder="Breitengrad*"/>
-          </div>
-          <div class="p-field half-width-form-right">
-            <label for="lng-input">Längengrad*</label>
-            <input pInputText
-                   id="lng-input"
-                   type="number"
-                   formControlName="lng"
-                   placeholder="Längengrad*"/>
-          </div>
-        </div>
-        <div class="p-fluid p-formgrid p-grid">
-          <div class="p-field half-width-form-left" style="margin-top: 0;">
-            <p class="invalid-label"
-               *ngIf="errorHandling('lat', 'required')">
-              Ein Breitengrad muss angegeben werden.
-            </p>
-            <p class="invalid-label"
-               *ngIf="errorHandling('lat', 'min') || errorHandling('lat', 'max')">
-              Der Breitengrad ist eine Zahl zwischen -180 und 180.
-            </p>
-          </div>
-          <div class="p-field half-width-form-right" style="margin-top: 0;">
-            <p class="invalid-label"
-               *ngIf="errorHandling('lng', 'required')">
-              Ein Längengrad muss angegeben werden.
-            </p>
-            <p class="invalid-label"
-               *ngIf="errorHandling('lng', 'min') || errorHandling('lng', 'max')">
-              Der Längengrad ist eine Zahl zwischen -90 und 90.
-            </p>
-          </div>
-        </div>
-        <div class="full-width" style="text-align: center;">
-          <h4>Vorschau</h4>
-          <p style="font-size: 75%; margin-bottom: 12px;">Klicken Sie auf die Karte, um die Marker-Position zu
-            verändern.</p>
-          <app-simple-map-with-single-marker [lat]="getCoordinate(associationForm.value.lat, 90)"
-                                             [lng]="getCoordinate(associationForm.value.lng, 180)"
-                                             (mapClick)="mapClick($event)"
-                                             style="margin: auto;">
-          </app-simple-map-with-single-marker>
-<!--          <div style="margin-top: 12px;">
-            <p-button (click)="geocode()" label="Eingegebene Adresse nachschlagen"></p-button>
-            <p style="font-style: italic;">Suchen nach: {{ givenAddress }}</p>
-
-            {{ geocode() | json }}
-          </div>-->
-        </div>
-      </fieldset>
-
-      <h2>Kontakte</h2>
-      <div class="full-width"
-           *ngIf="getFormGroupsFromFormArray(associationForm.controls.contacts)"
-           formArrayName="contacts">
-        <fieldset *ngFor="let contactFormGroup of getFormGroupsFromFormArray(associationForm.controls.contacts); index as i"
-                  [formGroup]="contactFormGroup"
-                  [ngClass]="{ 'invalid-fieldset': !getFormArrayFormGroup('contacts', i)?.valid }">
-          <div class="p-fluid p-formgrid p-grid">
-            <div class="p-field">
-              <label for="contact-{{i}}-name-input">Name der Kontaktperson / des Ansprechpartners</label>
-              <input pInputText
-                     id="contact-{{i}}-name-input"
-                     type="text"
-                     [formControl]="contactFormGroup.controls.name"
-                     placeholder="Name der Kontaktperson / des Ansprechpartners"/>
-            </div>
-            <div class="p-field">
-              <label for="contact-{{i}}-phone-input">Telefonnummer</label>
-              <input pInputText
-                     id="contact-{{i}}-phone-input"
-                     type="text"
-                     [formControl]="contactFormGroup.controls.phone"
-                     placeholder="Telefonnummer"/>
-            </div>
-            <div class="p-field">
-              <label for="contact-{{i}}-fax-input">Faxnummber</label>
-              <input pInputText
-                     id="contact-{{i}}-fax-input"
-                     type="text"
-                     [formControl]="contactFormGroup.controls.fax"
-                     placeholder="Faxnummer"/>
-            </div>
-            <div class="p-field">
-              <label for="contact-{{i}}-mail-input">E-Mail-Adresse</label>
-              <input pInputText
-                     id="contact-{{i}}-mail-input"
-                     type="text"
-                     [formControl]="contactFormGroup.controls.mail"
-                     placeholder="E-Mail-Adresse"/>
-            </div>
-          </div>
-          <div class="association-links" style="text-align: center;">
-            <h4>Vorschau</h4>
-           <div class="association-contact">
-            <p *ngIf="contactFormGroup.value.name" class="name">{{ contactFormGroup.value.name }}</p>
-             <p *ngIf="contactFormGroup.value.phone" class="name">
-               <span [innerHTML]="getSocialMediaIcon('phone')"></span>
-               <a href="{{ telephoneLink(contactFormGroup.value.phone) }}">{{ contactFormGroup.value.phone }}</a>
-             </p>
-             <p *ngIf="contactFormGroup.value.fax" class="name">
-               <span [innerHTML]="getSocialMediaIcon('fax')"></span>
-               <a href="{{ telephoneLink(contactFormGroup.value.fax) }}">{{ contactFormGroup.value.fax }}</a>
-             </p>
-             <p *ngIf="contactFormGroup.value.mail" class="name">
-               <span [innerHTML]="getSocialMediaIcon('mail')"></span>
-               <a href="mailto:{{ contactFormGroup.value.mail }}">{{ contactFormGroup.value.mail }}</a>
-             </p>
-           </div>
-          </div>
-          <div class="form-array-remove">
-            <p-button (onClick)="formArrayRemoveAt(associationForm.controls.contacts, i)">
-              <i class="pi pi-trash"></i>
-            </p-button>
-          </div>
-        </fieldset>
-      </div>
-      <div class="form-array-add">
-        <p-button (onClick)="formArrayAdd(associationForm.controls.contacts,'contact', association?.id)">
-          <i class="pi pi-plus"></i>
-        </p-button>
-      </div>
-
-      <h2>Textblöcke</h2>
-      <fieldset>
-        <h3>Ziele des Vereins</h3>
-
-        <div class="p-fluid p-formgrid p-grid">
-<!--          <div class="p-field"
-               *ngIf="getNestedFormGroupControl(associationForm.controls.goals, 'format')">
-            <label for="goals-format-input">Format</label>
-            <p-dropdown [options]="textBlockOptions"
-                        [formControl]="getNestedFormGroupControl(associationForm.controls.goals, 'format')"
-                        [placeholder]="'Format'"
-                        id="goals-format-input">
-            </p-dropdown>
-          </div>-->
-          <div class="p-field"
-               *ngIf="getNestedFormGroupControl(associationForm.controls.goals, 'text')">
-            <label for="goals-text-input">Textinhalt: Ziele des Vereins</label>
-            <textarea type="text"
-                      id="goals-text-input"
-                      rows="4"
-                      pInputTextarea
-                      [placeholder]="'Textinhalt: Ziele des Vereins'"
-                      [formControl]="getNestedFormGroupControl(associationForm.controls.goals, 'text')">
-          </textarea>
-          </div>
-        </div>
-      </fieldset>
-
-      <fieldset>
-        <h3>Aktivitäten</h3>
-
-        <div class="p-fluid p-formgrid p-grid">
-<!--          <div class="p-field"
-               *ngIf="getNestedFormGroupControl(associationForm.controls.activities, 'format')">
-            <label for="activities-format-input">Format</label>
-            <p-dropdown [options]="textBlockOptions"
-                        [formControl]="getNestedFormGroupControl(associationForm.controls.activities, 'format')"
-                        [placeholder]="'Format'"
-                        id="activities-format-input">
-            </p-dropdown>
-          </div>-->
-          <div class="p-field"
-               *ngIf="getNestedFormGroupControl(associationForm.controls.activities, 'text')">
-            <label for="activities-text-input">Textinhalt: Aktivitäten des Vereins</label>
-            <textarea type="text"
-                      id="activities-text-input"
-                      rows="4"
-                      pInputTextarea
-                      [placeholder]="'Textinhalt: Aktivitäten'"
-                      [formControl]="getNestedFormGroupControl(associationForm.controls.activities, 'text')">
-          </textarea>
-          </div>
-        </div>
-      </fieldset>
-
-      <h2>Bilder</h2>
-      <div class="full-width"
-           *ngIf="getFormGroupsFromFormArray(associationForm.controls.images)"
-           formArrayName="images">
-        <fieldset *ngFor="let imageFormGroup of getFormGroupsFromFormArray(associationForm.controls.images); index as i"
-                  [formGroup]="imageFormGroup"
-                  [ngClass]="{ 'invalid-fieldset': !getFormArrayFormGroup('images', i)?.valid }">
-          <div class="p-fluid p-formgrid p-grid">
-            <div class="p-field">
-              <label for="image-{{i}}-format-input">Bild-URL*</label>
-              <input pInputText
-                     id="image-{{i}}-format-input"
-                     type="text"
-                     [formControl]="imageFormGroup.controls.url"
-                     placeholder="Bild-URL*"/>
-              <p class="hint" *ngIf="!isExternalLink(imageFormGroup.controls.url.value)">Externe Links müssen mit <strong>http://</strong> oder <strong>https://</strong> beginnen.</p>
-              <p class="invalid-label"
-                 *ngIf="errorHandlingForFormArray('images', i, 'url', 'required')">
-                Eine URL muss angegeben werden.
-              </p>
-            </div>
-            <div class="p-field">
-              <label for="image-{{i}}-alt-text-input">Alternativtext</label>
-              <input pInputText
-                     id="image-{{i}}-alt-text-input"
-                     type="text"
-                     [formControl]="imageFormGroup.controls.altText"
-                     placeholder="Alternativtext"/>
-            </div>
-          </div>
-          <div class="association-images" style="text-align: center;">
-            <h4>Vorschau</h4>
-            <div class="association-image">
-              <img [src]="associationForm.value.images[i].url"
-                   [alt]="associationForm.value.images[i].altText"/>
-            </div>
-          </div>
-          <div class="form-array-remove">
-            <p-button (onClick)="formArrayRemoveAt(associationForm.controls.images, i)">
-              <i class="pi pi-trash"></i>
-            </p-button>
-          </div>
-        </fieldset>
-      </div>
-      <div class="form-array-add">
-        <p-button (onClick)="formArrayAdd(associationForm.controls.images,'image', association?.id)">
-          <i class="pi pi-plus"></i>
-        </p-button>
-      </div>
-
-      <h2>Links</h2>
-      <div class="full-width"
-           *ngIf="getFormGroupsFromFormArray(associationForm.controls.links)"
-           formArrayName="links">
-        <fieldset *ngFor="let linkFormGroup of getFormGroupsFromFormArray(associationForm.controls.links); index as i"
-                  [formGroup]="linkFormGroup"
-                  [ngClass]="{ 'invalid-fieldset': !getFormArrayFormGroup('links', i)?.valid }">
-          <div class="p-fluid p-formgrid p-grid">
-            <div class="p-field">
-              <label for="link-{{i}}-url-input">URL*</label>
-              <input pInputText
-                     id="link-{{i}}-url-input"
-                     type="text"
-                     [formControl]="linkFormGroup.controls.url"
-                     placeholder="URL*"/>
-              <p class="hint" *ngIf="!isExternalLink(linkFormGroup.controls.url.value)">Externe Links müssen mit <strong>http://</strong> oder <strong>https://</strong> beginnen.</p>
-              <p class="invalid-label"
-                 *ngIf="errorHandlingForFormArray('links', i, 'url', 'required')">
-                Eine URL muss angegeben werden.
-              </p>
-            </div>
-            <div class="p-field">
-              <label for="link-{{i}}-text-input">Link-Text</label>
-              <input pInputText
-                     id="link-{{i}}-text-input"
-                     type="text"
-                     [formControl]="linkFormGroup.controls.linkText"
-                     placeholder="Link-Text"/>
-            </div>
-          </div>
-          <div class="association-links" style="text-align: center;">
-          <h4>Vorschau</h4>
-          <div class="association-link">
-            <a [href]="associationForm.value.links[i].url" target="_blank"
-               [title]="associationForm.value.links[i].linkText">{{ associationForm.value.links[i].linkText || associationForm.value.links[i].url }}</a>
-          </div>
-        </div>
-          <div class="form-array-remove">
-            <p-button (onClick)="formArrayRemoveAt(associationForm.controls.links, i)">
-              <i class="pi pi-trash"></i>
-            </p-button>
-          </div>
-        </fieldset>
-      </div>
-      <div class="form-array-add">
-        <p-button (onClick)="formArrayAdd(associationForm.controls.links,'link', association?.id)">
-          <i class="pi pi-plus"></i>
-        </p-button>
-      </div>
-
-      <h2>Social Media</h2>
-      <div class="full-width"
-           *ngIf="getFormGroupsFromFormArray(associationForm.controls.socialMedia)"
-           formArrayName="socialMedia">
-        <fieldset *ngFor="let linkFormGroup of getFormGroupsFromFormArray(associationForm.controls.socialMedia); index as i"
-                  [formGroup]="linkFormGroup"
-                  [ngClass]="{ 'invalid-fieldset': !getFormArrayFormGroup('socialMedia', i)?.valid }">
-          <div class="p-fluid p-formgrid p-grid">
-            <div class="p-field">
-              <label for="social-media-{{i}}-platform-input">Plattform</label>
-              <p-dropdown id="social-media-{{i}}-platform-input"
-                          [options]="socialMediaOptions"
-                          [formControl]="linkFormGroup.controls.platform"
-                          placeholder="Plattform">
-              </p-dropdown>
-              <p class="invalid-label"
-                 *ngIf="errorHandlingForFormArray('socialMedia', i, 'platform', 'required')">
-                Eine Plattform muss angegeben werden.
-              </p>
-            </div>
-            <div class="p-field">
-              <label for="social-media-{{i}}-url-input">URL*</label>
-              <input pInputText
-                     id="social-media-{{i}}-url-input"
-                     type="text"
-                     [formControl]="linkFormGroup.controls.url"
-                     placeholder="URL*"/>
-              <p class="hint" *ngIf="!isExternalLink(linkFormGroup.controls.url.value)">Externe Links müssen mit <strong>http://</strong> oder <strong>https://</strong> beginnen.</p>
-              <p class="invalid-label"
-                 *ngIf="errorHandlingForFormArray('socialMedia', i, 'url', 'required')">
-                Eine URL muss angegeben werden.
-              </p>
-            </div>
-            <div class="p-field">
-              <label for="social-media-{{i}}-text-input">Link-Text</label>
-              <input pInputText
-                     id="social-media-{{i}}-text-input"
-                     type="text"
-                     [formControl]="linkFormGroup.controls.linkText"
-                     placeholder="Link-Text"/>
-            </div>
-          </div>
-          <div class="association-social-media" style="text-align: center;">
-            <h4>Vorschau</h4>
-            <div class="association-social-media-link">
-              <span [innerHTML]="getSocialMediaIcon(associationForm.value.socialMedia[i].platform)"></span>
-              <a [href]="associationForm.value.socialMedia[i].url" target="_blank" style="vertical-align: 3px;"
-                 [title]="associationForm.value.socialMedia[i].linkText">{{ associationForm.value.socialMedia[i].linkText || associationForm.value.socialMedia[i].platform }}</a>
-            </div>
-          </div>
-          <div class="form-array-remove">
-            <p-button (onClick)="formArrayRemoveAt(associationForm.controls.socialMedia, i)">
-              <i class="pi pi-trash"></i>
-            </p-button>
-          </div>
-        </fieldset>
-      </div>
-      <div class="form-array-add">
-        <p-button (onClick)="formArrayAdd(associationForm.controls.socialMedia,'socialMedia', association?.id)">
-          <i class="pi pi-plus"></i>
-        </p-button>
-      </div>
-
-      <h2>Schlagwörter</h2>
-      <fieldset>
-        <div class="p-fluid p-formgrid p-grid">
-          <div class="p-field">
-            <label for="districts-input">Aktivitätsgebiete</label>
-            <app-grouped-multi-select [options]="districtOptions"
-                                      [formControl]="associationForm.controls.districtIds"
-                                      id="districts-input"
-                                      [placeholder]="'Aktivitätsgebiet auswählen...'"
-                                      [labelPlural]="'Aktivitätsgebiete'"
-                                      [selectUpperCategories]="false"
-                                      [styleClass]="'full-width input-margin-bottom'">
-            </app-grouped-multi-select>
-          </div>
-
-          <div class="p-field">
-            <label for="activities-input">Tätigkeitsfelder</label>
-            <app-grouped-multi-select [options]="activitiesOptions"
-                                      [formControl]="associationForm.controls.activityIds"
-                                      id="activities-input"
-                                      [placeholder]="'Tätigkeitsfelder auswählen...'"
-                                      [labelPlural]="'Tätigkeitsfelder'"
-                                      [selectUpperCategories]="false"
-                                      [styleClass]="'full-width'">
-            </app-grouped-multi-select>
-          </div>
-        </div>
-      </fieldset>
-
-      <h2>Datensatz &ndash; Vorschau</h2>
-
-      <div style="text-align: center; margin-bottom: 12px;">
-        <p-button (onClick)="jsonCollapsed = !jsonCollapsed">
-          <span *ngIf="jsonCollapsed">
-            <i class="pi pi-eye icon-padding"></i> JSON anzeigen
-          </span>
-          <span *ngIf="!jsonCollapsed">
-            <i class="pi pi-eye-slash icon-padding"></i> JSON verbergen
-          </span>
-        </p-button>
-      </div>
-
-      <div class="fieldset overflow-x" *ngIf="!jsonCollapsed">
-        <pre style="font-family: 'Courier New', monospace; white-space: pre-wrap;">{{ associationForm.value | json }}</pre>
-      </div>
-
-      <fieldset class="button-row">
-        <p-button (onClick)="submit()" [disabled]="!associationForm.valid" class="submit">
-          <i class="pi pi-save"></i>&nbsp;&nbsp;Speichern
-        </p-button>
-        <span class="delete-button">
-          <p-button (onClick)="reset(association?.id)">
-            <i class="pi pi-backward"></i>&nbsp;&nbsp;Reset
-          </p-button>
-        </span>
-        <span class="delete-button" *ngIf="!isNew">
-          <p-button (onClick)="deleteAssociation(association?.id)">
-            <i class="pi pi-trash"></i>&nbsp;&nbsp;Verein löschen
-          </p-button>
-        </span>
-      </fieldset>
-    </div>
   </form>
 </div>
 

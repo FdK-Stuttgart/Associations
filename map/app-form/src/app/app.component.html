@@ -1,13 +1,3 @@
-<div class="fullscreen-container" id="fullscreen-content">
+<router-outlet></router-outlet>
 
-  <router-outlet></router-outlet>
-
-  <div class="fullscreen-button" *ngIf="fullscreenEnabled">
-    <button pButton
-            (click)="toggleFullscreen()"
-            class="p-button-raised p-button-rounded"
-            [icon]="showCloseIcon ? 'pi pi-window-minimize' : 'pi pi-window-maximize'">
-    </button>
-  </div>
-</div>
 
