@@ -62,10 +62,8 @@ you can upload the `.sql` file to your database.
 1. In the `map/database/api` folder open `database.php`. Edit user name,
    database name and password according to (1.), (2.) and (3.) from the previous
    section.
-2. Upload the `map/api` folder to a directory on your server.
-3. Open the `map/app` folder. In `map/app/src/environments/` open
-   `environments.prod.ts`. You will find the following:
-
+2. Upload the `map/database/api` folder to a directory on your server.
+3. In the file `map/app-<PART>/src/environments/environments.prod.ts` containing:
 ```typescript
 export const environment = {
   production: true,
@@ -78,15 +76,15 @@ export const environment = {
 ```
 
 6. Change the `serverBasePath` variable to the location on your server you
-   uploaded the `map/api` folder to.
-7. Build the angular app by executing `npm install` and the `build:prod` script
-   in `package.json`.
+   uploaded the `map/database/api` folder to.
+7. Build the angular app by executing `npm install` and `npm run-script
+   build:prod` (defined in the `package.json`.)
 
 For further information on how to install and setup angular as well as on how to
 build an app, see here: [Angular Docs](https://angular.io/guide/setup-local)
 
-8. The built app will appear inside the `map/app/dist` folder. Upload the
-   `map/dist/AssociationMap` directory to a location on your server.
+8. The built app will appear inside the `map/app-<PART>/dist` folder. Upload the
+   `map/app-<PART>/dist/AssociationMap` directory to a location on your server.
 
 9. Open the app at
    `http(s)://[YOUR_SERVER]/[PATH_TO_CHOSEN_LOCATION]/AssociationMap`.
