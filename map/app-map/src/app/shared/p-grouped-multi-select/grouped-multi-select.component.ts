@@ -90,8 +90,6 @@ export class GroupedMultiSelectComponent implements OnInit, OnChanges, ControlVa
       return 'Alle ' + this.labelPlural + ' ausgewählt';
     } else if (selectedLabels.length > 0 && selectedLabels.length < 4) {
       return selectedLabels.join(', ');
-    } else if (this.value.length === this.internalGroupedOptions.length) {
-      return 'Alle ' + this.labelPlural + ' ausgewählt';
     } else {
       return selectedLabels.length + ' ' + this.labelPlural + ' ausgewählt';
     }
