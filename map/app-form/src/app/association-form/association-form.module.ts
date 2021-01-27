@@ -13,24 +13,26 @@ import {ProgressSpinnerModule} from 'primeng/progressspinner';
 import {SidebarModule} from 'primeng/sidebar';
 import {ConfirmDialogModule} from 'primeng/confirmdialog';
 import { OptionsEditFormComponent } from './options-edit-form/options-edit-form.component';
+import {RouterModule} from '@angular/router';
 
 
 @NgModule({
   declarations: [AssociationFormComponent, AssociationEditFormComponent, OptionsEditFormComponent],
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    InputTextModule,
-    DropdownModule,
-    InputTextareaModule,
-    ButtonModule,
-    SharedModule,
-    BlockUIModule,
-    ProgressSpinnerModule,
-    SidebarModule,
-    ConfirmDialogModule
-  ]
+    imports: [
+        CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        InputTextModule,
+        DropdownModule,
+        InputTextareaModule,
+        ButtonModule,
+        SharedModule,
+        BlockUIModule,
+        ProgressSpinnerModule,
+        SidebarModule,
+        ConfirmDialogModule,
+        RouterModule
+    ]
 })
 export class AssociationFormModule {
 

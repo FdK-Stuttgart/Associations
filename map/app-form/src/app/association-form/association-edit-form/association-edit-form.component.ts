@@ -510,4 +510,17 @@ export class AssociationEditFormComponent implements OnChanges {
       message
     });
   }
+
+  async reloadOptions(optionType: string): Promise<void> {
+    this.emitBlockUi(true, 'Schlagwörter laden...');
+    switch (optionType) {
+      case 'districts':
+        this.districtOptions = (await this.mySqlQueryService.getDistrictOptions())?.data || [];
+        break;
+      case 'activities':
+        this.activitiesOptions = (await this.mySqlQueryService.getActivitiesOptions())?.data || [];
+        break;
+    }
+    this.emitBlockUi(false);
+  }
 }

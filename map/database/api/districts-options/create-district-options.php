@@ -47,11 +47,15 @@ if (isset($postdata) && !empty($postdata)) {
         if ($label != '' && $value != '') {
             $value = mysqli_real_escape_string($con, trim($value));
             $label = mysqli_real_escape_string($con, trim($label));
-			$category = mysqli_real_escape_string($con, trim($category));
-            $sql .= "('$value', '$label', '$category'),";
+            $category = mysqli_real_escape_string($con, trim($category));
+            if ($category == '' || $category == null) {
+                $sql .= "('$value', '$label', null),";
+            } else {
+                $sql .= "('$value', '$label', '$category'),";
+            }
             continue;
         }
-        $sql .= "('$value', '$label', '$category'),";
+        $sql .= "('$value', '$label', null),";
     }
 
     if (endsWith($sql, ',')) {

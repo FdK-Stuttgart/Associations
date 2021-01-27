@@ -5,8 +5,8 @@
 
 <p-confirmDialog [baseZIndex]="10000"></p-confirmDialog>
 
-<div class="form-container" *ngIf="options?.length">
-  <h1>{{ (optionType === 'activities' ? 'Tätigkeitsfelder-' : optionType === 'districts' ? 'Aktivitätsgebiete-' : '') + 'Optionen bearbeiten' }}</h1>
+<div class="form-container" *ngIf="!!optionType && options?.length; else selectOptionType">
+  <h1>{{ (optionType === 'activities' ? 'Tätigkeitsfelder-' : optionType === 'districts' ? 'Aktivitätsgebiete-' : '') + 'Schlagwörter bearbeiten' }}</h1>
 
   <form [formGroup]="optionsForm">
     <div *ngIf="getFormGroupsFromFormArray(optionsForm.controls.options)"
@@ -19,7 +19,7 @@
              [ngClass]="{ 'invalid-block': !getFormArrayFormGroup('options', i)?.valid,
                           'added': i === addedIndex }">
           <div class="col-12">
-            <div class="row p-fluid" *ngIf="showSubOptions || !optionForm.value.isSubOption">
+            <div class="row p-fluid" *ngIf="!optionForm.value.isSubOption || showSubOptions(optionForm.value.category)">
               <div class="col-1" *ngIf="!!optionForm.value.category"></div>
               <div class="p-field"
                    [ngClass]="{ 'col-xs-12 col-md-6': !optionForm.value.category,
@@ -38,9 +38,9 @@
                   Ein Optionsname muss angegeben werden.
                 </p>
                 <p *ngIf="!optionForm.value.isSubOption">
-                  <small><a (click)="toggleShowSubOptions()">
-                    <span *ngIf="showSubOptions">Unterkategorien verstecken</span>
-                    <span *ngIf="!showSubOptions">Unterkategorien anzeigen</span>
+                  <small><a (click)="toggleShowSubOptions(optionForm)">
+                    <span *ngIf="optionForm.value.showSubOptions">Unterkategorien verstecken</span>
+                    <span *ngIf="!optionForm.value.showSubOptions">Unterkategorien anzeigen</span>
                   </a></small>
                 </p>
               </div>
@@ -73,10 +73,9 @@
             </div>
           </div>
         </div>
-        <div class="row p-fluid">
-          <div class="col-xs-6 col-md-6">
-          </div>
-          <div class="p-field col-xs-6 col-md-6">
+        <div class="row">
+          <div class="col-6"></div>
+          <div class="col-6">
             <p-button (onClick)="addOption((optionsFormLength), null)">
               <i class="pi pi-plus"></i>&nbsp;&nbsp;Übergeordnete Kategorie hinzufügen
             </p-button>
@@ -85,9 +84,9 @@
       </div>
       <hr>
 
-      <h4>Datensatz &ndash; Vorschau</h4>
+      <h4 style="margin-top: 24px;">Datensatz &ndash; Vorschau</h4>
 
-      <div class="col-12">
+      <div class="col-12" style="margin-bottom: 12px;">
         <div class="form-array-add">
           <p-button (onClick)="jsonCollapsed = !jsonCollapsed">
             <span *ngIf="jsonCollapsed">
@@ -100,12 +99,22 @@
         </div>
       </div>
 
-      <div class="col-xs-12 overflow-x" *ngIf="!jsonCollapsed">
-        <pre style="font-family: 'Courier New', monospace; white-space: pre-wrap;">{{ optionsForm.value | json }}</pre>
+      <div class="col-12 overflow-x fieldset"
+           *ngIf="!jsonCollapsed">
+            <pre
+              style="font-family: 'Courier New', monospace; white-space: pre-wrap;">{{ optionsForm.value | json }}</pre>
       </div>
     </div>
   </form>
 </div>
+<ng-template #selectOptionType>
+  <div class="form-container">
+    <div class="col-12" style="text-align: center; margin-top: 48px;">
+      <h1>Schlagwörter bearbeiten</h1>
+      Wählen Sie einen Schlagwort-Typ in der Seitenleiste aus.
+    </div>
+  </div>
+</ng-template>
 
 <p-sidebar [(visible)]="sidebarExpanded"
            [position]="'right'"

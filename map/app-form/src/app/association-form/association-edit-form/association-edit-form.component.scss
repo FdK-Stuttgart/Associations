@@ -11,6 +11,7 @@ h4 {
   margin-top: 24px;
   margin-bottom: -4px;
 }
+
 h6 {
   margin-top: 16px;
 }
@@ -47,5 +48,11 @@ app-grouped-multi-select {
       background-color: darken(#F74600, 5%);
       border-color: darken(#F74600, 5%);
     }
+  }
+}
+
+a.no-decoration {
+  &:hover, &:active, &:focus {
+    text-decoration: none !important;
   }
 }

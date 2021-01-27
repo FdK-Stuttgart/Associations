@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {
   getInternalGroupedDropdownOptions,
   InternalGroupedDropdownOption
@@ -8,7 +8,7 @@ import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validat
 import {MysqlPersistService} from '../../services/mysql-persist.service';
 import {ConfirmationService, MessageService} from 'primeng/api';
 import {Subscription} from 'rxjs';
-import {ActivatedRoute, Router} from '@angular/router';
+import {ActivatedRoute} from '@angular/router';
 import {environment} from '../../../environments/environment';
 import {v4 as uuidv4} from 'uuid';
 import {Dropdown} from 'primeng/dropdown';
@@ -23,7 +23,7 @@ import {Dropdown} from 'primeng/dropdown';
   ]
 })
 export class OptionsEditFormComponent implements OnInit, OnDestroy {
-  optionType: 'activities' | 'districts' = 'activities';
+  @Input() optionType: 'activities' | 'districts';
 
   options: InternalGroupedDropdownOption[] = [];
   topOptions: InternalGroupedDropdownOption[] = [];
@@ -33,7 +33,7 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
   addedIndex: number | undefined;
 
   blocked = false;
-  loadingText = 'Optionen werden abgerufen...';
+  loadingText = 'Schlagwörter werden abgerufen...';
 
   jsonCollapsed = true;
 
@@ -41,15 +41,12 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
 
   sidebarExpanded = true;
 
-  showSubOptions = false;
-
   constructor(private mySqlQueryService: MysqlQueryService,
               private mySqlPersistService: MysqlPersistService,
               private messageService: MessageService,
               private confirmationService: ConfirmationService,
               private cdr: ChangeDetectorRef,
               private formBuilder: FormBuilder,
-              private router: Router,
               private route: ActivatedRoute) {
   }
 
@@ -66,15 +63,16 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
       }
     });
 
-    window.history.replaceState({}, '', `${environment.rootPath}/options-form/${this.optionType}`);
-    await this.reinitForm();
+    if (this.optionType) {
+      await this.reset(this.optionType);
+    }
   }
 
   /**
    * queries options from database and reinits the form
    */
   async reinitForm(): Promise<void> {
-    this.loadingText = 'Optionen werden abgerufen...';
+    this.loadingText = 'Schlagwörter werden abgerufen...';
     this.blocked = true;
     this.addedIndex = undefined;
 
@@ -97,7 +95,8 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
           category: new FormControl(option.category),
           categoryLabel: this.optionsForm.controls.options.value.find(o => o.value === option.category)?.label || null,
           label: new FormControl(option.label, Validators.required),
-          isSubOption: new FormControl(!!option.category)
+          isSubOption: new FormControl(!!option.category),
+          showSubOptions: new FormControl(false)
         }));
       });
     }
@@ -146,9 +145,9 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
   remove(formArray: AbstractControl, i: number): void {
     this.confirmationService.confirm({
       header: 'Löschen?',
-      message: `Möchten Sie diese Option wirklich löschen?<br><br>Wenn Sie die Werte der Optionen verändern oder `
+      message: `Möchten Sie diese Option wirklich löschen?<br><br>Wenn Sie Schlagwörter-Kategorien verändern oder `
         + `löschen,<br>kann dies zu fehlerhaften Zuordnungen von Vereinen zu <br>`
-        + `${this.optionType === 'activities' ? 'Tätigkeitsfeldern' : (this.optionType === 'districts' ? 'Aktivitätsgebieten' : 'Optionen')}`
+        + `${this.optionType === 'activities' ? 'Tätigkeitsfeldern' : (this.optionType === 'districts' ? 'Aktivitätsgebieten' : 'Schlagwörtern')}`
         + ` führen!`,
       acceptLabel: 'OK',
       rejectLabel: 'Abbrechen',
@@ -177,10 +176,11 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
     if (formArray) {
       const formGroup: FormGroup = this.formBuilder.group({
         value: new FormControl(value, [Validators.required, Validators.min(0)]),
-        category: new FormControl(this.showSubOptions ? category : null),
+        category: new FormControl(category === '' ? null : category),
         label: new FormControl('', Validators.required),
-        categoryLabel: this.showSubOptions ? this.topOptions.find(o => o.value === category)?.label || null : null,
-        isSubOption: this.showSubOptions
+        categoryLabel: this.topOptions.find(o => o.value === category)?.label || null,
+        isSubOption: !!category,
+        showSubOptions: new FormControl(false)
       });
 
       formArray.insert(index, formGroup);
@@ -253,7 +253,7 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
    */
   async submit(): Promise<void> {
     this.blocked = true;
-    this.loadingText = 'Optionen werden gespeichert...';
+    this.loadingText = 'Schlagwörter werden gespeichert...';
     const options = this.optionsForm.value.options.map((o: any) => {
       return {
         label: o.label,
@@ -269,7 +269,7 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
           this.blocked = false;
           this.messageService.add({
             severity: 'success',
-            summary: 'Optionen wurden gespeichert.',
+            summary: 'Schlagwörter wurden gespeichert.',
             key: 'editFormToast'
           });
           await this.reinitForm();
@@ -278,7 +278,7 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
           this.blocked = false;
           this.messageService.add({
             severity: 'error',
-            summary: 'Optionen konnte nicht gespeichert werden.',
+            summary: 'Schlagwörter konnte nicht gespeichert werden.',
             detail: JSON.stringify(reason),
             key: 'editFormToast'
           });
@@ -289,7 +289,7 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
           this.blocked = false;
           this.messageService.add({
             severity: 'success',
-            summary: 'Optionen wurden gespeichert.',
+            summary: 'Schlagwörter wurden gespeichert.',
             key: 'editFormToast'
           });
           await this.reinitForm();
@@ -298,7 +298,7 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
           this.blocked = false;
           this.messageService.add({
             severity: 'error',
-            summary: 'Optionen konnten nicht gespeichert werden.',
+            summary: 'Schlagwörter konnten nicht gespeichert werden.',
             detail: JSON.stringify(reason),
             key: 'editFormToast'
           });
@@ -310,6 +310,9 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
    * checks if any changes were made in the form
    */
   private hasFormValueChanged(): boolean {
+    if (!(this.optionsForm?.controls?.options as FormArray)?.controls?.length) {
+      return false;
+    }
     const oldOptions = this.options.map((o: InternalGroupedDropdownOption) => {
       return {
         label: o.label,
@@ -338,7 +341,7 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
    */
   private sortFormArray(options: FormArray): AbstractControl[] {
     this.blocked = true;
-    this.loadingText = 'Optionen sortieren...';
+    this.loadingText = 'Schlagwörter sortieren...';
     if (!options?.length) {
       return [];
     }
@@ -411,7 +414,7 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
           message: `Wenn Sie eine Unterkategorie in eine übergeordnete Kategorie abändern oder<br>`
             + `eine übergeordnete Kategorie in eine Unterkategorie verwandeln, kann dies zu<br>`
             + `fehlerhaften Zuordnungen von `
-            + `${this.optionType === 'activities' ? 'Tätigkeitsfeldern' : (this.optionType === 'districts' ? 'Aktivitätsgebieten' : 'Optionen')} führen!`,
+            + `${this.optionType === 'activities' ? 'Tätigkeitsfeldern' : (this.optionType === 'districts' ? 'Aktivitätsgebieten' : 'Schlagwörtern')} führen!`,
           acceptLabel: 'OK',
           rejectLabel: 'Abbrechen',
           closeOnEscape: true,
@@ -421,7 +424,7 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
             dropdown.writeValue(newCategory);
 
             if (!!newCategory) {
-              this.showSubOptions = true;
+              optionForm.controls.showSubOptions.setValue(true);
             }
 
             // set isSubOption control
@@ -538,14 +541,31 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
   /**
    * shows or hides sub options
    */
-  async toggleShowSubOptions(): Promise<void> {
+  async toggleShowSubOptions(optionForm: FormGroup): Promise<void> {
     this.blocked = true;
-    this.loadingText = 'Unterkategorien ' + (this.showSubOptions ? 'verstecken...' : 'anzeigen...');
-    this.showSubOptions = !this.showSubOptions;
+    this.loadingText = 'Unterkategorien ' + (optionForm.value.showSubOptions ? 'verstecken...' : 'anzeigen...');
+    const previousShowSubOptions = optionForm.value.showSubOptions;
+    optionForm.controls.showSubOptions.setValue(!previousShowSubOptions);
+    if (!previousShowSubOptions) {
+      this.scrollToShiftedElementWithValue(optionForm.value.value);
+    }
     this.blocked = false;
   }
 
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
+  }
+
+  showSubOptions(value: string): boolean {
+    const formArray = (this.optionsForm?.controls?.options as FormArray)?.controls;
+    if (formArray) {
+      const topCategory = formArray.find((a: FormGroup) =>
+        a.value.value === value
+      );
+      if (topCategory) {
+        return topCategory.value.showSubOptions;
+      }
+    }
+    return false;
   }
 }

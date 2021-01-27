@@ -4,6 +4,7 @@ import {MyHttpResponse} from '../model/http-response';
 import {MessageService} from 'primeng/api';
 import {MysqlQueryService} from '../services/mysql-query.service';
 import {AssociationEditFormComponent} from './association-edit-form/association-edit-form.component';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-association-form',
@@ -28,7 +29,8 @@ export class AssociationFormComponent implements OnInit {
   @ViewChild('editForm', {static: true}) editForm!: AssociationEditFormComponent;
 
   constructor(private messageService: MessageService,
-              private mySqlQueryService: MysqlQueryService) {
+              private mySqlQueryService: MysqlQueryService,
+              private router: Router) {
   }
 
   async ngOnInit(): Promise<void> {
@@ -107,5 +109,9 @@ export class AssociationFormComponent implements OnInit {
   blockUi($event: { block: boolean; message?: string }): void {
     this.blocked = $event.block;
     this.loadingText = $event.message;
+  }
+
+  async editOptions(): Promise<void> {
+    await this.router.navigate(['/options-form']);
   }
 }

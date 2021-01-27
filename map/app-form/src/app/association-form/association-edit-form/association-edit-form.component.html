@@ -457,6 +457,21 @@
                                   [selectTopOptions]="false"
                                   [styleClass]="'full-width input-margin-bottom'">
         </app-grouped-multi-select>
+
+        <div class="row">
+          <div class="col-6">
+            <a [routerLink]="'/options-form/districts'" [target]="'_blank'" class="no-decoration">
+              <p-button [styleClass]="'p-button-text'">
+                <i class="pi pi-pencil"></i>&nbsp;&nbsp;Schlagwörter bearbeiten
+              </p-button>
+            </a>
+          </div>
+          <div class="col-6">
+            <p-button (onClick)="reloadOptions('districts')" [styleClass]="'p-button-text'">
+              <i class="pi pi-spinner"></i>&nbsp;&nbsp;Neu laden
+            </p-button>
+          </div>
+        </div>
       </div>
 
       <div class="p-field col-xs-12 col-md-6">
@@ -469,25 +484,43 @@
                                   [selectTopOptions]="false"
                                   [styleClass]="'full-width'">
         </app-grouped-multi-select>
+
+        <div class="row" style="margin-top: 12px;">
+          <div class="col-6">
+            <a [routerLink]="'/options-form/activities'" [target]="'_blank'" class="no-decoration">
+              <p-button [styleClass]="'p-button-text'">
+                <i class="pi pi-pencil"></i>&nbsp;&nbsp;Schlagwörter bearbeiten
+              </p-button>
+            </a>
+          </div>
+          <div class="col-6">
+            <p-button (onClick)="reloadOptions('activities')" [styleClass]="'p-button-text'">
+              <i class="pi pi-spinner"></i>&nbsp;&nbsp;Neu laden
+            </p-button>
+          </div>
+        </div>
       </div>
     </div>
 
-    <h4>Datensatz &ndash; Vorschau</h4>
+    <h4 style="margin-top: 24px;">Datensatz &ndash; Vorschau</h4>
 
-    <div style="text-align: center; margin-bottom: 12px;">
-      <p-button (onClick)="jsonCollapsed = !jsonCollapsed">
-        <span *ngIf="jsonCollapsed">
-          <i class="pi pi-eye icon-padding"></i> JSON anzeigen
-        </span>
-        <span *ngIf="!jsonCollapsed">
-          <i class="pi pi-eye-slash icon-padding"></i> JSON verbergen
-        </span>
-      </p-button>
+    <div class="col-12" style="margin-bottom: 12px;">
+      <div class="form-array-add">
+        <p-button (onClick)="jsonCollapsed = !jsonCollapsed">
+          <span *ngIf="jsonCollapsed">
+            <i class="pi pi-eye icon-padding"></i> JSON anzeigen
+          </span>
+          <span *ngIf="!jsonCollapsed">
+            <i class="pi pi-eye-slash icon-padding"></i> JSON verbergen
+          </span>
+        </p-button>
+      </div>
     </div>
 
-    <div class="fieldset overflow-x" *ngIf="!jsonCollapsed">
-        <pre
-          style="font-family: 'Courier New', monospace; white-space: pre-wrap;">{{ associationForm.value | json }}</pre>
+    <div class="col-12 overflow-x fieldset"
+         *ngIf="!jsonCollapsed">
+            <pre
+              style="font-family: 'Courier New', monospace; white-space: pre-wrap;">{{ associationForm.value | json }}</pre>
     </div>
 
     <fieldset class="button-row">
