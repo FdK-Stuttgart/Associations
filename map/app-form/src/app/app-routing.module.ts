@@ -5,10 +5,6 @@ import {OptionsEditFormComponent} from './association-form/options-edit-form/opt
 
 export const routes: Routes = [
   {
-    path: 'form',
-    component: AssociationFormComponent
-  },
-  {
     path: 'options-form',
     component: OptionsEditFormComponent
   },
@@ -18,9 +14,8 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    redirectTo: '/form',
-    pathMatch: 'full'
-  },
+    component: AssociationFormComponent
+  }
 ];
 
 @NgModule({

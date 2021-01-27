@@ -1,7 +1,6 @@
 import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {
   getInternalGroupedDropdownOptions,
-  getTopOptions,
   InternalGroupedDropdownOption
 } from '../../model/dropdown-option';
 import {MysqlQueryService} from '../../services/mysql-query.service';
@@ -12,6 +11,7 @@ import {Subscription} from 'rxjs';
 import {ActivatedRoute, Router} from '@angular/router';
 import {environment} from '../../../environments/environment';
 import {v4 as uuidv4} from 'uuid';
+import {Dropdown} from 'primeng/dropdown';
 
 @Component({
   selector: 'app-edit-options-form',
@@ -41,6 +41,8 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
 
   sidebarExpanded = true;
 
+  showSubOptions = false;
+
   constructor(private mySqlQueryService: MysqlQueryService,
               private mySqlPersistService: MysqlPersistService,
               private messageService: MessageService,
@@ -49,6 +51,10 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
               private formBuilder: FormBuilder,
               private router: Router,
               private route: ActivatedRoute) {
+  }
+
+  get optionsFormLength(): number {
+    return (this.optionsForm?.controls?.options as FormArray)?.length || 0;
   }
 
   async ngOnInit(): Promise<void> {
@@ -78,9 +84,6 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
       this.options = getInternalGroupedDropdownOptions((await this.mySqlQueryService.getDistrictOptions())?.data || []);
     }
 
-    const selfTopOption = [{value: null, label: '(keine)', categoryLabel: null, isSubOption: false}];
-    this.topOptions = selfTopOption.concat(getTopOptions(this.options));
-
     this.optionsForm = new FormGroup({
       options: new FormArray([])
     });
@@ -98,6 +101,8 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
         }));
       });
     }
+
+    this.recalculateTopOptions();
 
     this.optionsForm.updateValueAndValidity();
 
@@ -172,10 +177,10 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
     if (formArray) {
       const formGroup: FormGroup = this.formBuilder.group({
         value: new FormControl(value, [Validators.required, Validators.min(0)]),
-        category: new FormControl(category),
+        category: new FormControl(this.showSubOptions ? category : null),
         label: new FormControl('', Validators.required),
-        categoryLabel: this.topOptions.find(o => o.value === category)?.label || null,
-        isSubOption: true
+        categoryLabel: this.showSubOptions ? this.topOptions.find(o => o.value === category)?.label || null : null,
+        isSubOption: this.showSubOptions
       });
 
       formArray.insert(index, formGroup);
@@ -374,13 +379,33 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
     return sortedOptions;
   }
 
-  changeCategoryDropdown(newCategory: any, options: AbstractControl, optionForm: FormGroup): void {
+  /**
+   * reorders all options when a category dropdown value is changed
+   * @param newCategory new category value
+   * @param options form array control
+   * @param optionForm option form group
+   * @param dropdown the dropdown input element
+   */
+  changeCategoryDropdown(newCategory: any, options: AbstractControl, optionForm: FormGroup, dropdown: Dropdown): void {
     const value = optionForm.value.value;
     const oldCategory = optionForm.value.category;
 
     if (newCategory !== oldCategory) {
-      if (!newCategory || !oldCategory) {
-
+      if (value === newCategory) {
+        this.confirmationService.confirm({
+          header: 'Kategorie-Auswahl ungültig',
+          message: `Als übergeordnete Kategorie kann nicht die Option selbst gewählt werden.`,
+          acceptLabel: 'OK',
+          rejectVisible: false,
+          closeOnEscape: true,
+          accept: () => {
+            optionForm.controls.category.setValue(oldCategory);
+            dropdown.writeValue(oldCategory);
+            optionForm.updateValueAndValidity();
+          }
+        });
+        return;
+      } else if (!newCategory || !oldCategory) {
         this.confirmationService.confirm({
           header: 'Achtung!',
           message: `Wenn Sie eine Unterkategorie in eine übergeordnete Kategorie abändern oder<br>`
@@ -393,10 +418,17 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
           accept: () => {
             // set new category value
             optionForm.controls.category.setValue(newCategory);
+            dropdown.writeValue(newCategory);
+
+            if (!!newCategory) {
+              this.showSubOptions = true;
+            }
 
             // set isSubOption control
             const isSubOption = !!newCategory;
             optionForm.controls.isSubOption.setValue(isSubOption);
+
+            this.optionsForm.updateValueAndValidity();
 
             // recalculate all top options, delete invalid top options from form and recalculate top options again
             this.recalculateTopOptions();
@@ -413,11 +445,13 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
           },
           reject: () => {
             optionForm.controls.category.setValue(oldCategory);
+            dropdown.writeValue(oldCategory);
           }
         });
       } else {
         // set new category value
         optionForm.controls.category.setValue(newCategory);
+        dropdown.writeValue(newCategory);
 
         // sort options by category label and label
         if (options instanceof FormArray) {
@@ -431,10 +465,21 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * recalculates the top options when a label of a top category is changed
+   * @param label changed top category label
+   * @param isSubOption is sub option
+   */
+  changeCategoryLabel(label: string, isSubOption: boolean): void {
+    if (!isSubOption) {
+      this.recalculateTopOptions();
+    }
+  }
+
+  /**
    * recalculates a list of all available top options
    */
   recalculateTopOptions(): void {
-    const selfTopOption = [{value: null, label: '(keine)', categoryLabel: null, isSubOption: false}];
+    const selfTopOption = [{value: null, label: '(Übergeordnete Kategorie)', categoryLabel: null, isSubOption: false}];
     const newTopOptions: InternalGroupedDropdownOption[] = (this.optionsForm.controls.options as FormArray).controls
       .filter((formGroup: FormGroup) => {
         return !formGroup.value.category;
@@ -470,23 +515,37 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
    * @param value the value to search for
    */
   scrollToShiftedElementWithValue(value: string): void {
-    // scroll to shifted form input
     this.optionsForm.updateValueAndValidity();
     this.cdr.detectChanges();
-    setTimeout(() => {
-      const element = document.querySelector('input[type="text"][value="' + value + '"]');
 
-      if (element) {
-        window.scrollTo({top: element.scrollTop, behavior: 'smooth'});
-      }
-    });
+    const elements: HTMLInputElement[] = Array.from(document.querySelectorAll('.hidden-input input'));
+    const element: HTMLInputElement | undefined = elements.find((i: HTMLInputElement) => i.value === value);
+
+    if (element) {
+      element.scrollIntoView();
+      const windowPositionY = window.scrollY;
+      window.scrollTo({top: (windowPositionY - 80)});
+    }
+  }
+
+  /**
+   * toggles visibility of the sidebar
+   */
+  toggleSidebar(): void {
+    this.sidebarExpanded = !this.sidebarExpanded;
+  }
+
+  /**
+   * shows or hides sub options
+   */
+  async toggleShowSubOptions(): Promise<void> {
+    this.blocked = true;
+    this.loadingText = 'Unterkategorien ' + (this.showSubOptions ? 'verstecken...' : 'anzeigen...');
+    this.showSubOptions = !this.showSubOptions;
+    this.blocked = false;
   }
 
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
-  }
-
-  toggleSidebar(): void {
-    this.sidebarExpanded = !this.sidebarExpanded;
   }
 }
