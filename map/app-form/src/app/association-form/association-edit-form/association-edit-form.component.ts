@@ -1,12 +1,23 @@
 import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
 import {SocialMediaPlatform, Association} from '../../model/association';
-import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
+import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators} from '@angular/forms';
 import {DropdownOption} from '../../model/dropdown-option';
 import {v4 as uuidv4} from 'uuid';
 import {MysqlPersistService} from '../../services/mysql-persist.service';
 import {ConfirmationService, MessageService} from 'primeng/api';
 import {MyHttpResponse} from '../../model/http-response';
 import {MysqlQueryService} from '../../services/mysql-query.service';
+
+function contactFilledValidator(): ValidatorFn {
+  return (control: FormGroup): { [key: string]: boolean } | null => {
+    if (!control.value.name && !control.value.phone && !control.value.fax && !control.value.mail) {
+      return {contactfilled: true};
+    }
+    return null;
+  };
+}
+
+const urlPattern = '(https?://)([\\da-z.-]+)\\.([a-z.]{2,6})[/\\w .-]*/?';
 
 function getEmptyFormArrayElement(type: 'contact' | 'link' | 'socialMedia' | 'image', associationId: string): FormGroup {
   switch (type) {
@@ -18,18 +29,18 @@ function getEmptyFormArrayElement(type: 'contact' | 'link' | 'socialMedia' | 'im
         fax: new FormControl(''),
         mail: new FormControl(''),
         associationId: new FormControl(associationId)
-      });
+      }, contactFilledValidator());
     case 'link':
       return new FormGroup({
         id: new FormControl(uuidv4()),
-        url: new FormControl('', Validators.required),
+        url: new FormControl('http://', [Validators.required, Validators.pattern(urlPattern)]),
         linkText: new FormControl(''),
         associationId: new FormControl(associationId)
       });
     case 'socialMedia':
       return new FormGroup({
         id: new FormControl(uuidv4()),
-        url: new FormControl('', Validators.required),
+        url: new FormControl('http://', [Validators.required, Validators.pattern(urlPattern)]),
         linkText: new FormControl(''),
         platform: new FormControl('Other'),
         associationId: new FormControl(associationId)
@@ -37,7 +48,7 @@ function getEmptyFormArrayElement(type: 'contact' | 'link' | 'socialMedia' | 'im
     case 'image':
       return new FormGroup({
         id: new FormControl(uuidv4()),
-        url: new FormControl('', Validators.required),
+        url: new FormControl('http://', [Validators.required, Validators.pattern(urlPattern)]),
         altText: new FormControl(''),
         associationId: new FormControl(associationId)
       });
@@ -55,11 +66,9 @@ function getEmptyFormArrayElement(type: 'contact' | 'link' | 'socialMedia' | 'im
   ]
 })
 export class AssociationEditFormComponent implements OnChanges {
-
-  blocked = false;
-  loadingText = 'Verein wird gespeichert...';
-
   jsonCollapsed = true;
+
+  initialFormState: any = {};
 
   associations: Association[] = [];
   association?: Association;
@@ -81,16 +90,7 @@ export class AssociationEditFormComponent implements OnChanges {
   districtOptions: DropdownOption[] = [];
   activitiesOptions: DropdownOption[] = [];
 
-  /*  readonly textBlockOptions = [
-      {
-        label: 'Plain Text',
-        value: 'plain'
-      },
-      {
-        label: 'HTML',
-        value: 'html'
-      }
-    ];*/
+  @Output() blockUi: EventEmitter<{ block: boolean, message?: string }> = new EventEmitter<{ block: boolean, message?: string }>();
 
   readonly socialMediaOptions = Object.keys(SocialMediaPlatform)
     // @ts-ignore
@@ -102,12 +102,15 @@ export class AssociationEditFormComponent implements OnChanges {
       };
     });
 
+  get hasFormValueChanged(): boolean {
+    return JSON.stringify(this.associationForm?.value) !== JSON.stringify(this.initialFormState);
+  }
+
   constructor(private formBuilder: FormBuilder,
               private mySqlQueryService: MysqlQueryService,
               private mySqlPersistService: MysqlPersistService,
               private confirmationService: ConfirmationService,
               private messageService: MessageService) {
-    this.initForm();
   }
 
   /**
@@ -126,7 +129,7 @@ export class AssociationEditFormComponent implements OnChanges {
    * queries all associations, fill in the edited association data into the form
    */
   private async initForm(): Promise<void> {
-    this.blocked = true;
+    this.emitBlockUi(true, 'Verein wird abgerufen...');
 
     this.districtOptions = (await this.mySqlQueryService.getDistrictOptions())?.data || [];
     this.activitiesOptions = (await this.mySqlQueryService.getActivitiesOptions())?.data || [];
@@ -144,7 +147,7 @@ export class AssociationEditFormComponent implements OnChanges {
           detail: httpResponse?.errorMessage || '',
           key: 'formToast'
         });
-        this.blocked = false;
+        this.emitBlockUi(false);
         return;
       } else {
         this.association = this.associations.find((s: Association) => s.id === this.selectedAssociationId);
@@ -155,7 +158,7 @@ export class AssociationEditFormComponent implements OnChanges {
             detail: `Der Verein mit der id ${this.selectedAssociationId}} konnte nicht in der Datenbank gefunden werden.`,
             key: 'formToast'
           });
-          this.blocked = false;
+          this.emitBlockUi(false);
           return;
         }
       }
@@ -183,6 +186,7 @@ export class AssociationEditFormComponent implements OnChanges {
     this.associationForm = new FormGroup({
       id: new FormControl(id),
       name: new FormControl(this.association?.name || '', Validators.required),
+      shortName: new FormControl(this.association?.shortName || '', [Validators.maxLength(50)]),
       lat: new FormControl(this.association?.lat || 0, [Validators.required, Validators.min(-90), Validators.max(90)]),
       lng: new FormControl(this.association?.lng || 0, [Validators.required, Validators.min(-180), Validators.max(180)]),
       addressLine1: new FormControl(this.association?.addressLine1 || ''),
@@ -198,8 +202,8 @@ export class AssociationEditFormComponent implements OnChanges {
       socialMedia: new FormArray([]),
       goals: this.goalsForm,
       activities: this.activityForm,
-      districtIds: new FormControl(this.association?.districtIds || []),
-      activityIds: new FormControl(this.association?.activityIds || [])
+      districtList: new FormControl(this.association?.districtList || []),
+      activityList: new FormControl(this.association?.activityList || [])
     });
 
     if (this.association?.contacts?.length) {
@@ -212,8 +216,10 @@ export class AssociationEditFormComponent implements OnChanges {
           phone: new FormControl(contact.phone || ''),
           fax: new FormControl(contact.fax || ''),
           mail: new FormControl(contact.mail || '')
-        }));
+        }, {validators: contactFilledValidator()}));
       });
+    } else {
+      this.formArrayAdd(this.associationForm.controls.contacts as FormArray, 'contact', this.associationForm.value.id);
     }
 
     if (this.association?.links?.length) {
@@ -222,7 +228,7 @@ export class AssociationEditFormComponent implements OnChanges {
       this.association.links.forEach(link => {
         linkControl.push(this.formBuilder.group({
           id: new FormControl(link.id || uuidv4()),
-          url: new FormControl(link.url, Validators.required),
+          url: new FormControl(link.url || 'http://', [Validators.required, Validators.pattern(urlPattern)]),
           linkText: new FormControl(link.linkText)
         }));
       });
@@ -234,7 +240,7 @@ export class AssociationEditFormComponent implements OnChanges {
       this.association?.socialMedia.forEach(link => {
         socialMediaControl.push(this.formBuilder.group({
           id: new FormControl(link.id || uuidv4()),
-          url: new FormControl(link.url, Validators.required),
+          url: new FormControl(link.url || 'http://', [Validators.required, Validators.pattern(urlPattern)]),
           linkText: new FormControl(link.linkText),
           platform: new FormControl(link.platform || 'Other')
         }));
@@ -247,7 +253,7 @@ export class AssociationEditFormComponent implements OnChanges {
       this.association?.images.forEach(image => {
         imageControl.push(this.formBuilder.group({
           id: new FormControl(image.id || uuidv4()),
-          url: new FormControl(image.url, Validators.required),
+          url: new FormControl(image.url || 'http://', [Validators.required, Validators.pattern(urlPattern)]),
           altText: new FormControl(image.altText)
         }));
       });
@@ -258,7 +264,9 @@ export class AssociationEditFormComponent implements OnChanges {
       this.associationForm.updateValueAndValidity();
     });
 
-    this.blocked = false;
+    this.initialFormState = this.associationForm?.value;
+
+    this.emitBlockUi(false);
   }
 
   /**
@@ -340,6 +348,15 @@ export class AssociationEditFormComponent implements OnChanges {
   }
 
   /**
+   * checks if a specific form group has a specific error
+   * @param formGroup the form group control to check
+   * @param error the error to check for
+   */
+  public errorHandlingFormGroup(formGroup: FormGroup, error: string): boolean {
+    return formGroup.hasError(error);
+  }
+
+  /**
    * checks if a specific form control in a specific form array has a specific error
    * @param array the form array to check
    * @param index the index of the form group to check
@@ -392,33 +409,18 @@ export class AssociationEditFormComponent implements OnChanges {
    * @param id the selected association's id
    */
   async reset(id: string): Promise<void> {
-    if (this.associationForm.dirty) {
-      this.confirmationService.confirm({
-        header: 'Änderungen zurücksetzen?',
-        message: 'Möchten Sie Ihre Änderungen am Verein wirklich zurücksetzen?',
-        acceptLabel: 'OK',
-        rejectLabel: 'Abbrechen',
-        closeOnEscape: true,
-        accept: async () => {
-          this.selectedAssociationId = id;
-          await this.initForm();
-        }
-      });
-    } else {
-      this.selectedAssociationId = id;
-      await this.initForm();
-    }
+    this.selectedAssociationId = id;
+    await this.initForm();
   }
 
   /**
    * submits form data, creates or updated the edited association
    */
   async submit(): Promise<void> {
-    this.blocked = true;
-    this.loadingText = 'Verein wird gespeichert...';
+    this.emitBlockUi(true, 'Verein wird gespeichert...');
     await this.mySqlPersistService.createOrUpdateAssociation(this.associationForm.value).toPromise()
       .then(() => {
-        this.blocked = false;
+        this.emitBlockUi(false);
         this.messageService.add({
           severity: 'success',
           summary: 'Verein wurde gespeichert.',
@@ -427,7 +429,7 @@ export class AssociationEditFormComponent implements OnChanges {
         this.reload.emit(this.associationForm.value.id);
       })
       .catch((reason) => {
-        this.blocked = false;
+        this.emitBlockUi(false);
         this.messageService.add({
           severity: 'error',
           summary: 'Verein konnte nicht gespeichert werden.',
@@ -449,11 +451,10 @@ export class AssociationEditFormComponent implements OnChanges {
       rejectLabel: 'Abbrechen',
       closeOnEscape: true,
       accept: async () => {
-        this.blocked = true;
-        this.loadingText = 'Verein wird gelöscht...';
+        this.emitBlockUi(true, 'Verein wird gelöscht...');
         await this.mySqlPersistService.deleteAssociation(id).toPromise()
           .then(() => {
-            this.blocked = false;
+            this.emitBlockUi(false);
             this.messageService.add({
               severity: 'success',
               summary: 'Verein wurde gelöscht.',
@@ -462,7 +463,7 @@ export class AssociationEditFormComponent implements OnChanges {
             this.reload.emit(undefined);
           })
           .catch((reason) => {
-            this.blocked = false;
+            this.emitBlockUi(false);
             this.messageService.add({
               severity: 'error',
               summary: 'Verein konnte nicht gelöscht werden.',
@@ -475,13 +476,9 @@ export class AssociationEditFormComponent implements OnChanges {
   }
 
   /**
-   * checks if a form value is a string starting with http:// or https://
-   * @param value the form value to check
+   * converts a phone number to a valid string usable in a <a href="tel:..."> link
+   * @param input phone number as string
    */
-  isExternalLink(value: any): boolean {
-    return !!value && typeof value === 'string' && (value.startsWith('http://') || value.startsWith('https://'));
-  }
-
   telephoneLink(input: string): string {
     let output = 'tel:';
     const num = input.match(/\d/g);
@@ -496,5 +493,44 @@ export class AssociationEditFormComponent implements OnChanges {
     }
     output += processedNum;
     return output;
+  }
+
+  /**
+   * add http:// prefix in url form controls
+   * @param urlControl the form control to add the prefix to
+   */
+  addHttpProtocolToLink(urlControl: AbstractControl): void {
+    if (!urlControl.value.startsWith('http://') && !urlControl.value.startsWith('https://')) {
+      urlControl.setValue('http://' + urlControl.value);
+    }
+  }
+
+  /**
+   * emits a event for the parent component to block the ui
+   * @param block start blocking state (true) or not end blocking state (false)
+   * @param message message to display in the ui blocker
+   */
+  emitBlockUi(block: boolean, message?: string): void {
+    this.blockUi.emit({
+      block,
+      message
+    });
+  }
+
+  /**
+   * reloads the options in a option dropdown
+   * @param optionType the option type of the dropdown (districts or activities)
+   */
+  async reloadOptions(optionType: string): Promise<void> {
+    this.emitBlockUi(true, 'Schlagwörter laden...');
+    switch (optionType) {
+      case 'districts':
+        this.districtOptions = (await this.mySqlQueryService.getDistrictOptions())?.data || [];
+        break;
+      case 'activities':
+        this.activitiesOptions = (await this.mySqlQueryService.getActivitiesOptions())?.data || [];
+        break;
+    }
+    this.emitBlockUi(false);
   }
 }

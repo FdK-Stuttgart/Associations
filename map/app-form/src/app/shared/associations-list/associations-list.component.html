@@ -10,7 +10,7 @@
              *ngIf="association[identifiedByFieldName] === selectedAssociationField"></i>
         </div>
         <div class="text">
-          {{ association.name }}
+          {{ association.shortName || association.name }}
         </div>
       </div>
     </a>

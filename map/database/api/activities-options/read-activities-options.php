@@ -6,13 +6,22 @@ require '../database.php';
 
 $activity_options = [];
 
-$sql = "SELECT label, value FROM `activities_options` ORDER BY value";
+$sql = "SELECT 	activities.value AS value, 
+                activities.label AS label, 
+                activities.category AS category, 
+                upper.label AS categoryLabel 
+        FROM activities 
+            LEFT JOIN activities AS upper 
+                ON activities.category = upper.value
+        ORDER BY categoryLabel, label";
 
 if ($result = mysqli_query($con, $sql)) {
     $i = 0;
     while ($row = mysqli_fetch_assoc($result)) {
         $activity_options[$i]['label'] = $row['label'];
-        $activity_options[$i]['value'] = intval($row['value']);
+        $activity_options[$i]['value'] = $row['value'];
+		$activity_options[$i]['category'] = $row['category'];
+        $activity_options[$i]['categoryLabel'] = $row['categoryLabel'];
         $i++;
     }
     echo json_encode($activity_options);

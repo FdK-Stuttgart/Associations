@@ -45,8 +45,8 @@ export class MysqlQueryService {
           const associations = res.map((s: any) => {
             return {
               ...s,
-              activityIds: s.activityIds ? JSON.parse(s.activityIds) : [],
-              districtIds: s.districtIds ? JSON.parse(s.districtIds) : []
+              activityList: s.activityList ? JSON.parse(s.activityList) : [],
+              districtList: s.districtList ? JSON.parse(s.districtList) : []
             };
           });
           return {

@@ -17,7 +17,10 @@
     <div class="sidebar-input-full-width"
          [ngClass]="{ 'group-header-option': !isSubOption(option), 'sub-option': isSubOption(option) }">
       {{ option.label }}
+      <span class="select-hint" *ngIf="!isSubOption(option)">
+        <span *ngIf="value.includes(option.value)">(Alle abwählen)</span>
+        <span *ngIf="!value.includes(option.value)">(Alle auswählen)</span>
+      </span>
     </div>
   </ng-template>
-
 </p-multiSelect>

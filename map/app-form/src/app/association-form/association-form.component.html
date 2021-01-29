@@ -1,16 +1,21 @@
+<p-confirmDialog [baseZIndex]="10000"></p-confirmDialog>
+
 <p-blockUI [blocked]="blocked">
   <p-progressSpinner></p-progressSpinner>
-  <div class="block-ui-text">Vereine werden abgerufen...</div>
+  <div class="block-ui-text">{{ loadingText }}</div>
 </p-blockUI>
 
 <div class="container">
   <div class="main-container">
-    <app-association-edit-form [selectedAssociationId]="selectedAssociation?.id"
+    <app-association-edit-form #editForm
+                               [selectedAssociationId]="selectedAssociation?.id"
                                [isNew]="isNew"
+                               (blockUi)="blockUi($event)"
                                (reload)="reload($event)">
     </app-association-edit-form>
   </div>
 </div>
+
 
 <p-sidebar [(visible)]="sidebarExpanded"
            [position]="'right'"
@@ -18,18 +23,52 @@
            [modal]="false">
   <div class="sidebar-content">
 
-    <div class="logo">
-      <a href="https://house-of-resources-stuttgart.de/" title="House of Resources Stuttgart">
-        <img src="assets/forum-der-kulturen.svg" alt="Forum der Kulturen (Logo)" class="full-width logo-img"/>
-      </a>
+    <div class="row" style="margin-bottom: 12px;">
+      <div class="col-6">
+        <p-button (onClick)="submit()" [disabled]="!editForm?.associationForm?.valid">
+          <i class="pi pi-save"></i>&nbsp;&nbsp;Speichern
+        </p-button>
+      </div>
+      <div class="col-6" style="text-align: right;">
+        <span class="delete-button">
+          <p-button (onClick)="reset()">
+            <i class="pi pi-backward"></i>&nbsp;&nbsp;Reset
+          </p-button>
+        </span>
+      </div>
     </div>
 
-    <h3>
+    <div class="row" style="margin-bottom: 12px;">
+      <div class="col-5">
+        <p-button (click)="selectAssociation(undefined, true)" [disabled]="isNew">
+          <i class="pi pi-plus"></i>&nbsp;&nbsp;Neu
+        </p-button>
+      </div>
+      <div class="col-7" style="text-align: right;">
+        <p-button (click)="reload(selectedAssociation?.id);">
+          <i class="pi pi-spinner"></i>&nbsp;&nbsp;Neu laden
+        </p-button>
+      </div>
+    </div>
+
+    <div class="row" style="margin-bottom: 30px;">
+      <div class="col-6">
+      </div>
+      <div class="col-6" style="text-align: right;">
+        <span class="delete-button">
+          <p-button (onClick)="deleteAssociation()">
+            <i class="pi pi-trash"></i>&nbsp;&nbsp;Löschen
+          </p-button>
+        </span>
+      </div>
+    </div>
+
+    <h4>
       Vereine
       <span>
         ({{associations?.length || 0}})
       </span>
-    </h3>
+    </h4>
 
     <app-associations-list [associations]="associations"
                            [selectedAssociationField]="selectedAssociation?.id"
@@ -37,16 +76,12 @@
                            [primeNgIconClass]="'pi pi-pencil'"
                            (selected)="selectAssociation($event)">
     </app-associations-list>
+  </div>
 
-    <div class="clear-button">
-      <p-button (click)="selectAssociation(undefined, true)" [disabled]="isNew">
-        <i class="pi pi-plus"></i>&nbsp;&nbsp;Verein hinzufügen
-      </p-button>
-    </div>
-
-    <div class="clear-button">
-      <p-button (click)="ngOnInit();">
-        <i class="pi pi-spinner"></i>&nbsp;&nbsp;Neu laden
+  <div class="row" style="margin-bottom: 12px; margin-top: 48px;">
+    <div class="col-12" style="text-align: center;">
+      <p-button (click)="editOptions()">
+        <i class="pi pi-pencil"></i>&nbsp;&nbsp;Schlagwörter bearbeiten
       </p-button>
     </div>
   </div>

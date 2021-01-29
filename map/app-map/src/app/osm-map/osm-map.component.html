@@ -17,6 +17,7 @@
            [showCloseIcon]="true"
            [modal]="false">
   <div class="sidebar-content">
+
     <div class="full-width flex-align-center margin-top">
       <p-autoComplete #autoComplete
                       (completeMethod)="filterAssociations($event.query)"
@@ -45,7 +46,7 @@
                                 [placeholder]="'Aktivitätsgebiet auswählen...'"
                                 [labelPlural]="'Aktivitätsgebiete'"
                                 [styleClass]="'sidebar-input-full-width input-margin-bottom'"
-                                [selectUpperCategories]="false">
+                                [selectTopOptions]="false">
       </app-grouped-multi-select>
 
       <app-grouped-multi-select [options]="activitiesOptions"
@@ -54,8 +55,16 @@
                                 [placeholder]="'Tätigkeitsfelder auswählen...'"
                                 [labelPlural]="'Tätigkeitsfelder'"
                                 [styleClass]="'sidebar-input-full-width'"
-                                [selectUpperCategories]="false">
+                                [selectTopOptions]="false">
       </app-grouped-multi-select>
+    </div>
+
+    <hr class="hr"/>
+
+    <div class="clear-button">
+      <p-button (click)="ngOnInit();">
+        <i class="pi pi-spinner"></i>&nbsp;&nbsp;Neu laden
+      </p-button>
     </div>
 
     <hr class="hr"/>
@@ -82,11 +91,11 @@
           <i class="pi pi-times mini-button" (click)="clearAutocomplete();"></i>
         </div>
         <div class="filter-chip" *ngIf="selectedDistricts?.length">
-          Aktivitätsgebiete ({{ getSubOptions(selectedDistricts).length }}) <i class="pi pi-times mini-button"
+          Aktivitätsgebiete ({{ getSubOptions(selectedDistricts, districtOptions).length }}) <i class="pi pi-times mini-button"
                                                                                (click)="resetDistrictsFilter()"></i>
         </div>
         <div class="filter-chip" *ngIf="selectedActivities?.length">
-          Tätigkeitsfelder ({{ getSubOptions(selectedActivities).length }}) <i class="pi pi-times mini-button"
+          Tätigkeitsfelder ({{ getSubOptions(selectedActivities, activitiesOptions).length }}) <i class="pi pi-times mini-button"
                                                                                (click)="resetActivitiesFilter()"></i>
         </div>
       </div>
@@ -104,11 +113,6 @@
          class="clear-button">
       <p-button (click)="clearFilters();">
         Filter löschen
-      </p-button>
-    </div>
-    <div class="clear-button">
-      <p-button (click)="ngOnInit();">
-        <i class="pi pi-spinner"></i>&nbsp;&nbsp;Neu laden
       </p-button>
     </div>
   </div>

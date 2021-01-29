@@ -19,16 +19,17 @@ if (isset($postdata) && !empty($postdata)) {
     $request = json_decode($postdata);
 
     // Update.
-    $sql = "DELETE FROM districts_options; 
+    $sql = "DELETE FROM districts; 
 
             ";
 
-    $sql .= "INSERT INTO districts_options (value, label) VALUES";
+    $sql .= "INSERT INTO districts (value, label, category) VALUES";
 
     foreach ($request as $i => $item) {
 
         $label = '';
-        $value = -1;
+        $value = '';
+		$category = '';
 
         foreach ($item as $k => $v) {
             if ($k == 'label') {
@@ -38,14 +39,23 @@ if (isset($postdata) && !empty($postdata)) {
             if ($k == 'value') {
                 $value = $v;
             }
+			
+			if ($k == 'category') {
+                $category = $v;
+            }
         }
-        if ($label != '' && $value != -1) {
-            $value = intval($value);
+        if ($label != '' && $value != '') {
+            $value = mysqli_real_escape_string($con, trim($value));
             $label = mysqli_real_escape_string($con, trim($label));
-            $sql .= "($value, '$label'),";
+            $category = mysqli_real_escape_string($con, trim($category));
+            if ($category == '' || $category == null) {
+                $sql .= "('$value', '$label', null),";
+            } else {
+                $sql .= "('$value', '$label', '$category'),";
+            }
             continue;
         }
-        $sql .= "('$label', $value),";
+        $sql .= "('$value', '$label', null),";
     }
 
     if (endsWith($sql, ',')) {

@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {HttpClient, HttpErrorResponse, HttpResponse} from '@angular/common/http';
+import {HttpClient, HttpErrorResponse, HttpHeaders, HttpResponse} from '@angular/common/http';
 import {Association} from '../model/association';
 import {Observable, throwError} from 'rxjs';
 import {MyHttpResponse} from '../model/http-response';
