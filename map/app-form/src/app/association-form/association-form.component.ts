@@ -1,7 +1,7 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, HostListener, OnInit, ViewChild} from '@angular/core';
 import {Association} from '../model/association';
 import {MyHttpResponse} from '../model/http-response';
-import {MessageService} from 'primeng/api';
+import {ConfirmationService, MessageService} from 'primeng/api';
 import {MysqlQueryService} from '../services/mysql-query.service';
 import {AssociationEditFormComponent} from './association-edit-form/association-edit-form.component';
 import {Router} from '@angular/router';
@@ -11,7 +11,8 @@ import {Router} from '@angular/router';
   templateUrl: './association-form.component.html',
   styleUrls: ['./association-form.component.scss'],
   providers: [
-    MessageService
+    MessageService,
+    ConfirmationService
   ]
 })
 export class AssociationFormComponent implements OnInit {
@@ -30,7 +31,12 @@ export class AssociationFormComponent implements OnInit {
 
   constructor(private messageService: MessageService,
               private mySqlQueryService: MysqlQueryService,
+              private confirmationService: ConfirmationService,
               private router: Router) {
+  }
+
+  @HostListener('window:beforeunload', ['$event']) unloadHandler(event: Event): void {
+    event.returnValue = false;
   }
 
   async ngOnInit(): Promise<void> {
@@ -64,14 +70,15 @@ export class AssociationFormComponent implements OnInit {
    */
   async reload(id: string | undefined): Promise<void> {
     await this.ngOnInit();
-    if (id) {
-      const associationToSelect = this.associations.find((s: Association) => s.id === id);
-      this.selectAssociation(associationToSelect, false);
-    } else {
-      this.selectedAssociation = undefined;
-      this.isNew = false;
+    if (await this.leavePage()) {
+      if (id) {
+        const associationToSelect = this.associations.find((s: Association) => s.id === id);
+        this.selectAssociation(associationToSelect, false, false);
+      } else {
+        this.selectAssociation(undefined, true, false);
+      }
+      window.scroll(0, 0);
     }
-    window.scroll(0, 0);
   }
 
   /**
@@ -79,11 +86,14 @@ export class AssociationFormComponent implements OnInit {
    * @param association the association to edit
    * @param isNew wheter a new association is created or an existing is edited
    */
-  selectAssociation(association: Association | undefined, isNew = false): void {
-    this.selectedAssociation = association;
-    this.isNew = isNew;
-    if (document.documentElement.clientWidth <= 768 && this.sidebarExpanded) {
-      this.sidebarExpanded = false;
+  async selectAssociation(association: Association | undefined, isNew = false, showDialog = true): Promise<void> {
+    if (!showDialog || await this.leavePage()) {
+      this.selectedAssociation = association;
+      this.isNew = isNew;
+      this.reset(false);
+      if (document.documentElement.clientWidth <= 768 && this.sidebarExpanded) {
+        this.sidebarExpanded = false;
+      }
     }
   }
 
@@ -98,8 +108,10 @@ export class AssociationFormComponent implements OnInit {
     await this.editForm.submit();
   }
 
-  async reset(): Promise<void> {
-    await this.editForm.reset(this.selectedAssociation?.id);
+  async reset(showDialog = true): Promise<void> {
+    if (!showDialog || await this.leavePage()) {
+      await this.editForm.reset(this.selectedAssociation?.id);
+    }
   }
 
   async deleteAssociation(): Promise<void> {
@@ -112,6 +124,40 @@ export class AssociationFormComponent implements OnInit {
   }
 
   async editOptions(): Promise<void> {
-    await this.router.navigate(['/options-form']);
+    if (await this.leavePage()) {
+      await this.router.navigate(['/options-form']);
+    }
+  }
+
+  /**
+   * deactivate guard
+   */
+  async canDeactivate(): Promise<boolean> {
+    return await this.leavePage();
+  }
+
+  /**
+   * show dialog on page-leave if something changed in the form
+   */
+  async leavePage(): Promise<boolean> {
+    if (this.editForm.hasFormValueChanged) {
+      return new Promise((resolve) => {
+        this.confirmationService.confirm({
+          header: 'Änderungen verwerfen?',
+          message: `Wenn Sie die Seite verlassen, gehen nicht gespeicherte Änderungen verloren.`,
+          acceptLabel: 'OK',
+          rejectLabel: 'Abbrechen',
+          closeOnEscape: true,
+          accept: () => {
+            resolve(true);
+          },
+          reject: () => {
+            resolve(false);
+          }
+        });
+      });
+    } else {
+      return true;
+    }
   }
 }

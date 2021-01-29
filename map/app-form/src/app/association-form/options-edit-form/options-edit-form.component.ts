@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, HostListener, Input, OnDestroy, OnInit} from '@angular/core';
 import {
   getInternalGroupedDropdownOptions,
   InternalGroupedDropdownOption
@@ -8,7 +8,7 @@ import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validat
 import {MysqlPersistService} from '../../services/mysql-persist.service';
 import {ConfirmationService, MessageService} from 'primeng/api';
 import {Subscription} from 'rxjs';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {environment} from '../../../environments/environment';
 import {v4 as uuidv4} from 'uuid';
 import {Dropdown} from 'primeng/dropdown';
@@ -41,17 +41,22 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
 
   sidebarExpanded = true;
 
+  get optionsFormLength(): number {
+    return (this.optionsForm?.controls?.options as FormArray)?.length || 0;
+  }
+
   constructor(private mySqlQueryService: MysqlQueryService,
               private mySqlPersistService: MysqlPersistService,
               private messageService: MessageService,
               private confirmationService: ConfirmationService,
               private cdr: ChangeDetectorRef,
+              private router: Router,
               private formBuilder: FormBuilder,
               private route: ActivatedRoute) {
   }
 
-  get optionsFormLength(): number {
-    return (this.optionsForm?.controls?.options as FormArray)?.length || 0;
+  @HostListener('window:beforeunload', ['$event']) unloadHandler(event: Event): void {
+    event.returnValue = false;
   }
 
   async ngOnInit(): Promise<void> {
@@ -332,6 +337,8 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
       option1.value < option2.value ? -1 : (option1.value > option2.value ? 1 : (option1.label < option2.value ? -1 : 1))
     );
 
+    console.log(JSON.stringify(oldOptions) !== JSON.stringify(newOptions));
+
     return JSON.stringify(oldOptions) !== JSON.stringify(newOptions);
   }
 
@@ -552,10 +559,10 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
     this.blocked = false;
   }
 
-  ngOnDestroy(): void {
-    this.sub?.unsubscribe();
-  }
-
+  /**
+   * returns if the sub options for a specific top category should be displayed or hidden
+   * @param value value of the top category
+   */
   showSubOptions(value: string): boolean {
     const formArray = (this.optionsForm?.controls?.options as FormArray)?.controls;
     if (formArray) {
@@ -567,5 +574,48 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
       }
     }
     return false;
+  }
+
+  /**
+   * navigate to the association form
+   */
+  async editAssociations(): Promise<void> {
+    await this.router.navigate(['/']);
+  }
+
+  /**
+   * deactivate guard
+   */
+  async canDeactivate(): Promise<boolean> {
+    return await this.leavePage();
+  }
+
+  /**
+   * show dialog on page-leave if something changed in the form
+   */
+  async leavePage(): Promise<boolean> {
+    if (!!this.optionType && this.hasFormValueChanged()) {
+      return new Promise((resolve) => {
+        this.confirmationService.confirm({
+          header: 'Änderungen verwerfen?',
+          message: `Wenn Sie die Seite verlassen, gehen nicht gespeicherte Änderungen verloren.`,
+          acceptLabel: 'OK',
+          rejectLabel: 'Abbrechen',
+          closeOnEscape: true,
+          accept: () => {
+            resolve(true);
+          },
+          reject: () => {
+            resolve(false);
+          }
+        });
+      });
+    } else {
+      return true;
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.sub?.unsubscribe();
   }
 }

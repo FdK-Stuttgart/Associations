@@ -17,6 +17,8 @@ function contactFilledValidator(): ValidatorFn {
   };
 }
 
+const urlPattern = '(https?://)([\\da-z.-]+)\\.([a-z.]{2,6})[/\\w .-]*/?';
+
 function getEmptyFormArrayElement(type: 'contact' | 'link' | 'socialMedia' | 'image', associationId: string): FormGroup {
   switch (type) {
     case 'contact':
@@ -31,14 +33,14 @@ function getEmptyFormArrayElement(type: 'contact' | 'link' | 'socialMedia' | 'im
     case 'link':
       return new FormGroup({
         id: new FormControl(uuidv4()),
-        url: new FormControl('', Validators.required),
+        url: new FormControl('http://', [Validators.required, Validators.pattern(urlPattern)]),
         linkText: new FormControl(''),
         associationId: new FormControl(associationId)
       });
     case 'socialMedia':
       return new FormGroup({
         id: new FormControl(uuidv4()),
-        url: new FormControl('', Validators.required),
+        url: new FormControl('http://', [Validators.required, Validators.pattern(urlPattern)]),
         linkText: new FormControl(''),
         platform: new FormControl('Other'),
         associationId: new FormControl(associationId)
@@ -46,7 +48,7 @@ function getEmptyFormArrayElement(type: 'contact' | 'link' | 'socialMedia' | 'im
     case 'image':
       return new FormGroup({
         id: new FormControl(uuidv4()),
-        url: new FormControl('', Validators.required),
+        url: new FormControl('http://', [Validators.required, Validators.pattern(urlPattern)]),
         altText: new FormControl(''),
         associationId: new FormControl(associationId)
       });
@@ -65,6 +67,8 @@ function getEmptyFormArrayElement(type: 'contact' | 'link' | 'socialMedia' | 'im
 })
 export class AssociationEditFormComponent implements OnChanges {
   jsonCollapsed = true;
+
+  initialFormState: any = {};
 
   associations: Association[] = [];
   association?: Association;
@@ -98,12 +102,15 @@ export class AssociationEditFormComponent implements OnChanges {
       };
     });
 
+  get hasFormValueChanged(): boolean {
+    return JSON.stringify(this.associationForm?.value) !== JSON.stringify(this.initialFormState);
+  }
+
   constructor(private formBuilder: FormBuilder,
               private mySqlQueryService: MysqlQueryService,
               private mySqlPersistService: MysqlPersistService,
               private confirmationService: ConfirmationService,
               private messageService: MessageService) {
-    this.initForm();
   }
 
   /**
@@ -221,7 +228,7 @@ export class AssociationEditFormComponent implements OnChanges {
       this.association.links.forEach(link => {
         linkControl.push(this.formBuilder.group({
           id: new FormControl(link.id || uuidv4()),
-          url: new FormControl(link.url, Validators.required),
+          url: new FormControl(link.url || 'http://', [Validators.required, Validators.pattern(urlPattern)]),
           linkText: new FormControl(link.linkText)
         }));
       });
@@ -233,7 +240,7 @@ export class AssociationEditFormComponent implements OnChanges {
       this.association?.socialMedia.forEach(link => {
         socialMediaControl.push(this.formBuilder.group({
           id: new FormControl(link.id || uuidv4()),
-          url: new FormControl(link.url, Validators.required),
+          url: new FormControl(link.url || 'http://', [Validators.required, Validators.pattern(urlPattern)]),
           linkText: new FormControl(link.linkText),
           platform: new FormControl(link.platform || 'Other')
         }));
@@ -246,7 +253,7 @@ export class AssociationEditFormComponent implements OnChanges {
       this.association?.images.forEach(image => {
         imageControl.push(this.formBuilder.group({
           id: new FormControl(image.id || uuidv4()),
-          url: new FormControl(image.url, Validators.required),
+          url: new FormControl(image.url || 'http://', [Validators.required, Validators.pattern(urlPattern)]),
           altText: new FormControl(image.altText)
         }));
       });
@@ -256,6 +263,8 @@ export class AssociationEditFormComponent implements OnChanges {
     setTimeout(() => {
       this.associationForm.updateValueAndValidity();
     });
+
+    this.initialFormState = this.associationForm?.value;
 
     this.emitBlockUi(false);
   }
@@ -400,22 +409,8 @@ export class AssociationEditFormComponent implements OnChanges {
    * @param id the selected association's id
    */
   async reset(id: string): Promise<void> {
-    if (this.associationForm.dirty) {
-      this.confirmationService.confirm({
-        header: 'Änderungen zurücksetzen?',
-        message: 'Möchten Sie Ihre Änderungen am Verein wirklich zurücksetzen?',
-        acceptLabel: 'OK',
-        rejectLabel: 'Abbrechen',
-        closeOnEscape: true,
-        accept: async () => {
-          this.selectedAssociationId = id;
-          await this.initForm();
-        }
-      });
-    } else {
-      this.selectedAssociationId = id;
-      await this.initForm();
-    }
+    this.selectedAssociationId = id;
+    await this.initForm();
   }
 
   /**
@@ -481,13 +476,9 @@ export class AssociationEditFormComponent implements OnChanges {
   }
 
   /**
-   * checks if a form value is a string starting with http:// or https://
-   * @param value the form value to check
+   * converts a phone number to a valid string usable in a <a href="tel:..."> link
+   * @param input phone number as string
    */
-  isExternalLink(value: any): boolean {
-    return !!value && typeof value === 'string' && (value.startsWith('http://') || value.startsWith('https://'));
-  }
-
   telephoneLink(input: string): string {
     let output = 'tel:';
     const num = input.match(/\d/g);
@@ -504,6 +495,21 @@ export class AssociationEditFormComponent implements OnChanges {
     return output;
   }
 
+  /**
+   * add http:// prefix in url form controls
+   * @param urlControl the form control to add the prefix to
+   */
+  addHttpProtocolToLink(urlControl: AbstractControl): void {
+    if (!urlControl.value.startsWith('http://') && !urlControl.value.startsWith('https://')) {
+      urlControl.setValue('http://' + urlControl.value);
+    }
+  }
+
+  /**
+   * emits a event for the parent component to block the ui
+   * @param block start blocking state (true) or not end blocking state (false)
+   * @param message message to display in the ui blocker
+   */
   emitBlockUi(block: boolean, message?: string): void {
     this.blockUi.emit({
       block,
@@ -511,6 +517,10 @@ export class AssociationEditFormComponent implements OnChanges {
     });
   }
 
+  /**
+   * reloads the options in a option dropdown
+   * @param optionType the option type of the dropdown (districts or activities)
+   */
   async reloadOptions(optionType: string): Promise<void> {
     this.emitBlockUi(true, 'Schlagwörter laden...');
     switch (optionType) {

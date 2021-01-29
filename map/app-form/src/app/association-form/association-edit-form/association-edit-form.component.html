@@ -190,10 +190,9 @@
             </p>
           </div>
         </div>
-        <div
-          *ngIf="!contactFormGroup.errors"
-          class="col-12 association-links"
-          style="text-align: center;">
+        <div *ngIf="!contactFormGroup.errors"
+             class="col-12 association-links"
+             style="text-align: center;">
           <h6>Vorschau</h6>
           <div class="association-contact">
             <p *ngIf="contactFormGroup.value.name" class="name">{{ contactFormGroup.value.name }}</p>
@@ -279,14 +278,15 @@
                    id="image-{{i}}-format-input"
                    type="text"
                    [formControl]="imageFormGroup.controls.url"
+                   (focusout)="addHttpProtocolToLink(imageFormGroup.controls.url)"
                    placeholder="Bild-URL*"/>
             <p class="invalid-label"
                *ngIf="errorHandlingForFormArray('images', i, 'url', 'required')">
               Eine URL muss angegeben werden.
             </p>
-            <p class="hint"
-               *ngIf="!isExternalLink(imageFormGroup.controls.url.value)">Externe Links müssen mit
-              <strong>http://</strong> oder <strong>https://</strong> beginnen.
+            <p class="invalid-label"
+               *ngIf="errorHandlingForFormArray('images', i, 'url', 'pattern')">
+              Keine gültige URL. Eine gültige URL muss mit <strong>http://</strong> oder <strong>https://</strong> beginnen.
             </p>
           </div>
           <div class="p-field col-xs-12 col-md-12">
@@ -339,12 +339,15 @@
                    id="link-{{i}}-url-input"
                    type="text"
                    [formControl]="linkFormGroup.controls.url"
+                   (focusout)="addHttpProtocolToLink(linkFormGroup.controls.url)"
                    placeholder="URL*"/>
-            <p class="hint" *ngIf="!isExternalLink(linkFormGroup.controls.url.value)">Externe Links müssen mit
-              <strong>http://</strong> oder <strong>https://</strong> beginnen.</p>
             <p class="invalid-label"
                *ngIf="errorHandlingForFormArray('links', i, 'url', 'required')">
               Eine URL muss angegeben werden.
+            </p>
+            <p class="invalid-label"
+               *ngIf="errorHandlingForFormArray('links', i, 'url', 'pattern')">
+              Keine gültige URL. Eine gültige URL muss mit <strong>http://</strong> oder <strong>https://</strong> beginnen.
             </p>
           </div>
           <div class=" col-xs-12 col-md-6">
@@ -405,12 +408,15 @@
                    id="social-media-{{i}}-url-input"
                    type="text"
                    [formControl]="linkFormGroup.controls.url"
+                   (focusout)="addHttpProtocolToLink(linkFormGroup.controls.url)"
                    placeholder="URL*"/>
-            <p class="hint" *ngIf="!isExternalLink(linkFormGroup.controls.url.value)">Externe Links müssen mit
-              <strong>http://</strong> oder <strong>https://</strong> beginnen.</p>
             <p class="invalid-label"
                *ngIf="errorHandlingForFormArray('socialMedia', i, 'url', 'required')">
               Eine URL muss angegeben werden.
+            </p>
+            <p class="invalid-label"
+               *ngIf="errorHandlingForFormArray('socialMedia', i, 'url', 'pattern')">
+              Keine gültige URL. Eine gültige URL muss mit <strong>http://</strong> oder <strong>https://</strong> beginnen.
             </p>
           </div>
           <div class="p-field col-xs-12 col-md-4">
