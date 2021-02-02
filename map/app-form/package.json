@@ -1,15 +1,15 @@
 {
   "name": "association-map-form",
-  "version": "0.9.1",
+  "version": "0.9.1-design-fixes.0",
   "scripts": {
-    "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
-    "build:prod": "ng build --prod --base-href /edit/",
-    "version": "npm version patch",
-    "test": "ng test",
-    "lint": "ng lint",
-    "e2e": "ng e2e"
+    "app-form:ng": "ng",
+    "app-form:start": "ng serve",
+    "app-form:build": "ng build",
+    "app-form:build:prod": "ng build --prod --base-href /edit/",
+    "app-form:version": "npm version patch",
+    "app-form:test": "ng test",
+    "app-form:lint": "ng lint",
+    "app-form:e2e": "ng e2e"
   },
   "private": true,
   "dependencies": {

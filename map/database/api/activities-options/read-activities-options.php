@@ -9,11 +9,12 @@ $activity_options = [];
 $sql = "SELECT 	activities.value AS value, 
                 activities.label AS label, 
                 activities.category AS category, 
-                upper.label AS categoryLabel 
+                upper.label AS categoryLabel,
+                activities.orderIndex AS orderIndex
         FROM activities 
             LEFT JOIN activities AS upper 
                 ON activities.category = upper.value
-        ORDER BY categoryLabel, label";
+        ORDER BY orderIndex, categoryLabel, label";
 
 if ($result = mysqli_query($con, $sql)) {
     $i = 0;
@@ -22,6 +23,7 @@ if ($result = mysqli_query($con, $sql)) {
         $activity_options[$i]['value'] = $row['value'];
 		$activity_options[$i]['category'] = $row['category'];
         $activity_options[$i]['categoryLabel'] = $row['categoryLabel'];
+        $activity_options[$i]['orderIndex'] = intval($row['orderIndex']);
         $i++;
     }
     echo json_encode($activity_options);

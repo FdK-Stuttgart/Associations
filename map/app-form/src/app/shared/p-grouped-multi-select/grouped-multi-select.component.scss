@@ -10,10 +10,6 @@
 }
 
 p-multiSelect ::ng-deep {
-  .p-multiselect-header {
-    display: none !important;
-  }
-
   .p-multiselect-panel {
     max-width: min(100%, 288px) !important;
   }

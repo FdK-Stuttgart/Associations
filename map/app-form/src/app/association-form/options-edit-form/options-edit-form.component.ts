@@ -1,7 +1,7 @@
 import {ChangeDetectorRef, Component, HostListener, Input, OnDestroy, OnInit} from '@angular/core';
 import {
   getInternalGroupedDropdownOptions,
-  InternalGroupedDropdownOption
+  InternalGroupedDropdownOption, sortOptions
 } from '../../model/dropdown-option';
 import {MysqlQueryService} from '../../services/mysql-query.service';
 import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
@@ -101,7 +101,8 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
           categoryLabel: this.optionsForm.controls.options.value.find(o => o.value === option.category)?.label || null,
           label: new FormControl(option.label, Validators.required),
           isSubOption: new FormControl(!!option.category),
-          showSubOptions: new FormControl(false)
+          showSubOptions: new FormControl(false),
+          orderIndex: new FormControl(option.orderIndex || -1)
         }));
       });
     }
@@ -179,13 +180,16 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
     const formArray: FormArray = this.optionsForm.controls.options as FormArray;
 
     if (formArray) {
+      const topOption = this.topOptions.find(o => o.value === category);
+
       const formGroup: FormGroup = this.formBuilder.group({
         value: new FormControl(value, [Validators.required, Validators.min(0)]),
         category: new FormControl(category === '' ? null : category),
         label: new FormControl('', Validators.required),
-        categoryLabel: this.topOptions.find(o => o.value === category)?.label || null,
+        categoryLabel: topOption?.label || null,
         isSubOption: !!category,
-        showSubOptions: new FormControl(false)
+        showSubOptions: new FormControl(false),
+        orderIndex: new FormControl(topOption?.orderIndex || -1)
       });
 
       formArray.insert(index, formGroup);
@@ -260,10 +264,12 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
     this.blocked = true;
     this.loadingText = 'Schlagwörter werden gespeichert...';
     const options = this.optionsForm.value.options.map((o: any) => {
+      const category = o.category ? this.optionsForm.value.options.find((c: any) => c.value === o.category) : undefined;
       return {
         label: o.label,
         value: o.value,
-        category: o.category === '' ? null : o.category
+        category: o.category === '' ? null : o.category,
+        orderIndex: category?.orderIndex || o.orderIndex || -1
       };
     }).sort((a: any, b: any) =>
       !a.category && !!b.category ? -1 : !!a.category && !b.category ? 1 : 0
@@ -325,7 +331,7 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
         category: o.category === '' ? null : o.category
       };
     }).sort((option1: any, option2: any) =>
-      option1.value < option2.value ? -1 : (option1.value > option2.value ? 1 : (option1.label < option2.value ? -1 : 1))
+      option1.value < option2.value ? -1 : (option1.value > option2.value ? 1 : (option1.label < option2.label ? -1 : 1))
     );
     const newOptions = this.optionsForm.value.options.map((o: any) => {
       return {
@@ -334,10 +340,8 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
         category: o.category === '' ? null : o.category
       };
     }).sort((option1: any, option2: any) =>
-      option1.value < option2.value ? -1 : (option1.value > option2.value ? 1 : (option1.label < option2.value ? -1 : 1))
+      option1.value < option2.value ? -1 : (option1.value > option2.value ? 1 : (option1.label < option2.label ? -1 : 1))
     );
-
-    console.log(JSON.stringify(oldOptions) !== JSON.stringify(newOptions));
 
     return JSON.stringify(oldOptions) !== JSON.stringify(newOptions);
   }
@@ -361,7 +365,8 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
         categoryLabel: ac1.value.category != null
           ? this.options.find((o: InternalGroupedDropdownOption) => o.category === ac1.value.category)?.categoryLabel || ac1.value.label
           : ac1.value.label,
-        isSubOption: ac1.value.category != null
+        isSubOption: ac1.value.category != null,
+        orderIndex: ac1.value.orderIndex
       };
 
       const b: InternalGroupedDropdownOption = {
@@ -371,20 +376,13 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
         categoryLabel: ac2.value.category != null
           ? this.options.find((o: InternalGroupedDropdownOption) => o.category === ac2.value.category)?.categoryLabel || ac2.value.label
           : ac2.value.label,
-        isSubOption: ac2.value.category != null
+        isSubOption: ac2.value.category != null,
+        orderIndex: ac2.value.orderIndex
       };
 
-      return a.categoryLabel < b.categoryLabel ? -1 :
-        (a.categoryLabel > b.categoryLabel ? 1 :
-            (!!a.isSubOption && !b.isSubOption ? 1 :
-                (!a.isSubOption && !!b.isSubOption ? -1 :
-                    (a.label < b.label ? -1 :
-                        (a.label > b.label ? 1 : 0)
-                    )
-                )
-            )
-        );
+      return sortOptions(a, b);
     });
+
     this.blocked = false;
     return sortedOptions;
   }
@@ -396,7 +394,7 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
    * @param optionForm option form group
    * @param dropdown the dropdown input element
    */
-  changeCategoryDropdown(newCategory: any, options: AbstractControl, optionForm: FormGroup, dropdown: Dropdown): void {
+  async changeCategoryDropdown(newCategory: any, options: AbstractControl, optionForm: FormGroup, dropdown: Dropdown): Promise<void> {
     const value = optionForm.value.value;
     const oldCategory = optionForm.value.category;
 
@@ -425,9 +423,13 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
           acceptLabel: 'OK',
           rejectLabel: 'Abbrechen',
           closeOnEscape: true,
-          accept: () => {
-            // set new category value
+          accept: async () => {
+            // set new category value and order index
+            const categoryObj = this.optionsForm.value.options.find((o: any) => o.value === newCategory);
             optionForm.controls.category.setValue(newCategory);
+            if (categoryObj?.orderIndex) {
+              optionForm.controls.orderIndex.setValue(categoryObj.orderIndex);
+            }
             dropdown.writeValue(newCategory);
 
             if (!!newCategory) {
@@ -451,7 +453,7 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
             }
 
             // scroll to shifted form input
-            this.scrollToShiftedElementWithValue(value);
+            await this.scrollToShiftedElementWithValue(value, newCategory);
           },
           reject: () => {
             optionForm.controls.category.setValue(oldCategory);
@@ -460,8 +462,14 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
         });
       } else {
         // set new category value
+        const categoryObj = this.optionsForm.value.options.find((o: any) => o.value === newCategory);
         optionForm.controls.category.setValue(newCategory);
+        if (categoryObj?.orderIndex) {
+          optionForm.controls.orderIndex.setValue(categoryObj.orderIndex);
+        }
         dropdown.writeValue(newCategory);
+
+        this.optionsForm.updateValueAndValidity();
 
         // sort options by category label and label
         if (options instanceof FormArray) {
@@ -469,7 +477,7 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
         }
 
         // scroll to shifted form input
-        this.scrollToShiftedElementWithValue(value);
+        await this.scrollToShiftedElementWithValue(value, newCategory);
       }
     }
   }
@@ -489,7 +497,13 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
    * recalculates a list of all available top options
    */
   recalculateTopOptions(): void {
-    const selfTopOption = [{value: null, label: '(Übergeordnete Kategorie)', categoryLabel: null, isSubOption: false}];
+    const selfTopOption = [{
+      value: null,
+      label: '(Übergeordnete Kategorie)',
+      categoryLabel: null,
+      isSubOption: false,
+      orderIndex: -1
+    }];
     const newTopOptions: InternalGroupedDropdownOption[] = (this.optionsForm.controls.options as FormArray).controls
       .filter((formGroup: FormGroup) => {
         return !formGroup.value.category;
@@ -499,7 +513,8 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
           label: formGroup.value.label,
           category: null,
           categoryLabel: null,
-          isSubOption: false
+          isSubOption: false,
+          orderIndex: formGroup.value.orderIndex
         };
       });
     this.topOptions = selfTopOption.concat(newTopOptions);
@@ -523,8 +538,21 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
   /**
    * sorts the form array, looks for the changed element by its value and scrolls to the element after sorting
    * @param value the value to search for
+   * @param category if a category value is given, make sure that the sub options of the category are shown
    */
-  scrollToShiftedElementWithValue(value: string): void {
+  async scrollToShiftedElementWithValue(value: string, category?: string): Promise<void> {
+    if (category) {
+      const optionForm: FormGroup | undefined = (this.optionsForm?.controls?.options as FormArray)?.controls?.find((fg: FormGroup) =>
+        fg.value?.value === category
+      ) as FormGroup;
+      if (optionForm) {
+        const showSubOptions = optionForm.controls?.showSubOptions?.value;
+        if (!showSubOptions) {
+          await this.toggleShowSubOptions(optionForm);
+        }
+      }
+    }
+
     this.optionsForm.updateValueAndValidity();
     this.cdr.detectChanges();
 
@@ -554,7 +582,7 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
     const previousShowSubOptions = optionForm.value.showSubOptions;
     optionForm.controls.showSubOptions.setValue(!previousShowSubOptions);
     if (!previousShowSubOptions) {
-      this.scrollToShiftedElementWithValue(optionForm.value.value);
+      await this.scrollToShiftedElementWithValue(optionForm.value.value);
     }
     this.blocked = false;
   }

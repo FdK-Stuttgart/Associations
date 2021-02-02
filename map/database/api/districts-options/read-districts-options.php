@@ -9,11 +9,12 @@ $district_options = [];
 $sql = "SELECT 	districts.value AS value, 
                 districts.label AS label, 
                 districts.category AS category, 
-                upper.label AS categoryLabel 
+                upper.label AS categoryLabel,
+                districts.orderIndex AS orderIndex
         FROM districts 
             LEFT JOIN districts AS upper 
                 ON districts.category = upper.value
-        ORDER BY categoryLabel, label";
+        ORDER BY orderIndex, categoryLabel, label";
 
 if ($result = mysqli_query($con, $sql)) {
     $i = 0;
@@ -22,6 +23,7 @@ if ($result = mysqli_query($con, $sql)) {
         $district_options[$i]['value'] = $row['value'];
 		$district_options[$i]['category'] = $row['category'];
         $district_options[$i]['categoryLabel'] = $row['categoryLabel'];
+        $district_options[$i]['orderIndex'] = intval($row['orderIndex']);
         $i++;
     }
     echo json_encode($district_options);

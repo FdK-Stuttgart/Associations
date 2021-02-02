@@ -10,8 +10,6 @@ export class AppComponent {
   title = 'Stadtteilkarte';
   version = version;
 
-  isInFullscreen = false;
-
   get fullscreenEnabled(): boolean {
     return document.fullscreenEnabled
       || (document as any).webkitFullscreenEnabled
@@ -26,14 +24,16 @@ export class AppComponent {
       || (document as any).msFullscreenElement;
   }
 
+  get isInFullscreen(): boolean {
+    return !!this.fullscreenElement;
+  }
+
   get showCloseIcon(): boolean {
     return this.isInFullscreen && !!this.fullscreenElement;
   }
 
   async toggleFullscreen(): Promise<void> {
-    this.isInFullscreen = !this.showCloseIcon;
-
-    if (this.isInFullscreen) {
+    if (!this.isInFullscreen) {
       await this.requestFullscreen(document.documentElement || document.getElementById('fullscreen-content') || undefined);
     } else {
       await this.exitFullscreen();
@@ -58,14 +58,11 @@ export class AppComponent {
     if (this.fullscreenEnabled) {
       if (document.exitFullscreen) {
         await document.exitFullscreen();
-      }
-      else if ((document as any).mozCancelFullScreen) {
+      } else if ((document as any).mozCancelFullScreen) {
         await (document as any).mozCancelFullScreen();
-      }
-      else if ((document as any).webkitCancelFullScreen) {
+      } else if ((document as any).webkitCancelFullScreen) {
         await (document as any).webkitCancelFullScreen();
-      }
-      else if ((document as any).msExitFullscreen) {
+      } else if ((document as any).msExitFullscreen) {
         await (document as any).msExitFullscreen();
       }
     }

@@ -1,6 +1,74 @@
 /* Importing Bootstrap SCSS file. */
 @import '~bootstrap/scss/bootstrap';
 
+$blue: #00b4d6;
+
+/* alegreya-sans-300 - latin */
+@font-face {
+  font-family: 'Alegreya Sans';
+  font-style: normal;
+  font-weight: 300;
+  src: url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-300.eot'); /* IE9 Compat Modes */
+  src: local(''),
+  url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-300.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+  url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-300.woff2') format('woff2'), /* Super Modern Browsers */
+  url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-300.woff') format('woff'), /* Modern Browsers */
+  url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-300.ttf') format('truetype'), /* Safari, Android, iOS */
+  url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-300.svg#AlegreyaSans') format('svg'); /* Legacy iOS */
+}
+/* alegreya-sans-regular - latin */
+@font-face {
+  font-family: 'Alegreya Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-regular.eot'); /* IE9 Compat Modes */
+  src: local(''),
+  url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+  url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-regular.woff2') format('woff2'), /* Super Modern Browsers */
+  url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-regular.woff') format('woff'), /* Modern Browsers */
+  url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-regular.ttf') format('truetype'), /* Safari, Android, iOS */
+  url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-regular.svg#AlegreyaSans') format('svg'); /* Legacy iOS */
+}
+/* alegreya-sans-500 - latin */
+@font-face {
+  font-family: 'Alegreya Sans';
+  font-style: normal;
+  font-weight: 500;
+  src: url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-500.eot'); /* IE9 Compat Modes */
+  src: local(''),
+  url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-500.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+  url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-500.woff2') format('woff2'), /* Super Modern Browsers */
+  url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-500.woff') format('woff'), /* Modern Browsers */
+  url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-500.ttf') format('truetype'), /* Safari, Android, iOS */
+  url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-500.svg#AlegreyaSans') format('svg'); /* Legacy iOS */
+}
+/* alegreya-sans-700 - latin */
+@font-face {
+  font-family: 'Alegreya Sans';
+  font-style: normal;
+  font-weight: 700;
+  src: url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-700.eot'); /* IE9 Compat Modes */
+  src: local(''),
+  url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-700.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+  url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-700.woff2') format('woff2'), /* Super Modern Browsers */
+  url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-700.woff') format('woff'), /* Modern Browsers */
+  url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-700.ttf') format('truetype'), /* Safari, Android, iOS */
+  url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-700.svg#AlegreyaSans') format('svg'); /* Legacy iOS */
+}
+/* alegreya-sans-900 - latin */
+@font-face {
+  font-family: 'Alegreya Sans';
+  font-style: normal;
+  font-weight: 900;
+  src: url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-900.eot'); /* IE9 Compat Modes */
+  src: local(''),
+  url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-900.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+  url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-900.woff2') format('woff2'), /* Super Modern Browsers */
+  url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-900.woff') format('woff'), /* Modern Browsers */
+  url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-900.ttf') format('truetype'), /* Safari, Android, iOS */
+  url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-900.svg#AlegreyaSans') format('svg'); /* Legacy iOS */
+}
+
 /* You can add global styles to this file, and also import other style files */
 @mixin scrollbars($size, $foreground-color, $background-color: mix($foreground-color, white,  50%)) {
   // For Google Chrome
@@ -28,29 +96,42 @@ body {
   margin: 0;
 }
 
-body * {
-  font-family: 'Roboto', sans-serif;
+body *:not(i):not(.pi) {
+  font-family: 'Alegreya Sans', sans-serif !important;
   @include scrollbars(6px, #aaaaaa, #ffffff);
+}
+
+.p-button:not(.p-button-text) {
+  background-color: $blue !important;
+  border-color: $blue !important;
+}
+
+.p-button-text {
+  color: $blue !important;
+}
+
+.p-button-label {
+  display: none;
 }
 
 .p-sidebar-close-icon {
   &:before {
-    color: #2196F3;
+    color: $blue;
     border-radius: 24px;
 
     &:hover, &:active {
-      color: darken(#2196F3, 10%);
+      color: darken($blue, 10%);
     }
   }
 }
 
 a {
-  color: #2196F3 !important;
+  color: $blue !important;
   cursor: pointer;
   text-decoration: none;
 
   &:hover, &:active {
-    color: darken(#2196F3, 10%);
+    color: darken($blue, 10%);
     text-decoration: underline !important;
   }
 }
@@ -307,6 +388,21 @@ fieldset, div.fieldset {
   align-items: center;
   margin-top: 4px;
   margin-bottom: 4px;
+}
+
+.association-social-media-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  a {
+    line-height: 24px;
+    vertical-align: bottom;
+  }
+
+  img {
+    margin-top: -4px;
+  }
 }
 
 .association-links ul {

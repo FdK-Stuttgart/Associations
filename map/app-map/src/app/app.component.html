@@ -5,8 +5,12 @@
   <div class="fullscreen-button" *ngIf="fullscreenEnabled">
     <button pButton
             (click)="toggleFullscreen()"
+            [label]="''"
             class="p-button-raised p-button-rounded"
-            [icon]="showCloseIcon ? 'pi pi-window-minimize' : 'pi pi-window-maximize'">
+            style="vertical-align: middle; line-height: 16px;">
+      <i class="pi"
+         [ngClass]="{ 'pi-window-minimize' : showCloseIcon, 'pi-window-maximize': !showCloseIcon }"></i>
+      <span *ngIf="!isInFullscreen">&nbsp;&nbsp;Vollbild</span>
     </button>
   </div>
 </div>

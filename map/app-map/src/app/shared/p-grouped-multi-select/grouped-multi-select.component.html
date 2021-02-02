@@ -1,13 +1,16 @@
 <p-multiSelect #multiSelect
-               [filter]="false"
-               [showToggleAll]="false"
+               [filter]="true"
+               [autofocusFilter]="true"
+               [resetFilterOnHide]="true"
+               [emptyFilterMessage]="'Keine Schlagwörter gefunden.'"
                [styleClass]="styleClass"
                [panelStyleClass]="'grouped-multiselect-panel'"
                [options]="internalGroupedOptions"
                [ngModel]="value"
                (onChange)="changeSelectedOptions($event)"
                (ngModelChange)="multiSelect.value = $event"
-               [placeholder]="placeholder">
+               [placeholder]="placeholder"
+>
 
   <ng-template pTemplate="selectedItems">
     <span>{{ getSelectedItemsLabel() }}</span>

@@ -1,15 +1,15 @@
 {
   "name": "association-map",
-  "version": "0.9.2",
+  "version": "0.9.2-design-fixes.0",
   "scripts": {
-    "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
-    "build:prod": "ng build --prod --base-href /",
-    "version": "npm version patch",
-    "test": "ng test",
-    "lint": "ng lint",
-    "e2e": "ng e2e"
+    "app-map:ng": "ng",
+    "app-map:start": "ng serve",
+    "app-map:build": "ng build",
+    "app-map:build:prod": "ng build --prod --base-href /",
+    "app-map:version": "npm version patch",
+    "app-map:test": "ng test",
+    "app-map:lint": "ng lint",
+    "app-map:e2e": "ng e2e"
   },
   "private": true,
   "dependencies": {

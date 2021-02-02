@@ -3,6 +3,7 @@ export interface DropdownOption {
   value: any;
   category?: string;
   categoryLabel?: string;
+  orderIndex: number;
 }
 
 export interface InternalGroupedDropdownOption {
@@ -11,6 +12,7 @@ export interface InternalGroupedDropdownOption {
   category?: string;
   categoryLabel: string;
   isSubOption: boolean;
+  orderIndex: number;
 }
 
 export function getInternalGroupedDropdownOptions(options: DropdownOption[]): InternalGroupedDropdownOption[] {
@@ -20,34 +22,37 @@ export function getInternalGroupedDropdownOptions(options: DropdownOption[]): In
       label: o.label,
       category: o.category,
       categoryLabel: o.categoryLabel || o.label,
-      isSubOption: !!o.category
+      isSubOption: !!o.category,
+      orderIndex: o.orderIndex
     };
-  }).sort((a: InternalGroupedDropdownOption, b: InternalGroupedDropdownOption) =>
-    a.categoryLabel < b.categoryLabel ? -1 :
-      (a.categoryLabel > b.categoryLabel ? 1 :
-          (a.isSubOption && !b.isSubOption ? 1 :
-              (!a.isSubOption && b.isSubOption ? -1 :
-                  (a.label < b.label ? -1 :
-                      (a.label > b.label ? 1 : 0)
-                  )
-              )
-          )
-      )
-  );
+  }).sort((a: InternalGroupedDropdownOption, b: InternalGroupedDropdownOption) => sortOptions(a, b));
 }
 
-export function getAllOptions(arr: any[], values?: string[]): any[] {
-  return values ? arr.filter((o: any) => values.includes(o.value)) : arr;
+export function sortOptions(a: InternalGroupedDropdownOption, b: InternalGroupedDropdownOption): number {
+  return a.orderIndex < b.orderIndex ? -1 :
+    (a.orderIndex > b.orderIndex ? 1 :
+        (!!a.isSubOption && !b.isSubOption ? 1 :
+            (!a.isSubOption && !!b.isSubOption ? -1 :
+                (a.label < b.label ? -1 :
+                    (a.label > b.label ? 1 : 0)
+                )
+            )
+        )
+    );
 }
 
-export function getSubOptions(arr: any[], values?: string[]): any[] {
-  return values
-    ? arr.filter((o: any) => !!o.category && values.includes(o.value))
+export function getAllOptions(arr: any[], ids?: number[]): any[] {
+  return ids ? arr.filter((o: any) => ids.includes(o.value)) : arr;
+}
+
+export function getSubOptions(arr: any[], ids?: number[]): any[] {
+  return ids
+    ? arr.filter((o: any) => !!o.category && ids.includes(o.value))
     : arr.filter((o: any) => !!o.category);
 }
 
-export function getTopOptions(arr: any[], values?: string[]): any[] {
-  return values
-    ? arr.filter((o: any) => !o.category && values.includes(o.value))
+export function getTopOptions(arr: any[], ids?: number[]): any[] {
+  return ids
+    ? arr.filter((o: any) => !o.category && ids.includes(o.value))
     : arr.filter((o: any) => !o.category);
 }

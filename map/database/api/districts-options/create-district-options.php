@@ -29,7 +29,8 @@ if (isset($postdata) && !empty($postdata)) {
 
         $label = '';
         $value = '';
-		$category = '';
+        $category = null;
+        $orderIndex = -1;
 
         foreach ($item as $k => $v) {
             if ($k == 'label') {
@@ -39,9 +40,13 @@ if (isset($postdata) && !empty($postdata)) {
             if ($k == 'value') {
                 $value = $v;
             }
-			
-			if ($k == 'category') {
+
+            if ($k == 'category') {
                 $category = $v;
+            }
+
+            if ($k == 'orderIndex') {
+                $orderIndex = $v;
             }
         }
         if ($label != '' && $value != '') {
@@ -49,9 +54,9 @@ if (isset($postdata) && !empty($postdata)) {
             $label = mysqli_real_escape_string($con, trim($label));
             $category = mysqli_real_escape_string($con, trim($category));
             if ($category == '' || $category == null) {
-                $sql .= "('$value', '$label', null),";
+                $sql .= "('$value', '$label', null, $orderIndex),";
             } else {
-                $sql .= "('$value', '$label', '$category'),";
+                $sql .= "('$value', '$label', '$category', $orderIndex),";
             }
             continue;
         }

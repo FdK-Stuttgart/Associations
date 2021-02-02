@@ -1,3 +1,5 @@
+@import '../styles.scss';
+
 .fullscreen-button {
   position: fixed;
   bottom: 12px;
@@ -5,7 +7,7 @@
   z-index: 20000;
 
   button ::ng-deep .p-button {
-    background-color: #2196F3;
+    background-color: $blue;
   }
 }
 
