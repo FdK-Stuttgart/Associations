@@ -84,7 +84,7 @@
     <div class="full-width" *ngIf="(selectedDistricts?.length || selectedActivities?.length
                                    || (!!autoComplete.inputEL?.nativeElement?.value && autoComplete.inputEL?.nativeElement?.value !== ''))">
       <div class="filter-chips">
-        <span class="mini">Filter:</span>
+        <span class="mini">Filter:&nbsp;</span>
         <div *ngIf="!!autoComplete.inputEL?.nativeElement?.value && autoComplete.inputEL?.nativeElement?.value !== ''"
              class="filter-chip">
           Suchbegriff "{{ autoComplete.inputEL?.nativeElement?.value | truncate:16:false:'...' }}"
