@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import { version } from '../../package.json';
+import {version} from '../../package.json';
 
 @Component({
   selector: 'app-root',
@@ -13,18 +13,28 @@ export class AppComponent {
   isInFullscreen = false;
 
   get fullscreenEnabled(): boolean {
-    return document.fullscreenEnabled;
+    return document.fullscreenEnabled
+      || (document as any).webkitFullscreenEnabled
+      || (document as any).mozFullScreenEnabled
+      || (document as any).msFullscreenEnabled;
+  }
+
+  get fullscreenElement(): any {
+    return document.fullscreenElement
+      || (document as any).webkitFullscreenElement
+      || (document as any).mozFullScreenElement
+      || (document as any).msFullscreenElement;
   }
 
   get showCloseIcon(): boolean {
-    return this.isInFullscreen && !!document.fullscreenElement;
+    return this.isInFullscreen && !!this.fullscreenElement;
   }
 
   async toggleFullscreen(): Promise<void> {
     this.isInFullscreen = !this.showCloseIcon;
 
     if (this.isInFullscreen) {
-      await this.requestFullscreen(document.getElementById('fullscreen-content') || undefined);
+      await this.requestFullscreen(document.documentElement || document.getElementById('fullscreen-content') || undefined);
     } else {
       await this.exitFullscreen();
     }
@@ -32,13 +42,32 @@ export class AppComponent {
 
   async requestFullscreen(element?: HTMLElement): Promise<void> {
     if (element) {
-      await element.requestFullscreen();
+      if (element.requestFullscreen) {
+        await element.requestFullscreen();
+      } else if ((element as any).webkitRequestFullscreen) {
+        await (element as any).webkitRequestFullscreen();
+      } else if ((element as any).mozRequestFullScreen) {
+        await (element as any).mozRequestFullScreen();
+      } else if ((element as any).msRequestFullscreen) {
+        await (element as any).msRequestFullscreen();
+      }
     }
   }
 
   async exitFullscreen(): Promise<void> {
-    if (document.fullscreenEnabled) {
-      await document.exitFullscreen();
+    if (this.fullscreenEnabled) {
+      if (document.exitFullscreen) {
+        await document.exitFullscreen();
+      }
+      else if ((document as any).mozCancelFullScreen) {
+        await (document as any).mozCancelFullScreen();
+      }
+      else if ((document as any).webkitCancelFullScreen) {
+        await (document as any).webkitCancelFullScreen();
+      }
+      else if ((document as any).msExitFullscreen) {
+        await (document as any).msExitFullscreen();
+      }
     }
   }
 }
