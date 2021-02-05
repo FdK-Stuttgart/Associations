@@ -159,9 +159,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
       layers: [rasterLayer, this.clusterLayer],
       view: new View({
         center: fromLonLat([9.179747886339912, 48.77860400126555]),
-        zoom: 14,
-        minZoom: 2,
-        maxZoom: 20,
+        zoom: 14
       })
     });
 
