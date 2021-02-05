@@ -185,7 +185,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
     });
 
     this.cluster = new Cluster({
-      distance: 25,
+      distance: 50,
       source: this.clusterSource
     });
 
@@ -254,10 +254,6 @@ export class OsmMapComponent implements OnInit, OnDestroy {
    * @param event ol event
    */
   mapClickHandler = (event: any) => {
-    const res = this.removePopup();
-    this.popupVisible = false;
-    this.popupContentAssociationId = undefined;
-
     if (this.map) {
       const feature = this.map.forEachFeatureAtPixel(event.pixel,
         (f: Feature<Geometry> | RenderFeature) => {
@@ -274,9 +270,12 @@ export class OsmMapComponent implements OnInit, OnDestroy {
             this.handleMarkerClick(coordinate.lat, coordinate.lng, id);
           }
         }
+      } else {
+        this.removePopup();
+        this.popupVisible = false;
+        this.popupContentAssociationId = undefined;
       }
     }
-    return res;
   }
 
   /**
@@ -456,7 +455,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
 
     if (!this.cluster) {
       this.cluster = new Cluster({
-        distance: 25,
+        distance: 50,
         source: this.clusterSource
       });
     }
