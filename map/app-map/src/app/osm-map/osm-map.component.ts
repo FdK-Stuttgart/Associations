@@ -141,7 +141,6 @@ export class OsmMapComponent implements OnInit, OnDestroy {
    */
   initMap(): void {
     if (this.map) {
-      this.map.removeEventListener('click', this.mapClickHandler);
       this.map.setTarget(undefined);
       this.map = undefined;
     }
@@ -275,6 +274,20 @@ export class OsmMapComponent implements OnInit, OnDestroy {
       }
     }
     return true;
+  }
+
+  /**
+   * handles the event of clicking on the close button in the popup
+   * @param event click event
+   */
+  closeButtonClickHandler = (event: MouseEvent) => {
+    if (this.popupVisible) {
+      this.removePopup();
+      this.popupVisible = false;
+      this.popupContentAssociationId = undefined;
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -514,7 +527,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
       this.popupContentAssociationId = id;
 
       // add the listener for the popup close button
-      document.getElementById('popup-close')?.addEventListener('click', this.mapClickHandler);
+      document.getElementById('popup-close')?.addEventListener('click', this.closeButtonClickHandler);
 
     } else {
       this.popupVisible = false;
@@ -527,7 +540,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
    */
   removePopup(): boolean {
     if (this.popup && this.map) {
-      document.getElementById('popup-close')?.removeEventListener('click', this.mapClickHandler);
+      document.getElementById('popup-close')?.removeEventListener('click', this.closeButtonClickHandler);
       this.map.removeOverlay(this.popup);
       this.popup = undefined;
       return true;
@@ -840,7 +853,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
    * removes event listeners
    */
   ngOnDestroy(): void {
-    document.getElementById('popup-close')?.removeEventListener('click', this.mapClickHandler);
+    document.getElementById('popup-close')?.removeEventListener('click', this.closeButtonClickHandler);
   }
 }
 
