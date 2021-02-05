@@ -596,7 +596,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
    * @param positioning screen position
    * @param zoom zoom level
    */
-  animateViewTo(coordinates: number[], size: Size, positioning: number[], zoom: number): void {
+  animateViewTo(coordinates: number[], size: Size, positioning: number[], zoom?: number): void {
     const view = this.map?.getView();
     if (view) {
       const oldCenter = view.getCenter();
@@ -609,11 +609,13 @@ export class OsmMapComponent implements OnInit, OnDestroy {
         duration: this.SIDEBAR_ANIMATION_DURATION * 2
       }, () => {
         view.centerOn(coordinates, size, positioning);
-        view.animate({
-          anchor: coordinates,
-          zoom,
-          duration: this.SIDEBAR_ANIMATION_DURATION * 2
-        });
+        if (zoom) {
+          view.animate({
+            anchor: coordinates,
+            zoom,
+            duration: this.SIDEBAR_ANIMATION_DURATION * 2
+          });
+        }
       });
     }
   }
