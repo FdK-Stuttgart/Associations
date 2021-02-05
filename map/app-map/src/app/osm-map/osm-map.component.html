@@ -80,12 +80,14 @@
           <i class="pi pi-times mini-button" (click)="clearAutocomplete();"></i>
         </div>
         <div class="filter-chip" *ngIf="selectedDistricts?.length">
-          Aktivitätsgebiete ({{ getSubOptions(selectedDistricts, districtOptions).length }}) <i class="pi pi-times mini-button"
-                                                                               (click)="resetDistrictsFilter()"></i>
+          Aktivitätsgebiete ({{ getSubOptions(selectedDistricts, districtOptions).length }}) <i
+          class="pi pi-times mini-button"
+          (click)="resetDistrictsFilter()"></i>
         </div>
         <div class="filter-chip" *ngIf="selectedActivities?.length">
-          Tätigkeitsfelder ({{ getSubOptions(selectedActivities, activitiesOptions).length }}) <i class="pi pi-times mini-button"
-                                                                               (click)="resetActivitiesFilter()"></i>
+          Tätigkeitsfelder ({{ getSubOptions(selectedActivities, activitiesOptions).length }}) <i
+          class="pi pi-times mini-button"
+          (click)="resetActivitiesFilter()"></i>
         </div>
       </div>
     </div>

@@ -31,7 +31,7 @@ export class SimpleMapWithSingleMarkerComponent implements OnInit, OnChanges, On
     lang: 'gr',
     placeholder: 'Nach Adresse suchen...',
     limit: 5,
-    autoComplete: false,
+    autoComplete: true,
     featureStyle: undefined,
     keepOpen: true
   });

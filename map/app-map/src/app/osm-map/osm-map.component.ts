@@ -3,19 +3,41 @@ import {SocialMediaPlatform, Association} from '../model/association';
 import Map from 'ol/Map';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
-import {fromLonLat, toLonLat} from 'ol/proj';
+import {fromLonLat} from 'ol/proj';
 import OSM from 'ol/source/OSM';
 import {Overlay} from 'ol';
 import OverlayPositioning from 'ol/OverlayPositioning';
 import {Coordinate} from 'ol/coordinate';
-import BaseEvent from 'ol/events/Event';
 import {ResizeObserver} from 'resize-observer';
 import {Size} from 'ol/size';
-import {DropdownOption, getSubOptions, InternalGroupedDropdownOption} from '../model/dropdown-option';
+import {DropdownOption, getSubOptions} from '../model/dropdown-option';
 import {AutoComplete} from 'primeng/autocomplete';
 import {MysqlQueryService} from '../services/mysql-query.service';
 import {MyHttpResponse} from '../model/http-response';
 import {MessageService} from 'primeng/api';
+import VectorSource from 'ol/source/Vector';
+import Cluster from 'ol/source/Cluster';
+import Feature from 'ol/Feature';
+import CircleStyle from 'ol/style/Circle';
+import VectorLayer from 'ol/layer/Vector';
+import Style from 'ol/style/Style';
+import Stroke from 'ol/style/Stroke';
+import Fill from 'ol/style/Fill';
+import Text from 'ol/style/Text';
+import Point from 'ol/geom/Point';
+import RenderFeature from 'ol/render/Feature';
+import Geometry from 'ol/geom/Geometry';
+import Icon from 'ol/style/Icon';
+import {createEmpty, extend, Extent} from 'ol/extent';
+// @ts-ignore
+import AnimatedCluster from 'ol-ext/layer/AnimatedCluster';
+import {
+  getFeatureCoordinate,
+  getFirstOriginalFeatureId,
+  getOriginalFeatures,
+  getOriginalFeaturesIds,
+  isClusteredFeature
+} from './map.utils';
 
 @Component({
   selector: 'app-osm-map',
@@ -38,6 +60,11 @@ export class OsmMapComponent implements OnInit, OnDestroy {
   selectedActivities: any[] = [];
 
   map?: Map;
+  clusterSource?: VectorSource;
+  cluster?: Cluster;
+  clusterFeatures: Feature[] = [];
+  clusterLayer?: VectorLayer;
+
   markers: Overlay[] = [];
   popup?: Overlay;
 
@@ -123,9 +150,11 @@ export class OsmMapComponent implements OnInit, OnDestroy {
       source: new OSM()
     });
 
+    this.clusterLayer = this.initCluster();
+
     this.map = new Map({
       target: document.getElementById('osm-map') ?? undefined,
-      layers: [rasterLayer],
+      layers: [rasterLayer, this.clusterLayer],
       view: new View({
         center: fromLonLat([9.179747886339912, 48.77860400126555]),
         zoom: 14,
@@ -134,7 +163,8 @@ export class OsmMapComponent implements OnInit, OnDestroy {
       })
     });
 
-    this.map.addEventListener('click', this.mapClickHandler);
+    this.map.on('click', this.mapClickHandler);
+    this.map.on('pointermove', this.mapPointerMoveHandler);
 
     this.associations.map((s: Association) => {
       this.addMarker(s.lat, s.lng, s.id);
@@ -142,6 +172,72 @@ export class OsmMapComponent implements OnInit, OnDestroy {
 
     this.changeDetectorRef.detectChanges();
     this.map.redrawText();
+  }
+
+  /**
+   * initializes the cluster layer with the map marker features
+   */
+  initCluster(): VectorLayer {
+    this.clusterSource = new VectorSource({
+      features: this.clusterFeatures
+    });
+
+    this.cluster = new Cluster({
+      distance: 25,
+      source: this.clusterSource
+    });
+
+    const clusterLayer = new AnimatedCluster({
+      source: this.cluster,
+      style: this.getAnimatedClusterStyle,
+      animationDuration: this.SIDEBAR_ANIMATION_DURATION
+    });
+    return clusterLayer;
+  }
+
+  /**
+   * style function that returns the style for marker cluster features
+   * @param feature map feature
+   */
+  getAnimatedClusterStyle = (feature: Feature<Geometry> | RenderFeature) => {
+    const originalFeatures = getOriginalFeatures(feature);
+    const featureIds: string[] = getOriginalFeaturesIds(feature);
+    const filteredIds: string[] = this.filteredAssociations.map((a: Association) => a.id);
+    const allIncluded: boolean = featureIds.every((id: string) => filteredIds.includes(id));
+    const isFiltered: boolean = featureIds.some((id: string) => filteredIds.includes(id));
+    const size = originalFeatures?.length;
+    let style;
+    if (!style) {
+      if (size && size > 1) {
+        style = new Style({
+          image: new CircleStyle({
+            radius: 15,
+            stroke: new Stroke({
+              color: '#231f20',
+            }),
+            fill: new Fill({
+              color: allIncluded ? '#ed2227' : isFiltered ? '#B47172' : '#989898',
+            }),
+          }),
+          text: new Text({
+            text: size.toString(),
+            font: '16px Alegreya',
+            fill: new Fill({
+              color: '#fff',
+            }),
+          }),
+        });
+      } else {
+        style = new Style({
+          image: new Icon({
+            img: isFiltered ? this.getActiveMarkerImg() : this.getInactiveMarkerImg(),
+            imgSize: [48, 48],
+            anchor: [0.5, 1]
+          })
+        });
+      }
+    }
+    return style;
   }
 
   /**
@@ -153,105 +249,111 @@ export class OsmMapComponent implements OnInit, OnDestroy {
 
   /**
    * handles the event when the user clicks directly onto the map
-   * @param event MouseEvent (click)
+   * @param event ol event
    */
-  mapClickHandler = (event: Event | BaseEvent) => {
+  mapClickHandler = (event: any) => {
     const res = this.removePopup();
     this.popupVisible = false;
     this.popupContentAssociationId = undefined;
+
+    if (this.map) {
+      const feature = this.map.forEachFeatureAtPixel(event.pixel,
+        (f: Feature<Geometry> | RenderFeature) => {
+          return f;
+        });
+      if (feature) {
+        const originalFeatures: Feature[] = getOriginalFeatures(feature) || [];
+        if (isClusteredFeature(feature)) {
+          this.zoomToClusterExtent(originalFeatures);
+        } else {
+          const coordinate: { lat: number, lng: number } | undefined = getFeatureCoordinate(feature);
+          const id: string | undefined = getFirstOriginalFeatureId(feature);
+          if (coordinate?.lat && coordinate?.lng && id) {
+            this.handleMarkerClick(coordinate.lat, coordinate.lng, id);
+          }
+        }
+      }
+    }
     return res;
+  }
+
+  /**
+   * handles the event when the user moves the mouse over the map
+   * @param event ol event
+   */
+  mapPointerMoveHandler = (event: any) => {
+    if (this.map) {
+      const hasFeature = this.map.hasFeatureAtPixel(event.pixel);
+      const target = this.map.getTarget();
+      if (target && target instanceof HTMLElement) {
+        if (hasFeature) {
+          target.style.cursor = 'pointer';
+        } else {
+          target.style.cursor = '';
+        }
+      }
+    }
   };
 
   /**
-   * handles the marker click event and opens or hides the popup overlay
-   * @param lat latitude of position
-   * @param lng longitude of position
-   * @param id association id
+   * checks if an association is currently displayed within a clustered feature
+   * @param id the association's id
    */
-  markerClickHandler(lat: number, lng: number, id: string): (event: MouseEvent) => void {
-    return (event: MouseEvent) => {
-      this.togglePopupOverlay(lat, lng, id);
-      event.stopPropagation();
-    };
+  isDisplayedInACluster(id: string): boolean {
+    const allFeatures: Feature<Geometry>[] = this.cluster?.getFeatures() || [];
+    const clusteredFeature: Feature<Geometry> | undefined
+      = allFeatures?.find((f: Feature<Geometry>) => {
+      const ids = getOriginalFeaturesIds(f);
+      if (!ids || ids.length <= 1) {
+        return false;
+      }
+      return ids.includes(id);
+    });
+    if (clusteredFeature) {
+      const originalFeatures = getOriginalFeatures(clusteredFeature);
+      if (originalFeatures) {
+        const length = originalFeatures.length;
+        return originalFeatures && !!length && (length > 1);
+      }
+    }
+    return false;
   }
 
   /**
-   * "enables" a map marker (uses the active marker image for the marker)
-   * @param id the marker's (association's) id
+   * get the extent to fit all features of a cluster into the viewport
+   * @param originalFeatures list of features in a cluster
    */
-  enableMarker(id: string): void {
-    const marker: Overlay | undefined = this.map?.getOverlayById(id);
+  getClusterExtent(originalFeatures: Feature<Geometry>[]): Extent {
+    const extent: Extent = createEmpty();
+    originalFeatures.forEach((f: any) => {
+      extend(extent, f.getGeometry().getExtent());
+    });
+    return extent;
+  }
 
-    if (marker) {
-      const pos: Coordinate | undefined = marker.getPosition();
-      if (pos && pos.length >= 2) {
-        const coord = toLonLat(pos);
-        const lat = coord[1];
-        const lng = coord[0];
-
-        const oldElement: HTMLElement | undefined = marker.getElement();
-        if (oldElement) {
-          oldElement.removeEventListener('click', this.markerClickHandler(lat, lng, id));
-        }
-
-        const element: HTMLImageElement = this.getMarkerActiveElement(lat, lng, id);
-        marker.setElement(element);
-        const markerContainer = marker.getElement()?.parentElement;
-        if (markerContainer) {
-          markerContainer.style.zIndex = '6000';
-        }
-      }
+  /**
+   * zoom the map view to a new viewport so that all features of a cluster fit onto the screen
+   * @param originalFeatures list of features in a cluster
+   */
+  zoomToClusterExtent(originalFeatures: any): void {
+    if (this.map) {
+      const extent = this.getClusterExtent(originalFeatures)
+      this.map.getView().fit(extent, {
+        size: this.map.getSize(),
+        padding: [72, 48, 24, 48],
+        duration: this.SIDEBAR_ANIMATION_DURATION * 2
+      });
     }
   }
 
   /**
-   * "disables" a map marker (uses the inactive marker image for the marker)
-   * @param id the marker's (association's) id
+   * handles clicking onto a marker features
+   * @param lat association's latitude
+   * @param lng association's longitude
+   * @param id association's id
    */
-  disableMarker(id: string): void {
-    const marker: Overlay | undefined = this.map?.getOverlayById(id);
-
-    if (marker) {
-      const pos: Coordinate | undefined = marker.getPosition();
-      if (pos && pos.length >= 2) {
-        const coord = toLonLat(pos);
-        const lat = coord[1];
-        const lng = coord[0];
-
-        const oldElement: HTMLElement | undefined = marker.getElement();
-        if (oldElement) {
-          oldElement.removeEventListener('click', this.markerClickHandler(lat, lng, id));
-        }
-
-        const element: HTMLImageElement = this.getMarkerInactiveElement(lat, lng, id);
-        marker.setElement(element);
-        const markerContainer = marker.getElement()?.parentElement;
-        if (markerContainer) {
-          markerContainer.style.zIndex = '5000';
-        }
-      }
-    }
-  }
-
-  /**
-   * enables or disables map markers according to the filtered associations
-   */
-  enablesAndDisableMapMarkers(): void {
-    const inactiveAssociations = this.associations.filter((s: Association) => {
-      return !this.filteredAssociations.includes(s);
-    });
-
-    inactiveAssociations.forEach((s: Association) => {
-      this.disableMarker(s.id);
-    });
-
-    const activeAssociations = this.associations.filter((s: Association) => {
-      return this.filteredAssociations.includes(s);
-    });
-
-    activeAssociations.forEach((s: Association) => {
-      this.enableMarker(s.id);
-    });
+  handleMarkerClick(lat: number, lng: number, id: string): void {
+    this.togglePopupOverlay(lat, lng, id);
   }
 
   /**
@@ -297,9 +399,25 @@ export class OsmMapComponent implements OnInit, OnDestroy {
     }
     this.filteredAssociations = filteredResult;
     if (JSON.stringify(filteredResult) !== JSON.stringify(previousFilteredResult)) {
-      this.enablesAndDisableMapMarkers();
+      if (this.clusterLayer) {
+        this.updateClusterLayerStyle();
+      }
     }
     return true;
+  }
+
+  /**
+   * update cluster layer style and check a view times to update the map correctly
+   */
+  updateClusterLayerStyle(): void {
+    // BUG FIX: after the cluster layer style changed,
+    // render the map a few times to prevent markers from disappearing with no replacement
+    this.clusterLayer?.setStyle(this.getAnimatedClusterStyle);
+    for (let i = 0; i <= 1500; i += 100) {
+      setTimeout(() => {
+        this.clusterLayer?.changed();
+      }, i);
+    }
   }
 
   /**
@@ -316,7 +434,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
 
 
   /**
-   * adds a new marker to the map
+   * adds a new marker feature to the cluster on the map
    * @param lat latitude of position
    * @param lng longitude of position
    * @param id association id
@@ -324,50 +442,42 @@ export class OsmMapComponent implements OnInit, OnDestroy {
   private addMarker(lat: number, lng: number, id: string): void {
     const pos = fromLonLat([lng, lat]);
 
-    const markerImg: HTMLImageElement = this.getMarkerActiveElement(lat, lng, id);
+    const newFeature = new Feature(new Point(pos));
+    newFeature.setId(id);
+    this.clusterFeatures.push(newFeature);
 
-    const marker = new Overlay({
-      id,
-      position: pos,
-      positioning: OverlayPositioning.BOTTOM_CENTER,
-      element: markerImg,
-      insertFirst: false,
-      stopEvent: true,
-    });
+    if (!this.clusterSource) {
+      this.clusterSource = new VectorSource({
+        features: this.clusterFeatures
+      });
+    }
 
-    this.markers.push(marker);
-    this.map?.addOverlay(marker);
+    if (!this.cluster) {
+      this.cluster = new Cluster({
+        distance: 25,
+        source: this.clusterSource
+      });
+    }
+
+    this.clusterSource.addFeature(newFeature);
+    this.cluster.setSource(this.clusterSource);
   }
 
   /**
-   * creates an html active marker image element
-   * @param lat latitude of position
-   * @param lng longitude of position
-   * @param id association id
+   * return the active marker image element (red marker)
    */
-  getMarkerActiveElement(lat: number, lng: number, id: string): HTMLImageElement {
+  getActiveMarkerImg(): HTMLImageElement {
     const markerImg: HTMLImageElement = this.renderer2.createElement('img');
-    markerImg.setAttribute('src', 'assets/marker.png');
-    markerImg.setAttribute('width', '48');
-    markerImg.setAttribute('height', '48');
-    markerImg.setAttribute('style', 'cursor: pointer;');
-    markerImg.addEventListener('click', this.markerClickHandler(lat, lng, id));
+    markerImg.setAttribute('src', 'assets/marker-small.png');
     return markerImg;
   }
 
   /**
-   * creates an html inactive (greyed out) marker image element
-   * @param lat latitude of position
-   * @param lng longitude of position
-   * @param id association id
+   * return the inactive marker image element (gray marker)
    */
-  getMarkerInactiveElement(lat: number, lng: number, id: string): HTMLImageElement {
+  getInactiveMarkerImg(): HTMLImageElement {
     const markerImg: HTMLImageElement = this.renderer2.createElement('img');
-    markerImg.setAttribute('src', 'assets/marker-inactive.png');
-    markerImg.setAttribute('width', '48');
-    markerImg.setAttribute('height', '48');
-    markerImg.setAttribute('style', 'cursor: pointer;');
-    markerImg.addEventListener('click', this.markerClickHandler(lat, lng, id));
+    markerImg.setAttribute('src', 'assets/marker-inactive-small.png');
     return markerImg;
   }
 
@@ -376,7 +486,8 @@ export class OsmMapComponent implements OnInit, OnDestroy {
    * @param association the association to select
    */
   selectAssociation(association: Association): void {
-    this.togglePopupOverlay(association.lat, association.lng, association.id);
+    const zoomIn = this.isDisplayedInACluster(association.id);
+    this.togglePopupOverlay(association.lat, association.lng, association.id, zoomIn);
   }
 
   /**
@@ -384,8 +495,9 @@ export class OsmMapComponent implements OnInit, OnDestroy {
    * @param lat latitude of position
    * @param lng longitude of position
    * @param id association id
+   * @param zoomIn zoom to association
    */
-  togglePopupOverlay(lat: number, lng: number, id: string): void {
+  togglePopupOverlay(lat: number, lng: number, id: string, zoomIn: boolean = false): void {
     this.removePopup();
 
     if (!this.popupVisible || this.popupContentAssociationId !== id) {
@@ -396,7 +508,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
       }
 
       const pos = fromLonLat([lng, lat]);
-      this.popup = this.createPopup(pos, id, removeSidebar);
+      this.popup = this.createPopup(pos, id, removeSidebar, zoomIn);
       this.map?.addOverlay(this.popup);
       this.popupVisible = true;
       this.popupContentAssociationId = id;
@@ -428,8 +540,9 @@ export class OsmMapComponent implements OnInit, OnDestroy {
    * @param coordinates latitude, longitude of popup position
    * @param id the society id to later address the specific marker by its id
    * @param sidebarChange whether the sidebar needs to be hidden (small screen sizes)
+   * @param zoomIn zoom to association
    */
-  createPopup(coordinates: Coordinate, id: string, sidebarChange = false): Overlay {
+  createPopup(coordinates: Coordinate, id: string, sidebarChange?: boolean, zoomIn = false): Overlay {
     const sidebarTimeout = sidebarChange ? (this.SIDEBAR_ANIMATION_DURATION / 2) : 0;
 
     const popupElement: HTMLDivElement = this.renderer2.createElement('div');
@@ -450,12 +563,17 @@ export class OsmMapComponent implements OnInit, OnDestroy {
     // trigger re-center map to the newly opened popup's position
     setTimeout(() => {
       const size = this.map?.getSize();
+      const zoom = zoomIn ? 20 : this.map?.getView().getZoom();
       if (this.map && size) {
         const mapContainer: HTMLElement | null = document.getElementById('osm-map');
-        const horizontalCenter = mapContainer ? (mapContainer.clientWidth / 2) : (this.osmContainer.nativeElement.clientWidth / 2);
-        const verticalCenter = mapContainer ? (mapContainer.clientHeight * 0.975) : (this.osmContainer.nativeElement.clientHeight * 0.975);
+        const horizontalCenter = mapContainer
+          ? (mapContainer.clientWidth / 2)
+          : (this.osmContainer.nativeElement.clientWidth / 2);
+        const verticalCenter = mapContainer
+          ? (mapContainer.clientHeight * 0.975)
+          : (this.osmContainer.nativeElement.clientHeight * 0.975);
         const positioning = [horizontalCenter, verticalCenter];
-        this.animateViewTo(coordinates, size, positioning);
+        this.animateViewTo(coordinates, size, positioning, zoom);
       }
     }, sidebarTimeout);
 
@@ -474,16 +592,26 @@ export class OsmMapComponent implements OnInit, OnDestroy {
    * @param coordinates latitude, longitude of new position
    * @param size zoom
    * @param positioning screen position
+   * @param zoom zoom level
    */
-  animateViewTo(coordinates: number[], size: Size, positioning: number[]): void {
+  animateViewTo(coordinates: number[], size: Size, positioning: number[], zoom: number): void {
     const view = this.map?.getView();
     if (view) {
       const oldCenter = view.getCenter();
       view.centerOn(coordinates, size, positioning);
       const newCenter = view.getCenter();
       view.setCenter(oldCenter);
-      view.animate({center: newCenter, anchor: coordinates, duration: (this.SIDEBAR_ANIMATION_DURATION * 2)}, () => {
+      view.animate({
+        center: newCenter,
+        anchor: coordinates,
+        duration: this.SIDEBAR_ANIMATION_DURATION * 2
+      }, () => {
         view.centerOn(coordinates, size, positioning);
+        view.animate({
+          anchor: coordinates,
+          zoom,
+          duration: this.SIDEBAR_ANIMATION_DURATION * 2
+        });
       });
     }
   }
@@ -711,10 +839,13 @@ export class OsmMapComponent implements OnInit, OnDestroy {
    */
   ngOnDestroy(): void {
     document.getElementById('popup-close')?.removeEventListener('click', this.mapClickHandler);
-    this.map?.removeEventListener('click', this.mapClickHandler);
   }
 }
 
+/**
+ * returns a valid telephone number only consisting of '+' and numbers
+ * @param input telephone number string
+ */
 export function telephoneLink(input: string): string {
   let output = 'tel:';
   const num = input.match(/\d/g);
@@ -722,6 +853,7 @@ export function telephoneLink(input: string): string {
     return '';
   }
   let processedNum: string = num.join('');
+  // TODO support other countries
   if (processedNum.startsWith('0049')) {
     processedNum = processedNum.replace('0049', '+49');
   } else if (processedNum.startsWith('0')) {

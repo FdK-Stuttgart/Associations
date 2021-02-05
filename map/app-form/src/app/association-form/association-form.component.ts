@@ -66,13 +66,12 @@ export class AssociationFormComponent implements OnInit {
 
   /**
    * queries all associations, reselects the edited association and scrolls to the top of the page
-   * @param id the selected association's id
    */
-  async reload(id: string | undefined): Promise<void> {
+  async reload(event: { id: string | undefined, showDialog: boolean | undefined }): Promise<void> {
     await this.ngOnInit();
-    if (await this.leavePage()) {
-      if (id) {
-        const associationToSelect = this.associations.find((s: Association) => s.id === id);
+    if (!event.showDialog || await this.leavePage()) {
+      if (event.id) {
+        const associationToSelect = this.associations.find((s: Association) => s.id === event.id);
         this.selectAssociation(associationToSelect, false, false);
       } else {
         this.selectAssociation(undefined, true, false);
@@ -85,6 +84,7 @@ export class AssociationFormComponent implements OnInit {
    * selects an association to edit
    * @param association the association to edit
    * @param isNew wheter a new association is created or an existing is edited
+   * @param showDialog show confirm dialog (discard changes)
    */
   async selectAssociation(association: Association | undefined, isNew = false, showDialog = true): Promise<void> {
     if (!showDialog || await this.leavePage()) {

@@ -6,12 +6,16 @@
 }
 
 .sub-option {
-  font-size: 75%;
+  font-size: 85%;
 }
 
 p-multiSelect ::ng-deep {
   .p-multiselect-panel {
     max-width: min(100%, 288px) !important;
+  }
+
+  .p-multiselect-header .p-checkbox {
+    display: none !important;
   }
 
   .p-multiselect-item {
@@ -31,5 +35,5 @@ p-multiSelect ::ng-deep {
 
 .select-hint {
   font-weight: normal;
-  font-size: 75%;
+  font-size: 85%;
 }

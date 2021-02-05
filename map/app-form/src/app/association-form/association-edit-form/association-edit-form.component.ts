@@ -73,7 +73,8 @@ export class AssociationEditFormComponent implements OnChanges {
   associations: Association[] = [];
   association?: Association;
 
-  @Output() reload: EventEmitter<string> = new EventEmitter<string>();
+  @Output() reload: EventEmitter<{ id: string | undefined, showDialog: boolean | undefined }>
+    = new EventEmitter<{ id: string | undefined, showDialog: boolean | undefined }>();
 
   // @ts-ignore
   @Input() selectedAssociationId: string = [];
@@ -426,7 +427,7 @@ export class AssociationEditFormComponent implements OnChanges {
           summary: 'Verein wurde gespeichert.',
           key: 'editFormToast'
         });
-        this.reload.emit(this.associationForm.value.id);
+        this.reload.emit({ id: this.associationForm.value.id, showDialog: false });
       })
       .catch((reason) => {
         this.emitBlockUi(false);
