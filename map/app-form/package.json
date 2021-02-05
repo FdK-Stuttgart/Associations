@@ -6,7 +6,7 @@
     "app-form:start": "ng serve",
     "app-form:build": "ng build",
     "app-form:build:prod": "ng build --prod --base-href /edit/",
-    "app-form:version": "npm version patch",
+    "app-form:version": "npm version patch --no-git-tag-version",
     "app-form:test": "ng test",
     "app-form:lint": "ng lint",
     "app-form:e2e": "ng e2e"

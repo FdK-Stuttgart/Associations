@@ -6,7 +6,7 @@
     "app-map:start": "ng serve",
     "app-map:build": "ng build",
     "app-map:build:prod": "ng build --prod --base-href /",
-    "app-map:version": "npm version patch",
+    "app-map:version": "npm version patch --no-git-tag-version",
     "app-map:test": "ng test",
     "app-map:lint": "ng lint",
     "app-map:e2e": "ng e2e"
