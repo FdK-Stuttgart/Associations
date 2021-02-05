@@ -276,6 +276,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
         this.popupContentAssociationId = undefined;
       }
     }
+    return true;
   }
 
   /**
