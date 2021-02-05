@@ -16,6 +16,7 @@ $blue: #00b4d6;
   url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-300.ttf') format('truetype'), /* Safari, Android, iOS */
   url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-300.svg#AlegreyaSans') format('svg'); /* Legacy iOS */
 }
+
 /* alegreya-sans-regular - latin */
 @font-face {
   font-family: 'Alegreya Sans';
@@ -29,6 +30,7 @@ $blue: #00b4d6;
   url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-regular.ttf') format('truetype'), /* Safari, Android, iOS */
   url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-regular.svg#AlegreyaSans') format('svg'); /* Legacy iOS */
 }
+
 /* alegreya-sans-500 - latin */
 @font-face {
   font-family: 'Alegreya Sans';
@@ -42,6 +44,7 @@ $blue: #00b4d6;
   url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-500.ttf') format('truetype'), /* Safari, Android, iOS */
   url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-500.svg#AlegreyaSans') format('svg'); /* Legacy iOS */
 }
+
 /* alegreya-sans-700 - latin */
 @font-face {
   font-family: 'Alegreya Sans';
@@ -55,6 +58,7 @@ $blue: #00b4d6;
   url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-700.ttf') format('truetype'), /* Safari, Android, iOS */
   url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-700.svg#AlegreyaSans') format('svg'); /* Legacy iOS */
 }
+
 /* alegreya-sans-900 - latin */
 @font-face {
   font-family: 'Alegreya Sans';
@@ -334,14 +338,35 @@ fieldset, div.fieldset {
   display: none;
 }
 
-.align-form-row-action-button {
-  padding-top: 22px;
+.align-form-row-action-button, .align-section-action-button {
   padding-left: 5px !important;
   padding-right: 5px !important;
+}
 
-  p-button button.p-button i {
-    width: 100%;
-    text-align: center;
+.align-form-row-action-button {
+  padding-top: 24px;
+
+  p-button button.p-button {
+    height: 40px;
+
+    i {
+      width: 100%;
+      text-align: center;
+    }
+  }
+}
+
+@media(max-width: 767px) {
+  .align-form-row-action-button {
+    padding-top: 0 !important;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgb(206, 212, 218);
+    margin-bottom: 20px;
+  }
+
+  .align-section-action-button, .align-form-row-action-button {
+    padding-left: 15px !important;
+    padding-right: 15px !important;
   }
 }
 

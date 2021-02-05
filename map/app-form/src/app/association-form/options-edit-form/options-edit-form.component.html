@@ -57,14 +57,14 @@
                   <input type="text" [formControl]="optionForm.controls.value"/>
                 </div>
               </div>
-              <div class="p-field col-xs-6 col-md-1 align-form-row-action-button">
+              <div class="col-6 col-md-1 align-form-row-action-button">
                 <span class="delete-button">
                   <p-button (onClick)="remove(optionsForm.controls.options, i)">
                     <i class="pi pi-trash"></i>
                   </p-button>
                 </span>
               </div>
-              <div class="p-field col-xs-6 col-md-1 align-form-row-action-button">
+              <div class="col-6 col-md-1 align-form-row-action-button">
                 <p-button
                   (onClick)="addOption((i+1), getFormArrayFormGroup('options', i)?.controls?.category?.value)">
                   <i class="pi pi-plus"></i>
@@ -74,8 +74,8 @@
           </div>
         </div>
         <div class="row">
-          <div class="col-6"></div>
-          <div class="col-6">
+          <div class="col-12 col-md-6"></div>
+          <div class="col-12 col-md-6 align-section-action-button" style="text-align: right;">
             <p-button (onClick)="addOption((optionsFormLength), null)">
               <i class="pi pi-plus"></i>&nbsp;&nbsp;Übergeordnete Kategorie hinzufügen
             </p-button>

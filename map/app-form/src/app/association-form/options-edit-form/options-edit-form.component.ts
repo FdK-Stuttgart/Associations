@@ -244,6 +244,9 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
           if (optionType && optionType !== this.optionType) {
             this.optionType = optionType;
           }
+          if (window.innerWidth <= 420) {
+            this.sidebarExpanded = false;
+          }
           await this.reinitForm();
           window.history.replaceState({}, '', `${environment.rootPath}/options-form/${this.optionType}`);
         }
@@ -251,6 +254,9 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
     } else {
       if (optionType && optionType !== this.optionType) {
         this.optionType = optionType;
+      }
+      if (window.innerWidth <= 420) {
+        this.sidebarExpanded = false;
       }
       await this.reinitForm();
       window.history.replaceState({}, '', `${environment.rootPath}/options-form/${this.optionType}`);
