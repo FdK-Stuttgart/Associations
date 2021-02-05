@@ -7,7 +7,7 @@
   height: 100vh;
   overflow: hidden;
   transition: width 0.3s;
-  background-color: rgb(227,226,212);
+  background-color: rgb(227, 226, 212);
 
   &.with-sidebar {
     width: calc(100% - 320px) !important;
@@ -34,11 +34,12 @@
   z-index: 1000;
   background-color: #fff;
   padding-left: 6px;
+  width: 30px !important;
 }
 
 .icon-eye {
   vertical-align: -2px;
-  padding-right: 6px;
+  padding-right: 4px;
 }
 
 .clickable {
@@ -51,6 +52,12 @@
   height: 24px;
 }
 
-p-autoComplete ::ng-deep input.full-width {
-  width: 100% !important;
+p-autoComplete {
+  &.full-width {
+    width: 282px !important;
+  }
+
+  ::ng-deep input.full-width {
+    width: 282px !important;
+  }
 }

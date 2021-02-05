@@ -1,5 +1,5 @@
 import {ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild} from '@angular/core';
-import {SocialMediaPlatform, Association} from '../model/association';
+import {SocialMediaPlatform, Association, Link, SocialMediaLink, Image, Contact} from '../model/association';
 import Map from 'ol/Map';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
@@ -52,6 +52,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
   SIDEBAR_ANIMATION_DURATION = 300;
 
   blocked = true;
+  loadingText = 'Vereine abrufen...';
 
   advancedSearchVisible = false;
   districtOptions: DropdownOption[] = [];
@@ -90,6 +91,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
    */
   async ngOnInit(): Promise<void> {
     this.blocked = true;
+    this.loadingText = 'Vereine abrufen...';
 
     const httpResponse: MyHttpResponse<Association[]> = (await this.mySqlQueryService.getAssociations());
     this.associations = httpResponse?.data ? httpResponse.data.sort(
@@ -375,6 +377,8 @@ export class OsmMapComponent implements OnInit, OnDestroy {
    * filter the associations.
    */
   filterAssociations(queryString?: string): boolean {
+    this.blocked = true;
+    this.loadingText = 'Vereinsdaten durchsuchen...';
     const previousFilteredResult = this.filteredAssociations;
     let filteredResult: Association[] = [];
 
@@ -386,7 +390,34 @@ export class OsmMapComponent implements OnInit, OnDestroy {
       filteredResult = this.associations;
     } else {
       filteredResult = this.associations
-        .filter((s: Association) => s.name.toLowerCase().startsWith(queryString ? queryString.toLowerCase() : ''));
+        .filter((s: Association) => {
+          const q: string = queryString ? queryString.toLowerCase() : '';
+          return s.name.toLowerCase().includes(q)
+            || s.shortName?.toLowerCase().includes(q)
+            || s.street?.toLowerCase().includes(q)
+            || s.postcode?.toLowerCase().includes(q)
+            || s.city?.toLowerCase().includes(q)
+            || s.country?.toLowerCase().includes(q)
+            || s.goals?.text?.toLowerCase().includes(q)
+            || s.activities?.text?.toLowerCase().includes(q)
+            || s.contacts?.some((contact: Contact) =>
+              contact.name?.toLowerCase().includes(q)
+              || contact.phone?.toLowerCase().includes(q)
+              || contact.fax?.toLowerCase().includes(q)
+              || contact.mail?.toLowerCase().includes(q)
+            )
+            || s.links?.some((link: Link) =>
+              link.url.toLowerCase().includes(q)
+              || link.linkText?.toLowerCase().includes(q)
+            ) || s.socialMedia?.some((socialMedia: SocialMediaLink) =>
+              socialMedia.url.toLowerCase().includes(q)
+              || socialMedia.linkText?.toLowerCase().includes(q)
+              || socialMedia.platform?.toLowerCase().includes(q)
+            ) || s.images?.some((image: Image) =>
+              image.url.toLowerCase().includes(q)
+              || image.altText?.toLowerCase().includes(q)
+            );
+        });
     }
 
     if (this.selectedActivities?.length || this.selectedDistricts?.length) {
@@ -416,6 +447,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
         this.updateClusterLayerStyle();
       }
     }
+    this.blocked = false;
     return true;
   }
 
