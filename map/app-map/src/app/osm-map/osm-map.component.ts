@@ -780,7 +780,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
   /**
    * toggles visibility of advanced search filters
    */
-  showAdvancedSearchFilters(): void {
+  toggleAdvancedSearchFilters(): void {
     this.advancedSearchVisible = !this.advancedSearchVisible;
   }
 

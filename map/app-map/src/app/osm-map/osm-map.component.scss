@@ -36,6 +36,10 @@
   padding-left: 6px;
 }
 
+.icon-eye {
+  vertical-align: -2px;
+}
+
 .clickable {
   cursor: pointer;
 }
@@ -46,6 +50,6 @@
   height: 24px;
 }
 
-p-autoComplete ::ng-deep .padding-right {
-  padding-right: 36px;
+p-autoComplete ::ng-deep input.full-width {
+  width: 100% !important;
 }

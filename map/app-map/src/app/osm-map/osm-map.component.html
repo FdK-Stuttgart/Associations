@@ -18,12 +18,13 @@
            [modal]="false">
   <div class="sidebar-content">
 
-    <div class="full-width flex-align-center margin-top">
+    <div class="full-width margin-top">
       <p-autoComplete #autoComplete
                       (completeMethod)="filterAssociations($event.query)"
                       (onClear)="filterAssociations($event.query)"
                       [field]="'name'"
-                      [inputStyleClass]="'padding-right'"
+                      [styleClass]="'full-width'"
+                      [inputStyleClass]="'full-width'"
                       [placeholder]="'Nach Verein suchen...'">
       </p-autoComplete>
 
@@ -32,9 +33,17 @@
          (click)="clearAutocomplete()">
       </i>
 
-      <p-button (click)="showAdvancedSearchFilters()">
-        <i [class]="advancedSearchVisible ? 'pi pi-caret-up' : 'pi pi-filter'"></i>
-      </p-button>
+      <br>
+
+      <div class="full-width" style="margin-top: 6px;">
+        <small>
+          <a (click)="toggleAdvancedSearchFilters()">
+            <i class="icon-eye pi" [class]="advancedSearchVisible ? 'pi-eye-slash' : 'pi-eye'"></i>&nbsp;&nbsp;Erweiterte Suche
+            <span *ngIf="advancedSearchVisible">verstecken</span>
+            <span *ngIf="!advancedSearchVisible">anzeigen</span>
+          </a>
+        </small>
+      </div>
     </div>
 
     <div class="full-width" *ngIf="advancedSearchVisible">
