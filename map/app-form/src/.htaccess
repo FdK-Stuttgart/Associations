@@ -1,12 +1,17 @@
+ErrorDocument 400 /edit/
+ErrorDocument 401 /edit/
+ErrorDocument 403 /edit/
+ErrorDocument 404 /edit/
+ErrorDocument 500 /edit/
+
+Header always set Access-Control-Allow-Origin http://localhost:4200
 Header always set Access-Control-Max-Age "1000"
+Header always set Access-Control-Allow-Headers "X-Requested-With, Content-Type, Origin, Authorization, Accept, Client-Security-Token, Accept-Encoding"
 Header always set Access-Control-Allow-Methods "POST, GET, OPTIONS, DELETE, PUT"
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
-
-  # Redirection of requests to index.html
-  RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} -f [OR]
-  RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} -d
-  RewriteRule ^.*$ - [NC,L]
-  RewriteRule ^(.*) index.html [NC,L]
+  RewriteBase /
+  RewriteCond %{HTTPS} !=on
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 </IfModule>
