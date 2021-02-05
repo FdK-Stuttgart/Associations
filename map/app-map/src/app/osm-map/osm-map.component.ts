@@ -94,7 +94,9 @@ export class OsmMapComponent implements OnInit, OnDestroy {
     const httpResponse: MyHttpResponse<Association[]> = (await this.mySqlQueryService.getAssociations());
     this.associations = httpResponse?.data ? httpResponse.data.sort(
       (a: Association, b: Association) => {
-        return a.name.toLowerCase() > b.name.toLowerCase() ? 1 : (a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 0);
+        const name1 = a.shortName || a.name;
+        const name2 = b.shortName || b.name;
+        return name1.toLowerCase() > name2.toLowerCase() ? 1 : (name1.toLowerCase() < name2.toLowerCase() ? -1 : 0);
       }
     ) : [];
 
