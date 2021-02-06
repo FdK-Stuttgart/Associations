@@ -2,12 +2,11 @@
 
 /* fill in database connection params */
 define('DB_HOST', '');
+define('DB_NAME', '');
 define('DB_USER', '');
 define('DB_PASS', '');
-define('DB_NAME', '');
 
-header("Access-Control-Allow-Origin: http://localhost:4200");
-header("Access-Control-Allow-Methods: GET,POST,PUT,OPTIONS");
+header("Access-Control-Allow-Methods: GET,POST");
 header("Access-Control-Allow-Headers:*");
 
 function connect()

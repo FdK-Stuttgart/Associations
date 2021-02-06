@@ -23,7 +23,7 @@
             "allowedCommonJsDependencies": [
               "resize-observer"
             ],
-            "outputPath": "dist/AssociationMap",
+            "outputPath": "../dist/AssociationMap/",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
@@ -33,7 +33,15 @@
               "src/assets",
               "src/docs",
               "src/.htaccess",
-              "src/index.d.ts"
+              "src/index.d.ts",
+              {
+                "glob": "**/*",
+                "input": "../database/api",
+                "output": "./api/",
+                "ignore": [
+                  "_database.php"
+                ]
+              }
             ],
             "styles": [
               "src/styles.scss",
@@ -101,7 +109,15 @@
               "src/assets",
               "src/docs",
               "src/.htaccess",
-              "src/index.d.ts"
+              "src/index.d.ts",
+              {
+                "glob": "**/*",
+                "input": "../database/api",
+                "output": "./",
+                "ignore": [
+                  "_database.php"
+                ]
+              }
             ],
             "styles": [
               "src/styles.scss",

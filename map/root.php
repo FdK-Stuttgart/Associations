@@ -1,0 +1,1 @@
+<?php echo "Der absolute Pfad lautet:".$_SERVER['DOCUMENT_ROOT']."/"; ?>

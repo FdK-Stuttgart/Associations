@@ -7,6 +7,7 @@
     "app-map:build": "ng build",
     "app-map:build:prod": "ng build --prod --base-href /",
     "app-map:version": "npm version patch --no-git-tag-version",
+    "app-map:version:commit": "npm version patch -m \"Upgrade app-map to %s\"",
     "app-map:test": "ng test",
     "app-map:lint": "ng lint",
     "app-map:e2e": "ng e2e"

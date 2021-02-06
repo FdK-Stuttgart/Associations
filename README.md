@@ -6,10 +6,12 @@ See also [OpenStreetMap uMap](https://wiki.openstreetmap.org/wiki/UMap)
 
 ## Setup
 
+### Setting up the database
+
 Depending on your MySQL environment, you can do this using the
 [phpMyAdmin](https://www.phpmyadmin.net/) GUI interface or via the command line.
 
-### From command line:
+#### From command line
 
 1. Install MySQL and make sure it's running. On Ubuntu:
    ```bash
@@ -18,17 +20,16 @@ Depending on your MySQL environment, you can do this using the
    ```
 
 2. Set up a MySQL database on your server. Current DB name of the database is
-   `reaper93_associations`. Can be renamed.
+   `associations`. Can be renamed.
    ```mysql
-   DROP DATABASE IF EXISTS reaper93_associations;
-   CREATE DATABASE IF NOT EXISTS reaper93_associations;
+   DROP DATABASE IF EXISTS associations;
+   CREATE DATABASE IF NOT EXISTS associations;
    ```
 
-3. Create user and grant permissions to database. Current user name is
-   `reaper93`. Can be renamed.
+3. Create user and grant permissions to database.
    ```mysql
-   CREATE USER 'reaper93'@'localhost' IDENTIFIED BY ''; -- TODO clarify password
-   GRANT ALL PRIVILEGES ON reaper93_associations.* TO 'reaper93'@'localhost' WITH GRANT OPTION;
+   CREATE USER 'user'@'localhost' IDENTIFIED BY 'REPLACE WITH SOME GOOD PASSWORD';
+   GRANT ALL PRIVILEGES ON associations.* TO 'user'@'localhost' WITH GRANT OPTION;
    exit
    ```
 
@@ -36,70 +37,135 @@ Depending on your MySQL environment, you can do this using the
    database. This will automatically create all necessary tables with some
    contents.
    ```bash
-   mysql -ureaper93 --table reaper93_associations < map/database/db-export/reaper93_associations.sql
+   mysql -uuser --table associations < map/database/db-export/associations.sql
    ```
 
 5. Verify the import. Login to the dbase:
    ```bash
-   mysql -ureaper93 reaper93_associations
+   mysql -uuser associations
    ```
    Now in MySQL:
    ```mysql
    SHOW TABLES;
-   SHOW COLUMNS activities_options;
+   SHOW COLUMNS activities;
    SHOW COLUMNS associations;
    SHOW COLUMNS contacts;
-   SHOW COLUMNS districts_options;
+   SHOW COLUMNS districts;
    SHOW COLUMNS images;
    SHOW COLUMNS links;
    SHOW COLUMNS socialmedia;
    ```
 
-### Using [phpMyAdmin](https://www.phpmyadmin.net/) GUI interface:
+#### Using [phpMyAdmin](https://www.phpmyadmin.net/) GUI interface
+
 Click on the newly created database and select `Import` from the top menu. Then
 you can upload the `.sql` file to your database.
 
-1. In the `map/database/api` folder open `database.php`. Edit user name,
-   database name and password according to (1.), (2.) and (3.) from the previous
-   section.
-2. Upload the `map/database/api` folder to a directory on your server.
-3. In the file `map/app-<PART>/src/environments/environments.prod.ts` containing:
-```typescript
-export const environment = {
-  production: true,
-  ...
-  phpApi: {
-    serverBasePath: '/AssociationMap/api'
-  }
-  ...
-};
-```
 
-6. Change the `serverBasePath` variable to the location on your server you
-   uploaded the `map/database/api` folder to.
-7. Build the angular app by executing `npm install` and `npm run-script
-   build:prod` (defined in the `package.json`.)
+### Setting up the database scripts
+
+1. In the `map/database/api` folder, copy the `_database.php` file and rename it to `database.php`. 
+2. Edit `DB_HOST`, `DB_NAME`, `DB_USER` and `DB_PASS` according to your configuration made in the steps 
+   (1.), (2.) and (3.) of the previous section. To stick with the example, change the lines from
+   
+   ```php
+    define('DB_HOST', '');
+	define('DB_NAME', '');
+	define('DB_USER', '');
+	define('DB_PASS', '');
+   ```
+   
+   to
+   
+   ```php
+    define('DB_HOST', 'your.mysql.host.com');
+	define('DB_NAME', 'associations');
+	define('DB_USER', 'user');
+	define('DB_PASS', 'REPLACE WITH SOME GOOD PASSWORD');
+   ```
+   
+Leave the `database.php` file in the `/database/api/` folder. This way, it will be copied to the right location when deploying the apps. 
+**The file will NOT be committed to the Git repository.**   
+
+### Angular
 
 For further information on how to install and setup angular as well as on how to
 build an app, see here: [Angular Docs](https://angular.io/guide/setup-local)
+   
+### Versioning
 
-8. The built app will appear inside the `map/app-<PART>/dist` folder. Upload the
-   `map/app-<PART>/dist/AssociationMap` directory to a location on your server.
+#### New map app version
 
-9. Open the app at
-   `http(s)://[YOUR_SERVER]/[PATH_TO_CHOSEN_LOCATION]/AssociationMap`.
+1. Commit, stash or reset all changes made to any project.
+2. Go into the `app-map` folder. 
+3. Run `app-map:version` script in `package.json`. If you want to make a commit for the new version automatically, run `app-map:version:commit`.
 
-10. The edit form can be used at
-    `http(s)://[YOUR_SERVER]/[PATH_TO_CHOSEN_LOCATION]/AssociationMap/form`.
 
-11. The edit forms for the dropdown options can be used at
-    `http(s)://[YOUR_SERVER]/[PATH_TO_CHOSEN_LOCATION]/AssociationMap/options-form`.
+#### New form app version
 
-# Data conversion ods -> json
+1. Commit, stash or reset all changes made to any project.
+2. Go into the `app-form` folder. 
+3. Run `app-form:version` script in `package.json`. If you want to make a commit for the new version automatically, run `app-form:version:commit`.
+
+### Deploying
+
+1. Make sure you have set up your `database.php` file described in the section above 
+  ("Setting up the database scripts"). This only has to be done once when deploying the apps for the first time
+   or if the database configuration has changed.
+2. Go into the `app-map` folder. 
+3. Run `app-map:build:prod` script in `package.json`. 
+4. Go into the `app-form` folder. 
+5. Run `app-form:build:prod` script in `package.json`.
+6. Check your `map/dist/` folder. It should be structured as follows:
+
+  ```
+    - dist/
+	  - AssociationMap/
+	    - api/
+		  - database.php
+		  - ...
+		- assets/
+		  - ...
+		- edit/
+		  - assets/
+		    - ...
+		  - index.html
+		  - ...
+		- index.html
+        - ...		
+  ```
+
+7. Upload the contents of `map/dist/AssociationMap/` onto the root path of your server.
+
+### Changing paths
+
+If you don't want to upload the app(s) to the server root path, but to a subdirectory 
+on your server, you can achieve that following these steps:
+
+1. In both apps (`app-map`, `app-form`), open and edit the `src/environments/environment.prod` file.
+2. Change the `serverBasePath` variable to the location on your server you uploaded the `api` folder to.
+3. Change the `rootPath` variable to the location on your server you uploaded the respective app directory to (folder containing the `index.html` and the assets folder).
+4. Rebuild the apps and re-upload.
+
+### Use the apps
+
+If you uploaded the apps to the root path of the server and did not change the default paths, the apps'
+content should appear at the following paths:
+
+1. Open the app at `http(s)://[YOUR_SERVER_ADDRESS]/`.
+
+2. The edit form can be used at `http(s)://[YOUR_SERVER_ADDRESS]/edit`.
+
+3. The edit forms for the dropdown options can be used at `http(s)://[YOUR_SERVER_ADDRESS]/edit/options-form`.
+
+
+
+# Data conversion ODS to JSON
 
 ## Usage
 
 ### Clojure
+
 ```bash
 cd data
 # generate pom.xml (or create it manually)
