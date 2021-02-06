@@ -43,9 +43,11 @@ export class AssociationFormComponent implements OnInit {
     this.blockUi({block: true, message: 'Vereine werden abgerufen...'});
     const httpResponse: MyHttpResponse<Association[]> = (await this.mySqlQueryService.getAssociations());
     this.associations = httpResponse?.data?.sort(
-      (a: Association, b: Association) =>
-        a.name.toLowerCase() > b.name.toLowerCase() ? 1 : (a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 0)
-    ) || [];
+      (a: Association, b: Association) => {
+        const name1 = a.shortName || a.name;
+        const name2 = b.shortName || b.name;
+        return name1.toLowerCase() > name2.toLowerCase() ? 1 : (name1.toLowerCase() < name2.toLowerCase() ? -1 : 0);
+      }) || [];
     if (!this.associations.length) {
       this.messageService.add({
         severity: 'error',
