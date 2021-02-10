@@ -1,10 +1,11 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Association} from '../model/association';
 import {MyHttpResponse} from '../model/http-response';
 import {ConfirmationService, MessageService} from 'primeng/api';
 import {MysqlQueryService} from '../services/mysql-query.service';
 import {AssociationEditFormComponent} from './association-edit-form/association-edit-form.component';
-import {Router} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
+import {Subscription} from 'rxjs';
 
 @Component({
   selector: 'app-association-form',
@@ -15,7 +16,7 @@ import {Router} from '@angular/router';
     ConfirmationService
   ]
 })
-export class AssociationFormComponent implements OnInit {
+export class AssociationFormComponent implements OnInit, OnDestroy {
   associations: Association[] = [];
   selectedAssociation?: Association;
   isNew = true;
@@ -27,16 +28,26 @@ export class AssociationFormComponent implements OnInit {
   districtOptions = [];
   activitiesOptions = [];
 
+  ignoreRouteParamChange = false;
+
+  sub: Subscription | undefined;
+
   @ViewChild('editForm', {static: true}) editForm!: AssociationEditFormComponent;
 
   constructor(private messageService: MessageService,
               private mySqlQueryService: MysqlQueryService,
               private confirmationService: ConfirmationService,
-              private router: Router) {
+              private router: Router,
+              private route: ActivatedRoute) {
   }
 
   async ngOnInit(): Promise<void> {
+    await this.init();
+  }
+
+  async init(): Promise<void> {
     this.blockUi({block: true, message: 'Vereine werden abgerufen...'});
+
     const httpResponse: MyHttpResponse<Association[]> = (await this.mySqlQueryService.getAssociations());
     this.associations = httpResponse?.data?.sort(
       (a: Association, b: Association) => {
@@ -56,6 +67,15 @@ export class AssociationFormComponent implements OnInit {
     this.districtOptions = (await this.mySqlQueryService.getDistrictOptions())?.data || [];
     this.activitiesOptions = (await this.mySqlQueryService.getActivitiesOptions())?.data || [];
 
+    this.sub = this.route.params.subscribe(async params => {
+      if (params.associationId && !this.ignoreRouteParamChange) {
+        if (params.associationId !== this.selectedAssociation?.id) {
+          this.selectAssociationById(params.associationId);
+        }
+      }
+      this.ignoreRouteParamChange = false;
+    });
+
     if (document.documentElement.clientWidth <= 768 && this.sidebarExpanded) {
       this.sidebarExpanded = false;
     }
@@ -66,7 +86,7 @@ export class AssociationFormComponent implements OnInit {
    * queries all associations, reselects the edited association and scrolls to the top of the page
    */
   async reload(event: { id: string | undefined, showDialog: boolean | undefined }): Promise<void> {
-    await this.ngOnInit();
+    await this.init();
     if (!event.showDialog || await this.leavePage()) {
       if (event.id) {
         const associationToSelect = this.associations.find((s: Association) => s.id === event.id);
@@ -89,8 +109,30 @@ export class AssociationFormComponent implements OnInit {
       this.selectedAssociation = association;
       this.isNew = isNew;
       this.reset(false);
+      const id = this.selectedAssociation?.id;
+      this.ignoreRouteParamChange = true;
+      if (id) {
+        await this.router.navigate(['/edit', id]);
+      } else {
+        await this.router.navigate(['/edit']);
+      }
       if (document.documentElement.clientWidth <= 768 && this.sidebarExpanded) {
         this.sidebarExpanded = false;
+      }
+    }
+  }
+
+  /**
+   * select an association by its id
+   * @param id association id
+   */
+  async selectAssociationById(id: string): Promise<void> {
+    const associationToSelect = this.associations.find((a: Association) => a.id === id);
+    if (associationToSelect) {
+      await this.selectAssociation(associationToSelect, false, true);
+    } else {
+      if (this.leavePage()) {
+        await this.router.navigate(['/edit']);
       }
     }
   }
@@ -123,7 +165,7 @@ export class AssociationFormComponent implements OnInit {
 
   async editOptions(): Promise<void> {
     if (await this.leavePage()) {
-      await this.router.navigate(['/options-form']);
+      await this.router.navigate(['/edit-options']);
     }
   }
 
@@ -131,7 +173,10 @@ export class AssociationFormComponent implements OnInit {
    * deactivate guard
    */
   async canDeactivate(): Promise<boolean> {
-    return await this.leavePage();
+    if (!this.ignoreRouteParamChange && !!this.editForm) {
+      return await this.leavePage();
+    }
+    return true;
   }
 
   /**
@@ -157,5 +202,9 @@ export class AssociationFormComponent implements OnInit {
     } else {
       return true;
     }
+  }
+
+  ngOnDestroy(): void {
+    this.sub?.unsubscribe();
   }
 }

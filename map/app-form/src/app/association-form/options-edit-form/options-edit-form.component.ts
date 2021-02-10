@@ -81,10 +81,10 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
     this.disableCanDeactivate = true;
     if (this.optionType === 'activities') {
       this.options = getInternalGroupedDropdownOptions((await this.mySqlQueryService.getActivitiesOptions())?.data || []);
-      await this.router.navigate(['/options-form/activities']);
+      await this.router.navigate(['/edit-options/activities']);
     } else if (this.optionType === 'districts') {
       this.options = getInternalGroupedDropdownOptions((await this.mySqlQueryService.getDistrictOptions())?.data || []);
-      await this.router.navigate(['/options-form/districts']);
+      await this.router.navigate(['/edit-options/districts']);
     }
     this.disableCanDeactivate = false;
 
@@ -613,7 +613,7 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
    * navigate to the association form
    */
   async editAssociations(): Promise<void> {
-    await this.router.navigate(['/']);
+    await this.router.navigate(['/edit']);
   }
 
   /**

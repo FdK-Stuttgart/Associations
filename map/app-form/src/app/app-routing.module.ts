@@ -8,19 +8,26 @@ import {NotFoundComponent} from './not-found/not-found.component';
 export const routes: Routes = [
   {
     path: '',
-    component: AssociationFormComponent
+    redirectTo: '/edit',
+    pathMatch: 'full'
   },
   {
-    path: ':associationId',
-    component: AssociationFormComponent
+    path: 'edit',
+    component: AssociationFormComponent,
+    canDeactivate: [AssociationFormDeactivateGuard]
   },
   {
-    path: 'options-form',
+    path: 'edit/:associationId',
+    component: AssociationFormComponent,
+    canDeactivate: [AssociationFormDeactivateGuard]
+  },
+  {
+    path: 'edit-options',
     component: OptionsEditFormComponent,
     canDeactivate: [OptionsEditFormDeactivateGuard]
   },
   {
-    path: 'options-form/:optionType',
+    path: 'edit-options/:optionType',
     component: OptionsEditFormComponent,
     canDeactivate: [OptionsEditFormDeactivateGuard]
   },
