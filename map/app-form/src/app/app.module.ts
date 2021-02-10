@@ -7,11 +7,13 @@ import {AssociationFormModule} from './association-form/association-form.module'
 import {HttpClientModule} from '@angular/common/http';
 import {ButtonModule} from 'primeng/button';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
-import {AssociationFormDeactivateGuard} from './association-form/guard';
+import {AssociationFormDeactivateGuard, OptionsEditFormDeactivateGuard} from './association-form/guard';
+import {NotFoundComponent} from './not-found/not-found.component';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    NotFoundComponent
   ],
   imports: [
     BrowserModule,
@@ -24,7 +26,8 @@ import {AssociationFormDeactivateGuard} from './association-form/guard';
   ],
   bootstrap: [AppComponent],
   providers: [
-    AssociationFormDeactivateGuard
+    AssociationFormDeactivateGuard,
+    OptionsEditFormDeactivateGuard
   ]
 })
 export class AppModule {

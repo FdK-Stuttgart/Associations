@@ -1,4 +1,4 @@
-import {Component, HostListener, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {Association} from '../model/association';
 import {MyHttpResponse} from '../model/http-response';
 import {ConfirmationService, MessageService} from 'primeng/api';
@@ -33,10 +33,6 @@ export class AssociationFormComponent implements OnInit {
               private mySqlQueryService: MysqlQueryService,
               private confirmationService: ConfirmationService,
               private router: Router) {
-  }
-
-  @HostListener('window:beforeunload', ['$event']) unloadHandler(event: Event): void {
-    event.returnValue = false;
   }
 
   async ngOnInit(): Promise<void> {

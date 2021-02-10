@@ -6,10 +6,12 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {OsmMapModule} from './osm-map/osm-map.module';
 import {HttpClientModule} from '@angular/common/http';
 import {ButtonModule} from 'primeng/button';
+import { NotFoundComponent } from './not-found/not-found.component';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    NotFoundComponent
   ],
     imports: [
         BrowserModule,

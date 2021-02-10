@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, HostListener, Input, OnDestroy, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {
   getInternalGroupedDropdownOptions,
   InternalGroupedDropdownOption, sortOptions
@@ -9,7 +9,6 @@ import {MysqlPersistService} from '../../services/mysql-persist.service';
 import {ConfirmationService, MessageService} from 'primeng/api';
 import {Subscription} from 'rxjs';
 import {ActivatedRoute, Router} from '@angular/router';
-import {environment} from '../../../environments/environment';
 import {v4 as uuidv4} from 'uuid';
 import {Dropdown} from 'primeng/dropdown';
 
@@ -41,6 +40,8 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
 
   sidebarExpanded = true;
 
+  disableCanDeactivate = false;
+
   get optionsFormLength(): number {
     return (this.optionsForm?.controls?.options as FormArray)?.length || 0;
   }
@@ -53,10 +54,6 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
               private router: Router,
               private formBuilder: FormBuilder,
               private route: ActivatedRoute) {
-  }
-
-  @HostListener('window:beforeunload', ['$event']) unloadHandler(event: Event): void {
-    event.returnValue = false;
   }
 
   async ngOnInit(): Promise<void> {
@@ -81,11 +78,15 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
     this.blocked = true;
     this.addedIndex = undefined;
 
+    this.disableCanDeactivate = true;
     if (this.optionType === 'activities') {
       this.options = getInternalGroupedDropdownOptions((await this.mySqlQueryService.getActivitiesOptions())?.data || []);
+      await this.router.navigate(['/options-form/activities']);
     } else if (this.optionType === 'districts') {
       this.options = getInternalGroupedDropdownOptions((await this.mySqlQueryService.getDistrictOptions())?.data || []);
+      await this.router.navigate(['/options-form/districts']);
     }
+    this.disableCanDeactivate = false;
 
     this.optionsForm = new FormGroup({
       options: new FormArray([])
@@ -248,7 +249,6 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
             this.sidebarExpanded = false;
           }
           await this.reinitForm();
-          window.history.replaceState({}, '', `${environment.rootPath}/options-form/${this.optionType}`);
         }
       });
     } else {
@@ -259,7 +259,6 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
         this.sidebarExpanded = false;
       }
       await this.reinitForm();
-      window.history.replaceState({}, '', `${environment.rootPath}/options-form/${this.optionType}`);
     }
   }
 
@@ -621,6 +620,9 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
    * deactivate guard
    */
   async canDeactivate(): Promise<boolean> {
+    if (this.disableCanDeactivate) {
+      return true;
+    }
     return await this.leavePage();
   }
 
