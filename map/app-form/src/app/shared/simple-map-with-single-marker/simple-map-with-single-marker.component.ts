@@ -1,12 +1,27 @@
-import {Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, Renderer2, SimpleChanges} from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  Output,
+  Renderer2,
+  SimpleChanges
+} from '@angular/core';
 import Map from 'ol/Map';
 import View from 'ol/View';
 import {fromLonLat, toLonLat} from 'ol/proj';
 import TileLayer from 'ol/layer/Tile';
 import OSM from 'ol/source/OSM';
-import {Overlay} from 'ol';
-import OverlayPositioning from 'ol/OverlayPositioning';
 import * as geocoder from 'ol-geocoder';
+import Point from 'ol/geom/Point';
+import Feature from 'ol/Feature';
+import {Vector as VectorLayer} from 'ol/layer';
+import Icon from 'ol/style/Icon';
+import IconAnchorUnits from 'ol/style/IconAnchorUnits';
+import Style from 'ol/style/Style';
+import {Vector} from 'ol/source';
 
 @Component({
   selector: 'app-simple-map-with-single-marker',
@@ -20,7 +35,8 @@ export class SimpleMapWithSingleMarkerComponent implements OnInit, OnChanges, On
   @Input() showAddressField = true;
 
   private map?: Map;
-  private marker?: Overlay;
+  private marker?: Feature;
+  private markersLayer?: VectorLayer;
 
   readonly markerId = 'central-marker';
 
@@ -40,13 +56,34 @@ export class SimpleMapWithSingleMarkerComponent implements OnInit, OnChanges, On
   }
 
   ngOnInit(): void {
+    this.initMap();
+  }
+
+  initMap(): void {
+    this.marker = new Feature({
+      geometry: new Point(fromLonLat([this.lng, this.lat])),
+    });
+
+    this.markersLayer = new VectorLayer({
+      source: new Vector({features: [this.marker]}),
+      style: new Style({
+        image: new Icon({
+          anchor: [0.5, 1],
+          img: this.getMarkerActiveElement(),
+          imgSize: [48, 48],
+          anchorXUnits: IconAnchorUnits.FRACTION,
+          anchorYUnits: IconAnchorUnits.FRACTION
+        })
+      })
+    });
+
     const rasterLayer = new TileLayer({
       source: new OSM()
     });
 
     this.map = new Map({
       target: document.getElementById('osm-map') ?? undefined,
-      layers: [rasterLayer],
+      layers: [rasterLayer, this.markersLayer],
       view: new View({
         center: fromLonLat([this.lng, this.lat]),
         zoom: 15,
@@ -60,8 +97,6 @@ export class SimpleMapWithSingleMarkerComponent implements OnInit, OnChanges, On
 
       this.map.addControl(this.geocoder);
     }
-
-    this.createMarker(this.lat, this.lng);
 
     this.map.addEventListener('click', this.mapClickHandler);
   }
@@ -82,10 +117,10 @@ export class SimpleMapWithSingleMarkerComponent implements OnInit, OnChanges, On
       return true;
     }
     return false;
-  };
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes.lat || changes.lng) {
+    if (this.map && this.markersLayer && (changes.lat || changes.lng)) {
       this.createMarker(this.lat, this.lng);
     }
   }
@@ -96,35 +131,26 @@ export class SimpleMapWithSingleMarkerComponent implements OnInit, OnChanges, On
 
   private createMarker(lat: number, lng: number): void {
     if (this.marker) {
-      this.map?.removeOverlay(this.marker);
       this.marker = undefined;
     }
 
     const pos = fromLonLat([lng, lat]);
 
-    const markerImg: HTMLImageElement = this.getMarkerActiveElement();
-
-    const marker = new Overlay({
-      id: this.markerId,
-      position: pos,
-      positioning: OverlayPositioning.BOTTOM_CENTER,
-      element: markerImg,
-      insertFirst: false,
-      stopEvent: true,
+    this.marker = new Feature({
+      geometry: new Point(pos)
     });
 
-    this.marker = marker;
-    this.map?.addOverlay(marker);
+    if (!this.map || !this.markersLayer) {
+      this.initMap();
+    }
 
+    this.markersLayer?.setSource(new Vector({features: [this.marker]}));
     this.map?.getView()?.setCenter(pos);
   }
 
   private getMarkerActiveElement(): HTMLImageElement {
     const markerImg: HTMLImageElement = this.renderer2.createElement('img');
-    markerImg.setAttribute('src', 'assets/marker.png');
-    markerImg.setAttribute('width', '48');
-    markerImg.setAttribute('height', '48');
-    markerImg.setAttribute('style', 'cursor: not-allowed; pointer-events: none;');
+    markerImg.setAttribute('src', 'assets/marker-small.png');
     return markerImg;
   }
 }
