@@ -14,6 +14,7 @@ import {SidebarModule} from 'primeng/sidebar';
 import {ConfirmDialogModule} from 'primeng/confirmdialog';
 import { OptionsEditFormComponent } from './options-edit-form/options-edit-form.component';
 import {RouterModule} from '@angular/router';
+import {MenubarModule} from 'primeng/menubar';
 
 
 @NgModule({
@@ -31,7 +32,8 @@ import {RouterModule} from '@angular/router';
         ProgressSpinnerModule,
         SidebarModule,
         ConfirmDialogModule,
-        RouterModule
+        RouterModule,
+        MenubarModule
     ]
 })
 export class AssociationFormModule {

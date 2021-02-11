@@ -1,7 +1,7 @@
 <p-confirmDialog [baseZIndex]="10000"></p-confirmDialog>
 
 <div class="form-container" *ngIf="association">
-  <h1>{{ !isNew ? 'Verein bearbeiten' : 'Verein erstellen' }}</h1>
+  <h1>{{ !isNew ? 'Verein bearbeiten' : 'Neuen Verein erstellen' }}</h1>
   <h2 *ngIf="association?.name" style="margin-top: 0;">{{ association?.name }}</h2>
 
   <form [formGroup]="associationForm">
@@ -286,7 +286,8 @@
             </p>
             <p class="invalid-label"
                *ngIf="errorHandlingForFormArray('images', i, 'url', 'pattern')">
-              Keine gültige URL. Eine gültige URL muss mit <strong>http://</strong> oder <strong>https://</strong> beginnen.
+              Keine gültige URL. Eine gültige URL muss mit <strong>http://</strong> oder <strong>https://</strong>
+              beginnen.
             </p>
           </div>
           <div class="p-field col-xs-12 col-md-12">
@@ -347,7 +348,8 @@
             </p>
             <p class="invalid-label"
                *ngIf="errorHandlingForFormArray('links', i, 'url', 'pattern')">
-              Keine gültige URL. Eine gültige URL muss mit <strong>http://</strong> oder <strong>https://</strong> beginnen.
+              Keine gültige URL. Eine gültige URL muss mit <strong>http://</strong> oder <strong>https://</strong>
+              beginnen.
             </p>
           </div>
           <div class=" col-xs-12 col-md-6">
@@ -416,7 +418,8 @@
             </p>
             <p class="invalid-label"
                *ngIf="errorHandlingForFormArray('socialMedia', i, 'url', 'pattern')">
-              Keine gültige URL. Eine gültige URL muss mit <strong>http://</strong> oder <strong>https://</strong> beginnen.
+              Keine gültige URL. Eine gültige URL muss mit <strong>http://</strong> oder <strong>https://</strong>
+              beginnen.
             </p>
           </div>
           <div class="p-field col-xs-12 col-md-4">
@@ -466,7 +469,7 @@
 
         <div class="row">
           <div class="col-6">
-            <a [routerLink]="'/edit-options/districts'" [target]="'_blank'" class="no-decoration">
+            <a [routerLink]="'/options/districts'" [target]="'_blank'" class="no-decoration">
               <p-button [styleClass]="'p-button-text'">
                 <i class="pi pi-pencil"></i>&nbsp;&nbsp;Schlagwörter bearbeiten
               </p-button>
@@ -493,7 +496,7 @@
 
         <div class="row" style="margin-top: 12px;">
           <div class="col-6">
-            <a [routerLink]="'/edit-options/activities'" [target]="'_blank'" class="no-decoration">
+            <a [routerLink]="'/options/activities'" [target]="'_blank'" class="no-decoration">
               <p-button [styleClass]="'p-button-text'">
                 <i class="pi pi-pencil"></i>&nbsp;&nbsp;Schlagwörter bearbeiten
               </p-button>
@@ -507,43 +510,6 @@
         </div>
       </div>
     </div>
-
-    <h4 style="margin-top: 24px;">Datensatz &ndash; Vorschau</h4>
-
-    <div class="col-12" style="margin-bottom: 12px;">
-      <div class="form-array-add">
-        <p-button (onClick)="jsonCollapsed = !jsonCollapsed">
-          <span *ngIf="jsonCollapsed">
-            <i class="pi pi-eye icon-padding"></i> JSON anzeigen
-          </span>
-          <span *ngIf="!jsonCollapsed">
-            <i class="pi pi-eye-slash icon-padding"></i> JSON verbergen
-          </span>
-        </p-button>
-      </div>
-    </div>
-
-    <div class="col-12 overflow-x fieldset"
-         *ngIf="!jsonCollapsed">
-            <pre
-              style="font-family: 'Courier New', monospace; white-space: pre-wrap;">{{ associationForm.value | json }}</pre>
-    </div>
-
-    <fieldset class="button-row">
-      <p-button (onClick)="submit()" [disabled]="!associationForm.valid" class="submit">
-        <i class="pi pi-save"></i>&nbsp;&nbsp;Speichern
-      </p-button>
-      <span class="delete-button">
-        <p-button (onClick)="reset(association?.id)">
-          <i class="pi pi-backward"></i>&nbsp;&nbsp;Reset
-        </p-button>
-      </span>
-      <span class="delete-button" *ngIf="!isNew">
-        <p-button (onClick)="deleteAssociation(association?.id)">
-          <i class="pi pi-trash"></i>&nbsp;&nbsp;Verein löschen
-        </p-button>
-      </span>
-    </fieldset>
   </form>
 </div>
 

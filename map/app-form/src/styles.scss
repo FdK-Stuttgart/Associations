@@ -105,9 +105,38 @@ body *:not(i):not(.pi) {
   @include scrollbars(6px, #aaaaaa, #ffffff);
 }
 
+.container {
+  padding-top: 100px !important;
+  padding-bottom: 60px;
+
+  .sidebar-content {
+    padding-top: 80px !important;
+  }
+
+  .p-sidebar-close {
+    top: 56px !important;
+  }
+}
+
+.fixed-menu-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 18000;
+}
+
 .p-button:not(.p-button-text) {
   background-color: $blue !important;
   border-color: $blue !important;
+}
+
+.p-menuitem-link:not(.p-disabled) .p-menuitem-icon:before, .p-menubar-button i:before {
+  color: $blue;
+}
+
+.p-menubar-button {
+  text-decoration: none !important;
 }
 
 .p-button-text {
@@ -116,6 +145,12 @@ body *:not(i):not(.pi) {
 
 .p-button-label {
   display: none;
+}
+
+.p-confirm-dialog-accept, .p-confirm-dialog-reject {
+  .p-button-icon {
+    margin-right: 0 !important;
+  }
 }
 
 .p-sidebar-close-icon {
@@ -129,7 +164,7 @@ body *:not(i):not(.pi) {
   }
 }
 
-a {
+a:not(.p-menuitem-link):not(.p-menubar-button) {
   color: $blue !important;
   cursor: pointer;
   text-decoration: none;

@@ -5,183 +5,128 @@
 
 <p-confirmDialog [baseZIndex]="10000"></p-confirmDialog>
 
-<div class="form-container" *ngIf="!!optionType && options?.length; else selectOptionType">
-  <h1>{{ (optionType === 'activities' ? 'Tätigkeitsfelder-' : optionType === 'districts' ? 'Aktivitätsgebiete-' : '') + 'Schlagwörter bearbeiten' }}</h1>
+<div class="container">
+  <div class="fixed-menu-container">
+    <p-menubar [model]="mainMenuItems"></p-menubar>
+  </div>
 
-  <form [formGroup]="optionsForm">
-    <div *ngIf="getFormGroupsFromFormArray(optionsForm.controls.options)"
-         class="row no-margin"
-         formArrayName="options">
-      <div class="col-12">
-        <div class="row"
-             *ngFor="let optionForm of getFormGroupsFromFormArray(optionsForm.controls.options); index as i"
-             [formGroup]="optionForm"
-             [ngClass]="{ 'invalid-block': !getFormArrayFormGroup('options', i)?.valid,
+  <div class="form-container" *ngIf="!!optionType && options?.length; else selectOptionType">
+    <h1>{{ (optionType === 'activities' ? 'Tätigkeitsfelder-' : optionType === 'districts' ? 'Aktivitätsgebiete-' : '') + 'Schlagwörter bearbeiten' }}</h1>
+
+    <form [formGroup]="optionsForm">
+      <div *ngIf="getFormGroupsFromFormArray(optionsForm.controls.options)"
+           class="row no-margin"
+           formArrayName="options">
+        <div class="col-12">
+          <div class="row"
+               *ngFor="let optionForm of getFormGroupsFromFormArray(optionsForm.controls.options); index as i"
+               [formGroup]="optionForm"
+               [ngClass]="{ 'invalid-block': !getFormArrayFormGroup('options', i)?.valid,
                           'added': i === addedIndex }">
-          <div class="col-12">
-            <div class="row p-fluid" *ngIf="!optionForm.value.isSubOption || showSubOptions(optionForm.value.category)">
-              <div class="col-1" *ngIf="!!optionForm.value.category"></div>
-              <div class="p-field"
-                   [ngClass]="{ 'col-xs-12 col-md-6': !optionForm.value.category,
+            <div class="col-12">
+              <div class="row p-fluid"
+                   *ngIf="!optionForm.value.isSubOption || showSubOptions(optionForm.value.category)">
+                <div class="col-1" *ngIf="!!optionForm.value.category"></div>
+                <div class="p-field"
+                     [ngClass]="{ 'col-xs-12 col-md-6': !optionForm.value.category,
                            'col-xs-11 col-md-5': !!optionForm.value.category }">
-                <label
-                  for="contact-{{i}}-label-input">{{ optionForm.value.isSubOption ? 'Optionsname*' : 'Kategoriename*' }}</label>
-                <input pInputText
-                       id="contact-{{i}}-label-input"
-                       type="text"
-                       class="label-input"
-                       (focusout)="changeCategoryLabel(optionForm.controls.label.value, optionForm.controls.isSubOption.value)"
-                       [formControl]="optionForm.controls.label"
-                       [placeholder]="optionForm.value.isSubOption ? 'Optionsname*' : 'Kategoriename*'"/>
-                <p class="invalid-label"
-                   *ngIf="errorHandlingForFormArray('options', i, 'label', 'required')">
-                  Ein Optionsname muss angegeben werden.
-                </p>
-                <p *ngIf="!optionForm.value.isSubOption">
-                  <small><a (click)="toggleShowSubOptions(optionForm)">
-                    <span *ngIf="optionForm.value.showSubOptions">Unterkategorien verstecken</span>
-                    <span *ngIf="!optionForm.value.showSubOptions">Unterkategorien anzeigen</span>
-                  </a></small>
-                </p>
-              </div>
-              <div class="p-field col-xs-12 col-md-4">
-                <label for="contact-{{i}}-category-input">Übergeordnete Kategorie*</label>
-                <p-dropdown id="contact-{{i}}-category-input"
-                            #dropdown
-                            [options]="topOptions"
-                            [ngModel]="optionForm.value.category"
-                            [ngModelOptions]="{ standalone: true }"
-                            (ngModelChange)="changeCategoryDropdown($event, optionsForm.controls.options, optionForm, dropdown)">
-                </p-dropdown>
-                <div class="hidden-input">
-                  <input type="text" [formControl]="optionForm.controls.value"/>
+                  <label
+                    for="contact-{{i}}-label-input">{{ optionForm.value.isSubOption ? 'Optionsname*' : 'Kategoriename*' }}</label>
+                  <input pInputText
+                         id="contact-{{i}}-label-input"
+                         type="text"
+                         class="label-input"
+                         (focusout)="changeCategoryLabel(optionForm.controls.label.value, optionForm.controls.isSubOption.value)"
+                         [formControl]="optionForm.controls.label"
+                         [placeholder]="optionForm.value.isSubOption ? 'Optionsname*' : 'Kategoriename*'"/>
+                  <p class="invalid-label"
+                     *ngIf="errorHandlingForFormArray('options', i, 'label', 'required')">
+                    Ein Optionsname muss angegeben werden.
+                  </p>
+                  <p *ngIf="!optionForm.value.isSubOption">
+                    <small><a (click)="toggleShowSubOptions(optionForm)">
+                      <span *ngIf="optionForm.value.showSubOptions">Unterkategorien verstecken</span>
+                      <span *ngIf="!optionForm.value.showSubOptions">Unterkategorien anzeigen</span>
+                    </a></small>
+                  </p>
+                </div>
+                <div class="p-field col-xs-12 col-md-4">
+                  <label for="contact-{{i}}-category-input">Übergeordnete Kategorie*</label>
+                  <p-dropdown id="contact-{{i}}-category-input"
+                              #dropdown
+                              [options]="topOptions"
+                              [ngModel]="optionForm.value.category"
+                              [ngModelOptions]="{ standalone: true }"
+                              (ngModelChange)="changeCategoryDropdown($event, optionsForm.controls.options, optionForm, dropdown)">
+                  </p-dropdown>
+                  <div class="hidden-input">
+                    <input type="text" [formControl]="optionForm.controls.value"/>
+                  </div>
+                </div>
+                <div class="col-6 col-md-1 align-form-row-action-button">
+                  <span class="delete-button">
+                    <p-button (onClick)="remove(optionsForm.controls.options, i)">
+                      <i class="pi pi-trash"></i>
+                    </p-button>
+                  </span>
+                </div>
+                <div class="col-6 col-md-1 align-form-row-action-button">
+                  <p-button
+                    (onClick)="addOption((i+1), getFormArrayFormGroup('options', i)?.controls?.category?.value)">
+                    <i class="pi pi-plus"></i>
+                  </p-button>
                 </div>
               </div>
-              <div class="col-6 col-md-1 align-form-row-action-button">
-                <span class="delete-button">
-                  <p-button (onClick)="remove(optionsForm.controls.options, i)">
-                    <i class="pi pi-trash"></i>
-                  </p-button>
-                </span>
-              </div>
-              <div class="col-6 col-md-1 align-form-row-action-button">
-                <p-button
-                  (onClick)="addOption((i+1), getFormArrayFormGroup('options', i)?.controls?.category?.value)">
-                  <i class="pi pi-plus"></i>
-                </p-button>
-              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12 col-md-6"></div>
+            <div class="col-12 col-md-6 align-section-action-button" style="text-align: right;">
+              <p-button (onClick)="addOption((optionsFormLength), null)">
+                <i class="pi pi-plus"></i>&nbsp;&nbsp;Übergeordnete Kategorie hinzufügen
+              </p-button>
             </div>
           </div>
         </div>
-        <div class="row">
-          <div class="col-12 col-md-6"></div>
-          <div class="col-12 col-md-6 align-section-action-button" style="text-align: right;">
-            <p-button (onClick)="addOption((optionsFormLength), null)">
-              <i class="pi pi-plus"></i>&nbsp;&nbsp;Übergeordnete Kategorie hinzufügen
-            </p-button>
-          </div>
-        </div>
       </div>
-      <hr>
-
-      <h4 style="margin-top: 24px;">Datensatz &ndash; Vorschau</h4>
-
-      <div class="col-12" style="margin-bottom: 12px;">
-        <div class="form-array-add">
-          <p-button (onClick)="jsonCollapsed = !jsonCollapsed">
-            <span *ngIf="jsonCollapsed">
-              <i class="pi pi-eye icon-padding"></i> JSON anzeigen
-            </span>
-            <span *ngIf="!jsonCollapsed">
-              <i class="pi pi-eye-slash icon-padding"></i> JSON verbergen
-            </span>
-          </p-button>
-        </div>
-      </div>
-
-      <div class="col-12 overflow-x fieldset"
-           *ngIf="!jsonCollapsed">
-            <pre
-              style="font-family: 'Courier New', monospace; white-space: pre-wrap;">{{ optionsForm.value | json }}</pre>
-      </div>
-    </div>
-  </form>
-</div>
-<ng-template #selectOptionType>
-  <div class="form-container">
-    <div class="col-12" style="text-align: center; margin-top: 48px;">
+    </form>
+  </div>
+  <ng-template #selectOptionType>
+    <div class="form-container">
       <h1>Schlagwörter bearbeiten</h1>
-      Wählen Sie einen Schlagwort-Typ in der Seitenleiste aus.
-    </div>
-  </div>
-</ng-template>
 
-<p-sidebar [(visible)]="sidebarExpanded"
-           [position]="'right'"
-           [showCloseIcon]="true"
-           [modal]="false">
-  <div class="sidebar-content">
-    <div class="row" style="margin-bottom: 30px;">
-      <div class="col-6">
-        <p-button (onClick)="submit()" [disabled]="!optionsForm.valid">
-          <i class="pi pi-save"></i>&nbsp;&nbsp;Speichern
-        </p-button>
-      </div>
-      <div class="col-6" style="text-align: right;">
-        <span class="delete-button">
-          <p-button (onClick)="reset()">
-            <i class="pi pi-backward"></i>&nbsp;&nbsp;Reset
-          </p-button>
-        </span>
-      </div>
-    </div>
+      <p>Kein Schlagwort-Typ ausgewählt.</p>
 
-    <h3>Schlagwörter</h3>
-    <div class="option-entries">
-      <div class="option-entry"
-           [ngClass]="{ 'selected': this.optionType === 'activities' }">
-        <a (click)="reset('activities')">
-          <div class="icon-and-text">
-            <div class="icon">
-              <i class="pi pi-pencil"
-                 *ngIf="this.optionType === 'activities'"></i>
+      <div class="option-entries">
+        <div class="option-entry"
+             [ngClass]="{ 'selected': this.optionType === 'activities' }">
+          <a (click)="reset('activities')">
+            <div class="icon-and-text">
+              <div class="icon">
+                <i class="pi pi-pencil"
+                   *ngIf="this.optionType === 'activities'"></i>
+              </div>
+              <div class="text">
+                Tätigkeitsfelder
+              </div>
             </div>
-            <div class="text">
-              Tätigkeitsfelder
+          </a>
+        </div>
+        <div class="option-entry"
+             [ngClass]="{ 'selected': this.optionType === 'districts' }">
+          <a (click)="reset('districts')">
+            <div class="icon-and-text">
+              <div class="icon">
+                <i class="pi pi-pencil"
+                   *ngIf="this.optionType === 'districts'"></i>
+              </div>
+              <div class="text">
+                Aktivitätsgebiete
+              </div>
             </div>
-          </div>
-        </a>
-      </div>
-      <div class="option-entry"
-           [ngClass]="{ 'selected': this.optionType === 'districts' }">
-        <a (click)="reset('districts')">
-          <div class="icon-and-text">
-            <div class="icon">
-              <i class="pi pi-pencil"
-                 *ngIf="this.optionType === 'districts'"></i>
-            </div>
-            <div class="text">
-              Aktivitätsgebiete
-            </div>
-          </div>
-        </a>
+          </a>
+        </div>
       </div>
     </div>
-
-    <div class="row" style="margin-bottom: 12px; margin-top: 48px;">
-      <div class="col-12" style="text-align: center;">
-        <p-button (click)="editAssociations()">
-          <i class="pi pi-pencil"></i>&nbsp;&nbsp;Vereine bearbeiten
-        </p-button>
-      </div>
-    </div>
-  </div>
-</p-sidebar>
-
-<div class="sidebar-trigger-button"
-     [ngClass]="{ 'expanded': sidebarExpanded }">
-  <p-button type="text"
-            [icon]="!sidebarExpanded ? 'pi pi-arrow-left' : 'pi pi-arrow-right'"
-            (click)="toggleSidebar()">
-  </p-button>
+  </ng-template>
 </div>

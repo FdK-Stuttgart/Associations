@@ -1,7 +1,7 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Association} from '../model/association';
 import {MyHttpResponse} from '../model/http-response';
-import {ConfirmationService, MessageService} from 'primeng/api';
+import {ConfirmationService, MenuItem, MessageService} from 'primeng/api';
 import {MysqlQueryService} from '../services/mysql-query.service';
 import {AssociationEditFormComponent} from './association-edit-form/association-edit-form.component';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -25,12 +25,16 @@ export class AssociationFormComponent implements OnInit, OnDestroy {
   loadingText = 'Vereine werden abgerufen...';
   sidebarExpanded = true;
 
+  mainMenuItems: MenuItem[];
+
   districtOptions = [];
   activitiesOptions = [];
 
   ignoreRouteParamChange = false;
 
   sub: Subscription | undefined;
+
+  editFormChangeSub: Subscription | undefined;
 
   @ViewChild('editForm', {static: true}) editForm!: AssociationEditFormComponent;
 
@@ -39,6 +43,67 @@ export class AssociationFormComponent implements OnInit, OnDestroy {
               private confirmationService: ConfirmationService,
               private router: Router,
               private route: ActivatedRoute) {
+    this.mainMenuItems = [
+      {
+        label: 'Neuen Verein erstellen',
+        icon: 'pi pi-plus',
+        command: async () => {
+          await this.selectAssociation(undefined, true);
+        },
+        disabled: this.isNew
+      },
+      {
+        label: 'Speichern',
+        icon: 'pi pi-save',
+        command: async () => {
+          await this.submit();
+        }
+      },
+      {
+        label: 'Löschen',
+        icon: 'pi pi-trash',
+        command: async () => {
+          await this.deleteAssociation();
+        }
+      },
+      {
+        label: 'Eingaben zurücksetzen',
+        icon: 'pi pi-backward',
+        command: async () => {
+          await this.reset();
+        }
+      },
+      {
+        label: 'Daten neu abrufen',
+        icon: 'pi pi-spinner',
+        command: async () => {
+          await this.reload({id: this.selectedAssociation?.id, showDialog: true});
+        }
+      },
+      {
+        label: 'Vereine bearbeiten',
+        icon: 'pi pi-home',
+        disabled: true
+      },
+      {
+        label: 'Schlagwörter bearbeiten',
+        icon: 'pi pi-tags',
+        items: [
+          {
+            label: 'Tätigkeitsfelder bearbeiten',
+            command: async () => {
+              this.editOptions('activities');
+            }
+          },
+          {
+            label: 'Aktivitätsgebiete bearbeiten',
+            command: async () => {
+              this.editOptions('districts');
+            }
+          }
+        ]
+      }
+    ];
   }
 
   async ngOnInit(): Promise<void> {
@@ -76,6 +141,20 @@ export class AssociationFormComponent implements OnInit, OnDestroy {
       this.ignoreRouteParamChange = false;
     });
 
+    this.editFormChangeSub?.unsubscribe();
+    this.editFormChangeSub = this.editForm.editFormChanges$.subscribe(value => {
+      this.mainMenuItems = this.mainMenuItems.map((item: MenuItem) => {
+        if (item.label === 'Speichern') {
+          return {
+            ...item,
+            disabled: (value !== 'VALID')
+          };
+        } else {
+          return item;
+        }
+      });
+    });
+
     if (document.documentElement.clientWidth <= 768 && this.sidebarExpanded) {
       this.sidebarExpanded = false;
     }
@@ -111,11 +190,24 @@ export class AssociationFormComponent implements OnInit, OnDestroy {
       this.reset(false);
       const id = this.selectedAssociation?.id;
       this.ignoreRouteParamChange = true;
+
       if (id) {
-        await this.router.navigate(['/edit', id]);
+        await this.router.navigate(['/associations', id]);
       } else {
-        await this.router.navigate(['/edit']);
+        await this.router.navigate(['/associations']);
       }
+
+      this.mainMenuItems = this.mainMenuItems.map((item: MenuItem) => {
+        if (item.label === 'Neuen Verein erstellen') {
+          return {
+            ...item,
+            disabled: this.isNew
+          };
+        } else {
+          return item;
+        }
+      });
+
       if (document.documentElement.clientWidth <= 768 && this.sidebarExpanded) {
         this.sidebarExpanded = false;
       }
@@ -132,7 +224,7 @@ export class AssociationFormComponent implements OnInit, OnDestroy {
       await this.selectAssociation(associationToSelect, false, true);
     } else {
       if (this.leavePage()) {
-        await this.router.navigate(['/edit']);
+        await this.router.navigate(['/associations']);
       }
     }
   }
@@ -163,9 +255,9 @@ export class AssociationFormComponent implements OnInit, OnDestroy {
     this.loadingText = $event.message;
   }
 
-  async editOptions(): Promise<void> {
+  async editOptions(optionType?: 'activities' | 'districts'): Promise<void> {
     if (await this.leavePage()) {
-      await this.router.navigate(['/edit-options']);
+      await this.router.navigate(optionType ? ['/options', optionType] : ['/options']);
     }
   }
 
@@ -206,5 +298,6 @@ export class AssociationFormComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
+    this.editFormChangeSub.unsubscribe();
   }
 }

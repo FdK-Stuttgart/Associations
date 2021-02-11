@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
+import {Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges} from '@angular/core';
 import {SocialMediaPlatform, Association} from '../../model/association';
 import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators} from '@angular/forms';
 import {DropdownOption} from '../../model/dropdown-option';
@@ -7,6 +7,7 @@ import {MysqlPersistService} from '../../services/mysql-persist.service';
 import {ConfirmationService, MessageService} from 'primeng/api';
 import {MyHttpResponse} from '../../model/http-response';
 import {MysqlQueryService} from '../../services/mysql-query.service';
+import {BehaviorSubject, Observable, of, Subscription} from 'rxjs';
 
 function contactFilledValidator(): ValidatorFn {
   return (control: FormGroup): { [key: string]: boolean } | null => {
@@ -65,9 +66,7 @@ function getEmptyFormArrayElement(type: 'contact' | 'link' | 'socialMedia' | 'im
     ConfirmationService
   ]
 })
-export class AssociationEditFormComponent implements OnChanges {
-  jsonCollapsed = true;
-
+export class AssociationEditFormComponent implements OnChanges, OnDestroy {
   initialFormState: any = {};
 
   associations: Association[] = [];
@@ -91,6 +90,8 @@ export class AssociationEditFormComponent implements OnChanges {
   districtOptions: DropdownOption[] = [];
   activitiesOptions: DropdownOption[] = [];
 
+  editFormChanges$: BehaviorSubject<string> = new BehaviorSubject<string>(null);
+
   @Output() blockUi: EventEmitter<{ block: boolean, message?: string }> = new EventEmitter<{ block: boolean, message?: string }>();
 
   readonly socialMediaOptions = Object.keys(SocialMediaPlatform)
@@ -102,6 +103,8 @@ export class AssociationEditFormComponent implements OnChanges {
         label: s
       };
     });
+
+  private editFormStatusChangesSub: Subscription | undefined;
 
   get hasFormValueChanged(): boolean {
     return JSON.stringify(this.associationForm?.value) !== JSON.stringify(this.initialFormState);
@@ -119,8 +122,7 @@ export class AssociationEditFormComponent implements OnChanges {
    * @param changes SimpleChanges
    */
   async ngOnChanges(changes: SimpleChanges): Promise<void> {
-    if (
-      (changes.selectedAssociationId && changes.selectedAssociationId.previousValue !== changes.selectedAssociationId.currentValue)
+    if ((changes.selectedAssociationId && changes.selectedAssociationId.previousValue !== changes.selectedAssociationId.currentValue)
       || changes.isNew) {
       await this.initForm();
     }
@@ -220,7 +222,9 @@ export class AssociationEditFormComponent implements OnChanges {
         }, {validators: contactFilledValidator()}));
       });
     } else {
-      this.formArrayAdd(this.associationForm.controls.contacts as FormArray, 'contact', this.associationForm.value.id);
+      if (this.isNew) {
+        this.formArrayAdd(this.associationForm.controls.contacts as FormArray, 'contact', this.associationForm.value.id);
+      }
     }
 
     if (this.association?.links?.length) {
@@ -266,6 +270,10 @@ export class AssociationEditFormComponent implements OnChanges {
     });
 
     this.initialFormState = this.associationForm?.value;
+
+    this.editFormStatusChangesSub = this.associationForm.statusChanges.subscribe((value) => {
+      this.editFormChanges$.next(value);
+    });
 
     this.emitBlockUi(false);
   }
@@ -427,7 +435,7 @@ export class AssociationEditFormComponent implements OnChanges {
           summary: 'Verein wurde gespeichert.',
           key: 'editFormToast'
         });
-        this.reload.emit({ id: this.associationForm.value.id, showDialog: false });
+        this.reload.emit({id: this.associationForm.value.id, showDialog: false});
       })
       .catch((reason) => {
         this.emitBlockUi(false);
@@ -533,5 +541,9 @@ export class AssociationEditFormComponent implements OnChanges {
         break;
     }
     this.emitBlockUi(false);
+  }
+
+  ngOnDestroy(): void {
+    this.editFormStatusChangesSub?.unsubscribe();
   }
 }

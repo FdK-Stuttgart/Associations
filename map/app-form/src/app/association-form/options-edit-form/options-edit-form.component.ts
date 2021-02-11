@@ -6,7 +6,7 @@ import {
 import {MysqlQueryService} from '../../services/mysql-query.service';
 import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import {MysqlPersistService} from '../../services/mysql-persist.service';
-import {ConfirmationService, MessageService} from 'primeng/api';
+import {ConfirmationService, MenuItem, MessageService} from 'primeng/api';
 import {Subscription} from 'rxjs';
 import {ActivatedRoute, Router} from '@angular/router';
 import {v4 as uuidv4} from 'uuid';
@@ -34,13 +34,15 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
   blocked = false;
   loadingText = 'Schlagwörter werden abgerufen...';
 
-  jsonCollapsed = true;
-
   sub: Subscription | undefined;
 
   sidebarExpanded = true;
 
   disableCanDeactivate = false;
+
+  mainMenuItems: MenuItem[];
+
+  formChangeSub: Subscription | undefined;
 
   get optionsFormLength(): number {
     return (this.optionsForm?.controls?.options as FormArray)?.length || 0;
@@ -54,6 +56,48 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
               private router: Router,
               private formBuilder: FormBuilder,
               private route: ActivatedRoute) {
+    this.mainMenuItems = [
+      {
+        label: 'Speichern',
+        icon: 'pi pi-save',
+        command: async () => {
+          await this.submit();
+        },
+        disabled: true
+      },
+      {
+        label: 'Eingaben zurücksetzen',
+        icon: 'pi pi-backward',
+        command: async () => {
+          await this.reset();
+        }
+      },
+      {
+        label: 'Vereine bearbeiten',
+        icon: 'pi pi-home',
+        command: async () => {
+          await this.editAssociations();
+        }
+      },
+      {
+        label: 'Schlagwörter bearbeiten',
+        icon: 'pi pi-tags',
+        items: [
+          {
+            label: 'Tätigkeitsfelder bearbeiten',
+            command: async () => {
+              this.reset('activities');
+            }
+          },
+          {
+            label: 'Aktivitätsgebiete bearbeiten',
+            command: async () => {
+              this.reset('districts');
+            }
+          }
+        ]
+      }
+    ];
   }
 
   async ngOnInit(): Promise<void> {
@@ -81,10 +125,10 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
     this.disableCanDeactivate = true;
     if (this.optionType === 'activities') {
       this.options = getInternalGroupedDropdownOptions((await this.mySqlQueryService.getActivitiesOptions())?.data || []);
-      await this.router.navigate(['/edit-options/activities']);
+      await this.router.navigate(['/options/activities']);
     } else if (this.optionType === 'districts') {
       this.options = getInternalGroupedDropdownOptions((await this.mySqlQueryService.getDistrictOptions())?.data || []);
-      await this.router.navigate(['/edit-options/districts']);
+      await this.router.navigate(['/options/districts']);
     }
     this.disableCanDeactivate = false;
 
@@ -111,6 +155,19 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
     this.recalculateTopOptions();
 
     this.optionsForm.updateValueAndValidity();
+
+    this.formChangeSub = this.optionsForm.statusChanges.subscribe((value) => {
+      this.mainMenuItems = this.mainMenuItems.map((item: MenuItem) => {
+        if (item.label === 'Speichern') {
+          return {
+            ...item,
+            disabled: (value !== 'VALID')
+          };
+        } else {
+          return item;
+        }
+      });
+    });
 
     this.blocked = false;
   }
@@ -613,7 +670,7 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
    * navigate to the association form
    */
   async editAssociations(): Promise<void> {
-    await this.router.navigate(['/edit']);
+    await this.router.navigate(['/associations']);
   }
 
   /**
@@ -653,5 +710,6 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
+    this.formChangeSub?.unsubscribe();
   }
 }
