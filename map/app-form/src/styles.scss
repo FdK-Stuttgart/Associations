@@ -2,6 +2,7 @@
 @import '~bootstrap/scss/bootstrap';
 
 $blue: #00b4d6;
+$red: #F74600;
 
 /* alegreya-sans-300 - latin */
 @font-face {
@@ -126,7 +127,7 @@ body *:not(i):not(.pi) {
   z-index: 18000;
 }
 
-.p-button:not(.p-button-text) {
+.p-button:not(.p-button-text):not(.p-confirm-dialog-reject) {
   background-color: $blue !important;
   border-color: $blue !important;
 }
@@ -153,6 +154,11 @@ body *:not(i):not(.pi) {
   }
 }
 
+.p-button.p-confirm-dialog-reject {
+  background-color: $red !important;
+  border-color: $red !important;
+}
+
 .p-sidebar-close-icon {
   &:before {
     color: $blue;
@@ -160,6 +166,27 @@ body *:not(i):not(.pi) {
 
     &:hover, &:active {
       color: darken($blue, 10%);
+    }
+  }
+}
+
+.p-inputswitch.p-inputswitch-checked:not(.p-disabled) .p-inputswitch-slider {
+  background-color: $blue !important;
+}
+
+.switch-label {
+  font-size: 120%;
+  line-height: 28px;
+  vertical-align: middle;
+  display: inline-block;
+  margin-left: 12px;
+
+  strong {
+    color: $blue;
+    font-weight: 600;
+
+    &.red {
+      color: $red;
     }
   }
 }

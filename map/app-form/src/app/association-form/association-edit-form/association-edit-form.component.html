@@ -2,11 +2,16 @@
 
 <div class="form-container" *ngIf="association">
   <h1>{{ !isNew ? 'Verein bearbeiten' : 'Neuen Verein erstellen' }}</h1>
-  <h2 *ngIf="association?.name" style="margin-top: 0;">{{ association?.name }}</h2>
+  <h4 *ngIf="association?.name" style="margin-top: 0;">{{ association?.shortName || association?.name }}</h4>
+
+  <p class="invalid-block" style="padding: 8px; text-align: center; margin-top: 20px;">
+    Alle hier eingetragenen Daten werden auf der frei zugänglichen Online-Karte veröffentlicht.<br>
+    <strong>Geben Sie also nur Daten an, die für die Öffentlichkeit bestimmt sind.</strong></p>
 
   <form [formGroup]="associationForm">
     <div class="row">
       <div class="col-12">
+
         <h4>Basisdaten</h4>
 
         <div class="row p-fluid">
@@ -26,19 +31,39 @@
         </div>
         <div class="row p-fluid">
           <div class="p-field col-xs-12 col-md-12">
-            <label for="short-name-input">Kurzbezeichnung</label>
+            <label for="short-name-input">Kurzbezeichnung (optional)</label>
             <input pInputText
                    id="short-name-input"
                    type="text"
                    formControlName="shortName"
-                   placeholder="Kurzbezeichnung"/>
+                   placeholder="Kurzbezeichnung (optional)"/>
+            <p class="small">Bitte geben Sie eine Abkürzung oder Kurzbezeichnung Ihres Vereinsnamens an.
+              Diese wird in der Auflistung der Vereine verwendet, wenn der vollständige Name des Vereins sehr lang ist
+              und deshalb abgeschnitten werden würde.
+            </p>
             <p class="invalid-label"
                *ngIf="errorHandling('shortName', 'maxlength')">
               Bitte wählen Sie eine Kurzbezeichnung mit maximal 50 Zeichen.
             </p>
           </div>
         </div>
+
+        <h4>Adresse</h4>
+
         <div class="row p-fluid">
+          <div class="p-field col-xs-12 col-md-12">
+            <p-inputSwitch #publicAddressSwitch
+                           [ngModel]="isPublicAddress"
+                           (ngModelChange)="requestChangePublicAddress($event)"
+                           [ngModelOptions]="{ standalone: true }">
+            </p-inputSwitch>
+            <p class="switch-label" *ngIf="isPublicAddress">Ich möchte die <strong>Vereinsadresse
+              veröffentlichen</strong>.</p>
+            <p class="switch-label" *ngIf="!isPublicAddress">Ich möchte <strong class="red">keine
+              Adresse angeben</strong>.</p>
+          </div>
+        </div>
+        <div class="row p-fluid" *ngIf="isPublicAddress">
           <div class="p-field col-xs-12 col-md-12">
             <label for="street-input">Straße und Hausnummer</label>
             <input pInputText
@@ -48,7 +73,7 @@
                    placeholder="Straße und Hausnummer"/>
           </div>
         </div>
-        <div class="row p-fluid">
+        <div class="row p-fluid" *ngIf="isPublicAddress">
           <div class="p-field col-xs-12 col-md-6">
             <label for="postcode-input">PLZ</label>
             <input pInputText
@@ -66,7 +91,7 @@
                    placeholder="Ort"/>
           </div>
         </div>
-        <div class="row p-fluid">
+        <div class="row p-fluid" *ngIf="isPublicAddress">
           <div class="p-field col-xs-12 col-md-12">
             <label for="address-line-1-input">Zusätzliche Adresszeilen (optional)</label>
             <input pInputText

@@ -15,26 +15,30 @@ import {ConfirmDialogModule} from 'primeng/confirmdialog';
 import { OptionsEditFormComponent } from './options-edit-form/options-edit-form.component';
 import {RouterModule} from '@angular/router';
 import {MenubarModule} from 'primeng/menubar';
+import {CheckboxModule} from 'primeng/checkbox';
+import {InputSwitchModule} from 'primeng/inputswitch';
 
 
 @NgModule({
   declarations: [AssociationFormComponent, AssociationEditFormComponent, OptionsEditFormComponent],
-    imports: [
-        CommonModule,
-        FormsModule,
-        ReactiveFormsModule,
-        InputTextModule,
-        DropdownModule,
-        InputTextareaModule,
-        ButtonModule,
-        SharedModule,
-        BlockUIModule,
-        ProgressSpinnerModule,
-        SidebarModule,
-        ConfirmDialogModule,
-        RouterModule,
-        MenubarModule
-    ]
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    InputTextModule,
+    DropdownModule,
+    InputTextareaModule,
+    ButtonModule,
+    SharedModule,
+    BlockUIModule,
+    ProgressSpinnerModule,
+    SidebarModule,
+    ConfirmDialogModule,
+    RouterModule,
+    MenubarModule,
+    CheckboxModule,
+    InputSwitchModule
+  ]
 })
 export class AssociationFormModule {
 

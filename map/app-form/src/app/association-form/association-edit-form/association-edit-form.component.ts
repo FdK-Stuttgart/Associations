@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges} from '@angular/core';
+import {Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild} from '@angular/core';
 import {SocialMediaPlatform, Association} from '../../model/association';
 import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators} from '@angular/forms';
 import {DropdownOption} from '../../model/dropdown-option';
@@ -7,7 +7,8 @@ import {MysqlPersistService} from '../../services/mysql-persist.service';
 import {ConfirmationService, MessageService} from 'primeng/api';
 import {MyHttpResponse} from '../../model/http-response';
 import {MysqlQueryService} from '../../services/mysql-query.service';
-import {BehaviorSubject, Observable, of, Subscription} from 'rxjs';
+import {BehaviorSubject, Subscription} from 'rxjs';
+import {InputSwitch} from 'primeng/inputswitch';
 
 function contactFilledValidator(): ValidatorFn {
   return (control: FormGroup): { [key: string]: boolean } | null => {
@@ -90,6 +91,8 @@ export class AssociationEditFormComponent implements OnChanges, OnDestroy {
   districtOptions: DropdownOption[] = [];
   activitiesOptions: DropdownOption[] = [];
 
+  isPublicAddress = false;
+
   editFormChanges$: BehaviorSubject<string> = new BehaviorSubject<string>(null);
 
   @Output() blockUi: EventEmitter<{ block: boolean, message?: string }> = new EventEmitter<{ block: boolean, message?: string }>();
@@ -105,6 +108,8 @@ export class AssociationEditFormComponent implements OnChanges, OnDestroy {
     });
 
   private editFormStatusChangesSub: Subscription | undefined;
+
+  @ViewChild(InputSwitch) publicAddressSwitch?: InputSwitch;
 
   get hasFormValueChanged(): boolean {
     return JSON.stringify(this.associationForm?.value) !== JSON.stringify(this.initialFormState);
@@ -198,7 +203,7 @@ export class AssociationEditFormComponent implements OnChanges, OnDestroy {
       street: new FormControl(this.association?.street || ''),
       postcode: new FormControl(this.association?.postcode || ''),
       city: new FormControl(this.association?.city || ''),
-      country: new FormControl(this.association?.country || 'Deutschland'),
+      country: new FormControl(this.association?.country || ''),
       contacts: new FormArray([]),
       images: new FormArray([]),
       links: new FormArray([]),
@@ -265,9 +270,17 @@ export class AssociationEditFormComponent implements OnChanges, OnDestroy {
     }
 
     // update the forms validation
-    setTimeout(() => {
-      this.associationForm.updateValueAndValidity();
-    });
+    this.associationForm.updateValueAndValidity();
+
+    // disable address field if no public address
+    this.isPublicAddress = !(
+      this.associationForm.value.street === ''
+      && this.associationForm.value.postcode === ''
+      && this.associationForm.value.city === ''
+      && this.associationForm.value.addressLine2 === ''
+      && this.associationForm.value.addressLine1.toLowerCase() === 'Keine öffentliche Anschrift'.toLowerCase()
+    );
+    this.requestChangePublicAddress(this.isPublicAddress);
 
     this.initialFormState = this.associationForm?.value;
 
@@ -276,6 +289,86 @@ export class AssociationEditFormComponent implements OnChanges, OnDestroy {
     });
 
     this.emitBlockUi(false);
+  }
+
+  requestChangePublicAddress(val: boolean): void {
+    const prevValue = this.isPublicAddress;
+
+    const someAddressInputFilled = !(
+      this.associationForm.value.street === ''
+      && this.associationForm.value.postcode === ''
+      && this.associationForm.value.city === ''
+      && this.associationForm.value.addressLine2 === ''
+      && (this.associationForm.value.addressLine1 === ''
+        || this.associationForm.value.addressLine1.toLowerCase() === 'Keine öffentliche Anschrift'.toLowerCase()
+      )
+    );
+
+    if (!someAddressInputFilled || !!val) {
+      this.changePublicAddress(val);
+      this.writePublicAddressSwitchValue(this.isPublicAddress);
+      return;
+    }
+
+    this.confirmationService.confirm({
+      header: 'Adresse löschen?',
+      message: 'Bereits eingegebene Adressdaten werden aus dem Formular gelöscht<br>und müssen gegebenenfalls neu eingegeben werden.',
+      acceptLabel: 'OK',
+      rejectLabel: 'Abbrechen',
+      closeOnEscape: true,
+      accept: async () => {
+        this.changePublicAddress(val);
+        if (this.publicAddressSwitch) {
+          this.writePublicAddressSwitchValue(this.isPublicAddress);
+        }
+      },
+      reject: () => {
+        this.isPublicAddress = prevValue;
+        if (this.publicAddressSwitch) {
+          this.writePublicAddressSwitchValue(this.isPublicAddress);
+        }
+      }
+    });
+  }
+
+  writePublicAddressSwitchValue(val: boolean): void {
+    setTimeout(() => {
+      if (this.publicAddressSwitch) {
+        this.publicAddressSwitch.writeValue(val);
+      }
+    });
+  }
+
+  changePublicAddress(val: boolean): void {
+    this.isPublicAddress = val;
+    if (!val) {
+      this.associationForm.controls.street.setValue('');
+      this.associationForm.controls.street.disable();
+      this.associationForm.controls.postcode.setValue('');
+      this.associationForm.controls.postcode.disable();
+      this.associationForm.controls.city.setValue('');
+      this.associationForm.controls.city.disable();
+      this.associationForm.controls.country.setValue('');
+      this.associationForm.controls.country.disable();
+      this.associationForm.controls.addressLine1.setValue('Keine öffentliche Anschrift');
+      this.associationForm.controls.addressLine1.disable();
+      this.associationForm.controls.addressLine2.setValue('');
+      this.associationForm.controls.addressLine2.disable();
+      this.associationForm.controls.addressLine3.setValue('');
+      this.associationForm.controls.addressLine3.disable();
+    } else {
+      this.associationForm.controls.street.enable();
+      this.associationForm.controls.postcode.enable();
+      this.associationForm.controls.city.enable();
+      this.associationForm.controls.country.enable();
+      this.associationForm.controls.addressLine1.enable();
+      this.associationForm.controls.addressLine2.enable();
+      this.associationForm.controls.addressLine3.enable();
+      if (this.associationForm.value.addressLine1.toLowerCase() === ('Keine öffentliche Anschrift'.toLowerCase())) {
+        this.associationForm.controls.addressLine1.setValue('');
+      }
+    }
+    this.associationForm.updateValueAndValidity();
   }
 
   /**
@@ -427,6 +520,16 @@ export class AssociationEditFormComponent implements OnChanges, OnDestroy {
    */
   async submit(): Promise<void> {
     this.emitBlockUi(true, 'Verein wird gespeichert...');
+
+    this.associationForm.controls.street.enable();
+    this.associationForm.controls.postcode.enable();
+    this.associationForm.controls.city.enable();
+    this.associationForm.controls.country.enable();
+    this.associationForm.controls.addressLine1.enable();
+    this.associationForm.controls.addressLine2.enable();
+    this.associationForm.controls.addressLine3.enable();
+    this.associationForm.updateValueAndValidity();
+
     await this.mySqlPersistService.createOrUpdateAssociation(this.associationForm.value).toPromise()
       .then(() => {
         this.emitBlockUi(false);
