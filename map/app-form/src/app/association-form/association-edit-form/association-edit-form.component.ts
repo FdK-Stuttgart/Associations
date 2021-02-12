@@ -1,7 +1,7 @@
 import {Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild} from '@angular/core';
 import {SocialMediaPlatform, Association} from '../../model/association';
 import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators} from '@angular/forms';
-import {DropdownOption} from '../../model/dropdown-option';
+import {DropdownOption, getSubOptions} from '../../model/dropdown-option';
 import {v4 as uuidv4} from 'uuid';
 import {MysqlPersistService} from '../../services/mysql-persist.service';
 import {ConfirmationService, MessageService} from 'primeng/api';
@@ -19,7 +19,7 @@ function contactFilledValidator(): ValidatorFn {
   };
 }
 
-const urlPattern = '(https?://)([\\da-z.-]+)\\.([a-z.]{2,6})[/\\w .-]*/?';
+const urlPattern = /^(?:(?:(?:https?|ftp):)?\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:[/?#]\S*)?$/i;
 
 function getEmptyFormArrayElement(type: 'contact' | 'link' | 'socialMedia' | 'image', associationId: string): FormGroup {
   switch (type) {
@@ -44,7 +44,7 @@ function getEmptyFormArrayElement(type: 'contact' | 'link' | 'socialMedia' | 'im
         id: new FormControl(uuidv4()),
         url: new FormControl('http://', [Validators.required, Validators.pattern(urlPattern)]),
         linkText: new FormControl(''),
-        platform: new FormControl('Other'),
+        platform: new FormControl('Facebook'),
         associationId: new FormControl(associationId)
       });
     case 'image':
@@ -103,7 +103,7 @@ export class AssociationEditFormComponent implements OnChanges, OnDestroy {
     .map((s: string) => {
       return {
         value: s,
-        label: s
+        label: s === 'Other' ? 'Andere Plattform' : s
       };
     });
 
@@ -131,6 +131,10 @@ export class AssociationEditFormComponent implements OnChanges, OnDestroy {
       || changes.isNew) {
       await this.initForm();
     }
+  }
+
+  getSubOptions(optionList: any[], selectedOptions: any[]) {
+    return getSubOptions(optionList, selectedOptions);
   }
 
   /**
@@ -252,7 +256,7 @@ export class AssociationEditFormComponent implements OnChanges, OnDestroy {
           id: new FormControl(link.id || uuidv4()),
           url: new FormControl(link.url || 'http://', [Validators.required, Validators.pattern(urlPattern)]),
           linkText: new FormControl(link.linkText),
-          platform: new FormControl(link.platform || 'Other')
+          platform: new FormControl(link.platform || 'Facebook')
         }));
       });
     }

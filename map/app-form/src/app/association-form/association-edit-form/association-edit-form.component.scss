@@ -39,20 +39,62 @@ app-grouped-multi-select {
   }
 }
 
-.form-array-remove, .delete-button {
-  p-button ::ng-deep button.p-button, p-button.reset ::ng-deep button.p-button {
-    background-color: #F74600 !important;
-    border-color: #F74600 !important;
-
-    &:hover, &:active {
-      background-color: darken(#F74600, 5%) !important;
-      border-color: darken(#F74600, 5%) !important;
-    }
-  }
-}
-
 a.no-decoration {
   &:hover, &:active, &:focus {
     text-decoration: none !important;
+  }
+}
+
+.popup-preview {
+  margin-top: 16px;
+  width: 100%;
+  min-height: 400px;
+  padding: 40px min(40px, 5%);
+  background-image: url('/../../../assets/blur-map.jpg');
+  background-repeat: no-repeat;
+  background-size: cover;
+
+  .popup {
+    margin: auto;
+    width: 80%;
+    max-width: 380px;
+    min-width: 280px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+    font-size: 85%;
+    padding-top: 10px;
+    padding-bottom: 10px;
+
+    .popup-inner {
+      padding: 5%;
+      height: 100%;
+      overflow-y: scroll;
+      max-height: 75vh;
+
+      p {
+        margin-bottom: 0;
+      }
+
+      h1 {
+        font-size: 200%;
+        margin-bottom: 24px;
+      }
+
+      h2 {
+        font-size: 180%;
+        margin-top: 32px;
+        margin-bottom: 12px;
+      }
+
+      h3 {
+        font-size: 150%;
+        margin-top: 24px;
+        margin-bottom: 4px;
+      }
+
+      h2 + div > h3, h2 + h3 {
+        margin-top: -6px;
+      }
+    }
   }
 }

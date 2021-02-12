@@ -41,17 +41,17 @@ export function sortOptions(a: InternalGroupedDropdownOption, b: InternalGrouped
     );
 }
 
-export function getAllOptions(arr: any[], ids?: number[]): any[] {
+export function getAllOptions(arr: any[], ids?: any[]): any[] {
   return ids ? arr.filter((o: any) => ids.includes(o.value)) : arr;
 }
 
-export function getSubOptions(arr: any[], ids?: number[]): any[] {
+export function getSubOptions(arr: any[], ids?: any[]): any[] {
   return ids
     ? arr.filter((o: any) => !!o.category && ids.includes(o.value))
     : arr.filter((o: any) => !!o.category);
 }
 
-export function getTopOptions(arr: any[], ids?: number[]): any[] {
+export function getTopOptions(arr: any[], ids?: any[]): any[] {
   return ids
     ? arr.filter((o: any) => !o.category && ids.includes(o.value))
     : arr.filter((o: any) => !o.category);
