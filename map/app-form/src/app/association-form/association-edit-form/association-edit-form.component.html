@@ -518,38 +518,40 @@
             </div>
           </div>
 
-          <h2 *ngIf="associationForm.value.addressLine1 || associationForm.value.addressLine2
-                                                  || associationForm.value.addressLine3
-                                                  || associationForm.value.street || associationForm.value.postcode
-                                                  || associationForm.value.city || associationForm.value.country">
-            Basisdaten
-          </h2>
+          <h2>Basisdaten</h2>
 
-          <div class="association-address" *ngIf="associationForm.value.addressLine1 || associationForm.value.addressLine2
-                                                  || associationForm.value.addressLine3
-                                                  || associationForm.value.street || associationForm.value.postcode
-                                                  || associationForm.value.city || associationForm.value.country">
+          <div class="association-address" *ngIf="associationForm.getRawValue().addressLine1
+                                                  || associationForm.getRawValue().addressLine2
+                                                  || associationForm.getRawValue().addressLine3
+                                                  || associationForm.getRawValue().street
+                                                  || associationForm.getRawValue().postcode
+                                                  || associationForm.getRawValue().city
+                                                  || associationForm.getRawValue().country; else noAddressGiven">
             <h3>Adresse</h3>
 
-            <div *ngIf="associationForm.value.addressLine1">
-              <p class="address-line-1">{{associationForm.value.addressLine1}}</p>
+            <div *ngIf="associationForm.getRawValue().addressLine1">
+              <p class="address-line-1">{{associationForm.getRawValue().addressLine1}}</p>
             </div>
-            <div *ngIf="associationForm.value.addressLine2">
-              <p class="address-line-2">{{associationForm.value.addressLine2}}</p>
+            <div *ngIf="associationForm.getRawValue().addressLine2">
+              <p class="address-line-2">{{associationForm.getRawValue().addressLine2}}</p>
             </div>
-            <div *ngIf="associationForm.value.addressLine3">
-              <p class="address-line-3">{{associationForm.value.addressLine3}}</p>
+            <div *ngIf="associationForm.getRawValue().addressLine3">
+              <p class="address-line-3">{{associationForm.getRawValue().addressLine3}}</p>
             </div>
-            <div *ngIf="associationForm.value.street">
-              <p class="street">{{associationForm.value.street}}</p>
+            <div *ngIf="associationForm.getRawValue().street">
+              <p class="street">{{associationForm.getRawValue().street}}</p>
             </div>
-            <div *ngIf="associationForm.value.postcode || associationForm.value.city">
-              <p class="postcode">{{associationForm.value.postcode}} {{ associationForm.value.city }}</p>
+            <div *ngIf="associationForm.getRawValue().postcode || associationForm.getRawValue().city">
+              <p class="postcode">{{associationForm.getRawValue().postcode}} {{ associationForm.getRawValue().city }}</p>
             </div>
-            <div *ngIf="associationForm.value.country">
-              <p class="street">{{associationForm.value.country}}</p>
+            <div *ngIf="associationForm.getRawValue().country">
+              <p class="street">{{associationForm.getRawValue().country}}</p>
             </div>
           </div>
+
+          <ng-template #noAddressGiven>
+            Keine Adressdaten angegeben.
+          </ng-template>
 
           <h3 *ngIf="associationForm.value.contacts && associationForm.value.contacts.length > 0">
             Kontaktinformationen</h3>
