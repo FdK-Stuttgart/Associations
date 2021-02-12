@@ -1,6 +1,6 @@
 {
   "name": "association-map-form",
-  "version": "0.9.12",
+  "version": "0.9.13",
   "scripts": {
     "app-form:ng": "ng",
     "app-form:start": "ng serve",
