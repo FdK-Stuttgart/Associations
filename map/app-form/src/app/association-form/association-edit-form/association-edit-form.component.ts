@@ -92,6 +92,7 @@ export class AssociationEditFormComponent implements OnChanges, OnDestroy {
   activitiesOptions: DropdownOption[] = [];
 
   isPublicAddress = false;
+  showPreview = false;
 
   editFormChanges$: BehaviorSubject<string> = new BehaviorSubject<string>(null);
 

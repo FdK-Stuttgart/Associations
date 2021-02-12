@@ -39,8 +39,8 @@
                    type="text"
                    formControlName="shortName"
                    placeholder="Kurzbezeichnung (optional)"/>
-            <p class="small">Bitte geben Sie eine Abkürzung oder Kurzbezeichnung Ihres Vereinsnamens an.
-              Diese wird in der Auflistung der Vereine verwendet, wenn der vollständige Name des Vereins sehr lang ist
+            <p style="margin-top: 6px;">Die Kurzbezeichnung wird in unserer Kartenapplikation
+              in der Liste aller Vereine verwendet, wenn der vollständige Name des Vereins sehr lang ist
               und deshalb abgeschnitten werden würde.
             </p>
             <p class="invalid-label"
@@ -107,7 +107,7 @@
                    formControlName="addressLine2"
                    placeholder="Zusätzliche Adresszeile"
                    style="margin-top: 12px;"/>
-            <p style="font-size: 85%; margin-bottom: 12px;">
+            <p style="margin-top: 6px; margin-bottom: 12px;">
               Zusätzliche Adresszeilen werden im Popup oberhalb der Adresse (Straße, PLZ, Ort, ...) angezeigt.
             </p>
           </div>
@@ -119,6 +119,10 @@
         </div>
         <div class="row p-fluid"
              [ngClass]="{ 'invalid-block': !associationForm.controls.lat.valid || !associationForm.controls.lng.valid }">
+          <div class="col-12" *ngIf="!isPublicAddress">
+            <p>Auch wenn Sie keine Adresse angeben möchten, benötigen wir einen Standort, um Ihren Verein auf unserer
+              Karte zu platzieren.</p>
+          </div>
           <div class="p-field col-xs-12 col-md-6">
             <label for="lat-input">Breitengrad*</label>
             <input pInputText
@@ -152,8 +156,8 @@
             </p>
           </div>
           <div class="col-12">
-            <h6>Standort auf Karte wählen</h6>
-            <p style="font-size: 85%; margin-bottom: 12px;">Klicken Sie auf die Karte, um die Marker-Position zu
+            <h6 style="margin-top: 32px;">Standort auf Karte wählen</h6>
+            <p style="margin-bottom: 12px;">Klicken Sie auf die Karte, um die Marker-Position zu
               verändern oder suchen Sie nach einer Adresse.</p>
             <app-simple-map-with-single-marker [lat]="getCoordinate(associationForm.value.lat, 90)"
                                                [lng]="getCoordinate(associationForm.value.lng, 180)"
@@ -503,7 +507,16 @@
   </form>
 
   <h4>Vorschau</h4>
-  <div class="popup-preview">
+
+  <div style="width: 100%; text-align: center;">
+    <p-button (onClick)="showPreview = !showPreview">
+      <i [class]="showPreview ? 'pi pi-eye-slash' : 'pi pi-eye'">
+      </i>&nbsp;&nbsp;Vorschau&nbsp;<span *ngIf="showPreview">verstecken</span>
+      <span *ngIf="!showPreview">anzeigen</span>
+    </p-button>
+  </div>
+
+  <div class="popup-preview" *ngIf="showPreview">
     <div class="popup">
       <div class="popup-inner">
         <div class="osm-association-inner-container">
@@ -542,7 +555,8 @@
               <p class="street">{{associationForm.getRawValue().street}}</p>
             </div>
             <div *ngIf="associationForm.getRawValue().postcode || associationForm.getRawValue().city">
-              <p class="postcode">{{associationForm.getRawValue().postcode}} {{ associationForm.getRawValue().city }}</p>
+              <p
+                class="postcode">{{associationForm.getRawValue().postcode}} {{ associationForm.getRawValue().city }}</p>
             </div>
             <div *ngIf="associationForm.getRawValue().country">
               <p class="street">{{associationForm.getRawValue().country}}</p>
