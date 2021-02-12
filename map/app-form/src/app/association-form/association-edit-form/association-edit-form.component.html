@@ -518,7 +518,12 @@
             </div>
           </div>
 
-          <h2>Basisdaten</h2>
+          <h2 *ngIf="associationForm.value.addressLine1 || associationForm.value.addressLine2
+                                                  || associationForm.value.addressLine3
+                                                  || associationForm.value.street || associationForm.value.postcode
+                                                  || associationForm.value.city || associationForm.value.country">
+            Basisdaten
+          </h2>
 
           <div class="association-address" *ngIf="associationForm.value.addressLine1 || associationForm.value.addressLine2
                                                   || associationForm.value.addressLine3
@@ -546,7 +551,8 @@
             </div>
           </div>
 
-          <h3>Kontaktinformationen</h3>
+          <h3 *ngIf="associationForm.value.contacts && associationForm.value.contacts.length > 0">
+            Kontaktinformationen</h3>
 
           <div *ngIf="associationForm.value.contacts && associationForm.value.contacts.length > 0"
                class="association-contacts">
