@@ -71,10 +71,12 @@
                   </span>
                 </div>
                 <div class="col-6 col-md-1 align-form-row-action-button">
-                  <p-button
-                    (onClick)="addOption((i+1), getFormArrayFormGroup('options', i)?.controls?.category?.value)">
-                    <i class="pi pi-plus"></i>
-                  </p-button>
+                  <span class="add-button">
+                    <p-button
+                      (onClick)="addOption((i+1), getFormArrayFormGroup('options', i)?.controls?.category?.value)">
+                      <i class="pi pi-plus"></i>
+                    </p-button>
+                  </span>
                 </div>
               </div>
             </div>

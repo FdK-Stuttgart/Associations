@@ -335,7 +335,9 @@ fieldset, div.fieldset {
   margin-top: 13px;
   text-align: center;
   width: 100%;
+}
 
+.form-array-remove, .form-array-add, .delete-button, .add-button {
   .p-button {
     width: 35px !important;
     padding-left: 9px;
@@ -452,13 +454,21 @@ fieldset, div.fieldset {
   .align-form-row-action-button {
     padding-top: 0 !important;
     padding-bottom: 20px;
-    border-bottom: 1px solid rgb(206, 212, 218);
-    margin-bottom: 20px;
   }
 
-  .align-section-action-button, .align-form-row-action-button {
+  .form-array-remove {
     padding-left: 15px !important;
     padding-right: 15px !important;
+  }
+
+  .form-array-remove, .form-array-add, .delete-button, .add-button {
+    .p-button {
+      width: 100% !important;
+
+      i, i:before {
+        margin: auto !important;
+      }
+    }
   }
 }
 
