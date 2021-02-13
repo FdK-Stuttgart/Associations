@@ -12,7 +12,7 @@ if (!$value) {
 }
 
 // Delete.
-$sql = "DELETE FROM districts WHERE value ='{$value}' LIMIT 1";
+$sql = "UPDATE districts SET current = 0 WHERE value ='{$value}' LIMIT 1";
 
 if (mysqli_query($con, $sql)) {
     http_response_code(204);

@@ -60,7 +60,7 @@ export class AssociationFormComponent implements OnInit, OnDestroy {
         }
       },
       {
-        label: 'Löschen',
+        label: 'Verein löschen',
         icon: 'pi pi-trash',
         command: async () => {
           await this.deleteAssociation();
@@ -74,7 +74,7 @@ export class AssociationFormComponent implements OnInit, OnDestroy {
         }
       },
       {
-        label: 'Daten neu abrufen',
+        label: 'Vereine neu abrufen',
         icon: 'pi pi-spinner',
         command: async () => {
           await this.reload({id: this.selectedAssociation?.id, showDialog: true});

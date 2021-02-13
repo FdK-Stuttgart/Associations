@@ -577,7 +577,7 @@ export class AssociationEditFormComponent implements OnChanges, OnDestroy {
               summary: 'Verein wurde gelöscht.',
               key: 'editFormToast'
             });
-            this.reload.emit(undefined);
+            this.reload.emit({ id: undefined, showDialog: false });
           })
           .catch((reason) => {
             this.emitBlockUi(false);

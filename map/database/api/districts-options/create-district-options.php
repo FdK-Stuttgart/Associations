@@ -19,11 +19,11 @@ if (isset($postdata) && !empty($postdata)) {
     $request = json_decode($postdata);
 
     // Update.
-    $sql = "DELETE FROM districts; 
+    $sql = "UPDATE district SET current = 0; 
 
             ";
 
-    $sql .= "INSERT INTO districts (value, label, category) VALUES";
+    $sql .= "REPLACE INTO districts (value, label, category, current) VALUES";
 
     foreach ($request as $i => $item) {
 
@@ -54,13 +54,13 @@ if (isset($postdata) && !empty($postdata)) {
             $label = mysqli_real_escape_string($con, trim($label));
             $category = mysqli_real_escape_string($con, trim($category));
             if ($category == '' || $category == null) {
-                $sql .= "('$value', '$label', null, $orderIndex),";
+                $sql .= "('$value', '$label', null, $orderIndex, 1),";
             } else {
-                $sql .= "('$value', '$label', '$category', $orderIndex),";
+                $sql .= "('$value', '$label', '$category', $orderIndex, 1),";
             }
             continue;
         }
-        $sql .= "('$value', '$label', null),";
+        $sql .= "('$value', '$label', null, 1),";
     }
 
     if (endsWith($sql, ',')) {

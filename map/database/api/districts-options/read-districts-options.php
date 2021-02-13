@@ -14,6 +14,7 @@ $sql = "SELECT 	districts.value AS value,
         FROM districts 
             LEFT JOIN districts AS upper 
                 ON districts.category = upper.value
+        WHERE districts.current = 1        
         ORDER BY orderIndex, categoryLabel, label";
 
 if ($result = mysqli_query($con, $sql)) {

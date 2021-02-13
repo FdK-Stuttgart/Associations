@@ -12,7 +12,7 @@ if (!$value) {
 }
 
 // Delete.
-$sql = "DELETE FROM activities WHERE value ='{$value}' LIMIT 1";
+$sql = "UPDATE activities SET current = 0 WHERE value ='{$value}' LIMIT 1";
 
 if (mysqli_query($con, $sql)) {
     http_response_code(204);

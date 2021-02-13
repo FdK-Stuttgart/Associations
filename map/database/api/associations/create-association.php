@@ -62,9 +62,10 @@ if (isset($postdata) && !empty($postdata)) {
                                        activities_format = '$activities_format',
                                        activities_text = '$activities_text',
                                        districtList = '$districtList',
-                                       activityList = '$activityList';";
+                                       activityList = '$activityList',
+                                       current = 1;";
 
-    $sql .= "\n\nDELETE FROM contacts WHERE associationId = '$id';";
+    $sql .= "\n\nUPDATE contacts SET current = 0 WHERE associationId = '$id';";
 
     if ($contacts != null) {
         $index = 0;
@@ -76,19 +77,20 @@ if (isset($postdata) && !empty($postdata)) {
 			$fax = mysqli_real_escape_string($con, trim($contact->fax));
             $associationId = $id;
 
-            $sql .= "\n\nINSERT INTO contacts SET id = '$contactId',
+            $sql .= "\n\nREPLACE INTO contacts SET id = '$contactId',
                                  name = '$contactName',
                                  phone = '$phone',
                                  mail = '$mail',
 								 fax = '$fax',
                                  associationId = '$id',
-                                 orderIndex = $index;";
+                                 orderIndex = $index,
+                                 current = 1;";
 
             $index++;
         }
     }
 
-    $sql .= "\n\nDELETE FROM images WHERE associationId = '$id';";
+    $sql .= "\n\nUPDATE contacts SET current = 0 WHERE associationId = '$id';";
 
     if ($images != null) {
         $index = 0;
@@ -98,17 +100,18 @@ if (isset($postdata) && !empty($postdata)) {
             $altText = mysqli_real_escape_string($con, trim($image->altText));
             $associationId = $id;
 
-            $sql .= "\n\nINSERT INTO images SET id = '$imageId',
+            $sql .= "\n\nREPLACE INTO images SET id = '$imageId',
                                         url = '$url',
                                         altText = '$altText',
                                         associationId = '$id',
-                                        orderIndex = $index;";
+                                        orderIndex = $index,
+                                        current = 1;";
 
             $index++;
         }
     }
 
-    $sql .= "\n\nDELETE FROM links WHERE associationId = '$id';";
+    $sql .= "\n\nUPDATE links SET current = 0 WHERE associationId = '$id';";
 
     if ($links != null) {
         $index = 0;
@@ -118,17 +121,18 @@ if (isset($postdata) && !empty($postdata)) {
             $linkText = mysqli_real_escape_string($con, trim($link->linkText));
             $associationId = $id;
 
-            $sql .= "\n\nINSERT INTO links SET id = '$linkId',
+            $sql .= "\n\nREPLACE INTO links SET id = '$linkId',
                                        url = '$url',
                                        linkText = '$linkText',
                                        associationId = '$id',
-                                       orderIndex = $index;";
+                                       orderIndex = $index,
+                                       current = 1;";
 
             $index++;
         }
     }
 
-    $sql .= "\n\nDELETE FROM socialmedia WHERE associationId = '$id';";
+    $sql .= "\n\nUPDATE socialmedia SET current = 0 WHERE associationId = '$id';";
 
     if ($socialMedia != null) {
         $index = 0;
@@ -139,12 +143,13 @@ if (isset($postdata) && !empty($postdata)) {
             $linkText = mysqli_real_escape_string($con, trim($socialMediaEntry->linkText));
             $associationId = $id;
 
-            $sql .= "\n\nINSERT INTO socialmedia SET id = '$socialMediaId',
+            $sql .= "\n\nREPLACE INTO socialmedia SET id = '$socialMediaId',
                                               platform = '$platform',
                                               url = '$url',
                                               linkText = '$linkText',
                                               associationId = '$id',
-                                              orderIndex = $index;";
+                                              orderIndex = $index,
+                                              current = 1;";
 
             $index++;
         }

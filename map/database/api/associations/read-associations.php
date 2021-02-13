@@ -11,14 +11,14 @@ function cmp($a, $b)
 
 $associations = [];
 
-$sql = "SELECT 
-            associations.id AS associationId, 
-            images.id AS imageId, 
-            links.id AS linkId, 
-            socialmedia.id AS socialMediaId, 
+$sql = "SELECT
+            associations.id AS associationId,
+            images.id AS imageId,
+            links.id AS linkId,
+            socialmedia.id AS socialMediaId,
             contacts.id AS contactId,
             associations.name AS name,
-            shortName,            
+            shortName,
             lat,
             lng,
             addressLine1,
@@ -36,8 +36,8 @@ $sql = "SELECT
             districtList,
             contacts.name AS contactName,
             phone,
-            mail,      
-			fax,
+            mail,
+            fax,
             contacts.orderIndex AS contactOrderIndex,
             links.url AS linkUrl,
             links.linkText AS linkLinkText,
@@ -48,13 +48,53 @@ $sql = "SELECT
             socialmedia.orderIndex AS socialMediaOrderIndex,
             images.url AS imageUrl,
             images.altText AS imageAltText,
-            images.orderIndex AS imageOrderIndex   
-        FROM `associations` 
-        LEFT JOIN `images` ON `images`.`associationId` = `associations`.`id` 
-        LEFT JOIN `links` ON `links`.`associationId` = `associations`.`id` 
-        LEFT JOIN `socialmedia` ON `socialmedia`.`associationId` = `associations`.`id` 
-        LEFT JOIN `contacts` ON `contacts`.`associationId` = `associations`.`id`
-        ORDER BY associationId";
+            images.orderIndex AS imageOrderIndex
+        FROM
+            `associations`
+        LEFT JOIN(
+            SELECT
+                *
+            FROM
+                `images`
+            WHERE
+                images.current = 1
+        ) AS images
+        ON
+            `images`.`associationId` = `associations`.`id`
+        LEFT JOIN(
+            SELECT
+                *
+            FROM
+                `links`
+            WHERE
+                links.current = 1
+        ) AS links
+        ON
+            `links`.`associationId` = `associations`.`id`
+        LEFT JOIN(
+            SELECT
+                *
+            FROM
+                `socialmedia`
+            WHERE
+                socialmedia.current = 1
+        ) AS socialmedia
+        ON
+            `socialmedia`.`associationId` = `associations`.`id`
+        LEFT JOIN(
+            SELECT
+                *
+            FROM
+                `contacts`
+            WHERE
+                contacts.current = 1
+        ) AS contacts
+        ON
+            `contacts`.`associationId` = `associations`.`id`
+        WHERE
+            associations.current = 1
+        ORDER BY
+            associationId";
 
 $contained = [];
 

@@ -10,10 +10,11 @@ $sql = "SELECT 	activities.value AS value,
                 activities.label AS label, 
                 activities.category AS category, 
                 upper.label AS categoryLabel,
-                activities.orderIndex AS orderIndex
+                activities.orderIndex AS orderIndex         
         FROM activities 
             LEFT JOIN activities AS upper 
                 ON activities.category = upper.value
+        WHERE activities.current = 1
         ORDER BY orderIndex, categoryLabel, label";
 
 if ($result = mysqli_query($con, $sql)) {
