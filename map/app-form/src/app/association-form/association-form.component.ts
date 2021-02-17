@@ -64,7 +64,8 @@ export class AssociationFormComponent implements OnInit, OnDestroy {
         icon: 'pi pi-trash',
         command: async () => {
           await this.deleteAssociation();
-        }
+        },
+        disabled: this.isNew
       },
       {
         label: 'Eingaben zurücksetzen',
@@ -79,11 +80,6 @@ export class AssociationFormComponent implements OnInit, OnDestroy {
         command: async () => {
           await this.reload({id: this.selectedAssociation?.id, showDialog: true});
         }
-      },
-      {
-        label: 'Vereine bearbeiten',
-        icon: 'pi pi-home',
-        disabled: true
       },
       {
         label: 'Schlagwörter bearbeiten',
@@ -198,7 +194,7 @@ export class AssociationFormComponent implements OnInit, OnDestroy {
       }
 
       this.mainMenuItems = this.mainMenuItems.map((item: MenuItem) => {
-        if (item.label === 'Neuen Verein erstellen') {
+        if (item.label === 'Neuen Verein erstellen' || item.label === 'Verein löschen') {
           return {
             ...item,
             disabled: this.isNew
