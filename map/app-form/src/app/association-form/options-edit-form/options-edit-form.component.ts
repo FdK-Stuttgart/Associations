@@ -36,6 +36,7 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
   loadingText = 'Schlagwörter werden abgerufen...';
 
   sub: Subscription | undefined;
+  loginStatusChangeSub: Subscription | undefined;
 
   sidebarExpanded = true;
 
@@ -98,6 +99,14 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
             }
           }
         ]
+      },
+      {
+        label: 'Ausloggen',
+        icon: 'pi pi-sign-out',
+        command: async () => {
+          this.loginService.removeToken();
+        },
+        disabled: !this.loginService.loginStatus
       }
     ];
   }
@@ -109,6 +118,18 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
           await this.reset(params.optionType);
         }
       }
+    });
+
+    this.loginStatusChangeSub = this.loginService.loginStatusChange$.subscribe((status: boolean) => {
+      this.mainMenuItems = this.mainMenuItems.map((item: MenuItem) => {
+        if (item.label === 'Ausloggen') {
+          return {
+            ...item,
+            disabled: !status
+          };
+        }
+        return item;
+      });
     });
 
     if (this.optionType) {
@@ -726,5 +747,6 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
     this.formChangeSub?.unsubscribe();
+    this.loginStatusChangeSub?.unsubscribe();
   }
 }

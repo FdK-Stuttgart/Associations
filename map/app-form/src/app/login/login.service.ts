@@ -1,16 +1,21 @@
 import {Injectable} from '@angular/core';
 import {WordpressAuthService} from '../services/wordpress-auth.service';
+import {BehaviorSubject} from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class LoginService {
+  loginStatusChange$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+
   constructor(private wordpressAuthService: WordpressAuthService) {
     setInterval(async () => {
       if (!!this.token) {
-        await this.checkLoginStatus();
+        const res = await this.checkLoginStatus();
+        this.loginStatusChange$.next(res);
       }
-    }, 60000);
+    }, 30000);
+    this.loginStatusChange$.next(this.loginStatus);
   }
 
   get loginStatus(): boolean {
@@ -30,9 +35,11 @@ export class LoginService {
 
     if (loginResult && loginResult.success && loginResult.data?.token) {
       this.token = loginResult.data.token;
-      return this.checkLoginStatus();
+      const loginStatus = await this.checkLoginStatus();
+      this.loginStatusChange$.next(loginStatus);
+      return loginStatus;
     } else {
-      this.token = undefined;
+      this.removeToken();
       return false;
     }
   }
@@ -40,8 +47,13 @@ export class LoginService {
   async checkLoginStatus(): Promise<boolean> {
     const validatingResult = await this.wordpressAuthService.getValidateAuthToken(this.token);
     if (!validatingResult?.success) {
-      this.token = undefined;
+      this.removeToken();
     }
     return !!validatingResult?.success;
+  }
+
+  removeToken(): void {
+    this.token = '';
+    this.loginStatusChange$.next(false);
   }
 }

@@ -6,7 +6,8 @@
 
   <div class="row p-fluid">
     <div class="p-field col-xs-12 col-md-12 invalid-block" style="padding-top: 8px; padding-bottom: 8px;">
-      Alle nachfolgend eingetragenen Daten werden auf der frei zugänglichen Online-Karte von House of Resources veröffentlicht.
+      Alle nachfolgend eingetragenen Daten werden auf der frei zugänglichen Online-Karte von House of Resources
+      veröffentlicht.
       Geben Sie also nur Daten an, die für die Öffentlichkeit bestimmt sind.
     </div>
   </div>
@@ -510,7 +511,7 @@
 
   <h4>Vorschau</h4>
 
-  <div style="width: 100%; text-align: center;">
+  <div style="width: 100%; text-align: center; margin-top: 16px;">
     <p-button (onClick)="showPreview = !showPreview">
       <i [class]="showPreview ? 'pi pi-eye-slash' : 'pi pi-eye'">
       </i>&nbsp;&nbsp;Vorschau&nbsp;<span *ngIf="showPreview">verstecken</span>
@@ -608,7 +609,8 @@
             <p class="activities">{{ associationForm.value.activities.text }}</p>
           </div>
 
-          <div class="association-links" *ngIf="associationForm.value.links && associationForm.value.links.length > 0">
+          <div class="association-links"
+               *ngIf="associationForm.value.links && associationForm.value.links.length > 0">
             <h3>Links</h3>
             <ul>
               <div class="association-link" *ngFor="let link of associationForm.value.links">

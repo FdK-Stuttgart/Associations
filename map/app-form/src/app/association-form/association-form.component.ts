@@ -6,6 +6,7 @@ import {MysqlQueryService} from '../services/mysql-query.service';
 import {AssociationEditFormComponent} from './association-edit-form/association-edit-form.component';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Subscription} from 'rxjs';
+import {LoginService} from '../login/login.service';
 
 @Component({
   selector: 'app-association-form',
@@ -35,6 +36,7 @@ export class AssociationFormComponent implements OnInit, OnDestroy {
   sub: Subscription | undefined;
 
   editFormChangeSub: Subscription | undefined;
+  loginStatusChangeSub: Subscription | undefined;
 
   @ViewChild('editForm', {static: true}) editForm!: AssociationEditFormComponent;
 
@@ -42,7 +44,8 @@ export class AssociationFormComponent implements OnInit, OnDestroy {
               private mySqlQueryService: MysqlQueryService,
               private confirmationService: ConfirmationService,
               private router: Router,
-              private route: ActivatedRoute) {
+              private route: ActivatedRoute,
+              private loginService: LoginService) {
     this.mainMenuItems = [
       {
         label: 'Neuen Verein erstellen',
@@ -98,6 +101,14 @@ export class AssociationFormComponent implements OnInit, OnDestroy {
             }
           }
         ]
+      },
+      {
+        label: 'Ausloggen',
+        icon: 'pi pi-sign-out',
+        command: async () => {
+          this.loginService.removeToken();
+        },
+        disabled: !this.loginService.loginStatus
       }
     ];
   }
@@ -108,6 +119,18 @@ export class AssociationFormComponent implements OnInit, OnDestroy {
 
   async init(): Promise<void> {
     this.blockUi({block: true, message: 'Vereine werden abgerufen...'});
+
+    this.loginStatusChangeSub = this.loginService.loginStatusChange$.subscribe((status: boolean) => {
+      this.mainMenuItems = this.mainMenuItems.map((item: MenuItem) => {
+        if (item.label === 'Ausloggen') {
+          return {
+            ...item,
+            disabled: !status
+          };
+        }
+        return item;
+      });
+    });
 
     const httpResponse: MyHttpResponse<Association[]> = (await this.mySqlQueryService.getAssociations());
     this.associations = httpResponse?.data?.sort(
@@ -158,7 +181,7 @@ export class AssociationFormComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * queries all associations, reselects the edited association and scrolls to the top of the page
+   * queries all associations and reselects the edited association
    */
   async reload(event: { id: string | undefined, showDialog: boolean | undefined }): Promise<void> {
     await this.init();
@@ -169,7 +192,6 @@ export class AssociationFormComponent implements OnInit, OnDestroy {
       } else {
         this.selectAssociation(undefined, true, false);
       }
-      window.scroll(0, 0);
     }
   }
 
@@ -294,6 +316,7 @@ export class AssociationFormComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
-    this.editFormChangeSub.unsubscribe();
+    this.editFormChangeSub?.unsubscribe();
+    this.loginStatusChangeSub?.unsubscribe();
   }
 }

@@ -620,6 +620,10 @@ fieldset, div.fieldset {
   align-items: center;
   margin-top: 4px;
   margin-bottom: 4px;
+
+  a {
+    padding-top: 3px;
+  }
 }
 
 .association-links ul {

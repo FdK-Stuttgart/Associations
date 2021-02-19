@@ -48,6 +48,10 @@ a.no-decoration {
 .popup-preview {
   margin-top: 16px;
   width: 100%;
+  min-width: 320px;
+  left: 50%;
+  position: absolute;
+  transform: translateX(-50%);
   min-height: 400px;
   padding: 40px min(40px, 5%);
   background-image: url('../../../assets/blur-map.jpg');
@@ -58,14 +62,16 @@ a.no-decoration {
     margin: auto;
     width: 80%;
     max-width: 380px;
-    min-width: 210px;
+    min-width: 280px;
     background-color: rgba(255, 255, 255, 0.8);
     border-radius: 10px;
     font-size: 85%;
+    padding-top: 10px;
+    padding-bottom: 10px;
 
     .popup-inner {
       height: 100%;
-      overflow-y: scroll;
+      overflow-y: auto;
       max-height: 75vh;
       padding: 20px 5%;
 
