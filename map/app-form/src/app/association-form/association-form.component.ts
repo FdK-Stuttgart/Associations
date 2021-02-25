@@ -7,6 +7,7 @@ import {AssociationEditFormComponent} from './association-edit-form/association-
 import {ActivatedRoute, Router} from '@angular/router';
 import {Subscription} from 'rxjs';
 import {LoginService} from '../login/login.service';
+import {ExportImportService} from '../services/export-import.service';
 
 @Component({
   selector: 'app-association-form',
@@ -45,7 +46,8 @@ export class AssociationFormComponent implements OnInit, OnDestroy {
               private confirmationService: ConfirmationService,
               private router: Router,
               private route: ActivatedRoute,
-              private loginService: LoginService) {
+              private loginService: LoginService,
+              private exportImportService: ExportImportService) {
     this.mainMenuItems = [
       {
         label: 'Neuen Verein erstellen',
@@ -82,6 +84,13 @@ export class AssociationFormComponent implements OnInit, OnDestroy {
         icon: 'pi pi-spinner',
         command: async () => {
           await this.reload({id: this.selectedAssociation?.id, showDialog: true});
+        }
+      },
+      {
+        label: 'Daten exportieren',
+        icon: 'pi pi-download',
+        command: async () => {
+          await this.export();
         }
       },
       {
@@ -312,6 +321,10 @@ export class AssociationFormComponent implements OnInit, OnDestroy {
     } else {
       return true;
     }
+  }
+
+  async export(): Promise<void> {
+    await this.exportImportService.exportAssociations(this.associations, this.districtOptions, this.activitiesOptions);
   }
 
   ngOnDestroy(): void {
