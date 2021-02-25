@@ -1,6 +1,6 @@
 {
   "name": "association-map",
-  "version": "0.9.16-wordpress-auth.2",
+  "version": "0.9.17",
   "scripts": {
     "app-map:ng": "ng",
     "app-map:start": "ng serve",
