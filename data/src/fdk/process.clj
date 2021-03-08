@@ -3,7 +3,7 @@
   (:require
    [clj-fuzzy.metrics :as fuzzy]
    [fdk.cities :refer :all]
-   [fdk.data :refer :all]
+   #_[fdk.data :refer :all]
    [utils.core :refer [in?]]))
 
 (def columns
@@ -113,7 +113,7 @@
    :eq-phone    (->> result
                      (filter (fn [m] (contains? m :eq-phone)))
                      (count))})
-(def rf
+#_(def rqf
   (let [
         cities-bw baden-wuerttemberg
         #_(->> big-cities
@@ -142,6 +142,6 @@
                        dedupe
                        (zipmap (range))))))
 
-(->> [result-new result-baden result-karte result-adresse
+#_(->> [result-new result-baden result-karte result-adresse
       result-combined]
      (map stats))

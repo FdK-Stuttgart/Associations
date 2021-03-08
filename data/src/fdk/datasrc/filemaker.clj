@@ -3,7 +3,7 @@
             [clojure.java.io :as io]
             [clojure.set :refer :all]
             [clojure.string :as s]
-            [fdk.data :as data]
+            #_[fdk.data :as data]
             [utils.core :refer :all]))
 
 (defn slurp-csv

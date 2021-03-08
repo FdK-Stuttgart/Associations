@@ -2,7 +2,7 @@
   (:require [clj-http.client :as client]
             [clojure.string :as s]
             [utils.core :refer :all]
-            [fdk.data :as data]
+            #_[fdk.data :as data]
             [fdk.datasrc.ods :as ods]
             [fdk.process :refer [in-bw?]]
             [hickory.core :as hick]
