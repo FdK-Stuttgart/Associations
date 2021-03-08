@@ -12,21 +12,9 @@
   {:pre [(char? row-letter)]}
   (.indexOf (djy/char-range \A \Z) (djy/upper-case row-letter)))
 
-(def document-data
-  "Reevaluate this when the ods file changed"
-  (SpreadsheetDocument/loadDocument
-   "resources/Vereinsinformationen_öffentlich_Stadtteilkarte.ods"))
-
-(defn document
-  [] document-data
-  #_([]
-   #_(document "resources/Vereinsinformationen_öffentlich_Stadtteilkarte.ods")
-   document-data)
-  #_([fname]
-   (SpreadsheetDocument/loadDocument fname)))
-
-(defn sheet0 [fname] (-> (document
-                         #_fname) (.getSheetByIndex 0)))
+(defn sheet0 [fname] (-> fname
+                         (SpreadsheetDocument/loadDocument)
+                         (.getSheetByIndex 0)))
 
 (defn sheet-rows [sheet]
   (drop 1 ;; skip column header
