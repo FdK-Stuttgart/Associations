@@ -6,18 +6,24 @@ var odsTable = o.calcReadTable()
 // }
 
 function normalizeAddress(address) {
-    var adr = o.replaceAll(address, '\n', ', ')
-    var adrMatch = adr.match(/[0-9] [A-z],/)
-    if (adrMatch) {
-        var oldHouseNr = adrMatch.toString()
-        // replace is replaceFirst
-        var newHouseNr = o.replaceAll(oldHouseNr, " ", "")
-        var newAdr = adr.replace(new RegExp(oldHouseNr, "g"), newHouseNr)
-        return newAdr
+    if (address) {
+        // console.log("address: "+address)
+        var adr = o.replaceAll(address, '\n', ', ')
+        // console.log("adr: "+adr)
+        var adrMatch = adr.match(/[0-9] [A-z],/)
+        if (adrMatch) {
+            var oldHouseNr = adrMatch.toString()
+            // replace is replaceFirst
+            var newHouseNr = o.replaceAll(oldHouseNr, " ", "")
+            var newAdr = adr.replace(new RegExp(oldHouseNr, "g"), newHouseNr)
+            return newAdr
+        }
+        else {
+            return adr
+        }
     }
-    else {
-        return adr
-    }
+    else
+        return address
 }
 
 function formatLink(line, prefix) {
@@ -86,6 +92,44 @@ function encodeLine(line) {
     }
 }
 
+function processTableRow2(requestFormat, row) {
+    const address      = row[o._address]
+    const cityDistrict = row[o._cityDistrict]
+    const name         = row[o._name]
+    const desc         = row[o._desc]
+    const goal         = row[o._goal]
+    const activity     = row[o._activity]
+    const coordinates  = row[o._coordinates]
+    const logos        = row[o._logo]
+    const normAddr     = normalizeAddress(address)
+    const descMarkdown = desc.split(/\s+/).map(encodeLine)
+
+    var logosMarkdown = ""
+    if (logos) {
+        var arrMarkdown = logos.split(/\s+/).map((s) => {
+            return "{{" + s + "}}\n"
+        })
+        logosMarkdown = arrMarkdown.concat()
+        // console.log("arrMarkdown.concat(): " + arrMarkdown.concat())
+    }
+    else {
+        console.log("logos " + logos + "; " + name)
+    }
+    console.log(
+        address+";"+
+        cityDistrict+";"+
+        name+";"+
+        desc+";"+
+        goal+";"+
+        activity+";"+
+        coordinates+";"+
+        logos+";"+
+        normAddr+";"+
+        descMarkdown+";"+
+        logosMarkdown
+    )
+}
+
 function processTableRow(requestFormat, row) {
     const address      = row[o._address]
     const cityDistrict = row[o._cityDistrict]
@@ -152,7 +196,9 @@ function calcGeoData(odsTable) {
     // (map (fn [tableRow] (processTableRow requestFormat tableRow)) )
     const format = _geojson
     return odsTable.map((tableRow, format) => {
-        return processTableRow(format, tableRow)
+        // return processTableRow(format, tableRow)
+        return processTableRow2(format, tableRow)
+        // console.log(tableRow)
     })
     // (reduce into [])
 }

@@ -63,7 +63,10 @@ function rowNr(idx) {
 
 export function replaceAll(s: string, match: string, replacement: string): string {
     // https://www.designcise.com/web/tutorial/how-to-replace-all-occurrences-of-a-word-in-a-javascript-string
-    return s.replace(new RegExp(match, 'g'), replacement)
+    if (s)
+        return s.replace(new RegExp(match, 'g'), replacement)
+    else
+        return s
 }
 
 // function composition
