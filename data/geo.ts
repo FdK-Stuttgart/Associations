@@ -115,6 +115,11 @@ function processTableRow2(requestFormat, row) {
     else {
         console.log("logos " + logos + "; " + name)
     }
+
+    // TODO 1. create json object and save it in a file.
+    // TODO 2. send HTTP request with this json-obj to an API service. This service
+    // inserts the data in the dbase
+
     console.log(
         address+";"+
         cityDistrict+";"+
