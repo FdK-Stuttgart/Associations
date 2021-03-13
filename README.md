@@ -190,11 +190,21 @@ java -jar fdk.jar Vereinsinformationen_öffentlich_Stadtteilkarte.ods out.umap
 sudo npm install -g typescript
 npm install --save-dev @types/node
 npm install xlsx
+```
+
+Open a new console and compile the geo.ts:
+```bash
+tsc geo.ts -w
+```
+
+Open a new console and compile the ods.ts:
+```bash
 tsc ods.ts -w
 ```
-Open a new console:
+
+Open a new console and run the data conversion process, i.e. data import:
 ```bash
-node ods.ts
+node geo.js
 ```
 
 
