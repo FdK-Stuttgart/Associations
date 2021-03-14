@@ -192,25 +192,19 @@ npm install --save-dev @types/node
 npm install xlsx
 ```
 
-Open a new console and compile the geo.ts:
+Compile the typescript source code files as they change:
 ```bash
-tsc geo.ts -w
+tsc *.ts --watch
 ```
 
-Open a new console and compile the ods.ts:
+Open a new console and run the data conversion:
 ```bash
-tsc ods.ts -w
+node json.js
 ```
-
-Open a new console and run the data conversion process, i.e. data import:
-```bash
-node geo.js
-```
-
 
 ## License
 
-Copyright © 2020
+Copyright © 2020, 2021
 
 This program and the accompanying materials are made available under the
 terms of the Eclipse Public License 2.0 which is available at

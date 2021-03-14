@@ -1,11 +1,6 @@
 import * as o from './ods'
 
-var odsTable = o.calcReadTable()
-// for (var y in t) {
-//     console.log('y: ' +y+ '; _name: ' + t[y][o._name] + '; _address: ' + t[y][o._address]);
-// }
-
-function normalizeAddress(address) {
+export function normalizeAddress(address) {
     if (address) {
         // console.log("address: "+address)
         var adr = o.replaceAll(address, '\n', ', ')
@@ -62,7 +57,7 @@ const instagramLogo =
 const youtubeLogo =
  "https://cdn.iconscout.com/icon/free/png-256/youtube-82-189778.png"
 
-function encodeLine(line) {
+export function encodeLine(line) {
     var imgSize = 14
     var s
     if (line.startsWith("https://www.facebook.com/")) {
@@ -91,135 +86,4 @@ function encodeLine(line) {
         return line
     }
 }
-
-function processTableRow2(requestFormat, row) {
-    const address      = row[o._address]
-    const cityDistrict = row[o._cityDistrict]
-    const name         = row[o._name]
-    const desc         = row[o._desc]
-    const goal         = row[o._goal]
-    const activity     = row[o._activity]
-    const coordinates  = row[o._coordinates]
-    const logos        = row[o._logo]
-    const normAddr     = normalizeAddress(address)
-    const descMarkdown = desc.split(/\s+/).map(encodeLine)
-
-    var logosMarkdown = ""
-    if (logos) {
-        var arrMarkdown = logos.split(/\s+/).map((s) => {
-            return "{{" + s + "}}\n"
-        })
-        logosMarkdown = arrMarkdown.concat()
-        // console.log("arrMarkdown.concat(): " + arrMarkdown.concat())
-    }
-    else {
-        console.log("logos " + logos + "; " + name)
-    }
-
-    // TODO 1. create json object and save it in a file.
-    // TODO 2. send HTTP request with this json-obj to an API service. This service
-    // inserts the data in the dbase
-
-    console.log(
-        address+";"+
-        cityDistrict+";"+
-        name+";"+
-        desc+";"+
-        goal+";"+
-        activity+";"+
-        coordinates+";"+
-        logos+";"+
-        normAddr+";"+
-        descMarkdown+";"+
-        logosMarkdown
-    )
-}
-
-function processTableRow(requestFormat, row) {
-    const address      = row[o._address]
-    const cityDistrict = row[o._cityDistrict]
-    const name         = row[o._name]
-    const desc         = row[o._desc]
-    const goal         = row[o._goal]
-    const activity     = row[o._activity]
-    const coordinates  = row[o._coordinates]
-    const logos        = row[o._logo]
-    const normAddr     = normalizeAddress(address)
-    const descMarkdown = desc.split(/\s+/).map(encodeLine)
-
-    var logosMarkdown = ""
-    if (logos) {
-        var arrMarkdown = logos.split(/\s+/).map((s) => {
-            return "{{" + s + "}}\n"
-        })
-        logosMarkdown = arrMarkdown.concat()
-        // console.log("arrMarkdown.concat(): " + arrMarkdown.concat())
-    }
-    else {
-        console.log("logos " + logos + "; " + name)
-    }
-    // var allFeatures
-    if (coordinates) {
-        // console.log('coordinates : '+ coordinates)
-        var obj: any =
-            [{
-                "type": "Feature",
-                "properties": {
-                    "geocoding": { "name": "" },
-                    "description": logosMarkdown +
-                        address + "\n\n" +
-                        descMarkdown + "\n\n" +
-                        "Aktiv in Stadtteil(en): " + cityDistrict + "\n\n"+
-                        "Ziele des Vereins: " + goal + "\n\n"+
-                        "Aktivitätsbereiche: " + activity,
-
-                    "search_address": normAddr,
-                    "search_district": cityDistrict,
-                    "search_desc": desc,
-                    "search_goal": goal,
-                    "search_activity": activity,
-                    "name" : name
-                },
-                "geometry": {
-                    "type": "Point",
-                    "coordinates": coordinates.split(/\s+/)
-                    // (read-string (format "[%s]" coordinates))
-                }}]
-        var allFeatures: JSON = <JSON> obj
-        return allFeatures
-    }
-    else {
-        console.log(name + ": TODO talk to the Nominatim address resolver API")
-        // console.log(": TODO talk to the Nominatim address resolver API")
-    }
-
-}
-
-export const _umap = '_umap'
-export const _geojson = '_geojson'
-function calcGeoData(odsTable) {
-    // (map (fn [tableRow] (processTableRow requestFormat tableRow)) )
-    const format = _geojson
-    return odsTable.map((tableRow, format) => {
-        // return processTableRow(format, tableRow)
-        return processTableRow2(format, tableRow)
-        // console.log(tableRow)
-    })
-    // (reduce into [])
-}
-
-// console.log('normalizeAddress: ' + normalizeAddress('Senefstr 1 a,'))
-// console.log('normalizeAddress: ' + normalizeAddress('Senefstr 1 a,'))
-// console.log('calcGeoData(odsTable): '+calcGeoData(odsTable))
-
-var fs = require("fs")
-var jsonObject = calcGeoData(odsTable)
-const fout = "./out.umap"
-fs.writeFile(fout, JSON.stringify(jsonObject, null, 4), (err) => {
-    if (err) {
-        console.error(err)
-        return
-    }
-    console.log(fout + " created")
-})
 

@@ -330,9 +330,3 @@ export function calcReadTable() {
     }
     return mm
 }
-
-// var t = calcReadTable()
-// // console.log('calcReadTable: '+t)
-// for (var y in t) {
-//     console.log('y: ' +y+ '; _name: ' + t[y][_name] + '; _address: ' + t[y][_address]);
-// }

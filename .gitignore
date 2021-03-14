@@ -18,3 +18,4 @@ data/*.class
 /data/.nrepl-port
 /data/src/fdk/data.clj
 /data/src/fdk/relevant.clj
+/data/*.js
