@@ -21,6 +21,10 @@ Depending on your MySQL environment, you can do this using the
 
 2. Set up a MySQL database on your server. Current DB name of the database is
    `associations`. Can be renamed.
+   ```shell
+   sudo mysql -uroot
+   ```
+
    ```mysql
    DROP DATABASE IF EXISTS associations;
    CREATE DATABASE IF NOT EXISTS associations;
@@ -28,32 +32,29 @@ Depending on your MySQL environment, you can do this using the
 
 3. Create user and grant permissions to database.
    ```mysql
-   CREATE USER 'user'@'localhost' IDENTIFIED BY 'REPLACE WITH SOME GOOD PASSWORD';
+   CREATE USER 'user'@'localhost' IDENTIFIED BY '<YOUR-PASSWORD>';
    GRANT ALL PRIVILEGES ON associations.* TO 'user'@'localhost' WITH GRANT OPTION;
    exit
    ```
 
-4. Now, import the `.sql` file from the `map/database/db-export/` folder to your
-   database. This will automatically create all necessary tables with some
-   contents.
-   ```bash
-   mysql -uuser --table associations < map/database/db-export/associations.sql
+4. Import the data:
    ```
-
-5. Verify the import. Login to the dbase:
+   mysql -uuser --table -p associations < map/database/db-export/associations.sql
+   ```
+5. Verify the import. Login to the database:
    ```bash
-   mysql -uuser associations
+   mysql -uuser -p --table associations
    ```
    Now in MySQL:
    ```mysql
    SHOW TABLES;
-   SHOW COLUMNS activities;
-   SHOW COLUMNS associations;
-   SHOW COLUMNS contacts;
-   SHOW COLUMNS districts;
-   SHOW COLUMNS images;
-   SHOW COLUMNS links;
-   SHOW COLUMNS socialmedia;
+   SHOW COLUMNS IN activities;
+   SHOW COLUMNS IN associations;
+   SHOW COLUMNS IN contacts;
+   SHOW COLUMNS IN districts;
+   SHOW COLUMNS IN images;
+   SHOW COLUMNS IN links;
+   SHOW COLUMNS IN socialmedia;
    ```
 
 #### Using [phpMyAdmin](https://www.phpmyadmin.net/) GUI interface
@@ -64,99 +65,128 @@ you can upload the `.sql` file to your database.
 
 ### Setting up the database scripts
 
-1. In the `map/database/api` folder, copy the `_database.php` file and rename it to `database.php`. 
-2. Edit `DB_HOST`, `DB_NAME`, `DB_USER` and `DB_PASS` according to your configuration made in the steps 
-   (1.), (2.) and (3.) of the previous section. To stick with the example, change the lines from
-   
+1. Copy connection-template to a new file:
+   ```
+   cp map/database/api/_database.php map/database/api/database.php
+   ```
+2. Edit `DB_HOST`, `DB_NAME`, `DB_USER` and `DB_PASS` according to your
+   configuration made in the steps (1.), (2.) and (3.) of the previous section.
+   I.e. change the:
    ```php
     define('DB_HOST', '');
-	define('DB_NAME', '');
-	define('DB_USER', '');
-	define('DB_PASS', '');
+    define('DB_NAME', '');
+    define('DB_USER', '');
+    define('DB_PASS', '');
    ```
-   
-   to
-   
+   to:
    ```php
     define('DB_HOST', 'your.mysql.host.com');
-	define('DB_NAME', 'associations');
-	define('DB_USER', 'user');
-	define('DB_PASS', 'REPLACE WITH SOME GOOD PASSWORD');
+    define('DB_NAME', 'associations');
+    define('DB_USER', 'user');
+    define('DB_PASS', '<YOUR-PASSWORD>');
    ```
-   
-Leave the `database.php` file in the `/database/api/` folder. This way, it will be copied to the right location when deploying the apps. 
-**The file will NOT be committed to the Git repository.**   
+
+Leave the `database.php` file in the `/database/api/` directory. This way, it
+will be copied to the right location when deploying the apps.
+**The file will NOT be committed to the Git repository.**
 
 ### Angular
 
 For further information on how to install and setup angular as well as on how to
 build an app, see here: [Angular Docs](https://angular.io/guide/setup-local)
-   
+
 ### Versioning
 
 #### New map app version
 
 1. Commit, stash or reset all changes made to any project.
-2. Go into the `app-map` folder. 
-3. Run `app-map:version` script in `package.json`. If you want to make a commit for the new version automatically, run `app-map:version:commit`.
+2. Run
+```
+cd app-map
+npm run app-map:version
+```
+
+or if you want to make a commit for the new version automatically, run
+`npm run app-form:version:commit`.
 
 
 #### New form app version
 
 1. Commit, stash or reset all changes made to any project.
-2. Go into the `app-form` folder. 
-3. Run `app-form:version` script in `package.json`. If you want to make a commit for the new version automatically, run `app-form:version:commit`.
+2. Run
+```
+cd app-form
+npm run app-form:version
+```
+or if you want to make a commit for the new version automatically, run
+`npm run app-form:version:commit`.
 
 ### Deploying
 
-1. Make sure you have set up your `database.php` file described in the section above 
-  ("Setting up the database scripts"). This only has to be done once when deploying the apps for the first time
-   or if the database configuration has changed.
-2. Go into the `app-map` folder. 
-3. Run `app-map:build:prod` script in `package.json`. 
-4. Go into the `app-form` folder. 
-5. Run `app-form:build:prod` script in `package.json`.
-6. Check your `map/dist/` folder. It should be structured as follows:
+1. Make sure you have set up your `database.php` file described in the section
+  above ("Setting up the database scripts"). This only has to be done once when
+  deploying the apps for the first time or if the database configuration has
+  changed.
+
+2. Run
+```
+cd app-map
+npm run app-map:build:prod
+cd app-form
+npm run app-form:build:prod
+```
+3. Check the `map/dist/` directory. It should have following structure:
 
   ```
     - dist/
-	  - AssociationMap/
-	    - api/
-		  - database.php
-		  - ...
-		- assets/
-		  - ...
-		- edit/
-		  - assets/
-		    - ...
-		  - index.html
-		  - ...
-		- index.html
-        - ...		
+      - AssociationMap/
+        - api/
+          - database.php
+          - ...
+        - assets/
+          - ...
+        - edit/
+          - assets/
+            - ...
+          - index.html
+          - ...
+        - index.html
+        - ...
   ```
 
-7. Upload the contents of `map/dist/AssociationMap/` onto the root path of your server.
+4. Upload the contents of `map/dist/AssociationMap/` onto the root path of your
+   server.
 
 ### Changing paths
 
-If you don't want to upload the app(s) to the server root path, but to a subdirectory 
-on your server, you can achieve that following these steps:
+If you don't want to upload the app(s) to the server root path, but to a
+subdirectory on your server, you can achieve that following these steps:
 
-1. In both apps (`app-map`, `app-form`), open and edit the `src/environments/environment.prod` file.
-2. Change the `serverBasePath` variable to the location on your server you uploaded the `api` folder to.
-3. Change the `rootPath` variable to the location on your server you uploaded the respective app directory to (folder containing the `index.html` and the assets folder).
-4. Rebuild the apps and re-upload.
+1. In both apps (`app-map`, `app-form`), open and edit the
+   `src/environments/environment.prod` file.
+
+2. Change the `serverBasePath` variable to the location on your server you
+   uploaded the `api` directory to.
+
+3. Change the `rootPath` variable to the location on your server you uploaded
+   the respective app directory to (directory containing the `index.html` and
+   the assets directory).
+
+4. Rebuild and redeploy the apps.
 
 ### Use the apps
 
-If you uploaded the apps to the root path of the server and did not change the default paths, the apps'
-content should appear at the following paths:
+If you uploaded the apps to the root path of the server and did not change the
+default paths, the apps' content should appear at the following paths:
 
-1. Open the app at `http(s)://[YOUR_SERVER_ADDRESS]/`.
+1. Open the app at
+`http(s)://[YOUR_SERVER_ADDRESS]/`.
 
-2. The edit form can be used at `http(s)://[YOUR_SERVER_ADDRESS]/edit`.
+2. The edit form can be used at
+`http(s)://[YOUR_SERVER_ADDRESS]/edit`.
 
-3. The edit forms for the dropdown options can be used at `http(s)://[YOUR_SERVER_ADDRESS]/edit/options-form`.
+3. The edit forms for the dropdown options can be used at
+`http(s)://[YOUR_SERVER_ADDRESS]/edit/options-form`.
 
 
 
