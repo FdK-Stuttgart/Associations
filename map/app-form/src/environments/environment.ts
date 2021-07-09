@@ -8,6 +8,7 @@ export const environment = {
   phpApi: {
     serverBasePath: 'http://localhost/AssociationMap/api'
   },
+  disableAuth: true,
   authApi: {
     basePath: 'http://localhost/test-wordpress/wp-json'
   }

@@ -2,6 +2,7 @@ import {Component, HostListener, OnInit} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {MessageService} from 'primeng/api';
 import {LoginService} from './login.service';
+import {environment} from '../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -21,6 +22,9 @@ export class LoginComponent implements OnInit {
   });
 
   get loginStatus(): boolean {
+    if (environment.disableAuth) {
+      return true;
+    }
     return this.loginService.loginStatus;
   }
 

@@ -73,6 +73,13 @@ export class AssociationFormComponent implements OnInit, OnDestroy {
         disabled: this.isNew
       },
       {
+        label: 'ALLE Vereine löschen',
+        icon: 'pi pi-trash',
+        command: async () => {
+          await this.deleteAllAssociations();
+        }
+      },
+      {
         label: 'Eingaben zurücksetzen',
         icon: 'pi pi-backward',
         command: async () => {
@@ -275,6 +282,10 @@ export class AssociationFormComponent implements OnInit, OnDestroy {
 
   async deleteAssociation(): Promise<void> {
     await this.editForm.deleteAssociation(this.selectedAssociation?.id);
+  }
+
+  async deleteAllAssociations(): Promise<void> {
+    await this.editForm.deleteAllAssociations();
   }
 
   blockUi($event: { block: boolean; message?: string }): void {

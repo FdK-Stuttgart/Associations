@@ -628,6 +628,54 @@ export class AssociationEditFormComponent implements OnChanges, OnDestroy {
   }
 
   /**
+   * deletes all associations from the database
+   */
+  deleteAllAssociations(): void {
+    this.confirmationService.confirm({
+      header: 'Löschen?',
+      message: 'Möchten Sie wirklich ALLE Vereine löschen?',
+      acceptLabel: 'OK',
+      rejectLabel: 'Abbrechen',
+      closeOnEscape: true,
+      accept: async () => {
+        this.emitBlockUi(true, 'Verein wird gelöscht...');
+
+        const loggedIn = await this.loginService.checkLoginStatus();
+        if (!loggedIn) {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Berechtigungsfehler',
+            detail: 'Konnten nicht gelöscht werden. Bitte loggen Sie sich erneut ein.',
+            key: 'editFormToast'
+          });
+          this.emitBlockUi(false);
+          return;
+        }
+
+        await this.mySqlPersistService.deleteAssociations().toPromise()
+          .then(() => {
+            this.emitBlockUi(false);
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Vereine wurden gelöscht.',
+              key: 'editFormToast'
+            });
+            this.reload.emit({id: undefined, showDialog: false});
+          })
+          .catch((reason) => {
+            this.emitBlockUi(false);
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Vereine konnten nicht gelöscht werden.',
+              detail: JSON.stringify(reason),
+              key: 'editFormToast'
+            });
+          });
+      }
+    });
+  }
+
+  /**
    * converts a phone number to a valid string usable in a <a href="tel:..."> link
    * @param input phone number as string
    */

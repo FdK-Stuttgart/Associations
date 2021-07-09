@@ -4,7 +4,8 @@ export const environment = {
   phpApi: {
     serverBasePath: '/api'
   },
+  disableAuth: false,
   authApi: {
-    basePath: 'https://hr.auskas.de/wp-json'
+    basePath: 'https://house-of-resources-stuttgart.de/wp-json'
   }
 };
