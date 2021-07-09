@@ -205,7 +205,7 @@ cd data
 clojure -Spom
 
 # build
-clojure -X:uberjar
+clojure -X:depstar uberjar :jar fdk.jar
 
 # run - two alternatives:
 
