@@ -146,17 +146,25 @@ function processTableRowAngular(
     const contactId : string = uuidv4()
     let arrContact : Contact[] = new Array()
     if (contact) {
-        // TODO contact:
-        // 1. we'got just 1 contact
-        // 2. better parsing of the contact-field is needed (e.g. remove the "Tel .")
-        // 3. icons
-        let contactDetails = contact.split(/\n/)
+        let contactDetails = contact.split(/\r?\n/)
+        var emails = new Array()
+        var phoneNumbers = new Array()
+        for (let cdi of contactDetails) {
+            if (cdi.match(/@/)) {
+                emails.push(cdi)
+            }
+            else {
+                phoneNumbers.push(cdi)
+            }
+        }
 
+        // TODO Contact.mail, Contact.phone should be type of TextBlock in case
+        // there are multiple of them
         const _contact : Contact = {
             id : contactId,
             name : '',
-            mail : contactDetails[1],
-            phone : contactDetails[0],
+            mail : emails.join(', '),
+            phone : phoneNumbers.join(', '),
             fax : '',
             associationId : associationId,
         }
