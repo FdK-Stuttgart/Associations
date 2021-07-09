@@ -41,6 +41,9 @@ export class LoginService {
       return true;
     }
     const loginResult = await this.wordpressAuthService.getAuthenticate(username, password);
+    // TODO check if the user is admin and display upload component if so.
+    // loginResult is the token
+
     if (loginResult && loginResult.success && loginResult.data?.token) {
       this.token = loginResult.data.token;
       const loginStatus = await this.checkLoginStatus();
