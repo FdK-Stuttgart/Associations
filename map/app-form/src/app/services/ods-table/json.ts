@@ -59,6 +59,30 @@ function escapeHtmlWithNull(unsafe) {
     return unsafe ? escapeHtml(unsafe) : ""
 }
 
+function getSocialMediaPlatform(url) {
+    if (url.startsWith("https://www.facebook.com/")) {
+        return SocialMediaPlatform.FACEBOOK
+    }
+    else if (url.startsWith("https://deDe.facebook.com/")) {
+        return SocialMediaPlatform.FACEBOOK
+    }
+    else if (url.startsWith("https://www.instagram.com/")) {
+        return SocialMediaPlatform.INSTAGRAM
+    }
+    else if (url.startsWith("https://www.youtube.com/")) {
+        return SocialMediaPlatform.YOUTUBE
+    }
+    else if (url.startsWith("https://")) {
+        return SocialMediaPlatform.OTHER
+    }
+    else if (url.startsWith("http://")) {
+        return SocialMediaPlatform.OTHER
+    }
+    else {
+        return SocialMediaPlatform.OTHER
+    }
+}
+
 function processTableRowAngular(
       districts : DropdownOption[]
     , activities : DropdownOption[]
@@ -139,6 +163,7 @@ function processTableRowAngular(
         arrContact.push(_contact)
     }
 
+    let arrSocialMediaLink : SocialMediaLink[] = new Array()
     let arrLink : Link[] = new Array()
     if (links) {
         let linkList = links.split(/\s+/)
@@ -151,20 +176,16 @@ function processTableRowAngular(
                 associationId : associationId,
             }
             arrLink.push(_link)
-        }
-    }
 
-    let arrSocialMediaLink : SocialMediaLink[] = new Array()
-    {
-        // TODO for the social media classification see `encodeLine`
-        const _socialMediaLink : SocialMediaLink = {
-            platform : SocialMediaPlatform.FACEBOOK,
-            id : uuidv4(),
-            linkText : '',
-            url : url,
-            associationId : associationId,
+            const _socialMediaLink : SocialMediaLink = {
+                platform : getSocialMediaPlatform(url),
+                id : uuidv4(),
+                linkText : '',
+                url : url,
+                associationId : associationId,
+            }
+            arrSocialMediaLink.push(_socialMediaLink)
         }
-        arrSocialMediaLink.push(_socialMediaLink)
     }
 
     const _activities : TextBlock = {
