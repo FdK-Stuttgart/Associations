@@ -117,7 +117,7 @@ if (isset($postdata) && !empty($postdata)) {
         }
     }
 
-    $sql .= "\n\nUPDATE contacts SET current = 0 WHERE associationId = '$id';";
+    $sql .= "\n\nUPDATE images SET current = 0 WHERE associationId = '$id';";
 
     if ($images != null) {
         $index = 0;
