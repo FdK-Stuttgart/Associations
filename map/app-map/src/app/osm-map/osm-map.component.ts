@@ -778,29 +778,12 @@ export class OsmMapComponent implements OnInit, OnDestroy {
       content += `</div>`;
     }
 
-    if ((association.districtList && association.districtList.length > 0)
-      || (association.activityList && association.activityList.length > 0)) {
-      content += `<h2>Schlagwörter</h2>`;
-    }
-
     if (association.districtList && association.districtList.length > 0) {
       content += `<div class="association-active-in"><h3>Aktivitätsgebiete</h3>`;
       content += `<div class="association-chips-container">`;
       for (const activeIn of getSubOptions(this.districtOptions, association.districtList)) {
         content += `<div class="association-chips">`;
         content += activeIn.label;
-        content += `</div>`;
-      }
-      content += `</div>`;
-      content += `</div>`;
-    }
-
-    if (association.activityList && association.activityList.length > 0) {
-      content += `<div class="association-chips-container"><h3>Tätigkeitsfelder</h3>`;
-      content += `<div class="association-chips-container">`;
-      for (const activity of getSubOptions(this.activitiesOptions, association.activityList)) {
-        content += `<div class="association-chips">`;
-        content += activity.label;
         content += `</div>`;
       }
       content += `</div>`;
