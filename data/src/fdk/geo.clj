@@ -149,19 +149,27 @@
          (sort)
          (reverse))))
 
+(defn no-public-address? [norm-addr]
+  (or (.contains norm-addr "keine")
+      (.contains norm-addr "Postfach")))
+
 (defn search-properties
   "(fdk.geo/search-properties {:addr \"a\" :desc \"d\" ...})"
-  [{:keys [addr city-district desc goal activity]}]
+  [{:keys [addr city-district desc goal activity] :as prm}]
   (conj {} #_{:_umap_options
               {:showLabel true
                :labelInteractive true
                #_#_:iconUrl "/uploads/pictogram/theatre-24-white.png"
                #_#_:iconClass "Default"}}
-        {:search_address addr
-         :search_district city-district
-         :search_desc desc
-         :search_goal goal
-         :search_activity activity}))
+        (when-not (empty? prm)
+          (conj
+           {:search_address addr
+            :search_district city-district
+            :search_desc desc
+            :search_goal goal
+            :search_activity activity}
+           (when (no-public-address? addr)
+             {:_umap_options {:color "DeepSkyBlue"}})))))
 
 (defn umap
   "
@@ -357,10 +365,8 @@
 
       :else line)))
 
-
 (defn query-param [{:keys [norm-addr city-district]}]
-  (if (or (.contains norm-addr "keine")
-          (.contains norm-addr "Postfach"))
+  (if (no-public-address? norm-addr)
     city-district
     norm-addr))
 
