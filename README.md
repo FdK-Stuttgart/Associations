@@ -192,6 +192,9 @@ default paths, the apps' content should appear at the following paths:
 
 # Data conversion ODS to JSON
 
+By the convention the main color of uMap-test and uMap-prod versions are different.
+Also the associations without public address have different color.
+
 ## Usage
 
 ### Clojure
@@ -213,6 +216,13 @@ clojure -M -m fdk.geo Vereinsinformationen_öffentlich_Stadtteilkarte.ods out.um
 java -jar fdk.jar Vereinsinformationen_öffentlich_Stadtteilkarte.ods out.umap
 ```
 
+Both alternatives have an optional parameter specifying colors. E.g. for the
+test version (using clojure):
+
+```
+clojure -M -m fdk.geo Vereinsinformationen_öffentlich_Stadtteilkarte.ods out.umap \
+ '{:colors {:main "DarkBlue" :no-addr "DeepSkyBlue"}}'
+```
 ### Typescript
 
 ```bash

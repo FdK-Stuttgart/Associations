@@ -44,13 +44,10 @@
     (Thread/sleep request-delay)
     r))
 
-(defn geojson [features]
-  {:type "FeatureCollection" :features features})
-
-(defn layer [idx layer-name features]
-  ;; (println "idx" idx)
+(defn layer [color layer-name features]
   ;; (println "layer-name" layer-name)
   ;; (println "features" features)
+  ;; (println "color" color)
   {:type "FeatureCollection"
    :features features
    :_umap_options
@@ -60,17 +57,7 @@
     :type "Cluster"
     ;; :cluster: {}
     ;; :heat: {}
-    :color (nth ["#d13858" ;; FdK color spectrum - see email from Joe
-                 #_"Blue"
-                 "Red"
-                 "Gold"
-                 "LightSkyBlue"
-                 "DarkSlateBlue"
-                 "Chocolate"
-                 "Black"
-                 "MediumSlateBlue"
-                 "CadetBlue"
-                 ] idx)
+    :color color
     :id (rand-int 1e7)}})
 
 (defn fst-letters [hm]
@@ -154,8 +141,9 @@
       (.contains norm-addr "Postfach")))
 
 (defn search-properties
-  "(fdk.geo/search-properties {:addr \"a\" :desc \"d\" ...})"
-  [{:keys [addr city-district desc goal activity] :as prm}]
+  "(fdk.geo/search-properties {} {:addr \"a\" :desc \"d\" ...})"
+  [no-addr-color
+   {:keys [addr city-district desc goal activity] :as prm}]
   (conj {} #_{:_umap_options
               {:showLabel true
                :labelInteractive true
@@ -169,7 +157,8 @@
             :search_goal goal
             :search_activity activity}
            (when (no-public-address? addr)
-             {:_umap_options {:color "DeepSkyBlue"}})))))
+             {:_umap_options {:color no-addr-color
+                              #_"DeepSkyBlue"}})))))
 
 (defn umap
   "
@@ -179,7 +168,7 @@
   Prod-direkt:    https://umap.openstreetmap.fr/de/map/stadtteilkarte_459647
   Prod-short-url: http://u.osmfr.org/m/459647/
   "
-  [features]
+  [main-color features]
   ;; (def features features)
   {:type "umap"
    ;; test-short-url
@@ -200,7 +189,7 @@
     #_{:south 48.667385 :west 9.003639 :north 48.892487 :east 9.662819}
     {:south 48.418264 :west 8.209534 :nord 49.317066 :east 10.846252}
     ;; there must be no space-char after ","!!!
-    :filterKey (cstr/join "," (map name (into [:name] (keys (search-properties {})))))
+    :filterKey (cstr/join "," (map name (into [:name] (keys (search-properties nil {})))))
     :locateControl true
     :measureControl nil
     :miniMap false
@@ -231,31 +220,8 @@
                                                 (get-in feature [:geometry :coordinates]))))
                         feature))
                 (create-groups)
-                #_(map-indexed (fn [idx cat-members]
-                               #_(println "idx" idx)
-                               (layer idx
-                                      (nth ods/categories idx)  ;; here is the category
-                                      cat-members                     ;; members
-                                      )))
-                (map-indexed (fn [idx [cat-name cat-members]]
-                               #_(println "idx" idx)
-                               (layer idx
-                                      cat-name
-                                      cat-members
-                                      #_(sort-by :name cat-members))))
-                (vec)
-                #_(inspect-tree))})
-
-(defn feature-collection
-  "E.g.:
-  (fdk.geo/feature-collection :umap features)
-  (fdk.geo/feature-collection :umap [1 2 3])"
-  [format features]
-  (let [json-fn (case format
-                  :umap    umap
-                  :geojson geojson)]
-    (json-fn features)
-    #_(umap features)))
+                (mapv (fn [[cat-name cat-members]]
+                        (layer main-color cat-name cat-members))))})
 
 (defn ftype [feature] (get-in feature [:properties :geocoding :type]))
 
@@ -371,7 +337,8 @@
     norm-addr))
 
 (defn process-table-row
-  [request-format
+  [no-addr-color
+   request-format
    {:keys [address city-district name desc goal activity coordinates
            logos] :as row}]
   (let [norm-addr (normalize-address address)
@@ -433,17 +400,18 @@
                                                 ["Ziele des Vereins: %s\n\n" goal]
                                                 ["Aktivitätsbereiche: %s" activity]])))
                                  :name name)
-                          (search-properties {:addr norm-addr
+                          (search-properties no-addr-color
+                                             {:addr norm-addr
                                               :desc desc ;; not desc-markdown
                                               :city-district city-district
                                               :goal goal
                                               :activity activity})))))))))
 
 (defn calc-geo-data
-  [{:keys [ods-table format] :or {format #_:geojson :umap}}]
+  [no-addr-color {:keys [ods-table format] :or {format #_:geojson :umap}}]
   (let [request-format (if (= format :umap) :geocodejson format)]
     (->> ods-table
-         (map (fn [table-row] (process-table-row request-format table-row)))
+         (map (fn [table-row] (process-table-row no-addr-color request-format table-row)))
          (reduce into [])
          ((fn [coll]
             #_(infof "Coordinates found %s" (count coll))
@@ -472,28 +440,13 @@
                    (utc/in? resolved address)))
          (map (fn [m] (cset/rename-keys m {:idx :row}))))))
 
-
-(defn get-geo-data [prm]
-  (let [ks [:geo-data]]
-    (if-let [v (get-in @com/cache ks)]
-      v
-      (com/cache! (fn [] (calc-geo-data prm)) ks))))
-
-(defn calc-json-fn
-  "(fdk.geo/calc-json-fn :umap)"
-  [fname format]
-  (->> (get-geo-data {:ods-table (ods/read-table fname) :format :umap})
-       ;; The correct param of `feature-collection` is `format` not the
-       ;; `request-format`
-       (feature-collection format)))
-
 (defn json
   "(fdk.geo/json :umap)"
-  [fname format]
-  (let [ks [:json]]
-    (if-let [v (get-in @com/cache ks)]
-      v
-      (com/cache! (fn [] (calc-json-fn fname format)) ks))))
+  [{:keys [colors]} fname]
+  (umap (:main colors)
+        (calc-geo-data
+         (:no-addr colors)
+         {:ods-table (ods/read-table fname)})))
 
 (defn save-json
   "During evaluation it defines the `json` var for debugging purposes. E.g.:
@@ -504,8 +457,26 @@
         (cheshire/generate-string json {:pretty true})))
 
 (defn -main
-  "(fdk.geo/-main \"resources/Vereinsinformationen_öffentlich_Stadtteilkarte.ods\" \"out.umap\")"
-  [& [input-file output-file]]
-  (println "input-file" input-file)
-  (println "output-file" output-file)
-  (fdk.geo/save-json (fdk.geo/json input-file :umap) output-file))
+  "(fdk.geo/-main
+    \"resources/Vereinsinformationen_öffentlich_Stadtteilkarte.ods\"
+    \"out.umap\"
+    \"{:colors {:main \\\"#d13858\\\" :no-addr \\\"DeepSkyBlue\\\"}}\")"
+  [& [input-file output-file prm-colors]]
+  (let [colors (if prm-colors
+                 (read-string prm-colors)
+                 ;; FdK color spectrum - see email from Joe
+                 ;; "Blue"
+                 ;; "Red"
+                 ;; "Gold"
+                 ;; "LightSkyBlue"
+                 ;; "DarkSlateBlue"
+                 ;; "Chocolate"
+                 ;; "Black"
+                 ;; "MediumSlateBlue"
+                 ;; "CadetBlue"
+                 {:colors {:main "#d13858"
+                           :no-addr "DeepSkyBlue"}})]
+    (println "colors" colors)
+    (println "input-file" input-file)
+    (println "output-file" output-file)
+    (save-json (json colors input-file) output-file)))
