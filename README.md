@@ -19,34 +19,35 @@ Depending on your MySQL environment, you can do this using the
    systemctl status mysql.service
    ```
 
-2. Set up a MySQL database on your server. Current DB name of the database is
-   `associations`. Can be renamed.
+2. Set up a MySQL database on your server. (The name of the database is
+   `associations`, however it can be renamed.):
    ```shell
    sudo mysql -uroot
    ```
-
+   Then on the MySQL command line:
    ```mysql
    DROP DATABASE IF EXISTS associations;
    CREATE DATABASE IF NOT EXISTS associations;
    ```
 
-3. Create user and grant permissions to database.
+3. Create user and grant permissions to database:
    ```mysql
    CREATE USER 'user'@'localhost' IDENTIFIED BY '<YOUR-PASSWORD>';
    GRANT ALL PRIVILEGES ON associations.* TO 'user'@'localhost' WITH GRANT OPTION;
+   flush privileges;
    exit
    ```
 
-4. Import the data. Attention! The script drops existing database. Any existing
-   data will be lost.
+4. Import the data. Attention! The script drops existing `associations`
+   database. Any existing data will be lost.
    ```
-   mysql -uuser --table -p associations < map/database/db-export/associations.sql
+   mysql -uuser --table --password associations < map/database/db-export/associations.sql
    ```
-5. Verify the import. Login to the database:
+5. Verify the import. Login to MySQL and connect to the `associations` database:
    ```bash
-   mysql -uuser -p --table associations
+   mysql -uuser --table --password associations
    ```
-   Now in MySQL:
+   Now on the MySQL command line:
    ```mysql
    SHOW TABLES;
    SHOW COLUMNS IN activities;
@@ -58,7 +59,7 @@ Depending on your MySQL environment, you can do this using the
    SHOW COLUMNS IN socialmedia;
    ```
 
-#### Using [phpMyAdmin](https://www.phpmyadmin.net/) GUI interface
+#### Using [phpMyAdmin GUI interface](localhost:80/phpmyadmin/index.php)
 
 Click on the newly created database and select `Import` from the top menu. Then
 you can upload the `.sql` file to your database.
@@ -91,6 +92,37 @@ Leave the `database.php` file in the `/database/api/` directory. This way, it
 will be copied to the right location when deploying the apps.
 **The file will NOT be committed to the Git repository.**
 
+### Setting up Wordpress Development Environment
+
+https://ubuntu.com/tutorials/install-and-configure-wordpress
+
+```bash
+sudo apt install wordpress php libapache2-mod-php php-mysql mysql-server mysql-client mysql-common phpmyadmin
+```
+In `/etc/phpmyadmin/config.inc.php` activate all lines with:
+```
+$cfg['Servers'][$i]['AllowNoPassword'] = TRUE;
+```
+
+Create wordpress-user with phpmyadmin
+
+<!-- ```mysql -->
+<!-- CREATE DATABASE wordpress; -->
+<!-- CREATE USER 'wordpress'@'%' IDENTIFIED WITH caching_sha2_password BY '***'; -->
+<!-- GRANT ALL PRIVILEGES ON *.* TO 'wordpress'@'%' WITH GRANT OPTION; -->
+<!-- GRANT ALL PRIVILEGES ON `wordpress\_%`.* TO 'wordpress'@'%';  -->
+<!-- flush privileges; -->
+<!-- ``` -->
+
+Goto [http://localhost/blog](http://localhost/blog)
+
+Goto [http://localhost/blog/wp-admin/](http://localhost/blog/wp-admin/)
+
+
+Wordpress Authentication - how to:
+[YouTube](https://youtu.be/ArEsbL4sIKY)
+[Text](https://devdactic.com/wordpress-api-authentication-ionic/)
+
 ### Angular
 
 For further information on how to install and setup angular as well as on how to
@@ -101,12 +133,12 @@ build an app, see here: [Angular Docs](https://angular.io/guide/setup-local)
 #### New map app version
 
 1. Commit, stash or reset all changes made to any project.
-2. Run
+
+2. Run:
 ```
 cd app-map
 npm run app-map:version
 ```
-
 or if you want to make a commit for the new version automatically, run
 `npm run app-form:version:commit`.
 
@@ -114,13 +146,8 @@ or if you want to make a commit for the new version automatically, run
 #### New form app version
 
 1. Commit, stash or reset all changes made to any project.
-2. Run
-```
-cd app-form
-npm run app-form:version
-```
-or if you want to make a commit for the new version automatically, run
-`npm run app-form:version:commit`.
+2. Run ``` cd app-form npm run app-form:version ``` or if you want to make a
+commit for the new version automatically, run `npm run app-form:version:commit`.
 
 ### Deploying
 
@@ -129,7 +156,7 @@ or if you want to make a commit for the new version automatically, run
   deploying the apps for the first time or if the database configuration has
   changed.
 
-2. Run
+2. Run:
 ```
 cd app-map
 npm run app-map:build:prod
@@ -154,7 +181,6 @@ npm run app-form:build:prod
         - index.html
         - ...
   ```
-
 4. Upload the contents of `map/dist/AssociationMap/` onto the root path of your
    server.
 
