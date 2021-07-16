@@ -701,7 +701,7 @@ export class AssociationEditFormComponent implements OnChanges, OnDestroy {
           return;
         }
 
-        await this.mySqlPersistService.deleteAssociations().toPromise()
+        await this.mySqlPersistService.deleteAllAssociations().toPromise()
           .then(() => {
             this.emitBlockUi(false);
             this.messageService.add({

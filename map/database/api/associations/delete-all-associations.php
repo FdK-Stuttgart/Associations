@@ -1,11 +1,10 @@
 <?php
 
 /**
- * Deletes one association by ID.
+ * Deletes i.e. deactivates all associations.
  */
 require '../database.php';
 
-// Delete.
 $sql = "UPDATE associations SET current = 0;";
 
 if (mysqli_query($con, $sql)) {
