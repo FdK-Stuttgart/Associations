@@ -5,6 +5,7 @@ import {ConfirmationService, MenuItem, MessageService} from 'primeng/api';
 import {MysqlQueryService} from '../services/mysql-query.service';
 import {MysqlPersistService} from '../services/mysql-persist.service';
 import {AssociationEditFormComponent} from './association-edit-form/association-edit-form.component';
+import {ImportEditFormComponent} from './import-edit-form/import-edit-form.component';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Subscription} from 'rxjs';
 import {LoginService} from '../login/login.service';
@@ -19,6 +20,7 @@ import {ExportImportService} from '../services/export-import.service';
     ConfirmationService
   ]
 })
+
 export class AssociationFormComponent implements OnInit, OnDestroy {
   associations: Association[] = [];
   selectedAssociation?: Association;
@@ -106,8 +108,9 @@ export class AssociationFormComponent implements OnInit, OnDestroy {
         label: 'Daten importieren',
         icon: 'pi pi-upload',
         command: async () => {
-          await this.uploadData();
-        }
+          await this.router.navigate(['/import']);
+        },
+        disabled: !this.loginService.isAdmin()
       },
       {
         label: 'Schlagwörter bearbeiten',

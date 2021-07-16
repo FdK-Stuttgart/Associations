@@ -21,6 +21,13 @@ export class LoginService {
     }
   }
 
+  // TODO proper isAdmin implementation: it looks like user specific the access
+  // rights can't be received from Wordpress so it must persisted from the dbase
+  isAdmin(): boolean {
+    return true
+    // return false
+  }
+
   get loginStatus(): boolean {
     if (environment.disableAuth) {
       return true;
@@ -41,8 +48,8 @@ export class LoginService {
       return true;
     }
     const loginResult = await this.wordpressAuthService.getAuthenticate(username, password);
-    // TODO check if the user is admin and display upload component if so.
-    // loginResult is the token
+    // TODO see if loginResult contains access-rights information from Wordpress
+    console.log(loginResult)
 
     if (loginResult && loginResult.success && loginResult.data?.token) {
       this.token = loginResult.data.token;

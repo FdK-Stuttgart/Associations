@@ -7,7 +7,10 @@ import {AssociationFormModule} from './association-form/association-form.module'
 import {HttpClientModule} from '@angular/common/http';
 import {ButtonModule} from 'primeng/button';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
-import {AssociationFormDeactivateGuard, OptionsEditFormDeactivateGuard} from './association-form/guard';
+import {  AssociationFormDeactivateGuard
+        , OptionsEditFormDeactivateGuard
+        , ImportEditFormDeactivateGuard
+       } from './association-form/guard';
 import {NotFoundComponent} from './not-found/not-found.component';
 import { LoginComponent } from './login/login.component';
 import {ReactiveFormsModule} from '@angular/forms';
@@ -42,8 +45,9 @@ import {FileUploadModule} from 'primeng/fileupload';
     ],
   bootstrap: [AppComponent],
   providers: [
-    AssociationFormDeactivateGuard,
-    OptionsEditFormDeactivateGuard
+      AssociationFormDeactivateGuard
+    , OptionsEditFormDeactivateGuard
+    , ImportEditFormDeactivateGuard
   ]
 })
 export class AppModule {

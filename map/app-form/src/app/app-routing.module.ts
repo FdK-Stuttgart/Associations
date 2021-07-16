@@ -2,7 +2,11 @@ import {NgModule} from '@angular/core';
 import {Routes, RouterModule} from '@angular/router';
 import {AssociationFormComponent} from './association-form/association-form.component';
 import {OptionsEditFormComponent} from './association-form/options-edit-form/options-edit-form.component';
-import {AssociationFormDeactivateGuard, OptionsEditFormDeactivateGuard} from './association-form/guard';
+import {ImportEditFormComponent} from './association-form/import-edit-form/import-edit-form.component';
+import {  AssociationFormDeactivateGuard
+        , OptionsEditFormDeactivateGuard
+        , ImportEditFormDeactivateGuard
+       } from './association-form/guard';
 import {NotFoundComponent} from './not-found/not-found.component';
 
 export const routes: Routes = [
@@ -30,6 +34,11 @@ export const routes: Routes = [
     path: 'options/:optionType',
     component: OptionsEditFormComponent,
     canDeactivate: [OptionsEditFormDeactivateGuard]
+  },
+  {
+    path: 'import',
+    component: ImportEditFormComponent,
+    canDeactivate: [ImportEditFormDeactivateGuard]
   },
   {
     path: '**',

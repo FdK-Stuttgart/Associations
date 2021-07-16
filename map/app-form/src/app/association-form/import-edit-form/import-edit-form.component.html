@@ -1,0 +1,10 @@
+Import der Vereinstabelle
+
+<p-fileUpload
+      #fileUpload
+      name="myfile[]"
+      customUpload="true"
+      (uploadHandler)="importTable($event)"
+    ></p-fileUpload>
+
+<p-toast key="editFormToast"></p-toast>
