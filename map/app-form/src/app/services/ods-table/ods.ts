@@ -306,7 +306,7 @@ export function calcReadTable(sheet) {
   let mm = new Array()
 
   // poor man's merge
-  for (var y in associations) {
+  for (let y in associations) {
     // console.log(
     //         'y: ' + y +
     //         '; _idx: ' + associations[y][_idx] +

@@ -175,8 +175,7 @@ function processTableRowAngular(
     let arrLink : Link[] = new Array()
     if (links) {
         let linkList = links.split(/\s+/)
-        for (var i = 0; i < linkList.length; i++) {
-            var url = linkList[i]
+        for (let url of linkList) {
             const _link : Link = {
                 id : uuidv4(),
                 linkText : '',
@@ -209,8 +208,7 @@ function processTableRowAngular(
     let arrImages : Image[] = new Array()
     if (logos) {
         let logoList = logos.split(/\s+/)
-        for (var i = 0; i < logoList.length; i++) {
-            var url = logoList[i]
+        for (let url of logoList) {
             const _image : Image = {
                 id : uuidv4(),
                 url : url,
