@@ -3,27 +3,26 @@ import * as o from './ods'
 export function normalizeAddress(address) {
     if (address) {
         // console.log("address: "+address)
-        var adr = o.replaceAll(address, '\n', ', ')
+        const adr = o.replaceAll(address, '\n', ', ')
         // console.log("adr: "+adr)
-        var adrMatch = adr.match(/[0-9] [A-z],/)
+        const adrMatch = adr.match(/[0-9] [A-z],/)
         if (adrMatch) {
-            var oldHouseNr = adrMatch.toString()
+            const oldHouseNr = adrMatch.toString()
             // replace is replaceFirst
-            var newHouseNr = o.replaceAll(oldHouseNr, " ", "")
-            var newAdr = adr.replace(new RegExp(oldHouseNr, "g"), newHouseNr)
-            return newAdr
+            const newHouseNr = o.replaceAll(oldHouseNr, " ", "")
+            return adr.replace(new RegExp(oldHouseNr, "g"), newHouseNr)
         }
         else {
             return adr
         }
     }
-    else
+    else {
         return address
+    }
 }
 
 function formatLink(line, prefix) {
-    var s1;
-
+    let s1
     if (line.endsWith("mig.madeingermany-stuttgart.de")
         ||
         line.startsWith(prefix+"www.")) {
@@ -33,16 +32,15 @@ function formatLink(line, prefix) {
         s1 = "www."
     }
 
-    var fmtLine
+    let fmtLine
     if (line.endsWith("/")) {
         fmtLine = line.substring(0, line.length - 1)
     }
     else {
         fmtLine = line
     }
-    var s2 = fmtLine.replace(new RegExp(prefix, "g"), "")
-    var r = "[[${line}|${s1}${s2}]]"
-    return r
+    const s2 = fmtLine.replace(new RegExp(prefix, "g"), "")
+    return "[[${line}|${s1}${s2}]]"
 }
 
 // "2 kB"
@@ -58,23 +56,18 @@ const youtubeLogo =
  "https://cdn.iconscout.com/icon/free/png-256/youtube-82-189778.png"
 
 export function encodeLine(line) {
-    var imgSize = 14
-    var s
+    const imgSize = 14
     if (line.startsWith("https://www.facebook.com/")) {
-        s = "{{" +facebookLogo + "|" + imgSize + "}}" + " [[${line}|Facebook]]"
-        return s
+        return "{{" +facebookLogo + "|" + imgSize + "}}" + " [[${line}|Facebook]]"
     }
     else if (line.startsWith("https://deDe.facebook.com/")) {
-        s = "{{" +facebookLogo + "|" + imgSize + "}}" + " [[${line}|Facebook]]"
-        return s
+        return "{{" +facebookLogo + "|" + imgSize + "}}" + " [[${line}|Facebook]]"
     }
     else if (line.startsWith("https://www.instagram.com/")) {
-        s = "{{" +instagramLogo + "|" + imgSize + "}}" + " [[${line}|Instagram]]"
-        return s
+        return "{{" +instagramLogo + "|" + imgSize + "}}" + " [[${line}|Instagram]]"
     }
     else if (line.startsWith("https://www.youtube.com/")) {
-        s = "{{" +youtubeLogo + "|" + imgSize + "}}" + " [[${line}|YouTube]]"
-        return s
+        return "{{" +youtubeLogo + "|" + imgSize + "}}" + " [[${line}|YouTube]]"
     }
     else if (line.startsWith("https://")) {
         return formatLink(line, "https://")
@@ -86,4 +79,3 @@ export function encodeLine(line) {
         return line
     }
 }
-
