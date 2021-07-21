@@ -83,6 +83,10 @@ function getSocialMediaPlatform(url) {
     }
 }
 
+export function noPublicAddress(normAddr: string) : boolean {
+  return !!normAddr.match(/.*keine|Postfach.*/i)
+}
+
 function processTableRowAngular(
       districts : DropdownOption[]
     , activities : DropdownOption[]
@@ -108,7 +112,7 @@ function processTableRowAngular(
         let street : string
         let postcode_city : string
         let addrLines = []
-        if (normAddr == "keine öffentliche Anschrift") {
+        if (noPublicAddress(normAddr)) {
             addrLines.push(normAddr)
         }
         else {

@@ -136,7 +136,10 @@
          (sort)
          (reverse))))
 
-(defn no-public-address? [norm-addr]
+(defn no-public-address?
+  "TODO implement no-public-address? as a regex match a la:
+  return !!normAddr.match(/.*keine|Postfach.*/i)"
+  [norm-addr]
   (or (.contains norm-addr "keine")
       (.contains norm-addr "Postfach")))
 
