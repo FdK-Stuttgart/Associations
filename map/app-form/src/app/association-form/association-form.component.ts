@@ -110,7 +110,7 @@ export class AssociationFormComponent implements OnInit, OnDestroy {
         command: async () => {
           await this.router.navigate(['/import']);
         },
-        disabled: !this.loginService.isAdmin()
+        disabled: !this.loginService.isAdmin,
       },
       {
         label: 'Schlagwörter bearbeiten',
@@ -156,6 +156,12 @@ export class AssociationFormComponent implements OnInit, OnDestroy {
           return {
             ...item,
             disabled: !status
+          };
+        }
+        else if (item.label === 'Daten importieren') {
+          return {
+            ...item,
+            disabled: !this.loginService.isAdmin
           };
         }
         return item;

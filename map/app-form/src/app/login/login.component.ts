@@ -53,7 +53,7 @@ export class LoginComponent implements OnInit {
     if (!!res) {
       this.messageService.add({
         severity: 'success',
-        summary: 'Erfolgreich eingeloggt.',
+        summary: this.loginForm.value.username + ' wurde eingeloggt.',
         key: 'loginToast'
       });
     } else {

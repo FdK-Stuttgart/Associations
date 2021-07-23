@@ -21,13 +21,6 @@ export class LoginService {
     }
   }
 
-  // TODO proper isAdmin implementation: it looks like user specific the access
-  // rights can't be received from Wordpress so it must persisted from the dbase
-  isAdmin(): boolean {
-    return true
-    // return false
-  }
-
   get loginStatus(): boolean {
     if (environment.disableAuth) {
       return true;
@@ -43,16 +36,30 @@ export class LoginService {
     localStorage.setItem('wordpress-jwt', (token || ''));
   }
 
+  set hasadmin(v: string | undefined) {
+    localStorage.setItem('hasadmin', (v || 'false'));
+  }
+
+  get hasadmin(): string | undefined {
+    return localStorage.getItem('hasadmin')
+  }
+
+  get isAdmin(): boolean {
+    return (this.hasadmin === 'true')
+  }
+
   async login(username: string, password: string): Promise<boolean> {
     if (environment.disableAuth) {
       return true;
     }
     const loginResult = await this.wordpressAuthService.getAuthenticate(username, password);
-    // TODO see if loginResult contains access-rights information from Wordpress
-    console.log(loginResult)
 
-    if (loginResult && loginResult.success && loginResult.data?.token) {
+    if (loginResult && loginResult.success
+      && loginResult.data?.token
+      && loginResult.data?.user_roles
+       ) {
       this.token = loginResult.data.token;
+      this.hasadmin = loginResult.data.user_roles.includes('administrator').toString()
       const loginStatus = await this.checkLoginStatus();
       this.loginStatusChange$.next(loginStatus);
       return loginStatus;
@@ -75,6 +82,7 @@ export class LoginService {
 
   removeToken(): void {
     this.token = '';
+    this.hasadmin = 'false';
     this.loginStatusChange$.next(false);
   }
 }
