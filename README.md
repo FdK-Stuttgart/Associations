@@ -177,7 +177,7 @@ See also how to [Install and configure WordPress](https://ubuntu.com/tutorials/i
    {"token":"...","user_email":"<some email>","user_nicename":"wordpress","user_display_name":"wordpress","user_roles":["administrator"]}
    ```
 
-1. In order to invalidate the JWT Token after 8 hours, add the following filter to the Wordpress Theme's `functions.php` (located in `wp-content/themes/{your-theme-name}/functions.php`):
+1. In order to invalidate the JWT Token after 8 hours, add another Code Snippet:
 
 ```php 
 function jwt_auth_expire_8_hours() {
@@ -186,6 +186,7 @@ function jwt_auth_expire_8_hours() {
 add_filter('jwt_auth_expire', 'jwt_auth_expire_8_hours');
 ```
 
+   Save and activate the code snippet!
 
 ### Angular Apps
 
