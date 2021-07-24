@@ -2,6 +2,7 @@ import {Injectable} from '@angular/core';
 import {WordpressAuthService} from '../services/wordpress-auth.service';
 import {BehaviorSubject} from 'rxjs';
 import {environment} from '../../environments/environment';
+import {CookieService} from 'ngx-cookie-service';
 
 @Injectable({
   providedIn: 'root'
@@ -9,7 +10,8 @@ import {environment} from '../../environments/environment';
 export class LoginService {
   loginStatusChange$: BehaviorSubject<boolean> = new BehaviorSubject(false);
 
-  constructor(private wordpressAuthService: WordpressAuthService) {
+  constructor(private wordpressAuthService: WordpressAuthService,
+              private cookieService: CookieService) {
     if (!environment.disableAuth) {
       setInterval(async () => {
         if (!!this.token) {
@@ -29,12 +31,20 @@ export class LoginService {
   }
 
   get token(): string | undefined {
-    return localStorage.getItem('wordpress-jwt');
+    return this.cookieService.get('wordpress-jwt');
   }
 
   set token(token: string | undefined) {
-    // Attention: localStorage can be modified using Browser DevTools. Be careful when using as a storage for security-relevant information.
-    localStorage.setItem('wordpress-jwt', (token || ''));
+    // Attention: Cookies can be modified using Browser DevTools. Be careful when using as a storage for security-relevant information.
+    this.cookieService.set(
+      'wordpress-jwt',
+      (token || ''),
+      1,
+     undefined,
+      undefined,
+      true,
+      'Strict'
+    );
   }
 
   async login(username: string, password: string): Promise<boolean> {

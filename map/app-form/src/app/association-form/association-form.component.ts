@@ -5,7 +5,6 @@ import {ConfirmationService, MenuItem, MessageService} from 'primeng/api';
 import {MysqlQueryService} from '../services/mysql-query.service';
 import {MysqlPersistService} from '../services/mysql-persist.service';
 import {AssociationEditFormComponent} from './association-edit-form/association-edit-form.component';
-import {ImportEditFormComponent} from './import-edit-form/import-edit-form.component';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Subscription} from 'rxjs';
 import {LoginService} from '../login/login.service';
@@ -110,7 +109,7 @@ export class AssociationFormComponent implements OnInit, OnDestroy {
         command: async () => {
           await this.router.navigate(['/import']);
         },
-        disabled: !this.loginService.isAdmin,
+        disabled: !this.loginService.token,
       },
       {
         label: 'Schlagwörter bearbeiten',
@@ -157,11 +156,10 @@ export class AssociationFormComponent implements OnInit, OnDestroy {
             ...item,
             disabled: !status
           };
-        }
-        else if (item.label === 'Daten importieren') {
+        } else if (item.label === 'Daten importieren') {
           return {
             ...item,
-            disabled: !this.loginService.isAdmin
+            disabled: !this.loginService.token
           };
         }
         return item;
@@ -359,7 +357,7 @@ export class AssociationFormComponent implements OnInit, OnDestroy {
   }
 
   async uploadData(): Promise<void> {
-    console.log("this.uploadedFiles.length: "+this.uploadedFiles.length)
+    console.log('this.uploadedFiles.length: ' + this.uploadedFiles.length);
     // await this.mySqlPersistService.importGoogleTable().toPromise()
     //   .then(() => {
     //     // this.emitBlockUi(false);
