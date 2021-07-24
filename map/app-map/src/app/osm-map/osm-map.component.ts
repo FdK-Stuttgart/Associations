@@ -29,7 +29,6 @@ import RenderFeature from 'ol/render/Feature';
 import Geometry from 'ol/geom/Geometry';
 import Icon from 'ol/style/Icon';
 import {createEmpty, extend, Extent} from 'ol/extent';
-import hexToRgba from 'hex-to-rgba'; // for the getActiveMarkerImgColor method
 // @ts-ignore
 import AnimatedCluster from 'ol-ext/layer/AnimatedCluster';
 import {
@@ -49,17 +48,6 @@ import {
   ]
 })
 export class OsmMapComponent implements OnInit, OnDestroy {
-
-  // TODO DRY - see app-form/src/app/services/ods-table/geo.ts
-  noPublicAddress(normAddr: string | undefined) : boolean {
-    if (normAddr) {
-        return !!normAddr.match(/.*keine|Postfach.*/i)
-    }
-    else {
-      return false
-    }
-  }
-
   sidebarExpanded = true;
   SIDEBAR_ANIMATION_DURATION = 300;
 
@@ -84,11 +72,10 @@ export class OsmMapComponent implements OnInit, OnDestroy {
   popupVisible = false;
   popupContentAssociationId?: string;
 
-  // @ts-ignore
   associations: Association[] = [];
   filteredAssociations: Association[] = [];
 
-  noPubAddrAssocIds: string[] = []
+  noPubAddrAssocIds: string[] = [];
 
   @ViewChild('osmContainer', {static: true}) osmContainer!: ElementRef<HTMLDivElement>;
   @ViewChild('autoComplete', {static: true}) autoComplete?: AutoComplete;
@@ -129,7 +116,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
     }
 
     const noPubAddrAssocs: Association[] = this.associations.filter(
-      (a: Association) => this.noPublicAddress(a.addressLine1) )
+      (a: Association) => this.noPublicAddress(a.addressLine1));
     this.noPubAddrAssocIds = noPubAddrAssocs.map((a: Association) => a.id);
     this.filteredAssociations = this.associations;
 
@@ -225,7 +212,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
     const isFiltered: boolean = featureIds.some((id: string) => filteredIds.includes(id));
     const size = originalFeatures?.length;
     let style;
-    const baseColor = '#d13858' // '#ed2227'
+    const baseColor = '#d13858'; // '#ed2227'
     if (!style) {
       if (size && size > 1) {
         style = new Style({
@@ -242,15 +229,15 @@ export class OsmMapComponent implements OnInit, OnDestroy {
             text: size.toString(),
             font: '16px Alegreya',
             fill: new Fill({
-              color: '#fff',
+              color: '#fff'
             }),
           }),
         });
       } else {
         const noPubAddr: boolean = featureIds.some(
           (id: string) => this.noPubAddrAssocIds.includes(id));
-        const noPubAddrColor = '#00bfff' // DeepSkyBlue
-        const color = noPubAddr? noPubAddrColor : baseColor
+        const noPubAddrColor = '#00bfff'; // DeepSkyBlue
+        const color = noPubAddr ? noPubAddrColor : baseColor;
 
         style = new Style({
           image: new Icon({
@@ -334,7 +321,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
         }
       }
     }
-  };
+  }
 
   /**
    * checks if an association is currently displayed within a clustered feature
@@ -378,7 +365,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
    */
   zoomToClusterExtent(originalFeatures: any): void {
     if (this.map) {
-      const extent = this.getClusterExtent(originalFeatures)
+      const extent = this.getClusterExtent(originalFeatures);
       this.map.getView().fit(extent, {
         size: this.map.getSize(),
         padding: [72, 48, 24, 48],
@@ -534,31 +521,12 @@ export class OsmMapComponent implements OnInit, OnDestroy {
     this.cluster.setSource(this.clusterSource);
   }
 
-  // /**
-  //  * return the active marker image element as an svg-path element. The colors
-  //  * cannot be in the hex format. Either color-name or RGBA formats are allowed, WTF?
-  //  */
-  // getActiveMarkerImgColor(hexFillColor : string): HTMLImageElement {
-  //   const markerImg: HTMLImageElement = this.renderer2.createElement('img');
-  //   const fill = hexToRgba(hexFillColor)
-  //   const svg =
-  //     '<svg xmlns="http://www.w3.org/2000/svg">'+
-  //     '<path fill="'+fill+'" stroke="white" stroke-width="0.50744" d="M 34.58637,33.56877 C 36.5425,30.96358 37.74628,27.7965 37.74628,24.27184 37.74628,15.99655 31.1255,9.25372 23,9.25372 c -8.1255,0 -14.74628,6.74283 -14.74628,15.01812 0,3.52466 1.25394,6.69174 3.15992,9.29693 C 14.37293,37.50208 23,48.58688 23,48.58688 c 0,0 8.62708,-11.0848 11.58637,-15.01811 z" id="path212" />'+
-  //     '<circle style="fill:white;fill-rule:evenodd" id="path116" cx="23" cy="23.642452" r="5.6927967" />'+
-  //     '</svg>';
-  //   // console.log(attr)
-
-  //   const attr = 'data:image/svg+xml;utf-8,'+svg;
-  //   markerImg.setAttribute('src', attr);
-  //   return markerImg;
-  // }
-
   /**
    * return the active marker image element.
    */
   getActiveMarkerImg(noPubAddr: boolean): HTMLImageElement {
     const markerImg: HTMLImageElement = this.renderer2.createElement('img');
-    const attr = noPubAddr ? 'assets/pin-DeepSkyBlue.png' : 'assets/pin-prod.png'
+    const attr = noPubAddr ? 'assets/pin-DeepSkyBlue.png' : 'assets/pin-prod.png';
     markerImg.setAttribute('src', attr);
     return markerImg;
   }
@@ -569,7 +537,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
   getInactiveMarkerImg(noPubAddr: boolean): HTMLImageElement {
     const markerImg: HTMLImageElement = this.renderer2.createElement('img');
     // TODO different colors for inactive associations with no public address?
-    const attr = noPubAddr ? 'assets/pin-inactive-small.png' : 'assets/pin-inactive-small.png'
+    const attr = noPubAddr ? 'assets/pin-inactive-small.png' : 'assets/pin-inactive-small.png';
     markerImg.setAttribute('src', attr);
     return markerImg;
   }
@@ -917,6 +885,15 @@ export class OsmMapComponent implements OnInit, OnDestroy {
    */
   ngOnDestroy(): void {
     document.getElementById('popup-close')?.removeEventListener('click', this.closeButtonClickHandler);
+  }
+
+  // TODO DRY - see app-form/src/app/services/ods-table/geo.ts
+  noPublicAddress(normAddr: string | undefined): boolean {
+    if (normAddr) {
+      return !!normAddr.match(/.*keine|Postfach.*/i)
+    } else {
+      return false
+    }
   }
 }
 
