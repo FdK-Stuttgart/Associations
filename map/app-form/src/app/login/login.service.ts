@@ -33,19 +33,8 @@ export class LoginService {
   }
 
   set token(token: string | undefined) {
+    // Attention: localStorage can be modified using Browser DevTools. Be careful when using as a storage for security-relevant information.
     localStorage.setItem('wordpress-jwt', (token || ''));
-  }
-
-  set hasadmin(v: string | undefined) {
-    localStorage.setItem('hasadmin', (v || 'false'));
-  }
-
-  get hasadmin(): string | undefined {
-    return localStorage.getItem('hasadmin')
-  }
-
-  get isAdmin(): boolean {
-    return (this.hasadmin === 'true')
   }
 
   async login(username: string, password: string): Promise<boolean> {
@@ -57,9 +46,13 @@ export class LoginService {
     if (loginResult && loginResult.success
       && loginResult.data?.token
       && loginResult.data?.user_roles
-       ) {
-      this.token = loginResult.data.token;
-      this.hasadmin = loginResult.data.user_roles.includes('administrator').toString()
+    ) {
+      const isAdmin = loginResult.data.user_roles.includes('administrator').toString();
+      if (isAdmin) {
+        this.token = loginResult.data.token;
+      } else {
+        this.removeToken();
+      }
       const loginStatus = await this.checkLoginStatus();
       this.loginStatusChange$.next(loginStatus);
       return loginStatus;
@@ -82,7 +75,6 @@ export class LoginService {
 
   removeToken(): void {
     this.token = '';
-    this.hasadmin = 'false';
     this.loginStatusChange$.next(false);
   }
 }
