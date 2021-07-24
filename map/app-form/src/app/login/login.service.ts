@@ -40,7 +40,7 @@ export class LoginService {
       'wordpress-jwt',
       (token || ''),
       1,
-     undefined,
+      undefined,
       undefined,
       true,
       'Strict'
@@ -57,7 +57,8 @@ export class LoginService {
       && loginResult.data?.token
       && loginResult.data?.user_roles
     ) {
-      const isAdmin = loginResult.data.user_roles.includes('administrator').toString();
+      const roles = loginResult.data.user_roles;
+      const isAdmin = roles.includes('administrator').toString();
       if (isAdmin) {
         this.token = loginResult.data.token;
       } else {
