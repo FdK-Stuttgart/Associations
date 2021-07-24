@@ -134,6 +134,13 @@ See also how to [Install and configure WordPress](https://ubuntu.com/tutorials/i
    ```php
    define('JWT_AUTH_SECRET_KEY', '<...>');
    ```
+   
+   If you want to call Wordpress' JWT auth api from another domain, you have to add the following line to the `wp-config.php` as well:
+   
+   ```php
+   define('JWT_AUTH_CORS_ENABLE', true);
+   ```
+   
    The test:
    ```bash
    curl -H 'Content-Type: application/json' \
@@ -169,6 +176,16 @@ See also how to [Install and configure WordPress](https://ubuntu.com/tutorials/i
    ```json
    {"token":"...","user_email":"<some email>","user_nicename":"wordpress","user_display_name":"wordpress","user_roles":["administrator"]}
    ```
+
+1. In order to invalidate the JWT Token after 8 hours, add the following filter to the Wordpress Theme's `functions.php` (located in `wp-content/themes/{your-theme-name}/functions.php`):
+
+```php 
+function jwt_auth_expire_8_hours() {
+  return time() + (DAY_IN_SECONDS / 3);
+  }
+add_filter('jwt_auth_expire', 'jwt_auth_expire_8_hours');
+```
+
 
 ### Angular Apps
 
