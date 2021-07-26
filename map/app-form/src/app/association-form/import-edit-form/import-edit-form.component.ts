@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Output} from '@angular/core';
+import {Component, EventEmitter, Output, OnInit} from '@angular/core';
 import {Association} from '../../model/association';
 import {DropdownOption} from '../../model/dropdown-option';
 import {MysqlPersistService} from '../../services/mysql-persist.service';
@@ -17,8 +17,8 @@ import * as XLSX from 'xlsx'
     MessageService
   ]
 })
-export class ImportEditFormComponent {
 
+export class ImportEditFormComponent implements OnInit {
   districtOptions: DropdownOption[] = [];
   activitiesOptions: DropdownOption[] = [];
 
@@ -27,12 +27,6 @@ export class ImportEditFormComponent {
   @Output() blockUi: EventEmitter<{ block: boolean, message?: string }>
     = new EventEmitter<{ block: boolean, message?: string }>();
 
-  private async initForm(): Promise<void> {
-    this.districtOptions = (await this.mySqlQueryService.getDistrictOptions())?.data || [];
-    this.activitiesOptions = (await this.mySqlQueryService.getActivitiesOptions())?.data || [];
-    this.emitBlockUi(true);
-  }
-
   constructor(
     private mySqlQueryService: MysqlQueryService,
     private mySqlPersistService: MysqlPersistService,
@@ -40,9 +34,9 @@ export class ImportEditFormComponent {
     private loginService: LoginService) {
   }
 
+  // TODO it looks like submit() is not needed
   async submit(): Promise<void> {
     this.emitBlockUi(true, 'Import der Vereinstabelle...');
-
     const loggedIn = await this.loginService.checkLoginStatus();
     if (!loggedIn) {
       this.messageService.add({
@@ -56,7 +50,13 @@ export class ImportEditFormComponent {
     }
   }
 
-  importTable(event) {
+  async ngOnInit(): Promise<void> {
+    this.districtOptions = (await this.mySqlQueryService.getDistrictOptions())?.data || [];
+    this.activitiesOptions = (await this.mySqlQueryService.getActivitiesOptions())?.data || [];
+  }
+
+  async importTable(event) : Promise<void> {
+    // console.log("this.districtOptions", this.districtOptions)
     for(let file of event.files) {
       this.uploadedFiles.push(file)
       const reader: FileReader = new FileReader()
@@ -68,10 +68,8 @@ export class ImportEditFormComponent {
         const wsname: string = wb.SheetNames[0]
         const ws: XLSX.WorkSheet = wb.Sheets[wsname]
 
-        // const data = XLSX.utils.sheet_to_json(ws) // to get 2d array pass 2nd parameter as object {header: 1}
-        // console.log(data) // Data will be logged in array format containing objects
         const assocs : Association[] = getAssociations(
-          this.districtOptions
+            this.districtOptions
           , this.activitiesOptions
           , ws)
 

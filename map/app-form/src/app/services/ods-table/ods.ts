@@ -312,6 +312,8 @@ export function calcReadTable(sheet) {
     //         '; _idx: ' + associations[y][_idx] +
     //         '; _name: ' + associations[y][_name] +
     //         '; _address: '+addresses[y][_address]
+    //         '; _cityDistrict: '+districts[y][_cityDistrict] +
+    //         ''
     // )
 
     let m: IHash = {};
