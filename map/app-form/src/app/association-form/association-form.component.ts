@@ -80,7 +80,8 @@ export class AssociationFormComponent implements OnInit, OnDestroy {
         icon: 'pi pi-trash',
         command: async () => {
           await this.deleteAllAssociations();
-        }
+        },
+        disabled: !this.loginService.token,
       },
       {
         label: 'Eingaben zurücksetzen',
