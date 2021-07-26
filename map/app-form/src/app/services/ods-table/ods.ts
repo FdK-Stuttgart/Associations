@@ -17,13 +17,12 @@ function range(n) {
     return Array.from(Array(n).keys())
 }
 
-function drop(myArray, n) {
-    const myClonedArray = Object.assign([], myArray)
-    return myClonedArray.splice(n,myArray.length)
-}
-
-function sheetRows(sheet) {
-    return drop(range(getRowCount(sheet)), 2) // WTF? indexing starts from 1?!?
+function sheetRowIndexes(sheet) {
+  const rowCount = getRowCount(sheet)
+  const arrSheetRange = range(rowCount)
+  // sheet line numbers start from 1 and we need to skip the header
+  const shiftedArr = arrSheetRange.map((v:number) => v + 2)
+  return shiftedArr
 }
 
 function textAtPosition(sheet, p, row) {
@@ -87,7 +86,7 @@ function cleanup(a) {
     // else {
     //     return s
     // }
-    return null;
+    return null
 }
 
 export interface IHash {
@@ -99,13 +98,13 @@ export interface IHash {
 export const _idx = '_idx'
 export const _address ='_address'
 
-function calcAddresses(sheet) {
+function calcAddresses(sheet, rows) {
     const f1 = (a: string) => replaceAll(a, '\n', ', ')
     const f2 = cleanup
     const f3 = (row: number) => address(sheet, row)
     const pipedFunction = pipe(f3, f2, f1)
 
-    const vals = sheetRows(sheet).map(pipedFunction)
+    const vals = rows.map(pipedFunction)
     return vals.map((s, i) => {
         let hm: IHash = {};
         hm[_idx] = rowNr(i)
@@ -115,13 +114,13 @@ function calcAddresses(sheet) {
 }
 
 export const _addr_recv ='_addr_recv'
-function calcAddressReceiver(sheet) {
+function calcAddressReceiver(sheet, rows) {
     const f1 = (a: string) => replaceAll(a, '\n', ', ')
     const f2 = cleanup
     const f3 = (row: number) => address_receiver(sheet, row)
     const pipedFunction = pipe(f3, f2, f1)
 
-    const vals = sheetRows(sheet).map(pipedFunction)
+    const vals = rows.map(pipedFunction)
     return vals.map((s, i) => {
         let hm: IHash = {};
         hm[_idx] = rowNr(i)
@@ -135,13 +134,13 @@ function association(sheet, row) {
 }
 
 export const _name = '_name'
-function calcAssociations(sheet) {
+function calcAssociations(sheet, rows) {
     const f1 = (a: string) => replaceAll(a, '\n', ' ')
     const f2 = cleanup
     const f3 = (row: number) => association(sheet, row)
     const pipedFunction = pipe(f3, f2, f1)
 
-    const vals = sheetRows(sheet).map(pipedFunction)
+    const vals = rows.map(pipedFunction)
     return vals.map((s, i) => {
         let hm: IHash = {};
         hm[_idx] = rowNr(i)
@@ -155,13 +154,13 @@ function cityDistrict(sheet, row) {
 }
 
 export const _cityDistrict = '_cityDistrict'
-function calcDistricts(sheet) {
+function calcDistricts(sheet, rows) {
     const f1 = identity
     const f2 = cleanup
     const f3 = (row: number) => cityDistrict(sheet, row)
     const pipedFunction = pipe(f3, f2, f1)
 
-    const vals = sheetRows(sheet).map(pipedFunction)
+    const vals = rows.map(pipedFunction)
     return vals.map((s, i) => {
         let hm: IHash = {};
         hm[_idx] = rowNr(i)
@@ -175,13 +174,13 @@ function tableCoordinates(sheet, row) {
 }
 
 export const _coordinates = '_coordinates'
-function calcCoordinates(sheet) {
+function calcCoordinates(sheet, rows) {
     const f1 = identity
     const f2 = cleanup
     const f3 = (row: number) => tableCoordinates(sheet, row)
     const pipedFunction = pipe(f3, f2, f1)
 
-    const vals = sheetRows(sheet).map(pipedFunction)
+    const vals = rows.map(pipedFunction)
     return vals.map((s, i) => {
         let hm: IHash = {};
         hm[_idx] = rowNr(i)
@@ -195,13 +194,13 @@ function contact(sheet, row) {
 }
 
 export const _contact = '_contact'
-function calcContacts(sheet) {
+function calcContacts(sheet, rows) {
     const f1 = identity
     const f2 = cleanup
     const f3 = (row: number) => contact(sheet, row)
     const pipedFunction = pipe(f3, f2, f1)
 
-    const vals = sheetRows(sheet).map(pipedFunction)
+    const vals = rows.map(pipedFunction)
     return vals.map((s, i) => {
         let hm: IHash = {};
         hm[_idx] = rowNr(i)
@@ -215,13 +214,13 @@ function logo(sheet, row) {
 }
 
 export const _logo = '_logo'
-function calcLogos(sheet) {
+function calcLogos(sheet, rows) {
     const f1 = identity
     const f2 = cleanup
     const f3 = (row: number) => logo(sheet, row)
     const pipedFunction = pipe(f3, f2, f1)
 
-    const vals = sheetRows(sheet).map(pipedFunction)
+    const vals = rows.map(pipedFunction)
     return vals.map((s, i) => {
         let hm: IHash = {};
         hm[_idx] = rowNr(i)
@@ -235,13 +234,13 @@ function webPage(sheet, row) {
 }
 
 export const _webPage = '_webPage'
-function calcWebPages(sheet) {
+function calcWebPages(sheet, rows) {
     const f1 = identity
     const f2 = cleanup
     const f3 = (row: number) => webPage(sheet, row)
     const pipedFunction = pipe(f3, f2, f1)
 
-    const vals = sheetRows(sheet).map(pipedFunction)
+    const vals = rows.map(pipedFunction)
     return vals.map((s, i) => {
         let hm: IHash = {};
         hm[_idx] = rowNr(i)
@@ -255,13 +254,13 @@ function goal(sheet, row) {
 }
 
 export const _goal = '_goal'
-function calcGoals(sheet) {
+function calcGoals(sheet, rows) {
     const f1 = identity
     const f2 = cleanup
     const f3 = (row: number) => goal(sheet, row)
     const pipedFunction = pipe(f3, f2, f1)
 
-    const vals = sheetRows(sheet).map(pipedFunction)
+    const vals = rows.map(pipedFunction)
     return vals.map((s, i) => {
         let hm: IHash = {};
         hm[_idx] = rowNr(i)
@@ -275,13 +274,13 @@ function activity(sheet, row) {
 }
 
 export const _activity = '_activity'
-function calcActivities(sheet) {
+function calcActivities(sheet, rows) {
     const f1 = identity
     const f2 = cleanup
     const f3 = (row: number) => activity(sheet, row)
     const pipedFunction = pipe(f3, f2, f1)
 
-    const vals = sheetRows(sheet).map(pipedFunction)
+    const vals = rows.map(pipedFunction)
     return vals.map((s, i) => {
         let hm: IHash = {};
         hm[_idx] = rowNr(i)
@@ -292,16 +291,17 @@ function calcActivities(sheet) {
 
 export const _desc = 'desc'
 export function calcReadTable(sheet) {
-  const associations = calcAssociations(sheet)
-  const addresses    = calcAddresses(sheet)
-  const addr_recv    = calcAddressReceiver(sheet)
-  const districts    = calcDistricts(sheet)
-  const contacts     = calcContacts(sheet)
-  const webPages     = calcWebPages(sheet)
-  const goals        = calcGoals(sheet)
-  const activities   = calcActivities(sheet)
-  const coordinates  = calcCoordinates(sheet)
-  const logos        = calcLogos(sheet)
+  const rowIndexes   = sheetRowIndexes(sheet)
+  const associations = calcAssociations(sheet, rowIndexes)
+  const addresses    = calcAddresses(sheet, rowIndexes)
+  const addr_recv    = calcAddressReceiver(sheet, rowIndexes)
+  const districts    = calcDistricts(sheet, rowIndexes)
+  const contacts     = calcContacts(sheet, rowIndexes)
+  const webPages     = calcWebPages(sheet, rowIndexes)
+  const goals        = calcGoals(sheet, rowIndexes)
+  const activities   = calcActivities(sheet, rowIndexes)
+  const coordinates  = calcCoordinates(sheet, rowIndexes)
+  const logos        = calcLogos(sheet, rowIndexes)
 
   let mm = new Array()
 
