@@ -357,29 +357,6 @@ export class AssociationFormComponent implements OnInit, OnDestroy {
     await this.exportImportService.exportAssociations(this.associations, this.districtOptions, this.activitiesOptions);
   }
 
-  async uploadData(): Promise<void> {
-    console.log('this.uploadedFiles.length: ' + this.uploadedFiles.length);
-    // await this.mySqlPersistService.importGoogleTable().toPromise()
-    //   .then(() => {
-    //     // this.emitBlockUi(false);
-    //     this.messageService.add({
-    //       severity: 'success',
-    //       summary: 'Import erfolgreicht.',
-    //       key: 'editFormToast'  // ???
-    //     });
-    //     // this.reload.emit({id: this.associationForm.value.id, showDialog: false});
-    //   })
-    //   .catch((reason) => {
-    //     // this.emitBlockUi(false);
-    //     this.messageService.add({
-    //       severity: 'error',
-    //       summary: 'Import fehlgeschlagen.',
-    //       detail: JSON.stringify(reason),
-    //       key: 'editFormToast' // ???
-    //     });
-    //   });
-  }
-
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
     this.editFormChangeSub?.unsubscribe();
