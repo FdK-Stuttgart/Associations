@@ -219,7 +219,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
           image: new CircleStyle({
             radius: 15,
             stroke: new Stroke({
-              color: '#231f20',
+              color: 'white',
             }),
             fill: new Fill({
               color: allIncluded ? baseColor : isFiltered ? '#B47172' : '#989898',
@@ -227,10 +227,11 @@ export class OsmMapComponent implements OnInit, OnDestroy {
           }),
           text: new Text({
             text: size.toString(),
-            font: '16px Alegreya',
+            font: '14px Alegreya',
             fill: new Fill({
               color: '#fff'
             }),
+            offsetY: 2, // default: 0
           }),
         });
       } else {
