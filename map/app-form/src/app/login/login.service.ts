@@ -57,7 +57,10 @@ export class LoginService {
       && loginResult.data?.token
       && loginResult.data?.user_roles
     ) {
-      if (loginResult.data.user_roles.includes('administrator')) {
+      if (
+           loginResult.data.user_roles.includes('administrator')
+        || loginResult.data.user_roles.includes('editor')
+         ) {
         this.token = loginResult.data.token;
       } else {
         this.removeToken();
