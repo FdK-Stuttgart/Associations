@@ -35,7 +35,10 @@ export class LoginService {
   }
 
   set token(token: string | undefined) {
-    // Attention: Cookies can be modified using Browser DevTools. Be careful when using as a storage for security-relevant information.
+    // Attention: Cookies can be modified using Browser DevTools. Be careful
+    // when using as a storage for security-relevant information.
+
+    // TODO info about cookies for the user? (it's just an internal tool)
     this.cookieService.set(
       'wordpress-jwt',
       (token || ''),
