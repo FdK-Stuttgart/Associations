@@ -36,8 +36,7 @@ export class ExportImportService {
         ...links,
         ...socialMedia,
         ...images,
-        districtList: this.extractOptions(a.districtList, districts),
-        activityList: this.extractOptions(a.activityList, activities)
+        districtList: this.extractOptions(a.districtList, districts)
       };
       if (typeof flatAssociation.lat === 'string') {
         flatAssociation.lat = parseFloat(flatAssociation.lat);
@@ -87,8 +86,7 @@ export class ExportImportService {
         contacts: 12,
         links: 13,
         socialMedia: 14,
-        districtList: 15,
-        activityList: 16
+        districtList: 15
       };
 
       const aKey = a.startsWith('contact') ? 'contacts'

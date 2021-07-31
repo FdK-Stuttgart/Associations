@@ -745,43 +745,6 @@
           </div>
         </div>
       </div>
-
-      <div class="p-field col-xs-12 col-md-6">
-        <label for="activities-input">Tätigkeitsfelder</label>
-        <app-grouped-multi-select
-          [options]="activitiesOptions"
-          [formControl]="associationForm.controls.activityList"
-          id="activities-input"
-          [placeholder]="'Tätigkeitsfelder auswählen...'"
-          [labelPlural]="'Tätigkeitsfelder'"
-          [selectTopOptions]="false"
-          [styleClass]="'full-width'"
-        >
-        </app-grouped-multi-select>
-
-        <div class="row" style="margin-top: 12px">
-          <div class="col-6">
-            <a
-              [routerLink]="'/options/activities'"
-              [target]="'_blank'"
-              class="no-decoration"
-            >
-              <p-button [styleClass]="'p-button-text'">
-                <i class="pi pi-external-link"></i>&nbsp;&nbsp;Schlagwörter
-                bearbeiten
-              </p-button>
-            </a>
-          </div>
-          <div class="col-6">
-            <p-button
-              (onClick)="reloadOptions('activities')"
-              [styleClass]="'p-button-text'"
-            >
-              <i class="pi pi-spinner"></i>&nbsp;&nbsp;Schlagwörter neu laden
-            </p-button>
-          </div>
-        </div>
-      </div>
     </div>
   </form>
 
@@ -1004,9 +967,7 @@
           <div
             *ngIf="
               (associationForm.value.districtList &&
-                associationForm.value.districtList.length > 0) ||
-              (associationForm.value.activityList &&
-                associationForm.value.activityList.length > 0)
+                associationForm.value.districtList.length > 0)
             "
           >
             <h2>Schlagwörter</h2>
@@ -1030,29 +991,6 @@
                   "
                 >
                   {{ district.label }}
-                </div>
-              </div>
-            </div>
-
-            <div
-              class="association-activities"
-              *ngIf="
-                associationForm.value.activityList &&
-                associationForm.value.activityList.length > 0
-              "
-            >
-              <h3>Tätigkeitsfelder</h3>
-              <div class="association-chips-container">
-                <div
-                  class="association-chips"
-                  *ngFor="
-                    let activity of getSubOptions(
-                      this.activitiesOptions,
-                      associationForm.value.activityList
-                    )
-                  "
-                >
-                  {{ activity.label }}
                 </div>
               </div>
             </div>

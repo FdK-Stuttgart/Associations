@@ -55,15 +55,6 @@
                                 [styleClass]="'sidebar-input-full-width input-margin-bottom'"
                                 [selectTopOptions]="false">
       </app-grouped-multi-select>
-
-      <app-grouped-multi-select [options]="activitiesOptions"
-                                [ngModel]="selectedActivities"
-                                (ngModelChange)="selectActivities($event)"
-                                [placeholder]="'Tätigkeitsfelder auswählen...'"
-                                [labelPlural]="'Tätigkeitsfelder'"
-                                [styleClass]="'sidebar-input-full-width'"
-                                [selectTopOptions]="false">
-      </app-grouped-multi-select>
     </div>
 
     <h3>
@@ -77,8 +68,7 @@
       </ng-template>
     </h3>
 
-    <div class="full-width" *ngIf="(selectedDistricts?.length || selectedActivities?.length
-                                   || (!!autoComplete.inputEL?.nativeElement?.value && autoComplete.inputEL?.nativeElement?.value !== ''))">
+    <div class="full-width" *ngIf="(selectedDistricts?.length || (!!autoComplete.inputEL?.nativeElement?.value && autoComplete.inputEL?.nativeElement?.value !== ''))">
       <div class="filter-chips">
         <span class="mini">Filter:&nbsp;</span>
         <div *ngIf="!!autoComplete.inputEL?.nativeElement?.value && autoComplete.inputEL?.nativeElement?.value !== ''"
@@ -91,11 +81,6 @@
           class="pi pi-times mini-button"
           (click)="resetDistrictsFilter()"></i>
         </div>
-        <div class="filter-chip" *ngIf="selectedActivities?.length">
-          Tätigkeitsfelder ({{ getSubOptions(selectedActivities, activitiesOptions).length }}) <i
-          class="pi pi-times mini-button"
-          (click)="resetActivitiesFilter()"></i>
-        </div>
       </div>
     </div>
 
@@ -106,8 +91,7 @@
     </app-associations-list>
 
 
-    <div *ngIf="(selectedDistricts?.length || selectedActivities?.length
-                || (!!autoComplete.inputEL?.nativeElement?.value && autoComplete.inputEL?.nativeElement?.value !== ''))"
+    <div *ngIf="(selectedDistricts?.length || (!!autoComplete.inputEL?.nativeElement?.value && autoComplete.inputEL?.nativeElement?.value !== ''))"
          class="clear-button">
       <p-button (click)="clearFilters();">
         Filter löschen

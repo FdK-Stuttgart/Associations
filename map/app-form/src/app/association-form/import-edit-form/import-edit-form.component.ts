@@ -30,7 +30,6 @@ export class ImportEditFormComponent implements OnInit {
   ];
 
   districtOptions: DropdownOption[] = [];
-  activitiesOptions: DropdownOption[] = [];
 
   uploadedFiles: any[] = [];
 
@@ -47,7 +46,6 @@ export class ImportEditFormComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.districtOptions = (await this.mySqlQueryService.getDistrictOptions())?.data || [];
-    this.activitiesOptions = (await this.mySqlQueryService.getActivitiesOptions())?.data || [];
   }
 
   async importTable(event): Promise<void> {

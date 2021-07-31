@@ -83,22 +83,11 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
         }
       },
       {
-        label: 'Schlagwörter bearbeiten',
+        label: 'Aktivitätsgebiete bearbeiten',
         icon: 'pi pi-tags',
-        items: [
-          {
-            label: 'Tätigkeitsfelder bearbeiten',
-            command: async () => {
-              this.reset('activities');
-            }
-          },
-          {
-            label: 'Aktivitätsgebiete bearbeiten',
-            command: async () => {
-              this.reset('districts');
-            }
-          }
-        ]
+        command: async () => {
+          this.reset('districts');
+        }
       },
       {
         label: 'Ausloggen',
@@ -146,10 +135,7 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
     this.addedIndex = undefined;
 
     this.disableCanDeactivate = true;
-    if (this.optionType === 'activities') {
-      this.options = getInternalGroupedDropdownOptions((await this.mySqlQueryService.getActivitiesOptions())?.data || []);
-      await this.router.navigate(['/options/activities']);
-    } else if (this.optionType === 'districts') {
+    if (this.optionType === 'districts') {
       this.options = getInternalGroupedDropdownOptions((await this.mySqlQueryService.getDistrictOptions())?.data || []);
       await this.router.navigate(['/options/districts']);
     }
@@ -234,7 +220,7 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
       header: 'Löschen?',
       message: `Möchten Sie diese Option wirklich löschen?<br><br>Wenn Sie Schlagwörter-Kategorien verändern oder `
         + `löschen,<br>kann dies zu fehlerhaften Zuordnungen von Vereinen zu <br>`
-        + `${this.optionType === 'activities' ? 'Tätigkeitsfeldern' : (this.optionType === 'districts' ? 'Aktivitätsgebieten' : 'Schlagwörtern')}`
+        + `${(this.optionType === 'districts' ? 'Aktivitätsgebieten' : 'Schlagwörtern')}`
         + ` führen!`,
       acceptLabel: 'OK',
       rejectLabel: 'Abbrechen',
@@ -372,27 +358,7 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
     }).sort((a: any, b: any) =>
       !a.category && !!b.category ? -1 : !!a.category && !b.category ? 1 : 0
     );
-    if (this.optionType === 'activities') {
-      await this.mySqlPersistService.createActivityOptions(options).toPromise()
-        .then(async () => {
-          this.blocked = false;
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Schlagwörter wurden gespeichert.',
-            key: 'editFormToast'
-          });
-          await this.reinitForm();
-        })
-        .catch((reason) => {
-          this.blocked = false;
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Schlagwörter konnte nicht gespeichert werden.',
-            detail: JSON.stringify(reason),
-            key: 'editFormToast'
-          });
-        });
-    } else if (this.optionType === 'districts') {
+    if (this.optionType === 'districts') {
       await this.mySqlPersistService.createDistrictOptions(options).toPromise()
         .then(async () => {
           this.blocked = false;
@@ -517,7 +483,7 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
           message: `Wenn Sie eine Unterkategorie in eine übergeordnete Kategorie abändern oder<br>`
             + `eine übergeordnete Kategorie in eine Unterkategorie verwandeln, kann dies zu<br>`
             + `fehlerhaften Zuordnungen von `
-            + `${this.optionType === 'activities' ? 'Tätigkeitsfeldern' : (this.optionType === 'districts' ? 'Aktivitätsgebieten' : 'Schlagwörtern')} führen!`,
+            + `${(this.optionType === 'districts' ? 'Aktivitätsgebieten' : 'Schlagwörtern')} führen!`,
           acceptLabel: 'OK',
           rejectLabel: 'Abbrechen',
           closeOnEscape: true,

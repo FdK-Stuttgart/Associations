@@ -90,7 +90,6 @@ export class AssociationEditFormComponent implements OnChanges, OnDestroy {
   activityForm: FormGroup;
 
   districtOptions: DropdownOption[] = [];
-  activitiesOptions: DropdownOption[] = [];
 
   isPublicAddress = false;
 
@@ -157,7 +156,6 @@ export class AssociationEditFormComponent implements OnChanges, OnDestroy {
     this.emitBlockUi(true, 'Verein wird abgerufen...');
 
     this.districtOptions = (await this.mySqlQueryService.getDistrictOptions())?.data || [];
-    this.activitiesOptions = (await this.mySqlQueryService.getActivitiesOptions())?.data || [];
 
     if (!this.isNew) {
       const httpResponse: MyHttpResponse<Association[]> = (await this.mySqlQueryService.getAssociations());
@@ -227,8 +225,7 @@ export class AssociationEditFormComponent implements OnChanges, OnDestroy {
       socialMedia: new FormArray([]),
       goals: this.goalsForm,
       activities: this.activityForm,
-      districtList: new FormControl(this.association?.districtList || []),
-      activityList: new FormControl(this.association?.activityList || [])
+      districtList: new FormControl(this.association?.districtList || [])
     });
 
     if (this.association?.contacts?.length) {
@@ -728,9 +725,6 @@ export class AssociationEditFormComponent implements OnChanges, OnDestroy {
     switch (optionType) {
       case 'districts':
         this.districtOptions = (await this.mySqlQueryService.getDistrictOptions())?.data || [];
-        break;
-      case 'activities':
-        this.activitiesOptions = (await this.mySqlQueryService.getActivitiesOptions())?.data || [];
         break;
     }
     this.emitBlockUi(false);
