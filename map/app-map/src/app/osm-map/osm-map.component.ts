@@ -56,9 +56,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
 
   advancedSearchVisible = false;
   districtOptions: DropdownOption[] = [];
-  activitiesOptions: DropdownOption[] = [];
   selectedDistricts: any[] = [];
-  selectedActivities: any[] = [];
 
   map?: Map;
   clusterSource?: VectorSource;
@@ -104,7 +102,6 @@ export class OsmMapComponent implements OnInit, OnDestroy {
     ) : [];
 
     this.districtOptions = (await this.mySqlQueryService.getDistrictOptions())?.data || [];
-    this.activitiesOptions = (await this.mySqlQueryService.getActivitiesOptions())?.data || [];
 
     if (!this.associations?.length) {
       this.messageService.add({
@@ -246,7 +243,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
               // this.getActiveMarkerImgColor(color)
               this.getActiveMarkerImg(noPubAddr)
               : this.getInactiveMarkerImg(noPubAddr),
-            imgSize: [48, 48],
+            imgSize: [30, 40],
             anchor: [0.5, 1]
           })
         });
@@ -386,7 +383,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * filters the association list (filtered by search string, activity options and district options).
+   * filters the association list (filtered by search string and district options).
    * @param queryString if the filter operation is triggered by a change event in the autocomplete input, use the input query string to
    * filter the associations.
    */
@@ -434,25 +431,12 @@ export class OsmMapComponent implements OnInit, OnDestroy {
         });
     }
 
-    if (this.selectedActivities?.length || this.selectedDistricts?.length) {
+    if (this.selectedDistricts?.length) {
 
       filteredResult = filteredResult.filter((s: Association) => {
-        let filtered = true;
-        if (this.selectedDistricts?.length) {
-          filtered = s.districtList?.some((value: any) =>
-            this.selectedDistricts.includes(value)
-          ) ?? false;
-          if (!filtered) {
-            return filtered;
-          }
-        }
-
-        if (this.selectedActivities?.length) {
-          filtered = s.activityList?.some((value: any) =>
-            this.selectedActivities.includes(value)
-          ) ?? false;
-        }
-        return filtered;
+        return !!s.districtList?.some((value: any) =>
+          this.selectedDistricts.includes(value)
+        );
       });
     }
     this.filteredAssociations = filteredResult;
@@ -527,7 +511,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
    */
   getActiveMarkerImg(noPubAddr: boolean): HTMLImageElement {
     const markerImg: HTMLImageElement = this.renderer2.createElement('img');
-    const attr = noPubAddr ? 'assets/pin-DeepSkyBlue.png' : 'assets/pin-prod.png';
+    const attr = noPubAddr ? 'assets/pin-addressless.png' : 'assets/pin-prod.png';
     markerImg.setAttribute('src', attr);
     return markerImg;
   }
@@ -839,20 +823,10 @@ export class OsmMapComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * select activities (advanced search)
-   * @param value the activities selected from the grouped multi-select component
-   */
-  selectActivities(value: any): void {
-    this.selectedActivities = value;
-    this.filterAssociations();
-  }
-
-  /**
    * clears all search filters
    */
   clearFilters(): void {
     this.selectedDistricts = [];
-    this.selectedActivities = [];
     this.clearAutocomplete();
     this.filterAssociations();
   }
@@ -870,14 +844,6 @@ export class OsmMapComponent implements OnInit, OnDestroy {
    */
   resetDistrictsFilter(): void {
     this.selectedDistricts = [];
-    this.filterAssociations();
-  }
-
-  /**
-   * resets the activities filter
-   */
-  resetActivitiesFilter(): void {
-    this.selectedActivities = [];
     this.filterAssociations();
   }
 

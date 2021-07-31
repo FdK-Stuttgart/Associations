@@ -16,17 +16,18 @@ import {MenubarModule} from 'primeng/menubar';
 import {CheckboxModule} from 'primeng/checkbox';
 import {InputSwitchModule} from 'primeng/inputswitch';
 import {FileUploadModule} from 'primeng/fileupload';
-
 import {AssociationEditFormComponent} from './association-edit-form/association-edit-form.component';
-import {OptionsEditFormComponent } from './options-edit-form/options-edit-form.component';
+import {OptionsEditFormComponent} from './options-edit-form/options-edit-form.component';
 import {ImportEditFormComponent} from './import-edit-form/import-edit-form.component';
 
 
 @NgModule({
-  declarations: [  AssociationFormComponent
-                 , AssociationEditFormComponent
-                 , OptionsEditFormComponent
-                 , ImportEditFormComponent],
+  declarations: [
+    AssociationFormComponent,
+    AssociationEditFormComponent,
+    OptionsEditFormComponent,
+    ImportEditFormComponent
+  ],
   imports: [
     CommonModule,
     FormsModule,
@@ -43,8 +44,8 @@ import {ImportEditFormComponent} from './import-edit-form/import-edit-form.compo
     RouterModule,
     MenubarModule,
     CheckboxModule,
-    InputSwitchModule
-    ,FileUploadModule
+    InputSwitchModule,
+    FileUploadModule
   ]
 })
 export class AssociationFormModule {

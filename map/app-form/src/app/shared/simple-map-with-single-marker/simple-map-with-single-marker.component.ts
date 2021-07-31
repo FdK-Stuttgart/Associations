@@ -70,7 +70,7 @@ export class SimpleMapWithSingleMarkerComponent implements OnInit, OnChanges, On
         image: new Icon({
           anchor: [0.5, 1],
           img: this.getMarkerActiveElement(),
-          imgSize: [48, 48],
+          imgSize: [30, 40],
           anchorXUnits: IconAnchorUnits.FRACTION,
           anchorYUnits: IconAnchorUnits.FRACTION
         })
@@ -150,7 +150,7 @@ export class SimpleMapWithSingleMarkerComponent implements OnInit, OnChanges, On
 
   private getMarkerActiveElement(): HTMLImageElement {
     const markerImg: HTMLImageElement = this.renderer2.createElement('img');
-    markerImg.setAttribute('src', 'assets/marker-small.png');
+    markerImg.setAttribute('src', 'assets/pin-prod.png');
     return markerImg;
   }
 }

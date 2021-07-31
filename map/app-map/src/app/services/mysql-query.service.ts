@@ -45,7 +45,6 @@ export class MysqlQueryService {
           const associations = res.map((s: any) => {
             return {
               ...s,
-              activityList: s.activityList ? JSON.parse(s.activityList) : [],
               districtList: s.districtList ? JSON.parse(s.districtList) : []
             };
           });
@@ -81,18 +80,6 @@ export class MysqlQueryService {
       );
   }
 
-  private readActivitiesOptions(): Observable<DropdownOption[] | null> {
-    return this.httpClient.get<DropdownOption[]>(`${this.PHP_API_SERVER_PATH}/activities-options/read-activities-options.php`,
-      {headers: this.HEADERS})
-      .pipe(
-        timeout(this.CONNECTION_TIMEOUT),
-        catchError(err => {
-          console.log(('Dropdown-Optionen für Tätigkeitsfelder konnten nicht abgerufen werden.'), err);
-          return throwError(err);
-        })
-      );
-  }
-
   async getDistrictOptions(): Promise<MyHttpResponse<DropdownOption[]>> {
     return await this.readDistrictOptions().toPromise().then(
       (res) => {
@@ -100,29 +87,6 @@ export class MysqlQueryService {
           return {
             success: false,
             errorMessage: 'Keine Dropdown-Optionen für Aktivitätsgebiete gefunden.'
-          };
-        } else {
-          return {
-            data: res,
-            success: true
-          };
-        }
-      },
-      (rej: HttpErrorResponse) => {
-        return {
-          success: false,
-          errorMessage: rej.message
-        };
-      });
-  }
-
-  async getActivitiesOptions(): Promise<MyHttpResponse<DropdownOption[]>> {
-    return await this.readActivitiesOptions().toPromise().then(
-      (res) => {
-        if (!res || !res.length) {
-          return {
-            success: false,
-            errorMessage: 'Keine Dropdown-Optionen für Tätigkeitsfelder gefunden.'
           };
         } else {
           return {

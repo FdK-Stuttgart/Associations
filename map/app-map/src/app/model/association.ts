@@ -23,7 +23,6 @@ export interface Association extends Address, LatLng {
   links?: Link[];
   socialMedia?: SocialMediaLink[];
   images?: Image[];
-  activityList?: any[];
   districtList?: any[];
 }
 

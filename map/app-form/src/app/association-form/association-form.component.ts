@@ -32,7 +32,6 @@ export class AssociationFormComponent implements OnInit, OnDestroy {
   mainMenuItems: MenuItem[];
 
   districtOptions = [];
-  activitiesOptions = [];
 
   ignoreRouteParamChange = false;
 
@@ -80,8 +79,7 @@ export class AssociationFormComponent implements OnInit, OnDestroy {
         icon: 'pi pi-trash',
         command: async () => {
           await this.deleteAllAssociations();
-        },
-        disabled: !this.loginService.token,
+        }
       },
       {
         label: 'Eingaben zurücksetzen',
@@ -110,33 +108,20 @@ export class AssociationFormComponent implements OnInit, OnDestroy {
         command: async () => {
           await this.router.navigate(['/import']);
         },
-        disabled: !this.loginService.token,
       },
       {
-        label: 'Schlagwörter bearbeiten',
+        label: 'Aktivitätsgebiete bearbeiten',
         icon: 'pi pi-tags',
-        items: [
-          {
-            label: 'Tätigkeitsfelder bearbeiten',
-            command: async () => {
-              this.editOptions('activities');
-            }
-          },
-          {
-            label: 'Aktivitätsgebiete bearbeiten',
-            command: async () => {
-              this.editOptions('districts');
-            }
-          }
-        ]
+        command: async () => {
+          this.editOptions('districts');
+        }
       },
       {
         label: 'Ausloggen',
         icon: 'pi pi-sign-out',
         command: async () => {
           this.loginService.removeToken();
-        },
-        disabled: !this.loginService.loginStatus
+        }
       }
     ];
   }
@@ -159,8 +144,7 @@ export class AssociationFormComponent implements OnInit, OnDestroy {
           };
         } else if (item.label === 'Daten importieren') {
           return {
-            ...item,
-            disabled: !this.loginService.token
+            ...item
           };
         }
         return item;
@@ -184,7 +168,6 @@ export class AssociationFormComponent implements OnInit, OnDestroy {
     }
 
     this.districtOptions = (await this.mySqlQueryService.getDistrictOptions())?.data || [];
-    this.activitiesOptions = (await this.mySqlQueryService.getActivitiesOptions())?.data || [];
 
     this.sub = this.route.params.subscribe(async params => {
       if (params.associationId && !this.ignoreRouteParamChange) {
@@ -312,7 +295,7 @@ export class AssociationFormComponent implements OnInit, OnDestroy {
     this.loadingText = $event.message;
   }
 
-  async editOptions(optionType?: 'activities' | 'districts'): Promise<void> {
+  async editOptions(optionType: 'activities' | 'districts' = 'districts'): Promise<void> {
     if (await this.leavePage()) {
       await this.router.navigate(optionType ? ['/options', optionType] : ['/options']);
     }
@@ -354,7 +337,7 @@ export class AssociationFormComponent implements OnInit, OnDestroy {
   }
 
   async export(): Promise<void> {
-    await this.exportImportService.exportAssociations(this.associations, this.districtOptions, this.activitiesOptions);
+    await this.exportImportService.exportAssociations(this.associations, this.districtOptions);
   }
 
   ngOnDestroy(): void {

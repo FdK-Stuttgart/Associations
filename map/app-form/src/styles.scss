@@ -137,6 +137,10 @@ body *:not(i):not(.pi) {
   }
 }
 
+.p-button .p-button-icon {
+  margin-right: 0 !important;
+}
+
 .p-menuitem-link:not(.p-disabled) .p-menuitem-icon:before, .p-menubar-button i:before {
   color: $blue;
 }

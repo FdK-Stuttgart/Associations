@@ -11,7 +11,7 @@
   </div>
 
   <div class="form-container" *ngIf="!!optionType && options?.length; else selectOptionType">
-    <h1>{{ (optionType === 'activities' ? 'Tätigkeitsfelder-' : optionType === 'districts' ? 'Aktivitätsgebiete-' : '') + 'Schlagwörter bearbeiten' }}</h1>
+    <h1>{{ (optionType === 'districts' ? 'Aktivitätsgebiete-' : '') + 'Schlagwörter bearbeiten' }}</h1>
 
     <form [formGroup]="optionsForm">
       <div *ngIf="getFormGroupsFromFormArray(optionsForm.controls.options)"
@@ -100,20 +100,6 @@
       <p>Kein Schlagwort-Typ ausgewählt.</p>
 
       <div class="option-entries">
-        <div class="option-entry"
-             [ngClass]="{ 'selected': this.optionType === 'activities' }">
-          <a (click)="reset('activities')">
-            <div class="icon-and-text">
-              <div class="icon">
-                <i class="pi pi-pencil"
-                   *ngIf="this.optionType === 'activities'"></i>
-              </div>
-              <div class="text">
-                Tätigkeitsfelder
-              </div>
-            </div>
-          </a>
-        </div>
         <div class="option-entry"
              [ngClass]="{ 'selected': this.optionType === 'districts' }">
           <a (click)="reset('districts')">
