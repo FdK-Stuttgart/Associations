@@ -61,43 +61,34 @@ function escapeHtmlWithNull(unsafe: string): string {
   return unsafe ? escapeHtml(unsafe) : '';
 }
 
-function isSocialMediaLink(url: string): boolean {
-  return url.includes('facebook.com')
-    || url.includes('facebook.de')
-    || url.includes('instagram.com')
-    || url.includes('instagram.de')
-    || url.includes('youtube.com')
-    || url.includes('youtube.de')
-    || url.includes('pinterest.com')
-    || url.includes('pinterest.de')
-    || url.includes('twitter.com')
-    || url.includes('twitter.de')
-    || url.includes('linkedin.com')
-    || url.includes('linked.de')
-    || url.includes('whatsapp.com')
-    || url.includes('snapchat.com');
+function domainRegex(domain: string): RegExp {
+  return new RegExp('.*' + domain + '\\..*', 'i');
 }
 
 function getSocialMediaPlatform(url: string): SocialMediaPlatform {
-  if (url.includes('facebook.com') || url.includes('facebook.de')) {
+  if (url.match(domainRegex('facebook'))) {
     return SocialMediaPlatform.FACEBOOK;
-  } else if (url.includes('instagram.com') || url.includes('instagram.de')) {
+  } else if (url.match(domainRegex('instagram'))) {
     return SocialMediaPlatform.INSTAGRAM;
-  } else if (url.includes('youtube.com') || url.includes('youtube.de')) {
+  } else if (url.match(domainRegex('youtube'))) {
     return SocialMediaPlatform.YOUTUBE;
-  } else if (url.includes('pinterest.com') || url.includes('pinterest.de')) {
+  } else if (url.match(domainRegex('pinterest'))) {
     return SocialMediaPlatform.PINTEREST;
-  } else if (url.includes('twitter.com') || url.includes('twitter.de')) {
+  } else if (url.match(domainRegex('twitter'))) {
     return SocialMediaPlatform.TWITTER;
-  } else if (url.includes('linkedin.com') || url.includes('linkedin.de')) {
+  } else if (url.match(domainRegex('linkedin'))) {
     return SocialMediaPlatform.LINKEDIN;
-  } else if (url.includes('whatsapp.com')) {
+  } else if (url.match(domainRegex('whatsapp'))) {
     return SocialMediaPlatform.WHATSAPP;
-  } else if (url.includes('snapchat.com')) {
+  } else if (url.match(domainRegex('snapchat'))) {
     return SocialMediaPlatform.SNAPCHAT;
   } else {
     return SocialMediaPlatform.OTHER;
   }
+}
+
+function isSocialMediaLink(url: string): boolean {
+  return getSocialMediaPlatform(url) != SocialMediaPlatform.OTHER;
 }
 
 export function noPublicAddress(normAddr: string): boolean {
