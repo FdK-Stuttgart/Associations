@@ -1,5 +1,4 @@
 import * as o from './ods';
-import * as g from './geo';
 import {DropdownOption} from '../../model/dropdown-option';
 import {
   Address,
@@ -105,6 +104,27 @@ export function noPublicAddress(normAddr: string): boolean {
   return !!normAddr.match(/.*keine|Postfach.*/i);
 }
 
+function normalizeAddress(address: string): string {
+  if (address) {
+    // console.log("address: "+address)
+    const adr = o.replaceAll(address, '\n', ', ');
+    // console.log("adr: "+adr)
+    const adrMatch = adr.match(/[0-9] [A-z],/);
+    if (adrMatch) {
+      const oldHouseNr = adrMatch.toString();
+      // replace is replaceFirst
+      const newHouseNr = o.replaceAll(oldHouseNr, ' ', '');
+      return adr.replace(new RegExp(oldHouseNr, 'g'), newHouseNr);
+    }
+    else {
+      return adr;
+    }
+  }
+  else {
+    return address;
+  }
+}
+
 function processTableRowAngular(
   districts: DropdownOption[],
   row: any
@@ -120,7 +140,7 @@ function processTableRowAngular(
   const coordinates = row[o._coordinates];
   const logos = row[o._logo];
   const links = row[o._webPage];
-  const normAddr = g.normalizeAddress(address);
+  const normAddr = normalizeAddress(address);
 
   let outputAddress: Address;
   {
