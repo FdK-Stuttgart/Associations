@@ -2,23 +2,33 @@ import {Component, EventEmitter, Output, OnInit} from '@angular/core';
 import {Association} from '../../model/association';
 import {DropdownOption} from '../../model/dropdown-option';
 import {MysqlPersistService} from '../../services/mysql-persist.service';
-import {MessageService} from 'primeng/api';
+import {ConfirmationService, MenuItem, MessageService} from 'primeng/api';
 import {MysqlQueryService} from '../../services/mysql-query.service';
-import {LoginService} from '../../login/login.service';
-
-import {getAssociations} from './../../services/ods-table/json'
-import * as XLSX from 'xlsx'
+import {getAssociations} from '../../services/ods-table/json';
+import * as XLSX from 'xlsx';
+import {ActivatedRoute, Router} from '@angular/router';
 
 @Component({
   selector: 'app-edit-import-form',
   templateUrl: './import-edit-form.component.html',
   styleUrls: ['./import-edit-form.component.scss'],
   providers: [
-    MessageService
+    MessageService,
+    ConfirmationService,
   ]
 })
 
 export class ImportEditFormComponent implements OnInit {
+  backMenuItems: MenuItem[] = [
+    {
+      label: 'Zurück',
+      icon: 'pi pi-arrow-left',
+      command: async () => {
+        await this.router.navigate(['/associations']);
+      },
+    }
+  ];
+
   districtOptions: DropdownOption[] = [];
   activitiesOptions: DropdownOption[] = [];
 
@@ -31,23 +41,8 @@ export class ImportEditFormComponent implements OnInit {
     private mySqlQueryService: MysqlQueryService,
     private mySqlPersistService: MysqlPersistService,
     private messageService: MessageService,
-    private loginService: LoginService) {
-  }
-
-  // TODO it looks like submit() is not needed
-  async submit(): Promise<void> {
-    this.emitBlockUi(true, 'Import der Vereinstabelle...');
-    const loggedIn = await this.loginService.checkLoginStatus();
-    if (!loggedIn) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Berechtigungsfehler',
-        detail: 'Konnte nicht gespeichert werden. Bitte loggen Sie sich erneut ein.',
-        key: 'editFormToast'
-      });
-      this.emitBlockUi(false);
-      return;
-    }
+    private router: Router,
+    private route: ActivatedRoute) {
   }
 
   async ngOnInit(): Promise<void> {
@@ -55,45 +50,44 @@ export class ImportEditFormComponent implements OnInit {
     this.activitiesOptions = (await this.mySqlQueryService.getActivitiesOptions())?.data || [];
   }
 
-  async importTable(event) : Promise<void> {
-    // console.log("this.districtOptions", this.districtOptions)
-    for(let file of event.files) {
-      this.uploadedFiles.push(file)
-      const reader: FileReader = new FileReader()
-      const bs = reader.readAsBinaryString(file)
+  async importTable(event): Promise<void> {
+    for (const file of event.files) {
+      this.uploadedFiles.push(file);
+      const reader: FileReader = new FileReader();
+      const bs = reader.readAsBinaryString(file);
       reader.onload = (e) => {
-        const binaryResult = reader.result
-        const wb: XLSX.WorkBook = XLSX.read(binaryResult, { type: 'binary' })
+        const binaryResult = reader.result;
+        const wb: XLSX.WorkBook = XLSX.read(binaryResult, {type: 'binary'});
 
-        const wsname: string = wb.SheetNames[0]
-        const ws: XLSX.WorkSheet = wb.Sheets[wsname]
+        const wsname: string = wb.SheetNames[0];
+        const ws: XLSX.WorkSheet = wb.Sheets[wsname];
 
-        const assocs : Association[] = getAssociations(
-            this.districtOptions
-          , this.activitiesOptions
-          , ws)
+        const assocs: Association[] = getAssociations(
+          this.districtOptions,
+          ws
+        );
 
         this.mySqlPersistService.deleteAllAssociations().toPromise()
           .then(() => {
             // console.log("deleteAllAssociations done")
-            let importFailed = false
-            for (let a of assocs) {
+            let importFailed = false;
+            for (const a of assocs) {
               this.mySqlPersistService.createOrUpdateAssociation(a).toPromise()
                 .then(() => {
                   // console.log("Saved", a.name)
                 })
                 .catch((reason) => {
-                  importFailed = true
+                  importFailed = true;
                   this.emitBlockUi(false);
                   this.messageService.add({
                     severity: 'error',
                     summary: a.name + ' konnte nicht gespeichert werden.',
                     detail: JSON.stringify(reason),
                     key: 'editFormToast'
-                  })
-                })
+                  });
+                });
               if (importFailed) {
-                break
+                break;
               }
             }
             if (!importFailed) {
@@ -102,7 +96,7 @@ export class ImportEditFormComponent implements OnInit {
                 severity: 'success',
                 summary: assocs.length + ' Vereine importiert.',
                 key: 'editFormToast'
-              })
+              });
             }
           })
           .catch((reason) => {
@@ -112,9 +106,9 @@ export class ImportEditFormComponent implements OnInit {
               summary: 'Bestehende Vereine konnten nicht gelöscht werden.',
               detail: JSON.stringify(reason),
               key: 'editFormToast'
-            })
-          })
-      }
+            });
+          });
+      };
     }
   }
 
@@ -134,5 +128,4 @@ export class ImportEditFormComponent implements OnInit {
       message
     });
   }
-
 }

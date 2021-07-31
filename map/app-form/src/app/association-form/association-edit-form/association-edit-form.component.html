@@ -124,7 +124,7 @@
         <div class="row p-fluid" *ngIf="isPublicAddress">
           <div class="p-field col-xs-12 col-md-12">
             <label for="address-line-1-input"
-              >Zusätzliche Adresszeilen (optional)</label
+            >Zusätzliche Adresszeilen (optional)</label
             >
             <input
               pInputText
@@ -254,7 +254,7 @@
         >
           <div class="p-field col-xs-12 col-md-6">
             <label for="contact-{{ i }}-name-input"
-              >Name der Kontaktperson / des Ansprechpartners</label
+            >Name der Kontaktperson / des Ansprechpartners</label
             >
             <input
               pInputText
@@ -600,7 +600,7 @@
               [options]="socialMediaOptions"
               [formControl]="linkFormGroup.controls.platform"
               placeholder="Plattform"
-              >#
+            >#
               <ng-template pTemplate="selectedItem">
                 <div *ngIf="linkFormGroup.value.platform">
                   <span
@@ -813,7 +813,7 @@
               *ngFor="let img of associationForm.value.images"
               class="association-image"
             >
-              <img [src]="img.url" [alt]="img.altText" />
+              <img [src]="img.url" [alt]="img.altText"/>
             </div>
           </div>
 
@@ -971,7 +971,7 @@
                     [href]="link.url"
                     [title]="link.linkText || link.url"
                     target="_blank"
-                    >{{ link.linkText || link.url }}</a
+                  >{{ link.linkText || link.url }}</a
                   >
                 </li>
               </div>

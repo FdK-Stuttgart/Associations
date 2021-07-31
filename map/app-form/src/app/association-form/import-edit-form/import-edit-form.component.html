@@ -1,10 +1,20 @@
-Import der Vereinstabelle
+<p-confirmDialog [baseZIndex]="10000"></p-confirmDialog>
 
-<p-fileUpload
+<div class="container">
+  <div class="fixed-menu-container">
+    <p-menubar [model]="backMenuItems"></p-menubar>
+  </div>
+
+  <div class="form-container">
+    <h1>Import der Vereinstabelle</h1>
+
+    <p-fileUpload
       #fileUpload
       name="myfile[]"
       customUpload="true"
       (uploadHandler)="importTable($event)"
     ></p-fileUpload>
 
-<p-toast key="editFormToast"></p-toast>
+    <p-toast key="editFormToast"></p-toast>
+  </div>
+</div>
