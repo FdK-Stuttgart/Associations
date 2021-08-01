@@ -965,33 +965,24 @@
           </div>
 
           <div
+            class="association-districts"
             *ngIf="
-              (associationForm.value.districtList &&
-                associationForm.value.districtList.length > 0)
-            "
-          >
-            <h2>Schlagwörter</h2>
-
-            <div
-              class="association-districts"
-              *ngIf="
                 associationForm.value.districtList &&
                 associationForm.value.districtList.length > 0
               "
-            >
-              <h3>Aktivitätsgebiete</h3>
-              <div class="association-chips-container">
-                <div
-                  class="association-chips"
-                  *ngFor="
+          >
+            <h3>Aktivitätsgebiete</h3>
+            <div class="association-chips-container">
+              <div
+                class="association-chips"
+                *ngFor="
                     let district of getSubOptions(
                       this.districtOptions,
                       associationForm.value.districtList
                     )
                   "
-                >
-                  {{ district.label }}
-                </div>
+              >
+                {{ district.label }}
               </div>
             </div>
           </div>
