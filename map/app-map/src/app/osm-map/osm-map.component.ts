@@ -522,7 +522,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
   getInactiveMarkerImg(noPubAddr: boolean): HTMLImageElement {
     const markerImg: HTMLImageElement = this.renderer2.createElement('img');
     // TODO different colors for inactive associations with no public address?
-    const attr = noPubAddr ? 'assets/pin-inactive-small.png' : 'assets/pin-inactive-small.png';
+    const attr = noPubAddr ? 'assets/pin-addressless-inactive.png' : 'assets/pin-inactive-small.png';
     markerImg.setAttribute('src', attr);
     return markerImg;
   }
