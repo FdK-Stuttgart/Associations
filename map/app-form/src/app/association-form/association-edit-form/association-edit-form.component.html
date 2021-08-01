@@ -859,15 +859,24 @@
               *ngFor="let contact of associationForm.value.contacts"
               class="association-contact"
             >
-              <p class="name">{{ contact.name }}</p>
               <div class="association-contact-row" *ngIf="contact.phone">
                 <span [innerHTML]="getSocialMediaIcon('phone')"></span>
                 <a [href]="telephoneLink(contact.phone)">{{ contact.phone }}</a>
               </div>
+            </div>
+            <div
+              *ngFor="let contact of associationForm.value.contacts"
+              class="association-contact"
+            >
               <div class="association-contact-row" *ngIf="contact.fax">
                 <span [innerHTML]="getSocialMediaIcon('fax')"></span>
                 <a [href]="telephoneLink(contact.fax)">{{ contact.fax }}</a>
               </div>
+            </div>
+            <div
+              *ngFor="let contact of associationForm.value.contacts"
+              class="association-contact"
+            >
               <div class="association-contact-row" *ngIf="contact.mail">
                 <span [innerHTML]="getSocialMediaIcon('mail')"></span>
                 <a href="mailto:{{ contact.mail }}">{{ contact.mail }}</a>

@@ -88,7 +88,7 @@ function getSocialMediaPlatform(url: string): SocialMediaPlatform {
 }
 
 function isSocialMediaLink(url: string): boolean {
-  return getSocialMediaPlatform(url) != SocialMediaPlatform.OTHER;
+  return getSocialMediaPlatform(url) !== SocialMediaPlatform.OTHER;
 }
 
 export function noPublicAddress(normAddr: string): boolean {
@@ -106,12 +106,10 @@ function normalizeAddress(address: string): string {
       // replace is replaceFirst
       const newHouseNr = o.replaceAll(oldHouseNr, ' ', '');
       return adr.replace(new RegExp(oldHouseNr, 'g'), newHouseNr);
-    }
-    else {
+    } else {
       return adr;
     }
-  }
-  else {
+  } else {
     return address;
   }
 }
@@ -173,31 +171,50 @@ function processTableRowAngular(
   };
 
   const associationId: string = uuidv4();
-  const contactId: string = uuidv4();
   const arrContact: Contact[] = [];
   if (contact) {
     const contactDetails = contact.split(/\r?\n/);
     const emails = [];
     const phoneNumbers = [];
+    const faxNumbers = [];
     for (const cdi of contactDetails) {
       if (cdi.match(/@/)) {
         emails.push(cdi);
       } else {
-        phoneNumbers.push(cdi);
+        if (cdi.match(new RegExp(/.*fax.*/, 'i'))) {
+          const faxNo = cdi
+            .replace('Fax:', '')
+            .replace('fax:', '')
+            .replace('Fax', '')
+            .replace('fax', '')
+            .trim();
+          faxNumbers.push(faxNo);
+        } else {
+          const phoneNumber = cdi
+            .replace('Tel:', '')
+            .replace('tel:', '')
+            .replace('Tel.', '')
+            .replace('tel.', '')
+            .replace('Tel', '')
+            .replace('tel', '')
+            .trim();
+          phoneNumbers.push(phoneNumber);
+        }
       }
     }
 
-    // TODO Contact.mail, Contact.phone should be type of TextBlock in case
-    // there are multiple of them
-    const contactOutput: Contact = {
-      id: contactId,
-      name: '',
-      mail: emails.join(', '),
-      phone: phoneNumbers.join(', '),
-      fax: '',
-      associationId
-    };
-    arrContact.push(contactOutput);
+    const maxLength = Math.max(phoneNumbers.length, faxNumbers.length, emails.length);
+    for (let i = 0; i < maxLength; i++) {
+      const contactId: string = uuidv4();
+      arrContact.push({
+        id: contactId,
+        name: '',
+        mail: emails[i] || '',
+        phone: phoneNumbers[i] || '',
+        fax: faxNumbers[i] || '',
+        associationId
+      });
+    }
   }
 
   const arrSocialMediaLink: SocialMediaLink[] = [];

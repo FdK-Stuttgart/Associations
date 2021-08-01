@@ -716,21 +716,26 @@ export class OsmMapComponent implements OnInit, OnDestroy {
       content += `<div class="association-contacts"><h3>Kontaktinformationen</h3>`;
       for (const contact of association.contacts) {
         content += `<div class="association-contact">`;
-        if (contact.name) {
-          content += `<p class="name">${contact.name}</p>`;
-        }
         if (contact.phone) {
           content += `<div class="association-contact">`;
           content += `<div class="association-contact-row">`;
           content += this.getSocialMediaIcon('phone', false);
           content += `<p class="phone"><a href="${telephoneLink(contact.phone)}">${contact.phone}</a></p></div></div>`;
         }
+        content += `</div>`;
+      }
+      for (const contact of association.contacts) {
+        content += `<div class="association-contact">`;
         if (contact.fax) {
           content += `<div class="association-contact">`;
           content += `<div class="association-contact-row">`;
           content += this.getSocialMediaIcon('fax', false);
           content += `<p class="fax"><a href="${telephoneLink(contact.fax)}">${contact.fax}</a></p></div></div>`;
         }
+        content += `</div>`;
+      }
+      for (const contact of association.contacts) {
+        content += `<div class="association-contact">`;
         if (contact.mail) {
           content += `<div class="association-contact">`;
           content += `<div class="association-contact-row">`;
@@ -758,6 +763,18 @@ export class OsmMapComponent implements OnInit, OnDestroy {
       content += `</p></div>`;
     }
 
+    if (association.districtList && association.districtList.length > 0) {
+      content += `<div class="association-active-in"><h3>Aktivitätsgebiete</h3>`;
+      content += `<div class="association-chips-container">`;
+      for (const activeIn of getSubOptions(this.districtOptions, association.districtList)) {
+        content += `<div class="association-chips">`;
+        content += activeIn.label;
+        content += `</div>`;
+      }
+      content += `</div>`;
+      content += `</div>`;
+    }
+
     if (association.links && association.links.length > 0) {
       content += `<div class="association-links"><h3>Links</h3>`;
       for (const link of association.links) {
@@ -776,18 +793,6 @@ export class OsmMapComponent implements OnInit, OnDestroy {
         content += `<a href="${socialMedia.url}" title="${socialMedia.linkText || socialMedia.platform}" target="_blank">${socialMedia.linkText || socialMedia.platform}</a>`;
         content += `</div>`;
       }
-      content += `</div>`;
-    }
-
-    if (association.districtList && association.districtList.length > 0) {
-      content += `<div class="association-active-in"><h3>Aktivitätsgebiete</h3>`;
-      content += `<div class="association-chips-container">`;
-      for (const activeIn of getSubOptions(this.districtOptions, association.districtList)) {
-        content += `<div class="association-chips">`;
-        content += activeIn.label;
-        content += `</div>`;
-      }
-      content += `</div>`;
       content += `</div>`;
     }
 
