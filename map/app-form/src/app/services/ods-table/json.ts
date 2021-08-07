@@ -34,7 +34,7 @@ function getDistricts(stringParts: string[], options: DropdownOption[]): string[
     return options.find(option => {
       return stringPart === option.label || isSynonym(stringPart, option.label);
     });
-  }).filter(o => !!o).map((o: DropdownOption[]) => o.value);
+  }).filter(op => !!op).map((opt: DropdownOption) => opt.value);
 }
 
 function isSynonym(stringPart: string, districtLabel: string): boolean {
