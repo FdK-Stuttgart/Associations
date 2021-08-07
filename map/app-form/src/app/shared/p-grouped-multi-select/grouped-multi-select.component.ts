@@ -81,7 +81,6 @@ export class GroupedMultiSelectComponent implements OnInit, OnChanges, ControlVa
       });
 
     const selectedLabels = selectedOptions?.length > 0 ? selectedOptions
-      .filter((o: any) => !!o.category)
       .map((o: InternalGroupedDropdownOption) => o.label) : [];
 
     if (!selectedLabels.length) {

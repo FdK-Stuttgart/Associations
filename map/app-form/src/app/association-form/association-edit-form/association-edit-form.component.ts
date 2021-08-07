@@ -1,7 +1,7 @@
 import {Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild} from '@angular/core';
 import {SocialMediaPlatform, Association} from '../../model/association';
 import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators} from '@angular/forms';
-import {DropdownOption, getSubOptions} from '../../model/dropdown-option';
+import {DropdownOption, getAllOptions, getSubOptions} from '../../model/dropdown-option';
 import {v4 as uuidv4} from 'uuid';
 import {MysqlPersistService} from '../../services/mysql-persist.service';
 import {ConfirmationService, MessageService} from 'primeng/api';
@@ -147,6 +147,10 @@ export class AssociationEditFormComponent implements OnChanges, OnDestroy {
 
   getSubOptions(optionList: any[], selectedOptions: any[]): any[] {
     return getSubOptions(optionList, selectedOptions);
+  }
+
+  getAllOptions(optionList: any[], selectedOptions: any[]): any[] {
+    return getAllOptions(optionList, selectedOptions);
   }
 
   /**

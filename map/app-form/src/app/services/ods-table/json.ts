@@ -13,8 +13,7 @@ import {
 } from '../../model/association';
 import {v4 as uuidv4} from 'uuid';
 
-function keywords(thing, options): any[] {
-  let list: any[] = [];
+function keywords(thing, options): string[] {
   if (thing) {
     const clean = thing
       .replace(/\((.*?)\)/g, (match: string, token) => {
@@ -25,23 +24,48 @@ function keywords(thing, options): any[] {
       })
       .trim();
     const cleanSplit = clean.split(/, /);
-    for (const es of cleanSplit) {
-      let found = false;
-      for (const eo of options) {
-        if (es === eo.label) {
-          list.push(eo.value);
-          found = true;
-          break;
-        }
+    return getDistricts(cleanSplit, options);
+  }
+  return [];
+}
+
+function getDistricts(stringParts: string[], options: DropdownOption[]): string[] {
+  return stringParts.map((stringPart: string) => {
+    return options.find(option => {
+      return stringPart === option.label || isSynonym(stringPart, option.label);
+    });
+  }).filter(o => !!o).map((o: DropdownOption[]) => o.value);
+}
+
+function isSynonym(stringPart: string, districtLabel: string): boolean {
+  stringPart = stringPart.replace('Bad-Cannstatt', 'Bad Cannstatt').trim();
+  if (stringPart === districtLabel) {
+    return true;
+  }
+  if (districtLabel.startsWith('Stuttgart')) {
+    let stringPartWithPrefix = stringPart;
+    if (stringPartWithPrefix.startsWith('Stuttgart ')) {
+      stringPartWithPrefix = stringPartWithPrefix.replace('Stuttgart ', 'Stuttgart-');
+      if (stringPartWithPrefix === districtLabel) {
+        return true;
+      }
+    }
+    if (!stringPart.startsWith('Stuttgart-') && !stringPartWithPrefix.startsWith('Stuttgart')) {
+      stringPartWithPrefix = 'Stuttgart-' + stringPart;
+      if (stringPartWithPrefix === districtLabel) {
+        return true;
       }
     }
   }
-  list = list.filter((e) => {
-    return e;
-  });
-  return list.map((e) => {
-    return e + '';
-  });
+  if (stringPart === 'Stuttgart' && districtLabel === 'Stadt Stuttgart') {
+    return true;
+  }
+  if ((stringPart === 'Baden-Württemberg' || stringPart === 'Baden Württemberg' || stringPart === 'Landesweit')
+    && districtLabel === 'Landesweit (Baden-Württemberg)') {
+    return true;
+  }
+  return districtLabel === 'Stuttgart und Region'
+    && (stringPart.includes('Stuttgart und Umgebung') || stringPart.includes('und Region') || stringPart === 'Stuttgart Region');
 }
 
 // Thanks to https://stackoverflow.com/a/6234804

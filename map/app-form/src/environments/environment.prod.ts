@@ -6,6 +6,6 @@ export const environment = {
   },
   disableAuth: false,
   authApi: {
-    basePath: 'https://house-of-resources-stuttgart.de/wp-json'
+    basePath: 'https://hr.auskas.de/wp-json'
   }
 };

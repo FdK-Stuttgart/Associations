@@ -10,7 +10,7 @@ import OverlayPositioning from 'ol/OverlayPositioning';
 import {Coordinate} from 'ol/coordinate';
 import {ResizeObserver} from 'resize-observer';
 import {Size} from 'ol/size';
-import {DropdownOption, getSubOptions} from '../model/dropdown-option';
+import {DropdownOption, getAllOptions, getSubOptions} from '../model/dropdown-option';
 import {AutoComplete} from 'primeng/autocomplete';
 import {MysqlQueryService} from '../services/mysql-query.service';
 import {MyHttpResponse} from '../model/http-response';
@@ -766,7 +766,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
     if (association.districtList && association.districtList.length > 0) {
       content += `<div class="association-active-in"><h3>Aktivitätsgebiete</h3>`;
       content += `<div class="association-chips-container">`;
-      for (const activeIn of getSubOptions(this.districtOptions, association.districtList)) {
+      for (const activeIn of getAllOptions(this.districtOptions, association.districtList)) {
         content += `<div class="association-chips">`;
         content += activeIn.label;
         content += `</div>`;
