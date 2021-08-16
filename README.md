@@ -92,6 +92,25 @@ you can upload the `.sql` file to your database.
    will be copied to the right location when deploying the apps. **The file will
    NOT be committed to the Git repository.**
 
+1. For the development a PHP server may need to be started:
+   ```bash
+   php -S localhost:4200 -t ./map/database/
+   ```
+   In this case, in the files:
+   ```bash
+   map/app-map/src/environments/environment.ts
+   map/app-form/src/environments/environment.ts
+   ```
+   set:
+   ```ts
+   serverBasePath: 'http://localhost:4200/api'
+   ```
+   Also for the development, make sure the `map/database/api/database.php`
+   contains:
+   ```php
+   header("Access-Control-Allow-Origin: *");
+   ```
+
 ## Setup Wordpress Development Environment
 
 See also how to [Install and configure WordPress](https://ubuntu.com/tutorials/install-and-configure-wordpress)

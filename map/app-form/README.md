@@ -6,7 +6,7 @@ This project was generated with [Angular CLI](https://github.com/angular/angular
 
 Run `npm install` or `npm update` to install or update npm dependencies. (Or eventually the `npm update --legacy-peer-deps`)
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files. To start under a different port use `ng serve --port <portNumber>`.
+Run `ng serve --port 4202` for a dev server. Navigate to `http://localhost:4202/`. The app will automatically reload if you change any of the source files. To start under a different port use `ng serve --port <portNumber>`.
 
 ## Code scaffolding
 
