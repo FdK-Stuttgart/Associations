@@ -114,6 +114,8 @@ you can upload the `.sql` file to your database.
 ## Setup Wordpress Development Environment
 
 See also how to [Install and configure WordPress](https://ubuntu.com/tutorials/install-and-configure-wordpress)
+or
+[How to set up a local development environment for WordPress from scratch](https://www.endpoint.com/blog/2019/08/set-up-local-development-environment-for-wordpress/)
 
 1. In `/etc/phpmyadmin/config.inc.php` activate all lines with:
    ```php
