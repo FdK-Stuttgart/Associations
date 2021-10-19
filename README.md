@@ -11,6 +11,11 @@ line or with [phpMyAdmin](https://www.phpmyadmin.net/) GUI.
 
 ### From the Ubuntu command line
 
+1. Install Angular:
+   ```bash
+   npm install -g @angular/cli
+   ```
+
 1. Install Wordpress, PHP, MySQL phpMyAdmin:
    ```bash
    sudo apt install wordpress php libapache2-mod-php php-mysql mysql-server mysql-client mysql-common phpmyadmin
@@ -156,7 +161,7 @@ or
    define('JWT_AUTH_SECRET_KEY', '<...>');
    ```
    
-   If you want to call Wordpress' JWT auth api from another domain, you have to add the following line to the `wp-config.php` as well:
+   If you want to call Wordpress' JWT auth api from another domain, add to the `wp-config.php`:
    
    ```php
    define('JWT_AUTH_CORS_ENABLE', true);
