@@ -687,8 +687,6 @@ export class OsmMapComponent implements OnInit, OnDestroy {
       content += `</div>`;
     }
 
-    content += `<h2>Basisdaten</h2>`;
-
     if (association.addressLine1 || association.addressLine2 || association.addressLine3
       || association.street || association.postcode || association.city || association.country) {
       content += `<div class="association-address"><h3>Adresse</h3>`;
@@ -748,10 +746,6 @@ export class OsmMapComponent implements OnInit, OnDestroy {
         content += `</div>`;
       }
       content += `</div>`;
-    }
-
-    if ((association.goals && association.goals.text !== '') || (association.activities && association.activities.text !== '')) {
-      content += `<h2>Beschreibung</h2>`;
     }
 
     if (association.goals && association.goals.text !== '') {
