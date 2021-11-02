@@ -51,6 +51,9 @@ export class OsmMapComponent implements OnInit, OnDestroy {
   sidebarExpanded = true;
   SIDEBAR_ANIMATION_DURATION = 300;
 
+  zoomDefault = 14;
+  zoomViewDetails = 14.5;
+
   blocked = true;
   loadingText = 'Vereine abrufen...';
 
@@ -161,7 +164,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
       layers: [rasterLayer, this.clusterLayer],
       view: new View({
         center: fromLonLat([9.179747886339912, 48.77860400126555]),
-        zoom: 14
+        zoom: this.zoomDefault
       })
     });
 
@@ -609,7 +612,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
     // trigger re-center map to the newly opened popup's position
     setTimeout(() => {
       const size = this.map?.getSize();
-      const zoom = zoomIn ? 20 : this.map?.getView().getZoom();
+      const zoom = zoomIn ? this.zoomViewDetails : this.map?.getView().getZoom();
       if (this.map && size) {
         const mapContainer: HTMLElement | null = document.getElementById('osm-map');
         const horizontalCenter = mapContainer
