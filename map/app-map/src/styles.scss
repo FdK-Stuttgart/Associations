@@ -1,5 +1,7 @@
 /* You can add global styles to this file, and also import other style files */
 $blue: #00b4d6;
+$list: #000000;
+$link: $blue;
 
 /* alegreya-sans-300 - latin */
 @font-face {
@@ -124,7 +126,6 @@ body *:not(i):not(.pi) {
 }
 
 a {
-  color: $blue;
   cursor: pointer;
   text-decoration: none;
 
@@ -270,6 +271,9 @@ a {
   padding-top: 3px;
 }
 
+.association-contact a, .association-links a, .social-media-link a {
+  color: $link;
+}
 .association-links ul {
   padding-inline-start: 26px;
 
