@@ -757,13 +757,13 @@ export class OsmMapComponent implements OnInit, OnDestroy {
     if (association.goals && association.goals.text !== '') {
       content += `<div class="association-description"><h3>Ziele des Vereins</h3>`;
       content += association.goals.text;
-      content += `</p></div>`;
+      content += `</div>`;
     }
 
     if (association.activities && association.activities.text !== '') {
       content += `<div class="association-description"><h3>Aktivitäten</h3>`;
       content += association.activities.text;
-      content += `</p></div>`;
+      content += `</div>`;
     }
 
     if (association.districtList && association.districtList.length > 0) {
