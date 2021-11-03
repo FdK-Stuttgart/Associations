@@ -783,11 +783,12 @@ export class OsmMapComponent implements OnInit, OnDestroy {
     }
 
     if (association.socialMedia && association.socialMedia.length > 0) {
-      content += `<div class="association-social-media"><h3>Social Media</h3>`;
+      content += `<div class="association-social-media">`;
       for (const socialMedia of association.socialMedia) {
         content += `<div class="social-media-link">`;
+        content += `<a href="${socialMedia.url}" title="${socialMedia.linkText || socialMedia.platform}" target="_blank">`;
         content += this.getSocialMediaIcon(socialMedia.platform);
-        content += `<a href="${socialMedia.url}" title="${socialMedia.linkText || socialMedia.platform}" target="_blank">${socialMedia.linkText || socialMedia.platform}</a>`;
+        content += `</a>`;
         content += `</div>`;
       }
       content += `</div>`;
