@@ -160,13 +160,13 @@ or
    ```php
    define('JWT_AUTH_SECRET_KEY', '<...>');
    ```
-   
+
    If you want to call Wordpress' JWT auth api from another domain, add to the `wp-config.php`:
-   
+
    ```php
    define('JWT_AUTH_CORS_ENABLE', true);
    ```
-   
+
    The test:
    ```bash
    curl -H 'Content-Type: application/json' \
@@ -205,7 +205,7 @@ or
 
 1. In order to invalidate the JWT Token after 8 hours, add another Code Snippet:
 
-```php 
+```php
 function jwt_auth_expire_8_hours() {
   return time() + (DAY_IN_SECONDS / 3);
   }

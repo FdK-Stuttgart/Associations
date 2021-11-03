@@ -49,7 +49,7 @@ import {
 })
 export class OsmMapComponent implements OnInit, OnDestroy {
   sidebarExpanded = true;
-  SIDEBAR_ANIMATION_DURATION = 300;
+  sidebarAnimationDuration = 300;
 
   zoomDefault = 14;
   zoomViewDetails = 14.5;
@@ -195,7 +195,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
     const clusterLayer = new AnimatedCluster({
       source: this.cluster,
       style: this.getAnimatedClusterStyle,
-      animationDuration: this.SIDEBAR_ANIMATION_DURATION
+      animationDuration: this.sidebarAnimationDuration
     });
     return clusterLayer;
   }
@@ -370,7 +370,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
       this.map.getView().fit(extent, {
         size: this.map.getSize(),
         padding: [72, 48, 24, 48],
-        duration: this.SIDEBAR_ANIMATION_DURATION * 2
+        duration: this.sidebarAnimationDuration * 2
       });
     }
   }
@@ -386,9 +386,10 @@ export class OsmMapComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * filters the association list (filtered by search string and district options).
-   * @param queryString if the filter operation is triggered by a change event in the autocomplete input, use the input query string to
-   * filter the associations.
+   * Filter the association list by search string and district options.
+   * @param queryString if the filter operation is triggered by a change event
+   * in the autocomplete input, use the input query string to filter the
+   * associations.
    */
   filterAssociations(queryString?: string): boolean {
     this.blocked = true;
@@ -592,7 +593,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
    * @param zoomIn zoom to association
    */
   createPopup(coordinates: Coordinate, id: string, sidebarChange?: boolean, zoomIn = false): Overlay {
-    const sidebarTimeout = sidebarChange ? (this.SIDEBAR_ANIMATION_DURATION / 2) : 0;
+    const sidebarTimeout = sidebarChange ? (this.sidebarAnimationDuration / 2) : 0;
 
     const popupElement: HTMLDivElement = this.renderer2.createElement('div');
     popupElement.setAttribute('class', 'association-container osm-association-container');
@@ -653,14 +654,14 @@ export class OsmMapComponent implements OnInit, OnDestroy {
       view.animate({
         center: newCenter,
         anchor: coordinates,
-        duration: this.SIDEBAR_ANIMATION_DURATION * 2
+        duration: this.sidebarAnimationDuration * 2
       }, () => {
         view.centerOn(coordinates, size, positioning);
         if (zoom) {
           view.animate({
             anchor: coordinates,
             zoom,
-            duration: this.SIDEBAR_ANIMATION_DURATION * 2
+            duration: this.sidebarAnimationDuration * 2
           });
         }
       });
@@ -860,9 +861,9 @@ export class OsmMapComponent implements OnInit, OnDestroy {
   // TODO DRY - see app-form/src/app/services/ods-table/geo.ts
   noPublicAddress(normAddr: string | undefined): boolean {
     if (normAddr) {
-      return !!normAddr.match(/.*keine|Postfach.*/i)
+      return !!normAddr.match(/.*keine|Postfach.*/i);
     } else {
-      return false
+      return false;
     }
   }
 }
