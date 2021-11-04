@@ -21,6 +21,7 @@ import {ExportImportService} from '../services/export-import.service';
 })
 
 export class AssociationFormComponent implements OnInit, OnDestroy {
+  noPubAddrAssocIds: string[] = [];
   associations: Association[] = [];
   selectedAssociation?: Association;
   isNew = true;
@@ -166,6 +167,9 @@ export class AssociationFormComponent implements OnInit, OnDestroy {
         key: 'formToast'
       });
     }
+    const noPubAddrAssocs: Association[] = this.associations.filter(
+      (a: Association) => this.noPublicAddress(a.addressLine1));
+    this.noPubAddrAssocIds = noPubAddrAssocs.map((a: Association) => a.id);
 
     this.districtOptions = (await this.mySqlQueryService.getDistrictOptions())?.data || [];
 
@@ -344,5 +348,15 @@ export class AssociationFormComponent implements OnInit, OnDestroy {
     this.sub?.unsubscribe();
     this.editFormChangeSub?.unsubscribe();
     this.loginStatusChangeSub?.unsubscribe();
+  }
+
+  // TODO DRY noPublicAddress implementation
+  // see map/app-map/src/app/osm-map/osm-map.component.ts
+  noPublicAddress(normAddr: string | undefined): boolean {
+    if (normAddr) {
+      return !!normAddr.match(/.*keine|Postfach.*/i);
+    } else {
+      return false;
+    }
   }
 }

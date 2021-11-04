@@ -858,7 +858,8 @@ export class OsmMapComponent implements OnInit, OnDestroy {
     document.getElementById('popup-close')?.removeEventListener('click', this.closeButtonClickHandler);
   }
 
-  // TODO DRY - see app-form/src/app/services/ods-table/geo.ts
+  // TODO DRY noPublicAddress implementation
+  // see map/app-form/src/app/association-form/association-form.component.ts
   noPublicAddress(normAddr: string | undefined): boolean {
     if (normAddr) {
       return !!normAddr.match(/.*keine|Postfach.*/i);

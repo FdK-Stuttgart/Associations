@@ -7,6 +7,7 @@ import {Association} from '../../model/association';
   styleUrls: ['./associations-list.component.scss']
 })
 export class AssociationsListComponent implements OnInit {
+  @Input() noPubAddrAssocIds: string[] = [];
   @Input() associations: Association[] = [];
   @Input() identifiedByFieldName = 'name';
   @Input() selectedAssociationField: any = undefined;

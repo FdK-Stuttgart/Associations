@@ -1,7 +1,10 @@
 <div class="association-entries"
      *ngIf="associations?.length; else noAssociations">
   <div class="association-entry"
-       [ngClass]="{ 'selected': association[identifiedByFieldName] === selectedAssociationField }"
+       [ngClass]="{ 'selected': association[identifiedByFieldName] === selectedAssociationField
+                  , 'noPubAddr': noPubAddrAssocIds.includes(association.id) === true
+                  , 'pubAddr': noPubAddrAssocIds.includes(association.id) === false
+                  }"
        *ngFor="let association of associations">
     <a (click)="emitClick(association)">
       <div class="icon-and-text">
