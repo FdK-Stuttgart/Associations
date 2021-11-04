@@ -227,10 +227,9 @@ build an app, see here: [Angular Docs](https://angular.io/guide/setup-local)
 1. Run:
    ```bash
    cd app-map
-   npm run app-map:version
+   # npm run app-map:version # no autocommit
+   npm run app-map:version:commit
    ```
-   or if you want to make a commit for the new version automatically, run `npm
-   run app-form:version:commit`.
 
 #### New form-app version
 
@@ -238,10 +237,9 @@ build an app, see here: [Angular Docs](https://angular.io/guide/setup-local)
 1. Run
    ```bash
    cd app-form
-   npm run app-form:version
+   # npm run app-form:version # no autocommit
+   npm run app-form:version:commit
    ```
-   or if you want to make a commit for the new version automatically, run `npm
-   run app-form:version:commit`.
 
 ### Deployment
 
