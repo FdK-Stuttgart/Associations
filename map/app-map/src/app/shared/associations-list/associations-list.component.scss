@@ -1,3 +1,11 @@
+.pubAddr {
+  // color: #d13858;
+  // color: black;
+  color: #212529;;
+}
+.noPubAddr {
+  // color: #e17c91;
+  color: grey;
 }
 .association-entry {
   padding: 4px;
@@ -10,6 +18,7 @@
   }
 
   &.selected {
+    color: #00b4d6;
     background-color: rgba(0, 0, 0, 0.05);
   }
 }
