@@ -28,7 +28,10 @@ import {Vector} from 'ol/source';
   templateUrl: './simple-map-with-single-marker.component.html',
   styleUrls: ['./simple-map-with-single-marker.component.scss']
 })
-export class SimpleMapWithSingleMarkerComponent implements OnInit, OnChanges, OnDestroy {
+
+
+export class SimpleMapWithSingleMarkerComponent
+implements OnInit, OnChanges, OnDestroy {
   @Input() lat = 0;
   @Input() lng = 0;
 
@@ -40,7 +43,8 @@ export class SimpleMapWithSingleMarkerComponent implements OnInit, OnChanges, On
 
   readonly markerId = 'central-marker';
 
-  @Output() mapClick: EventEmitter<{ lat: number, lng: number }> = new EventEmitter<{ lat: number, lng: number }>();
+  @Output() mapClick: EventEmitter<{ lat: number, lng: number }>
+    = new EventEmitter<{ lat: number, lng: number }>();
 
   geocoder = new geocoder('nominatim', {
     provider: 'osm',
@@ -102,7 +106,8 @@ export class SimpleMapWithSingleMarkerComponent implements OnInit, OnChanges, On
   }
 
   chooseAddressHandler = (event: any) => {
-    if (event && event.coordinate && event.coordinate.length && event.coordinate.length >= 2) {
+    if (event && event.coordinate && event.coordinate.length
+      && event.coordinate.length >= 2) {
       const coordinate = toLonLat(event.coordinate);
       this.mapClick.emit({lat: coordinate[1], lng: coordinate[0]});
       return true;
@@ -111,7 +116,8 @@ export class SimpleMapWithSingleMarkerComponent implements OnInit, OnChanges, On
   }
 
   mapClickHandler = (event: any) => {
-    if (event.coordinate && event.coordinate.length && event.coordinate.length >= 2) {
+    if (event.coordinate && event.coordinate.length
+      && event.coordinate.length >= 2) {
       const coordinate = toLonLat(event.coordinate);
       this.mapClick.emit({lat: coordinate[1], lng: coordinate[0]});
       return true;

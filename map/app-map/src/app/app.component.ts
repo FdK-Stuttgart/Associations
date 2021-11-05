@@ -34,7 +34,10 @@ export class AppComponent {
 
   async toggleFullscreen(): Promise<void> {
     if (!this.isInFullscreen) {
-      await this.requestFullscreen(document.documentElement || document.getElementById('fullscreen-content') || undefined);
+      await this.requestFullscreen(
+        document.documentElement
+          || document.getElementById('fullscreen-content')
+          || undefined);
     } else {
       await this.exitFullscreen();
     }

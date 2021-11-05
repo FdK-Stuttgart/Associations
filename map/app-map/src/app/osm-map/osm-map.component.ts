@@ -1,5 +1,7 @@
-import {ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild} from '@angular/core';
-import {SocialMediaPlatform, Association, Link, SocialMediaLink, Image, Contact} from '../model/association';
+import {ChangeDetectorRef, Component, ElementRef,
+        OnDestroy, OnInit, Renderer2, ViewChild} from '@angular/core';
+import {SocialMediaPlatform, Association,
+        Link, SocialMediaLink, Image, Contact} from '../model/association';
 import Map from 'ol/Map';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
@@ -10,7 +12,8 @@ import OverlayPositioning from 'ol/OverlayPositioning';
 import {Coordinate} from 'ol/coordinate';
 import {ResizeObserver} from 'resize-observer';
 import {Size} from 'ol/size';
-import {DropdownOption, getAllOptions, getSubOptions} from '../model/dropdown-option';
+import {DropdownOption, getAllOptions,
+        getSubOptions} from '../model/dropdown-option';
 import {AutoComplete} from 'primeng/autocomplete';
 import {MysqlQueryService} from '../services/mysql-query.service';
 import {MyHttpResponse} from '../model/http-response';
@@ -78,8 +81,10 @@ export class OsmMapComponent implements OnInit, OnDestroy {
 
   noPubAddrAssocIds: string[] = [];
 
-  @ViewChild('osmContainer', {static: true}) osmContainer!: ElementRef<HTMLDivElement>;
-  @ViewChild('autoComplete', {static: true}) autoComplete?: AutoComplete;
+  @ViewChild('osmContainer',
+             {static: true}) osmContainer!: ElementRef<HTMLDivElement>;
+  @ViewChild('autoComplete',
+             {static: true}) autoComplete?: AutoComplete;
   resizeObserver?: ResizeObserver;
 
   constructor(private renderer2: Renderer2,
@@ -89,22 +94,26 @@ export class OsmMapComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * queries the association data from the database and initializes map and sidebar
+   * queries the association data from the database and initializes map and
+   * sidebar
    */
   async ngOnInit(): Promise<void> {
     this.blocked = true;
     this.loadingText = 'Vereine abrufen...';
 
-    const httpResponse: MyHttpResponse<Association[]> = (await this.mySqlQueryService.getAssociations());
+    const httpResponse: MyHttpResponse<Association[]>
+      = (await this.mySqlQueryService.getAssociations());
     this.associations = httpResponse?.data ? httpResponse.data.sort(
       (a: Association, b: Association) => {
         const name1 = a.shortName || a.name;
         const name2 = b.shortName || b.name;
-        return name1.toLowerCase() > name2.toLowerCase() ? 1 : (name1.toLowerCase() < name2.toLowerCase() ? -1 : 0);
+        return name1.toLowerCase() > name2.toLowerCase()
+          ? 1 : (name1.toLowerCase() < name2.toLowerCase() ? -1 : 0);
       }
     ) : [];
 
-    this.districtOptions = (await this.mySqlQueryService.getDistrictOptions())?.data || [];
+    this.districtOptions =
+      (await this.mySqlQueryService.getDistrictOptions())?.data || [];
 
     if (!this.associations?.length) {
       this.messageService.add({
@@ -120,7 +129,8 @@ export class OsmMapComponent implements OnInit, OnDestroy {
     this.noPubAddrAssocIds = noPubAddrAssocs.map((a: Association) => a.id);
     this.filteredAssociations = this.associations;
 
-    if (this.osmContainer?.nativeElement?.clientWidth < 360 && this.sidebarExpanded) {
+    if (this.osmContainer?.nativeElement?.clientWidth < 360
+      && this.sidebarExpanded) {
       this.sidebarExpanded = false;
     }
 
@@ -161,6 +171,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
 
     this.map = new Map({
       target: document.getElementById('osm-map') ?? undefined,
+      // controls
       layers: [rasterLayer, this.clusterLayer],
       view: new View({
         center: fromLonLat([9.179747886339912, 48.77860400126555]),
@@ -207,9 +218,12 @@ export class OsmMapComponent implements OnInit, OnDestroy {
   getAnimatedClusterStyle = (feature: Feature<Geometry> | RenderFeature) => {
     const originalFeatures = getOriginalFeatures(feature);
     const featureIds: string[] = getOriginalFeaturesIds(feature);
-    const filteredIds: string[] = this.filteredAssociations.map((a: Association) => a.id);
-    const allIncluded: boolean = featureIds.every((id: string) => filteredIds.includes(id));
-    const isFiltered: boolean = featureIds.some((id: string) => filteredIds.includes(id));
+    const filteredIds: string[] =
+      this.filteredAssociations.map((a: Association) => a.id);
+    const allIncluded: boolean =
+      featureIds.every((id: string) => filteredIds.includes(id));
+    const isFiltered: boolean =
+      featureIds.some((id: string) => filteredIds.includes(id));
     const size = originalFeatures?.length;
     let style;
     const baseColor = '#d13858'; // '#ed2227'
@@ -222,7 +236,8 @@ export class OsmMapComponent implements OnInit, OnDestroy {
               color: 'white',
             }),
             fill: new Fill({
-              color: allIncluded ? baseColor : isFiltered ? '#B47172' : '#989898',
+              color: allIncluded ?
+                baseColor : isFiltered ? '#B47172' : '#989898',
             }),
           }),
           text: new Text({
@@ -256,7 +271,8 @@ export class OsmMapComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * updates map size when the map container resizes (the resize observer's callback function)
+   * updates map size when the map container resizes (the resize observer's
+   * callback function)
    */
   resizeMapContainer(): void {
     this.map?.updateSize();
@@ -277,7 +293,8 @@ export class OsmMapComponent implements OnInit, OnDestroy {
         if (isClusteredFeature(feature)) {
           this.zoomToClusterExtent(originalFeatures);
         } else {
-          const coordinate: { lat: number, lng: number } | undefined = getFeatureCoordinate(feature);
+          const coordinate: { lat: number, lng: number }
+            | undefined = getFeatureCoordinate(feature);
           const id: string | undefined = getFirstOriginalFeatureId(feature);
           if (coordinate?.lat && coordinate?.lng && id) {
             this.handleMarkerClick(coordinate.lat, coordinate.lng, id);
@@ -361,7 +378,8 @@ export class OsmMapComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * zoom the map view to a new viewport so that all features of a cluster fit onto the screen
+   * zoom the map view to a new viewport so that all features of a cluster fit
+   * onto the screen
    * @param originalFeatures list of features in a cluster
    */
   zoomToClusterExtent(originalFeatures: any): void {
@@ -577,7 +595,8 @@ export class OsmMapComponent implements OnInit, OnDestroy {
    */
   removePopup(): boolean {
     if (this.popup && this.map) {
-      document.getElementById('popup-close')?.removeEventListener('click', this.closeButtonClickHandler);
+      document.getElementById('popup-close')?.removeEventListener(
+        'click', this.closeButtonClickHandler);
       this.map.removeOverlay(this.popup);
       this.popup = undefined;
       return true;
@@ -589,14 +608,18 @@ export class OsmMapComponent implements OnInit, OnDestroy {
    * creates a new popup overlay
    * @param coordinates latitude, longitude of popup position
    * @param id the society id to later address the specific marker by its id
-   * @param sidebarChange whether the sidebar needs to be hidden (small screen sizes)
+   * @param sidebarChange whether the sidebar needs to be hidden
+   * (small screen sizes)
    * @param zoomIn zoom to association
    */
-  createPopup(coordinates: Coordinate, id: string, sidebarChange?: boolean, zoomIn = false): Overlay {
-    const sidebarTimeout = sidebarChange ? (this.sidebarAnimationDuration / 2) : 0;
+  createPopup(coordinates: Coordinate,
+              id: string, sidebarChange?: boolean, zoomIn = false): Overlay {
+    const sidebarTimeout
+      = sidebarChange ? (this.sidebarAnimationDuration / 2) : 0;
 
     const popupElement: HTMLDivElement = this.renderer2.createElement('div');
-    popupElement.setAttribute('class', 'association-container osm-association-container');
+    popupElement.setAttribute(
+      'class', 'association-container osm-association-container');
 
     const closeIcon: HTMLElement = this.renderer2.createElement('a');
     closeIcon.setAttribute('class', 'association-container-close-icon');
@@ -605,7 +628,8 @@ export class OsmMapComponent implements OnInit, OnDestroy {
     closeIcon.innerHTML = `<i class="pi pi-times"></i>`;
     popupElement.appendChild(closeIcon);
 
-    const association: Association | undefined = this.associations.find((s: Association) => s.id === id);
+    const association: Association
+      | undefined = this.associations.find((s: Association) => s.id === id);
     if (association) {
       popupElement.innerHTML += this.getPopupContent(association);
     }
@@ -613,9 +637,11 @@ export class OsmMapComponent implements OnInit, OnDestroy {
     // trigger re-center map to the newly opened popup's position
     setTimeout(() => {
       const size = this.map?.getSize();
-      const zoom = zoomIn ? this.zoomViewDetails : this.map?.getView().getZoom();
+      const zoom = zoomIn ?
+        this.zoomViewDetails : this.map?.getView().getZoom();
       if (this.map && size) {
-        const mapContainer: HTMLElement | null = document.getElementById('osm-map');
+        const mapContainer:
+        HTMLElement | null = document.getElementById('osm-map');
         const horizontalCenter = mapContainer
           ? (mapContainer.clientWidth / 2)
           : (this.osmContainer.nativeElement.clientWidth / 2);
@@ -630,7 +656,8 @@ export class OsmMapComponent implements OnInit, OnDestroy {
     return new Overlay({
       position: coordinates,
       positioning: OverlayPositioning.BOTTOM_CENTER,
-      offset: [0, -56], // -56px to show the popup above its marker (marker is 48px high)
+      // -56px to show the popup above its marker (marker is 48px high)
+      offset: [0, -56],
       element: popupElement,
       stopEvent: true,
       className: 'on-top'
@@ -644,7 +671,8 @@ export class OsmMapComponent implements OnInit, OnDestroy {
    * @param positioning screen position
    * @param zoom zoom level
    */
-  animateViewTo(coordinates: number[], size: Size, positioning: number[], zoom?: number): void {
+  animateViewTo(coordinates: number[],
+                size: Size, positioning: number[], zoom?: number): void {
     const view = this.map?.getView();
     if (view) {
       const oldCenter = view.getCenter();
@@ -669,9 +697,11 @@ export class OsmMapComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * returns the html content of the association popup. The html needs to be composed in typescript as we are not able
-   * to inject a component as a popup into the OpenLayers map.
-   * @param association the association data which needs to be displayed within the popup
+   * returns the html content of the association popup. The html needs to be
+   * composed in typescript as we are not able to inject a component as a popup
+   * into the OpenLayers map.
+   * @param association the association data which needs to be displayed within
+   * the popup
    */
   getPopupContent(association: Association): string {
     let content = `<div class="osm-association-inner-container"><div class="association-title"><h2>`;
@@ -688,8 +718,10 @@ export class OsmMapComponent implements OnInit, OnDestroy {
       content += `</div>`;
     }
 
-    if (association.addressLine1 || association.addressLine2 || association.addressLine3
-      || association.street || association.postcode || association.city || association.country) {
+    if (association.addressLine1 || association.addressLine2
+      || association.addressLine3
+      || association.street || association.postcode
+      || association.city || association.country) {
       content += `<div class="association-address"><h3>Adresse</h3>`;
       if (association.addressLine1) {
         content += `<p class="name"><strong>${association.addressLine1}</strong></p>`;
@@ -722,7 +754,8 @@ export class OsmMapComponent implements OnInit, OnDestroy {
           content += `<div class="association-contact">`;
           content += `<div class="association-contact-row">`;
           content += this.getSocialMediaIcon('phone', false);
-          content += `<p class="phone"><a href="${telephoneLink(contact.phone)}">${contact.phone}</a></p></div></div>`;
+          content +=
+          `<p class="phone"><a href="${telephoneLink(contact.phone)}">${contact.phone}</a></p></div></div>`;
         }
         content += `</div>`;
       }
@@ -764,7 +797,8 @@ export class OsmMapComponent implements OnInit, OnDestroy {
     if (association.districtList && association.districtList.length > 0) {
       content += `<div class="association-active-in"><h3>Aktivitätsgebiete</h3>`;
       content += `<div class="association-chips-container">`;
-      for (const activeIn of getAllOptions(this.districtOptions, association.districtList)) {
+      for (const activeIn of getAllOptions(this.districtOptions,
+                                           association.districtList)) {
         content += `<div class="association-chips">`;
         content += activeIn.label;
         content += `</div>`;
@@ -803,8 +837,10 @@ export class OsmMapComponent implements OnInit, OnDestroy {
    * @param platform the social media platform
    * @param alt whether to add an alt attribute to the image
    */
-  getSocialMediaIcon(platform?: SocialMediaPlatform | string, alt = true): string {
-    if (!platform || platform === '' || platform === SocialMediaPlatform.OTHER || platform === 'Other') {
+  getSocialMediaIcon(platform?: SocialMediaPlatform | string,
+                     alt = true): string {
+    if (!platform || platform === ''
+      || platform === SocialMediaPlatform.OTHER || platform === 'Other') {
       return '';
     }
     return `<div class="social-media-icon mini-icon"><img src="assets/${platform.toLowerCase()}.png" alt="${alt ? platform : ''}"/></div>`;
@@ -855,7 +891,8 @@ export class OsmMapComponent implements OnInit, OnDestroy {
    * removes event listeners
    */
   ngOnDestroy(): void {
-    document.getElementById('popup-close')?.removeEventListener('click', this.closeButtonClickHandler);
+    document.getElementById('popup-close')?.removeEventListener(
+      'click', this.closeButtonClickHandler);
   }
 
   // TODO DRY noPublicAddress implementation
