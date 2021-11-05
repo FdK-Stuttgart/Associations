@@ -65,10 +65,10 @@ export class OsmMapComponent implements OnInit, OnDestroy {
   selectedDistricts: any[] = [];
 
   map?: Map;
-  clusterSource?: VectorSource;
+  clusterSource?: VectorSource<Geometry>;
   cluster?: Cluster;
-  clusterFeatures: Feature[] = [];
-  clusterLayer?: VectorLayer;
+  clusterFeatures: Feature<Geometry>[] = [];
+  clusterLayer?: VectorLayer<AnimatedCluster>;
 
   markers: Overlay[] = [];
   popup?: Overlay;
@@ -193,7 +193,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
   /**
    * initializes the cluster layer with the map marker features
    */
-  initCluster(): VectorLayer {
+  initCluster(): VectorLayer<AnimatedCluster> {
     this.clusterSource = new VectorSource({
       features: this.clusterFeatures
     });
@@ -289,7 +289,8 @@ export class OsmMapComponent implements OnInit, OnDestroy {
           return f;
         });
       if (feature) {
-        const originalFeatures: Feature[] = getOriginalFeatures(feature) || [];
+        const originalFeatures: Feature<Geometry>[]
+          = getOriginalFeatures(feature) || [];
         if (isClusteredFeature(feature)) {
           this.zoomToClusterExtent(originalFeatures);
         } else {

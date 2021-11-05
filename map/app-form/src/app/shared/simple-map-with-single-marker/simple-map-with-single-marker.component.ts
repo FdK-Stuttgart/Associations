@@ -17,11 +17,12 @@ import OSM from 'ol/source/OSM';
 import * as geocoder from 'ol-geocoder';
 import Point from 'ol/geom/Point';
 import Feature from 'ol/Feature';
-import {Vector as VectorLayer} from 'ol/layer';
+import Geometry from 'ol/geom/Geometry';
+import VectorLayer from 'ol/layer/Vector';
 import Icon from 'ol/style/Icon';
 import IconAnchorUnits from 'ol/style/IconAnchorUnits';
 import Style from 'ol/style/Style';
-import {Vector} from 'ol/source';
+import {Vector as VectorSource} from 'ol/source';
 
 @Component({
   selector: 'app-simple-map-with-single-marker',
@@ -38,8 +39,8 @@ implements OnInit, OnChanges, OnDestroy {
   @Input() showAddressField = true;
 
   private map?: Map;
-  private marker?: Feature;
-  private markersLayer?: VectorLayer;
+  private marker?: Feature<Geometry>;
+  private markersLayer?: VectorLayer<VectorSource<Geometry>>;
 
   readonly markerId = 'central-marker';
 
@@ -69,7 +70,7 @@ implements OnInit, OnChanges, OnDestroy {
     });
 
     this.markersLayer = new VectorLayer({
-      source: new Vector({features: [this.marker]}),
+      source: new VectorSource({features: [this.marker]}),
       style: new Style({
         image: new Icon({
           anchor: [0.5, 1],
@@ -150,7 +151,7 @@ implements OnInit, OnChanges, OnDestroy {
       this.initMap();
     }
 
-    this.markersLayer?.setSource(new Vector({features: [this.marker]}));
+    this.markersLayer?.setSource(new VectorSource({features: [this.marker]}));
     this.map?.getView()?.setCenter(pos);
   }
 

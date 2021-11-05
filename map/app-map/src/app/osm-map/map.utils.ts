@@ -5,45 +5,55 @@ import Point from 'ol/geom/Point';
 import {Coordinate} from 'ol/coordinate';
 import {toLonLat} from 'ol/proj';
 
-export function isClusteredFeature(feature: Feature<Geometry> | RenderFeature): boolean {
+export function isClusteredFeature(
+  feature: Feature<Geometry> | RenderFeature): boolean {
   if (!feature || !feature.get('features')) {
     return false;
   }
   return feature.get('features').length > 1;
 }
 
-export function getOriginalFeatures(feature: Feature<Geometry> | RenderFeature): Feature[] | undefined {
+export function getOriginalFeatures(
+  feature: Feature<Geometry> | RenderFeature): Feature<Geometry>[]
+  | undefined {
   return feature.get('features');
 }
 
-export function getOriginalFeaturesIds(feature: Feature<Geometry> | RenderFeature): string[] {
-  const features: Feature[] | undefined = getOriginalFeatures(feature)
+export function getOriginalFeaturesIds(
+  feature: Feature<Geometry> | RenderFeature): string[] {
+  const features: Feature<Geometry>[] | undefined = getOriginalFeatures(feature)
 
   if (features) {
     return features
       .filter(
-        (f: Feature) => !!f.getId()
+        (f: Feature<Geometry>) => !!f.getId()
       )
       .map(
-        (f: Feature) => (f.getId() as string).toString()
+        (f: Feature<Geometry>) => (f.getId() as string).toString()
       );
   }
   return [];
 }
 
-export function getFirstOriginalFeature(feature: Feature<Geometry> | RenderFeature): Feature | undefined {
+export function getFirstOriginalFeature(
+  feature: Feature<Geometry> | RenderFeature): Feature<Geometry>
+  | undefined {
   const originalFeatures = getOriginalFeatures(feature);
-  if (!originalFeatures || !originalFeatures.length || originalFeatures.length < 1) {
+  if (!originalFeatures || !originalFeatures.length
+    || originalFeatures.length < 1) {
     return undefined;
   }
   return originalFeatures[0];
 }
 
-export function getFirstOriginalFeatureId(feature: Feature<Geometry> | RenderFeature): string | undefined {
+export function getFirstOriginalFeatureId(
+  feature: Feature<Geometry> | RenderFeature): string | undefined {
   return getFirstOriginalFeature(feature)?.getId()?.toString();
 }
 
-export function getFeatureCoordinate(feature: Feature<Geometry> | RenderFeature): { lat: number, lng: number } | undefined {
+export function getFeatureCoordinate(
+  feature: Feature<Geometry> | RenderFeature): { lat: number, lng: number }
+  | undefined {
   if (!isClusteredFeature(feature)) {
     const point: Point = feature.getGeometry() as Point;
     if (point) {
