@@ -91,7 +91,7 @@ export class AssociationEditFormComponent implements OnChanges, OnDestroy {
 
   districtOptions: DropdownOption[] = [];
 
-  isPublicAddress = false;
+  isPublicAddress: boolean = false;
 
   uploadedFiles: any[] = [];
 
@@ -524,6 +524,9 @@ export class AssociationEditFormComponent implements OnChanges, OnDestroy {
     return coordinate;
   }
 
+  getIsPublicAddress(): boolean {
+    return this.isPublicAddress;
+  }
   /**
    * resets the form's value and queries the association's data from the database
    * @param id the selected association's id

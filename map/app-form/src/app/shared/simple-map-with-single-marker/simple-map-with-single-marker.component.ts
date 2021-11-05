@@ -36,7 +36,7 @@ implements OnInit, OnChanges, OnDestroy {
   @Input() lat = 0;
   @Input() lng = 0;
 
-  @Input() showAddressField = true;
+  @Input() isPublicAddress: boolean;
 
   private map?: Map;
   private marker?: Feature<Geometry>;
@@ -74,7 +74,7 @@ implements OnInit, OnChanges, OnDestroy {
       style: new Style({
         image: new Icon({
           anchor: [0.5, 1],
-          img: this.getMarkerActiveElement(),
+          img: this.getMarkerActiveElement(this.isPublicAddress),
           imgSize: [30, 40],
           anchorXUnits: IconAnchorUnits.FRACTION,
           anchorYUnits: IconAnchorUnits.FRACTION
@@ -97,7 +97,7 @@ implements OnInit, OnChanges, OnDestroy {
       })
     });
 
-    if (this.showAddressField) {
+    if (this.isPublicAddress) {
       this.geocoder.on('addresschosen', this.chooseAddressHandler);
 
       this.map.addControl(this.geocoder);
@@ -127,8 +127,9 @@ implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (this.map && this.markersLayer && (changes.lat || changes.lng)) {
-      this.createMarker(this.lat, this.lng);
+    if (this.map && this.markersLayer
+      && (changes.lat || changes.lng || changes.isPublicAddress)) {
+      this.createMarker(this.lat, this.lng, this.isPublicAddress);
     }
   }
 
@@ -136,7 +137,8 @@ implements OnInit, OnChanges, OnDestroy {
     this.map?.removeEventListener('click', this.mapClickHandler);
   }
 
-  private createMarker(lat: number, lng: number): void {
+  private createMarker(
+    lat: number, lng: number, isPublicAddress: boolean): void {
     if (this.marker) {
       this.marker = undefined;
     }
@@ -152,12 +154,23 @@ implements OnInit, OnChanges, OnDestroy {
     }
 
     this.markersLayer?.setSource(new VectorSource({features: [this.marker]}));
+    this.markersLayer?.setStyle(new Style({
+      image: new Icon({
+        anchor: [0.5, 1],
+        img: this.getMarkerActiveElement(this.isPublicAddress),
+        imgSize: [30, 40],
+        anchorXUnits: IconAnchorUnits.FRACTION,
+        anchorYUnits: IconAnchorUnits.FRACTION
+      })
+    })
+                               );
     this.map?.getView()?.setCenter(pos);
   }
 
-  private getMarkerActiveElement(): HTMLImageElement {
+  private getMarkerActiveElement(isPublicAddress: boolean): HTMLImageElement {
     const markerImg: HTMLImageElement = this.renderer2.createElement('img');
-    markerImg.setAttribute('src', 'assets/pin-prod.png');
+    const attr = isPublicAddress ? 'assets/pin-prod.png' : 'assets/pin-noPubAddr.png';
+    markerImg.setAttribute('src', attr);
     return markerImg;
   }
 }

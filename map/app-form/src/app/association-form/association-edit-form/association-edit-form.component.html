@@ -164,6 +164,7 @@
               verändern oder suchen Sie nach einer Adresse.</p>
             <app-simple-map-with-single-marker [lat]="getCoordinate(associationForm.value.lat, 90)"
                                                [lng]="getCoordinate(associationForm.value.lng, 180)"
+                                               [isPublicAddress]="getIsPublicAddress()"
                                                (mapClick)="mapClick($event)"
                                                style="margin: auto;">
             </app-simple-map-with-single-marker>
