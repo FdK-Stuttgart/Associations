@@ -1,11 +1,10 @@
+$alphaOpacity: 0.52; // in %
+
 .pubAddr {
-  // color: #d13858;
-  // color: black;
-  color: #212529;;
+  color: rgba(33, 37, 41, 100);
 }
 .noPubAddr {
-  // color: #e17c91;
-  color: grey;
+  color: rgba(33, 37, 41, $alphaOpacity);
 }
 .association-entry {
   padding: 4px;
