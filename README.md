@@ -73,7 +73,7 @@ you can upload the `.sql` file to your database.
 ## Setup PHP scripts for database access
 
 1. Copy connection-template to a new file:
-   ```bash
+   ```shell
    cp map/database/api/_database.php map/database/api/database.php
    ```
 
@@ -98,11 +98,11 @@ you can upload the `.sql` file to your database.
    NOT be committed to the Git repository.**
 
 1. For the development a PHP server may need to be started:
-   ```bash
+   ```shell
    php -S localhost:4200 -t ./map/database/
    ```
    In this case, in the files:
-   ```bash
+   ```shell
    map/app-map/src/environments/environment.ts
    map/app-form/src/environments/environment.ts
    ```
@@ -138,7 +138,7 @@ or
    ```
 
 1. Setup file ownership:
-   ```bash
+   ```shell
    sudo cp map/config-localhost.php /etc/wordpress/config-localhost.php
    sudo chown -R www-data:www-data /usr/share/wordpress /var/lib/wordpress /etc/wordpress
    ```
@@ -149,7 +149,7 @@ or
 1. Download required Wordpress plugins:
    * [JWT Authentication for WP REST API](https://wordpress.org/plugins/jwt-authentication-for-wp-rest-api/)
    * [Code Snippets](https://wordpress.org/plugins/code-snippets/)
-   ```bash
+   ```shell
    wget https://downloads.wordpress.org/plugin/code-snippets.zip \
         https://downloads.wordpress.org/plugin/jwt-authentication-for-wp-rest-api.1.2.6.zip \
         --directory-prefix=~/Downloads/
@@ -168,7 +168,7 @@ or
    ```
 
    The test:
-   ```bash
+   ```shell
    curl -H 'Content-Type: application/json' \
         -d '{"username":"wordpress","password":"<password>"}' \
         http://localhost/blog/index.php/wp-json/jwt-auth/v1/token
@@ -193,7 +193,7 @@ or
    Save and activate the code snippet!
 
    The test:
-   ```bash
+   ```shell
    curl -H 'Content-Type: application/json' \
         -d '{"username":"wordpress","password":"<password>"}' \
         http://localhost/blog/index.php/wp-json/jwt-auth/v1/token
@@ -225,7 +225,7 @@ build an app, see here: [Angular Docs](https://angular.io/guide/setup-local)
 
 1. Commit, stash or reset all changes made to any project.
 1. Run:
-   ```bash
+   ```shell
    cd app-map
    # npm run app-map:version # no autocommit
    npm run app-map:version:commit
@@ -235,7 +235,7 @@ build an app, see here: [Angular Docs](https://angular.io/guide/setup-local)
 
 1. Commit, stash or reset all changes made to any project.
 1. Run
-   ```bash
+   ```shell
    cd app-form
    # npm run app-form:version # no autocommit
    npm run app-form:version:commit
@@ -249,7 +249,7 @@ build an app, see here: [Angular Docs](https://angular.io/guide/setup-local)
   changed.
 
 1. Run:
-   ```bash
+   ```shell
    cd app-map
    npm run app-map:build:prod
    # in a new terminal
@@ -309,7 +309,7 @@ default paths, the apps' content should appear at the following paths:
    `http(s)://[YOUR_SERVER_ADDRESS]/edit/options-form`.
 
 ### Commands useful to remove / reinstall Wordpress:
-```bash
+```shell
 sudo rm -rf /var/lib/wordpress /usr/share/wordpress /etc/wordpress/
 sudo mysql -uroot
 ```
@@ -327,7 +327,7 @@ Also the associations without public address have different color.
 
 ### Clojure
 
-```bash
+```shell
 cd data
 # generate pom.xml (or create it manually)
 clojure -Spom
@@ -353,18 +353,18 @@ clojure -M -m fdk.geo Vereinsinformationen_öffentlich_Stadtteilkarte.ods out.um
 ```
 ### Typescript
 
-```bash
+```shell
 # install nodejs
 sudo npm install -g typescript
 npm install --save-dev @types/node
 npm install xlsx
 ```
 Compile the typescript source code files as they change:
-```bash
+```shell
 tsc *.ts --watch
 ```
 Open a new console and run the data conversion:
-```bash
+```shell
 node json.js
 ```
 
