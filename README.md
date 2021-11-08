@@ -1,74 +1,79 @@
-# FdK
-
 See also [OpenStreetMap uMap](https://wiki.openstreetmap.org/wiki/UMap)
 
-# AssociationMap
+## On GNU Guix
+1. Execute `run.sh <shared_path> <public_path>` where `public_path` is a
+   relative route within `shared_path`. E.g.:
+```shell
+./run.sh ~/dec fdk
+# load the profile inside the container:
+source /usr/etc/profile
+# start the services:
+start
+sleep 3
+php -c /usr/etc -f /usr/etc/db-connect-test.php
+php -c /usr/etc -S localhost:4200 -t ~/dec/fdk/map/database/
+```
 
-## MySQL Database installation and setup
+1. In a new terminal
+```shell
+# test database access:
+curl --request GET http://localhost:4200/api/associations/read-associations.php
+```
+
+1. In a new terminal start the app-map
+```shell
+./run.sh ~/dec fdk
+# load the profile inside the container:
+source /usr/etc/profile
+cd dec/fdk/map/app-map/
+ng serve --port 4201
+```
+
+1. In a new terminal start the app-map
+```shell
+./run.sh ~/dec fdk
+# load the profile inside the container:
+source /usr/etc/profile
+cd dec/fdk/map/app-form/
+ng serve --port 4202
+```
+
+
+## On Ubuntu
+
+```shell
+# install AngularJS:
+npm install -g @angular/cli
+# install Wordpress, PHP, MySQL phpMyAdmin:
+sudo apt install wordpress php libapache2-mod-php php-mysql mysql-server mysql-client mysql-common phpmyadmin
+# make sure MySQL is running:
+systemctl status mysql.service
+# set up the database:
+userPasswd=<YOUR-PASSWORD>
+sudo mysql -uroot << EOF
+DROP DATABASE IF EXISTS associations;
+CREATE DATABASE IF NOT EXISTS associations;
+CREATE USER '$USER@'localhost' IDENTIFIED BY '$userPasswd';
+GRANT ALL PRIVILEGES ON associations.* TO $USER'@'localhost' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+select '-- Loading test data ...' AS '';
+SOURCE dec/fdk/map/database/db-export/associations.sql;
+-- SHOW TABLES;
+-- SHOW COLUMNS IN activities;
+SELECT count(*) as 'count-of-activities (should be ~130)'
+FROM associations.activities;
+exit
+EOF
+```
+## MySQL installation and setup
 
 Depending on your MySQL environment, you can do this using the from the command
 line or with [phpMyAdmin](https://www.phpmyadmin.net/) GUI.
 
-### From the Ubuntu command line
+### Database setup with [phpMyAdmin](localhost:80/phpmyadmin/index.php)
 
-1. Install Angular:
-   ```bash
-   npm install -g @angular/cli
-   ```
-
-1. Install Wordpress, PHP, MySQL phpMyAdmin:
-   ```bash
-   sudo apt install wordpress php libapache2-mod-php php-mysql mysql-server mysql-client mysql-common phpmyadmin
-   ```
-   Make sure MySQL is running:
-   ```bash
-   systemctl status mysql.service
-   ```
-1. Set up a MySQL database on your server. (The name of the database is
-   `associations`, however it can be renamed.):
-   ```shell
-   sudo mysql -uroot
-   ```
-   Then on the MySQL command line:
-   ```sql
-   DROP DATABASE IF EXISTS associations;
-   CREATE DATABASE IF NOT EXISTS associations;
-   ```
-
-1. Create user and grant permissions to database:
-   ```sql
-   CREATE USER 'user'@'localhost' IDENTIFIED BY '<YOUR-PASSWORD>';
-   GRANT ALL PRIVILEGES ON associations.* TO 'user'@'localhost' WITH GRANT OPTION;
-   flush privileges;
-   exit
-   ```
-
-1. Import the data. Attention! The script drops existing `associations`
-   database. Any existing data will be lost.
-   ```
-   mysql -uuser --table --password associations < map/database/db-export/associations.sql
-   ```
-1. Verify the import. Login to MySQL and connect to the `associations` database:
-   ```bash
-   mysql -uuser --table --password associations
-   ```
-   And from the MySQL command line:
-   ```sql
-   SHOW TABLES;
-   SHOW COLUMNS IN activities;
-   SHOW COLUMNS IN associations;
-   SHOW COLUMNS IN contacts;
-   SHOW COLUMNS IN districts;
-   SHOW COLUMNS IN images;
-   SHOW COLUMNS IN links;
-   SHOW COLUMNS IN socialmedia;
-   ```
-
-### Database setup with [phpMyAdmin](localhost:80/phpmyadmin/index.php) GUI
-
-Click on the newly created database and select `Import` from the top menu. Then
-you can upload the `.sql` file to your database.
-
+Click on the newly created database and select `Import` from the top menu and
+upload the sql file.
 
 ## Setup PHP scripts for database access
 
@@ -97,7 +102,7 @@ you can upload the `.sql` file to your database.
    will be copied to the right location when deploying the apps. **The file will
    NOT be committed to the Git repository.**
 
-1. For the development a PHP server may need to be started:
+1. Development on Ubuntu: a PHP server may need to be started:
    ```shell
    php -S localhost:4200 -t ./map/database/
    ```
