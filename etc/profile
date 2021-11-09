@@ -13,13 +13,105 @@ ls -1d /usr/etc/* | while read filepath; do
 done
 
 alias ng='node $HOME/node_modules/\@angular/cli/bin/ng'
+# node_bin=`which node`
+# ng_bin=$HOME/node_modules/\@angular/cli/bin/ng
+#  serve_map_cmd="$node_bin $ng_bin serve --port 4021"
+# serve_form_cmd="$node_bin $ng_bin serve --port 4022"
 
-start () {
-    mysqld_safe 1>/dev/null &
+port_map=4021
+port_form=4022
+
+test_php () {
+    printf "Testing php websrver... \n"
+    url=http://localhost:4200/api/associations/read-associations.php
+    cnt_chars=$(curl --silent --request GET $url | wc -c)
+    printf "... %s chars received\n" $cnt_chars
 }
 
-stop () {
-    mysqladmin shutdown
+start_php () {
+    mysqld_safe 1>/dev/null &
+    # phpApi paths
+    sed -i -e "s|localhost/AssociationMap|localhost:4200|" \
+        dec/fdk/map/app-map/src/environments/environment.ts \
+        dec/fdk/map/app-form/src/environments/environment.ts
+
+    # php -c /usr/etc -f /usr/etc/db-connect-test.php
+
+    # --no-header / -q   means quiet-mode
+    # redirection '... 1>/var/log/php_stdout.log &' doesn't work
+    # set -x  # Print commands and their arguments as they are executed.
+    php -q -c /usr/etc \
+        -S localhost:4200 \
+        -t ~/dec/fdk/map/database/ \
+        &>/var/log/php_stdout.log &
+    # set +x  # Don't print commands
+
+#     xterm -e 'env DISPLAY=":1.0" PROMPT_COMMAND="unset PROMPT_COMMAND
+# ls -la
+# echo $DISPLAY
+# " bash'
+
+
+#     xfce4-terminal \
+#         --title="php" \
+#         --command='env PROMPT_COMMAND="unset PROMPT_COMMAND
+# # php -c /usr/etc -f /usr/etc/db-connect-test.php
+# php -c /usr/etc -S localhost:4200 -t ~/dec/fdk/map/database/ 1>/dev/null &
+# " bash'
+}
+
+kill_all () {
+    # mysqladmin shutdown
+    # set -x
+    killall mariadbd # 'killall mysqld_safe' doesn't work
+    killall php
+    pkill -f "ng serve --port $port_map"
+    pkill -f "ng serve --port $port_form"
+    # set +x
+}
+
+serve_map () {
+    # test_php
+    # set -x
+    cd ~/dec/fdk/map/app-map/
+    logfile=/var/log/serve_map.log
+    printf "See %s\n" $logfile
+    ng serve --port $port_map &>$logfile &
+    # cd -
+    # set +x
+
+#     xfce4-terminal \
+#         --working-directory="~/dec/fdk/map/app-map/" \
+#         --title="app-map" \
+#         --command='env PROMPT_COMMAND="unset PROMPT_COMMAND
+# curl --request GET http://localhost:4200/api/associations/read-associations.php
+# ng serve --port 4201
+# " bash'
+}
+
+serve_form () {
+    # test_php
+    # set -x
+    cd ~/dec/fdk/map/app-form/
+    logfile=/var/log/serve_form.log
+    printf "See %s\n" $logfile
+    ng serve --port $port_form &>$logfile &
+    # cd -
+    # set +x
+
+#     xfce4-terminal \
+#         --working-directory="~/dec/fdk/map/app-form/" \
+#         --title="app-form" \
+#         --command='env PROMPT_COMMAND="unset PROMPT_COMMAND
+# curl --request GET http://localhost:4200/api/associations/read-associations.php
+# ng serve --port 4202
+# " bash'
+}
+
+start () {
+    start_php
+    serve_map
+    serve_form
 }
 
 # Random password generator
@@ -64,6 +156,7 @@ SOURCE dec/fdk/map/database/db-export/associations.sql;
 SELECT count(*) as 'count-of-activities (should be ~130)'
 FROM associations.activities;
 EOF
+    mysqladmin shutdown
 fi
 
 cat << EOF
@@ -74,6 +167,7 @@ cat << EOF
 | |_| | |\  | |_| | | |_| | |_| | |>  <
  \____|_| \_|\___/   \____|\__,_|_/_/\_\\
 
-Welcome! 'start' or 'stop' services using that same words as commands.
-
+Welcome! Available commands:
+  start : Runs: start_php, serve_map, serve_form
+  kill_all : (broken: killing a node process messes up the terminal)
 EOF

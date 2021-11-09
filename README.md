@@ -9,9 +9,6 @@ See also [OpenStreetMap uMap](https://wiki.openstreetmap.org/wiki/UMap)
 source /usr/etc/profile
 # start the services:
 start
-sleep 3
-php -c /usr/etc -f /usr/etc/db-connect-test.php
-php -c /usr/etc -S localhost:4200 -t ~/dec/fdk/map/database/
 ```
 
 1. In a new terminal
@@ -34,8 +31,6 @@ ng serve --port 4201
 ./run.sh ~/dec fdk
 # load the profile inside the container:
 source /usr/etc/profile
-cd dec/fdk/map/app-form/
-ng serve --port 4202
 ```
 
 

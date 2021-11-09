@@ -26,12 +26,6 @@ file_path=$(dirname "$0") # path to this file
 grep -qF "#mysqld_user#" $file_path/etc/my.cnf &&\
     sed -i -e "s|#mysqld_user#|$(whoami)|" $file_path/etc/my.cnf
 
-# phpApi paths
-sed -i -e "s|localhost/AssociationMap|localhost:4200|" \
-    map/app-map/src/environments/environment.ts \
-    map/app-form/src/environments/environment.ts
-
-
 if [ ! -d $file_path/node_modules ]; then
     mkdir $file_path/node_modules
 fi
@@ -43,7 +37,7 @@ cliTools="busybox ripgrep"
 # cliTools="$cliTools coreutils"
 guix shell \
      --container --network --no-cwd \
-     node php mariadb nss-certs $cliTools \
+     node php mariadb nss-certs curl $cliTools \
      --share=$file_path/node_modules=$HOME/node_modules \
      --share=$file_path/etc=/usr/etc \
      --share=$file_path/var/log=/var/log \
