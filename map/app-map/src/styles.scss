@@ -103,6 +103,7 @@ body *:not(i):not(.pi) {
 .p-button:not(.p-button-text) {
   background-color: $blue !important;
   border-color: $blue !important;
+  border-radius: 0;
 }
 
 .p-button-text {
@@ -362,7 +363,6 @@ p-autoComplete {
   .filter-chip {
     display: inline-block;
     padding: 4px 8px 2px;
-    border-radius: 12px;
     background-color: $blue;
     color: #fff;
     margin-right: 4px;

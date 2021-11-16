@@ -723,7 +723,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
       || association.addressLine3
       || association.street || association.postcode
       || association.city || association.country) {
-      content += `<div class="association-address"><h3>Adresse</h3>`;
+      content += `<div class="association-address">`;
       if (association.addressLine1) {
         content += `<p class="name"><strong>${association.addressLine1}</strong></p>`;
       }

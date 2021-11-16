@@ -130,6 +130,7 @@ body *:not(i):not(.pi) {
 .p-button:not(.p-button-text):not(.p-confirm-dialog-reject) {
   background-color: $blue;
   border-color: $blue;
+  border-radius: 0;
 
   &:hover, &:active {
     background-color: darken($blue, 10%);
