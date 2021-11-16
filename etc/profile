@@ -18,8 +18,8 @@ alias ng='node $HOME/node_modules/\@angular/cli/bin/ng'
 #  serve_map_cmd="$node_bin $ng_bin serve --port 4021"
 # serve_form_cmd="$node_bin $ng_bin serve --port 4022"
 
-port_map=4021
-port_form=4022
+port_map=4201
+port_form=4202
 
 test_php () {
     printf "Testing php websrver... \n"
@@ -76,7 +76,8 @@ serve_map () {
     cd ~/dec/fdk/map/app-map/
     logfile=/var/log/serve_map.log
     printf "See %s\n" $logfile
-    ng serve --port $port_map &>$logfile &
+    # ng serve --port $port_map &>$logfile &
+    ng serve --port $port_map
     # cd -
     # set +x
 
@@ -89,13 +90,20 @@ serve_map () {
 # " bash'
 }
 
+start_map () {
+    serve_map # just an alias
+}
+
 serve_form () {
     # test_php
     # set -x
     cd ~/dec/fdk/map/app-form/
+    sed -i "s|del-cli --force|rm -rf|" package.json
+    sed -i "s|robocopy \(.*\) \*\.\* \/S \/E \/IS|cp -r \1|" package.json
     logfile=/var/log/serve_form.log
     printf "See %s\n" $logfile
-    ng serve --port $port_form &>$logfile &
+    # ng serve --port $port_form &>$logfile &
+    ng serve --port $port_form
     # cd -
     # set +x
 
@@ -106,6 +114,10 @@ serve_form () {
 # curl --request GET http://localhost:4200/api/associations/read-associations.php
 # ng serve --port 4202
 # " bash'
+}
+
+start_form () {
+    serve_form # just an alias
 }
 
 start () {

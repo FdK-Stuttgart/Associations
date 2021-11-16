@@ -22,15 +22,15 @@ curl --request GET http://localhost:4200/api/associations/read-associations.php
 ./run.sh ~/dec fdk
 # load the profile inside the container:
 source /usr/etc/profile
-cd dec/fdk/map/app-map/
-ng serve --port 4201
+serve_map
 ```
 
-1. In a new terminal start the app-map
+1. In a new terminal start the app-form
 ```shell
 ./run.sh ~/dec fdk
 # load the profile inside the container:
 source /usr/etc/profile
+serve_form
 ```
 
 

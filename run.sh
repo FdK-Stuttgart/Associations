@@ -33,7 +33,7 @@ fi
 # $file_path/node_modules should contain only the packages needed by angular
 # (the ng) itself. Both app-map and app-form have their node_modules-directories
 
-cliTools="busybox ripgrep"
+cliTools="busybox ripgrep less"
 # cliTools="$cliTools coreutils"
 guix shell \
      --container --network --no-cwd \
