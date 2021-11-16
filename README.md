@@ -241,7 +241,7 @@ build an app, see here: [Angular Docs](https://angular.io/guide/setup-local)
    npm run app-form:version:commit
    ```
 
-### Deployment
+### Build
 
 1. Make sure you have set up your `database.php` file described in the section
   above ("Setting up the database scripts"). This only has to be done once when
@@ -274,8 +274,52 @@ build an app, see here: [Angular Docs](https://angular.io/guide/setup-local)
          - index.html
          - ...
    ```
-1. Upload the contents of `map/dist/AssociationMap/` onto the root path of your
-   server.
+### Deployment
+```shell
+### Deploy to TEST
+# create backup
+test_login=<...>
+test_server=<...>
+test_home=<...>
+ssh $test_login@$test_server
+cd $test_home
+timestamp=$(date '+%s')
+cp -r AssociationMap/ AssociationMap.backup-$timestamp/
+chmod -R -w AssociationMap.backup-$timestamp/
+#
+logout
+#
+# file transfer DEV -> TEST:
+rsync -ravz \
+      --exclude="AssociationMap/.htaccess" \
+      --exclude="AssociationMap/edit/.htaccess" \
+      --exclude="AssociationMap/api/database.php" \
+      ./map/dist/AssociationMap \
+    $test_login@$test_server:$test_home
+
+### Deploy to PROD
+# create backup
+prod_login=<...>
+prod_server=<...>
+prod_home=<...>
+ssh $prod_login@$prod_server
+cd $prod_home
+timestamp=$(date '+%s')
+cp -r AssociationMap/ AssociationMap.backup-$timestamp/
+chmod -R -w AssociationMap.backup-$timestamp/
+#
+logout
+#
+ssh $test_login@$test_server  # login to TEST
+cd $test_home
+# file transfer TEST -> PROD:
+rsync -ravz \
+      --exclude="AssociationMap/.htaccess" \
+      --exclude="AssociationMap/edit/.htaccess" \
+      --exclude="AssociationMap/api/database.php" \
+     ./AssociationMap \
+      $prod_login@$prod_server:$prod_home
+```
 
 ### Changing paths
 
