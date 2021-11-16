@@ -131,7 +131,6 @@ a {
   text-decoration: none;
 
   &:hover, &:active {
-    color: darken($blue, 10%);
     text-decoration: underline !important;
   }
 }

@@ -1,10 +1,11 @@
-$alphaOpacity: 0.52; // in %
+// $alphaOpacity: 0.52; // in %
+$alphaOpacity: 100; // in %
 
 .pubAddr {
-  // color: rgba(33, 37, 41, 100);
+  color: rgba(209, 56, 88, 100);
 }
 .noPubAddr {
-  // color: rgba(33, 37, 41, $alphaOpacity);
+  color: rgb(0, 180, 214, $alphaOpacity);
 }
 .association-entry {
   padding: 4px;
@@ -17,8 +18,7 @@ $alphaOpacity: 0.52; // in %
   }
 
   &.selected {
-    color: #00b4d6;
-    background-color: rgba(0, 0, 0, 0.05);
+    text-decoration: underline;
   }
 }
 

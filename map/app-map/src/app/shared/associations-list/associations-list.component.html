@@ -1,16 +1,23 @@
 <div class="association-entries"
      *ngIf="associations?.length; else noAssociations">
   <div class="association-entry"
-       [ngClass]="{ 'selected': association[identifiedByFieldName] === selectedAssociationField
-                  , 'noPubAddr': noPubAddrAssocIds.includes(association.id) === true
-                  , 'pubAddr': noPubAddrAssocIds.includes(association.id) === false
-                  }"
+       [ngClass]="{ 'selected': association[identifiedByFieldName] === selectedAssociationField }"
        *ngFor="let association of associations">
     <a (click)="emitClick(association)">
       <div class="icon-and-text">
         <div class="icon">
-          <i class="{{ primeNgIconClass }} icon-padding"
-             *ngIf="association[identifiedByFieldName] === selectedAssociationField"></i>
+          <i class="{{ primeNgNoPubAddr }} icon-padding"
+             *ngIf="noPubAddrAssocIds.includes(association.id) === true
+                    && association[identifiedByFieldName] !== selectedAssociationField"></i>
+          <i class="{{ primeNgPubAddr }} icon-padding"
+             *ngIf="noPubAddrAssocIds.includes(association.id) === false
+                    && association[identifiedByFieldName] !== selectedAssociationField"></i>
+          <i class="{{ primeNgNoPubAddrSelected }} icon-padding"
+             *ngIf="noPubAddrAssocIds.includes(association.id) === true &&
+             association[identifiedByFieldName] === selectedAssociationField"></i>
+          <i class="{{ primeNgPubAddrSelected }} icon-padding"
+             *ngIf="noPubAddrAssocIds.includes(association.id) === false
+                    && association[identifiedByFieldName] === selectedAssociationField"></i>
         </div>
         <div class="text">
           {{ association.shortName || association.name }}
