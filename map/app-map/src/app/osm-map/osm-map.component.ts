@@ -59,6 +59,8 @@ export class OsmMapComponent implements OnInit, OnDestroy {
 
   blocked = true;
   loadingText = 'Vereine abrufen...';
+  queryString?: string;
+  queryStringMarker = '<mark>$&</mark>';
 
   advancedSearchVisible = false;
   districtOptions: DropdownOption[] = [];
@@ -72,6 +74,11 @@ export class OsmMapComponent implements OnInit, OnDestroy {
 
   markers: Overlay[] = [];
   popup?: Overlay;
+
+  popupLat?: number;
+  popupLng?: number;
+  popupId?: string;
+  popupZoomIn?: boolean;
 
   popupVisible = false;
   popupContentAssociationId?: string;
@@ -422,7 +429,9 @@ export class OsmMapComponent implements OnInit, OnDestroy {
 
     if (!queryString) {
       filteredResult = this.associations;
+      this.queryString = undefined;
     } else {
+      this.queryString = queryString;
       filteredResult = this.associations
         .filter((s: Association) => {
           const q: string = queryString ? queryString.toLowerCase() : '';
@@ -467,6 +476,19 @@ export class OsmMapComponent implements OnInit, OnDestroy {
         !== JSON.stringify(previousFilteredResult)) {
       if (this.clusterLayer) {
         this.updateClusterLayerStyle();
+      }
+    }
+    if (this.popupVisible) {
+      if (this.popupLat != undefined
+        && this.popupLng != undefined
+        && this.popupId != undefined
+        && this.popupZoomIn != undefined) {
+        this.popupVisible = false;
+        this.togglePopupOverlay(
+          this.popupLat,
+          this.popupLng,
+          this.popupId,
+          this.popupZoomIn);
       }
     }
     this.blocked = false;
@@ -587,12 +609,22 @@ export class OsmMapComponent implements OnInit, OnDestroy {
       this.popupVisible = true;
       this.popupContentAssociationId = id;
 
+      this.popupLat = lat;
+      this.popupLng = lng;
+      this.popupId = id;
+      this.popupZoomIn = zoomIn;
+
       // add the listener for the popup close button
       document.getElementById('popup-close')?.addEventListener(
         'click',
         this.closeButtonClickHandler);
 
     } else {
+      this.popupLat = undefined;
+      this.popupLng = undefined;
+      this.popupId = undefined;
+      this.popupZoomIn = undefined;
+
       this.popupVisible = false;
       this.popupContentAssociationId = undefined;
     }
@@ -712,9 +744,93 @@ export class OsmMapComponent implements OnInit, OnDestroy {
    * the popup
    */
   getPopupContent(association: Association): string {
+    association.markedName = association.name;
+    if (association.street) {
+      association.markedStreet = association.street;
+    }
+    if (association.postcode) {
+      association.markedPostcode = association.postcode;
+    }
+    if (association.city) {
+      association.markedCity = association.city;
+    }
+    if (association.country) {
+      association.markedCountry = association.country;
+    }
+    if (association.goals) {
+      association.goals.markedText = association.goals.text;
+    }
+    if (association.activities) {
+      association.activities.markedText = association.activities.text;
+    }
+    association.contacts?.map((contact: Contact) => {
+      if (contact.name) {
+        contact.markedName = contact.name;
+      }
+      if (contact.phone) {
+        contact.markedPhone = contact.phone;
+      }
+      if (contact.fax) {
+        contact.markedFax = contact.fax;
+      }
+      if (contact.mail) {
+        contact.markedMail = contact.mail;
+      }});
+    association.links?.some((link: Link) => {
+      if (link.linkText) {
+        link.markedLink = link.linkText;
+      }});
+
+    if (this.queryString) {
+      const re = new RegExp(this.queryString, 'gi');
+      association.markedName =
+        association.name.replace(re, '<mark>$&</mark>');
+      if (association.street) {
+        association.markedStreet =
+          association.street.replace(re, '<mark>$&</mark>');
+      }
+      if (association.postcode) {
+        association.markedPostcode =
+          association.postcode.replace(re, '<mark>$&</mark>');
+      }
+      if (association.city) {
+        association.markedCity =
+          association.city.replace(re, '<mark>$&</mark>');
+      }
+      if (association.country) {
+        association.markedCountry =
+          association.country.replace(re, '<mark>$&</mark>');
+      }
+      if (association.goals) {
+        association.goals.markedText =
+          association.goals.text.replace(re, '<mark>$&</mark>');
+      }
+      if (association.activities) {
+        association.activities.markedText =
+          association.activities.text.replace(re, '<mark>$&</mark>');
+      }
+      association.contacts?.map((contact: Contact) => {
+        if (contact.name) {
+          contact.markedName = contact.name.replace(re, '<mark>$&</mark>');
+        }
+        if (contact.phone) {
+          contact.markedPhone = contact.phone.replace(re, '<mark>$&</mark>');
+        }
+        if (contact.fax) {
+          contact.markedFax = contact.fax.replace(re, '<mark>$&</mark>');
+        }
+        if (contact.mail) {
+          contact.markedMail = contact.mail.replace(re, '<mark>$&</mark>');
+        }});
+      association.links?.some((link: Link) => {
+        if (link.linkText) {
+          link.markedLink = link.linkText.replace(re, '<mark>$&</mark>');
+        }});
+    }
+
     let content = `<div class="osm-association-inner-container">`;
     content += `<div class="association-title"><h2>`;
-    content += association.name;
+    content += association.markedName;
     content += `</h2></div>`;
 
     if (association.images && association.images.length > 0) {
@@ -744,16 +860,16 @@ export class OsmMapComponent implements OnInit, OnDestroy {
         content += `<p class="name">${association.addressLine3}</p>`;
       }
       if (association.street) {
-        content += `<p class="street">${association.street}</p>`;
+        content += `<p class="street">${association.markedStreet}</p>`;
       }
       if (association.postcode || association.city) {
         content += `<p class="postcode-city">`;
-        content += `${association.postcode ? (association.postcode+' ') : ''}`;
+        content += `${association.postcode ? (association.markedPostcode+' ') : ''}`;
         content += `${association.city}`;
         content += `</p>`;
       }
       if (association.country) {
-        content += `<p class="country">${association.country}</p>`;
+        content += `<p class="country">${association.markedCountry}</p>`;
       }
       content += `</div>`;
     }
@@ -768,7 +884,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
           content += this.getSocialMediaIcon('phone', false);
           content += `<p class="phone">`;
           content += `<a href="${telephoneLink(contact.phone)}">`;
-          content += `${contact.phone}`;
+          content += `${contact.markedPhone}`;
           content += `</a></p></div></div>`;
         }
         content += `</div>`;
@@ -780,7 +896,8 @@ export class OsmMapComponent implements OnInit, OnDestroy {
           content += `<div class="association-contact-row">`;
           content += this.getSocialMediaIcon('fax', false);
           content += `<p class="fax"><a href="${telephoneLink(contact.fax)}">`;
-          content += `${contact.fax}</a></p></div></div>`;
+          content += `${contact.markedFax}`;
+          content += `</a></p></div></div>`;
         }
         content += `</div>`;
       }
@@ -791,7 +908,8 @@ export class OsmMapComponent implements OnInit, OnDestroy {
           content += `<div class="association-contact-row">`;
           content += this.getSocialMediaIcon('mail', false);
           content += `<p class="mail"><a href="mailto:${contact.mail}">`;
-          content += `${contact.mail}</a></p></div></div>`;
+          content += `${contact.markedMail}`;
+          content += `</a></p></div></div>`;
         }
         content += `</div>`;
       }
@@ -801,13 +919,13 @@ export class OsmMapComponent implements OnInit, OnDestroy {
     if (association.goals && association.goals.text !== '') {
       content += `<div class="association-description">`;
       content += `<h3>Ziele des Vereins</h3>`;
-      content += association.goals.text;
+      content += association.goals.markedText;
       content += `</div>`;
     }
 
     if (association.activities && association.activities.text !== '') {
       content += `<div class="association-description"><h3>Aktivitäten</h3>`;
-      content += association.activities.text;
+      content += association.activities.markedText;
       content += `</div>`;
     }
 
@@ -829,9 +947,10 @@ export class OsmMapComponent implements OnInit, OnDestroy {
       content += `<div class="association-links"><h3>Links</h3>`;
       for (const link of association.links) {
         content += `<ul><li>`;
-        content += `<a href="${link.url}" title="${link.linkText || link.url}"`;
+        content += `<a href="${link.url}" `;
+        content += ` title="${link.linkText || link.url}"`;
         content += ` target="_blank">`;
-        content += `${link.linkText || link.url}`;
+        content += `${link.markedLink || link.url}`;
         content += `</a></li></ul>`;
       }
       content += `</div>`;
@@ -842,7 +961,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
       for (const socialMedia of association.socialMedia) {
         content += `<div class="social-media-link">`;
         content += `<a href="${socialMedia.url}"`;
-        content += ` title="${socialMedia.linkText || socialMedia.platform}"`;
+        content += ` title="${socialMedia.linkText || socialMedia.platform || socialMedia.url}"`;
         content += ` target="_blank">`;
         content += this.getSocialMediaIcon(socialMedia.platform);
         content += `</a>`;

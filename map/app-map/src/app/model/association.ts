@@ -3,9 +3,13 @@ export interface Address {
   addressLine2?: string;
   addressLine3?: string;
   street?: string;
+  markedStreet?: string;
   postcode?: string;
+  markedPostcode?: string;
   city?: string;
+  markedCity?: string;
   country?: string;
+  markedCountry?: string;
 }
 
 export interface LatLng {
@@ -16,6 +20,7 @@ export interface LatLng {
 export interface Association extends Address, LatLng {
   id: string;
   name: string;
+  markedName: string;
   shortName?: string;
   goals?: TextBlock;
   activities?: TextBlock;
@@ -29,15 +34,20 @@ export interface Association extends Address, LatLng {
 export interface Contact {
   id?: string;
   name?: string;
+  markedName?: string;
   mail?: string;
+  markedMail?: string;
   phone?: string;
+  markedPhone?: string;
   fax?: string;
+  markedFax?: string;
   associationId?: string;
 }
 
 export interface Link {
   id?: string;
   linkText?: string;
+  markedLink?: string;
   url: string;
   associationId?: string;
 }
@@ -49,6 +59,7 @@ export interface SocialMediaLink extends Link {
 export interface TextBlock {
   format?: 'plain' | 'html';
   text: string;
+  markedText: string;
 }
 
 export enum SocialMediaPlatform {
