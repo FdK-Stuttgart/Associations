@@ -219,107 +219,35 @@ add_filter('jwt_auth_expire', 'jwt_auth_expire_8_hours');
 For the information on how to install and setup angular as well as on how to
 build an app, see here: [Angular Docs](https://angular.io/guide/setup-local)
 
-### Angular App Versioning
+### Angular App versioning, build and deployment
 
-#### New map-app version
+Make sure you have set up your `database.php` file described in the section
+above ("Setting up the database scripts"). This only has to be done once when
+deploying the apps for the first time or if the database configuration has
+changed.
 
-1. Commit, stash or reset all changes made to any project.
-1. Run:
-   ```shell
-   cd app-map
-   # npm run app-map:version # no autocommit
-   npm run app-map:version:commit
-   ```
-
-#### New form-app version
-
-1. Commit, stash or reset all changes made to any project.
-1. Run
-   ```shell
-   cd app-form
-   # npm run app-form:version # no autocommit
-   npm run app-form:version:commit
-   ```
-
-### Build
-
-1. Make sure you have set up your `database.php` file described in the section
-  above ("Setting up the database scripts"). This only has to be done once when
-  deploying the apps for the first time or if the database configuration has
-  changed.
-
-1. Run:
-   ```shell
-   cd app-map
-   npm run app-map:build:prod
-   # in a new terminal
-   cd app-form
-   npm run app-form:build:prod
-   ```
-1. Check the `map/dist/` directory. It should have following structure:
-
-   ```
-     - dist/
-       - AssociationMap/
-         - api/
-           - database.php
-           - ...
-         - assets/
-           - ...
-         - edit/
-           - assets/
-             - ...
-           - index.html
-           - ...
-         - index.html
-         - ...
-   ```
-### Deployment
-```shell
-### Deploy to TEST
-# create backup
-test_login=<...>
-test_server=<...>
-test_home=<...>
-ssh $test_login@$test_server
-cd $test_home
-timestamp=$(date '+%s')
-cp -r AssociationMap/ AssociationMap.backup-$timestamp/
-chmod -R -w AssociationMap.backup-$timestamp/
-#
-logout
-#
-# file transfer DEV -> TEST:
-rsync -ravz \
-      --exclude="AssociationMap/.htaccess" \
-      --exclude="AssociationMap/edit/.htaccess" \
-      --exclude="AssociationMap/api/database.php" \
-      ./map/dist/AssociationMap \
-    $test_login@$test_server:$test_home
-
-### Deploy to PROD
-# create backup
-prod_login=<...>
-prod_server=<...>
-prod_home=<...>
-ssh $prod_login@$prod_server
-cd $prod_home
-timestamp=$(date '+%s')
-cp -r AssociationMap/ AssociationMap.backup-$timestamp/
-chmod -R -w AssociationMap.backup-$timestamp/
-#
-logout
-#
-ssh $test_login@$test_server  # login to TEST
-cd $test_home
-# file transfer TEST -> PROD:
-rsync -ravz \
-      --exclude="AssociationMap/.htaccess" \
-      --exclude="AssociationMap/edit/.htaccess" \
-      --exclude="AssociationMap/api/database.php" \
-     ./AssociationMap \
-      $prod_login@$prod_server:$prod_home
+Versioning & Build:
+Run the `build` function from the `etc/profile`. After the build the `map/dist/`
+should have this structure:
 ```
+- dist/
+  - AssociationMap/
+    - api/
+      - database.php
+      - ...
+    - assets/
+      - ...
+    - edit/
+      - assets/
+        - ...
+      - index.html
+      - ...
+    - index.html
+    - ...
+```
+
+Deployment:
+Run the `deploy_test` and/or `deploy_prod` function from the `etc/profile`.
 
 ### Changing paths
 

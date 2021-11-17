@@ -33,12 +33,15 @@ fi
 # $file_path/node_modules should contain only the packages needed by angular
 # (the ng) itself. Both app-map and app-form have their node_modules-directories
 
-cliTools="busybox ripgrep less"
-# cliTools="$cliTools coreutils"
+# TODO replace busybox with env
+cliTools="busybox rsync openssh bash ripgrep less mycli"
+cliTools="$cliTools grep git coreutils sed node which"
 guix shell \
      --container --network --no-cwd \
      node php mariadb nss-certs curl $cliTools \
      --share=$file_path/node_modules=$HOME/node_modules \
+     --share=$file_path/map/app-map/node_modules=$HOME/node_modules/map/app-map/ \
+     --share=$file_path/map/app-form/node_modules=$HOME/node_modulesmap/app-form/ \
      --share=$file_path/etc=/usr/etc \
      --share=$file_path/var/log=/var/log \
      --share=$file_path/var/lib/mysql/data=/var/lib/mysql/data \

@@ -21,6 +21,12 @@ alias ng='node $HOME/node_modules/\@angular/cli/bin/ng'
 port_map=4201
 port_form=4202
 
+p1=~/dec/fdk/map/app-map/package.json
+p11=~/dec/fdk/map/app-map/package-lock.json
+p2=~/dec/fdk/map/app-form/package.json
+p22=~/dec/fdk/map/app-form/package-lock.json
+
+
 test_php () {
     printf "Testing php websrver... \n"
     url=http://localhost:4200/api/associations/read-associations.php
@@ -32,8 +38,8 @@ start_php () {
     mysqld_safe 1>/dev/null &
     # phpApi paths
     sed -i -e "s|localhost/AssociationMap|localhost:4200|" \
-        dec/fdk/map/app-map/src/environments/environment.ts \
-        dec/fdk/map/app-form/src/environments/environment.ts
+        ~/dec/fdk/map/app-map/src/environments/environment.ts \
+        ~/dec/fdk/map/app-form/src/environments/environment.ts
 
     # php -c /usr/etc -f /usr/etc/db-connect-test.php
 
@@ -58,6 +64,10 @@ start_php () {
 # # php -c /usr/etc -f /usr/etc/db-connect-test.php
 # php -c /usr/etc -S localhost:4200 -t ~/dec/fdk/map/database/ 1>/dev/null &
 # " bash'
+}
+# just an alias
+php () {
+    start_php
 }
 
 kill_all () {
@@ -90,16 +100,15 @@ serve_map () {
 # " bash'
 }
 
-start_map () {
-    serve_map # just an alias
+# just an alias
+map () {
+    serve_map
 }
 
 serve_form () {
     # test_php
     # set -x
     cd ~/dec/fdk/map/app-form/
-    sed -i "s|del-cli --force|rm -rf|" package.json
-    sed -i "s|robocopy \(.*\) \*\.\* \/S \/E \/IS|cp -r \1|" package.json
     logfile=/var/log/serve_form.log
     printf "See %s\n" $logfile
     # ng serve --port $port_form &>$logfile &
@@ -116,14 +125,156 @@ serve_form () {
 # " bash'
 }
 
-start_form () {
-    serve_form # just an alias
+# just an alias
+form () {
+    serve_form
 }
 
 start () {
     start_php
     serve_map
     serve_form
+}
+
+set_ng () {
+    file=$1
+    sed -i \
+        's#"ng \(.*\)"#"node $HOME/node_modules/@angular/cli/bin/ng.js \1"#' \
+        $file
+}
+
+set_version () {
+    file=$1
+    grep "version" $file \
+    | grep --only-matching "\([0-9]*\?\.[0-9]*\?\.[0-9]*\?\)"
+}
+
+version () {
+    cd ~/dec/fdk
+    git stash
+
+    cd $(dirname $p1)
+    npm run app-map:version # no autocommit
+    # npm run app-map:version:commit
+    ver_map=$(set_version $p1)
+
+    cd $(dirname $p2)
+    npm run app-form:version # no autocommit
+    # npm run app-form:version:commit
+    ver_form=$(set_version $p2)
+
+    cd ~/dec/fdk
+    # -lt 5: all 3 version numbers MAJOR.MINOR.PATCH must be non-empty
+    if [[ "$ver_form" != "$ver_map" && ${#ver_map} -lt 5 ]]; then
+        printf "Wrong version numbers: ver_form: '%s', ver_map: '%s'\n" \
+               $ver_form $ver_map
+        printf "Reverting changes."
+        git checkout -- $p1 $p2 $p11 $p22
+        retval=1
+    else
+        git add $p1 $p2 $p11 $p22
+        git commit -m "v${ver_map}"
+        retval=0
+    fi
+    git stash pop
+    return $retval
+}
+
+build () {
+    cd ~/dec/fdk
+    git stash
+    set_ng $p1
+    cd ~/dec/fdk/map/app-map
+    npm run app-map:build:prod
+
+    set_ng $p2
+    sed -i "s|del-cli --force|rm -rf|" $p2
+    sed -i "s|robocopy \(.*\) \*\.\* \/S \/E \/IS|cp -r \1|" $p2
+    sed -i \
+        "s|\(npm-run-all\)|node $HOME/dec/fdk/map/app-form/node_modules/npm-run-all/bin/npm-run-all/main.js \1|" \
+        $p2
+    cd ~/dec/fdk/map/app-form
+    npm run app-form:build:prod
+
+    git checkout -- $p1 $p2 $p11 $p22
+    cd ~/dec/fdk
+    git stash pop
+    return 0
+}
+
+ver_build () {
+    version
+    result="$?"
+    if [ "$result" -ne 0 ]; then
+        return $result
+    else
+        build
+        return $?
+    fi
+}
+
+deploy_test () {
+    # test_login=
+    # test_server=
+    # test_home=
+    if [[ -z "$test_login" || -z "$test_server" || -z "$test_home" ]]; then
+        printf "Undefined variable(s):\n"
+        printf "    test_login:  '%s'\n" $test_login
+        printf "    test_server: '%s'\n" $test_server
+        printf "    test_home:   '%s'\n" $test_home
+    else
+        # create backup
+        ssh $test_login@$test_server
+        # TODO execute remotely:
+        # cd $test_home
+        # timestamp=$(date '+%s')
+        # cp -r AssociationMap/ AssociationMap.backup-$timestamp/
+        # chmod -R -w AssociationMap.backup-$timestamp/
+        # #
+        # logout
+        # #
+        # # file transfer DEV -> TEST:
+        # rsync -ravz \
+        #       --dry-run \
+        #       --exclude="AssociationMap/.htaccess" \
+        #       --exclude="AssociationMap/edit/.htaccess" \
+        #       --exclude="AssociationMap/api/database.php" \
+        #       ./map/dist/AssociationMap \
+        #       $test_login@$test_server:$test_home
+    fi
+}
+
+deploy_prod () {
+    # prod_login=
+    # prod_server=
+    # prod_home=
+    if [[ -z "$prod_login" || -z "$prod_server" || -z "$prod_home" ]]; then
+        printf "Undefined variable(s):\n"
+        printf "    prod_login:  '%s'\n" $prod_login
+        printf "    prod_server: '%s'\n" $prod_server
+        printf "    prod_home:   '%s'\n" $prod_home
+    else
+        # create backup
+        ssh $prod_login@$prod_server
+        # TODO execute remotely:
+        # cd $prod_home
+        # timestamp=$(date '+%s')
+        # cp -r AssociationMap/ AssociationMap.backup-$timestamp/
+        # chmod -R -w AssociationMap.backup-$timestamp/
+        # #
+        # logout
+        # #
+        # ssh $test_login@$test_server  # login to TEST
+        # cd $test_home
+        # # file transfer TEST -> PROD:
+        # rsync -ravz \
+        #       --dry-run \
+        #       --exclude="AssociationMap/.htaccess" \
+        #       --exclude="AssociationMap/edit/.htaccess" \
+        #       --exclude="AssociationMap/api/database.php" \
+        #       ./AssociationMap \
+        #       $prod_login@$prod_server:$prod_home
+    fi
 }
 
 # Random password generator
@@ -180,6 +331,6 @@ cat << EOF
  \____|_| \_|\___/   \____|\__,_|_/_/\_\\
 
 Welcome! Available commands:
-  start : Runs: start_php, serve_map, serve_form
+  start_php, serve_map, serve_form, version, build, deploy_test, deploy_prod
   kill_all : (broken: killing a node process messes up the terminal)
 EOF
