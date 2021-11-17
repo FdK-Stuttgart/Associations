@@ -463,7 +463,8 @@ export class OsmMapComponent implements OnInit, OnDestroy {
       });
     }
     this.filteredAssociations = filteredResult;
-    if (JSON.stringify(filteredResult) !== JSON.stringify(previousFilteredResult)) {
+    if (JSON.stringify(filteredResult)
+        !== JSON.stringify(previousFilteredResult)) {
       if (this.clusterLayer) {
         this.updateClusterLayerStyle();
       }
@@ -473,11 +474,11 @@ export class OsmMapComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * update cluster layer style and check a view times to update the map correctly
+   * update cluster layer style and check view times to update the map correctly
    */
   updateClusterLayerStyle(): void {
-    // BUG FIX: after the cluster layer style changed,
-    // render the map a few times to prevent markers from disappearing with no replacement
+    // BUG FIX: after the cluster layer style changed, render the map a few
+    // times to prevent markers from disappearing with no replacement
     this.clusterLayer?.setStyle(this.getAnimatedClusterStyle);
     for (let i = 0; i <= 1500; i += 100) {
       setTimeout(() => {
@@ -545,7 +546,8 @@ export class OsmMapComponent implements OnInit, OnDestroy {
   getInactiveMarkerImg(noPubAddr: boolean): HTMLImageElement {
     const markerImg: HTMLImageElement = this.renderer2.createElement('img');
     // TODO different colors for inactive associations with no public address?
-    const attr = noPubAddr ? 'assets/pin-noPubAddr-inactive.png' : 'assets/pin-inactive-small.png';
+    const attr = noPubAddr ?
+      'assets/pin-noPubAddr-inactive.png' : 'assets/pin-inactive-small.png';
     markerImg.setAttribute('src', attr);
     return markerImg;
   }
@@ -556,7 +558,8 @@ export class OsmMapComponent implements OnInit, OnDestroy {
    */
   selectAssociation(association: Association): void {
     const zoomIn = this.isDisplayedInACluster(association.id);
-    this.togglePopupOverlay(association.lat, association.lng, association.id, zoomIn);
+    this.togglePopupOverlay(
+      association.lat, association.lng, association.id, zoomIn);
   }
 
   /**
@@ -566,12 +569,14 @@ export class OsmMapComponent implements OnInit, OnDestroy {
    * @param id association id
    * @param zoomIn zoom to association
    */
-  togglePopupOverlay(lat: number, lng: number, id: string, zoomIn: boolean = false): void {
+  togglePopupOverlay(
+    lat: number, lng: number, id: string, zoomIn: boolean = false): void {
     this.removePopup();
 
     if (!this.popupVisible || this.popupContentAssociationId !== id) {
       let removeSidebar = false;
-      if (this.osmContainer.nativeElement.clientWidth < 360 && this.sidebarExpanded) {
+      if (this.osmContainer.nativeElement.clientWidth < 360
+        && this.sidebarExpanded) {
         this.sidebarExpanded = false;
         removeSidebar = true;
       }
@@ -583,7 +588,9 @@ export class OsmMapComponent implements OnInit, OnDestroy {
       this.popupContentAssociationId = id;
 
       // add the listener for the popup close button
-      document.getElementById('popup-close')?.addEventListener('click', this.closeButtonClickHandler);
+      document.getElementById('popup-close')?.addEventListener(
+        'click',
+        this.closeButtonClickHandler);
 
     } else {
       this.popupVisible = false;
@@ -705,7 +712,8 @@ export class OsmMapComponent implements OnInit, OnDestroy {
    * the popup
    */
   getPopupContent(association: Association): string {
-    let content = `<div class="osm-association-inner-container"><div class="association-title"><h2>`;
+    let content = `<div class="osm-association-inner-container">`;
+    content += `<div class="association-title"><h2>`;
     content += association.name;
     content += `</h2></div>`;
 
@@ -725,7 +733,9 @@ export class OsmMapComponent implements OnInit, OnDestroy {
       || association.city || association.country) {
       content += `<div class="association-address">`;
       if (association.addressLine1) {
-        content += `<p class="name"><strong>${association.addressLine1}</strong></p>`;
+        content += `<p class="name"><strong>`;
+        content += `${association.addressLine1}`;
+        content += `</strong></p>`;
       }
       if (association.addressLine2) {
         content += `<p class="name">${association.addressLine2}</p>`;
@@ -738,7 +748,8 @@ export class OsmMapComponent implements OnInit, OnDestroy {
       }
       if (association.postcode || association.city) {
         content += `<p class="postcode-city">`;
-        content += `${association.postcode ? (association.postcode + ' ') : ''}${association.city}`;
+        content += `${association.postcode ? (association.postcode+' ') : ''}`;
+        content += `${association.city}`;
         content += `</p>`;
       }
       if (association.country) {
@@ -748,15 +759,18 @@ export class OsmMapComponent implements OnInit, OnDestroy {
     }
 
     if (association.contacts && association.contacts.length > 0) {
-      content += `<div class="association-contacts"><h3>Kontaktinformationen</h3>`;
+      content += `<div class="association-contacts">`;
+      content += `<h3>Kontaktinformationen</h3>`;
       for (const contact of association.contacts) {
         content += `<div class="association-contact">`;
         if (contact.phone) {
           content += `<div class="association-contact">`;
           content += `<div class="association-contact-row">`;
           content += this.getSocialMediaIcon('phone', false);
-          content +=
-          `<p class="phone"><a href="${telephoneLink(contact.phone)}">${contact.phone}</a></p></div></div>`;
+          content += `<p class="phone">`;
+          content += `<a href="${telephoneLink(contact.phone)}">`;
+          content += `${contact.phone}`;
+          content += `</a></p></div></div>`;
         }
         content += `</div>`;
       }
@@ -766,7 +780,8 @@ export class OsmMapComponent implements OnInit, OnDestroy {
           content += `<div class="association-contact">`;
           content += `<div class="association-contact-row">`;
           content += this.getSocialMediaIcon('fax', false);
-          content += `<p class="fax"><a href="${telephoneLink(contact.fax)}">${contact.fax}</a></p></div></div>`;
+          content += `<p class="fax"><a href="${telephoneLink(contact.fax)}">`;
+          content += `${contact.fax}</a></p></div></div>`;
         }
         content += `</div>`;
       }
@@ -776,7 +791,8 @@ export class OsmMapComponent implements OnInit, OnDestroy {
           content += `<div class="association-contact">`;
           content += `<div class="association-contact-row">`;
           content += this.getSocialMediaIcon('mail', false);
-          content += `<p class="mail"><a href="mailto:${contact.mail}">${contact.mail}</a></p></div></div>`;
+          content += `<p class="mail"><a href="mailto:${contact.mail}">`;
+          content += `${contact.mail}</a></p></div></div>`;
         }
         content += `</div>`;
       }
@@ -784,7 +800,8 @@ export class OsmMapComponent implements OnInit, OnDestroy {
     }
 
     if (association.goals && association.goals.text !== '') {
-      content += `<div class="association-description"><h3>Ziele des Vereins</h3>`;
+      content += `<div class="association-description">`;
+      content += `<h3>Ziele des Vereins</h3>`;
       content += association.goals.text;
       content += `</div>`;
     }
@@ -796,7 +813,8 @@ export class OsmMapComponent implements OnInit, OnDestroy {
     }
 
     if (association.districtList && association.districtList.length > 0) {
-      content += `<div class="association-active-in"><h3>Aktivitätsgebiete</h3>`;
+      content += `<div class="association-active-in">`;
+      content += `<h3>Aktivitätsgebiete</h3>`;
       content += `<div class="association-chips-container">`;
       for (const activeIn of getAllOptions(this.districtOptions,
                                            association.districtList)) {
@@ -811,9 +829,11 @@ export class OsmMapComponent implements OnInit, OnDestroy {
     if (association.links && association.links.length > 0) {
       content += `<div class="association-links"><h3>Links</h3>`;
       for (const link of association.links) {
-        content += `<ul>`;
-        content += `<li><a href="${link.url}" title="${link.linkText || link.url}" target="_blank">${link.linkText || link.url}</a></li>`;
-        content += `</ul>`;
+        content += `<ul><li>`;
+        content += `<a href="${link.url}" title="${link.linkText || link.url}"`;
+        content += ` target="_blank">`;
+        content += `${link.linkText || link.url}`;
+        content += `</a></li></ul>`;
       }
       content += `</div>`;
     }
@@ -822,7 +842,9 @@ export class OsmMapComponent implements OnInit, OnDestroy {
       content += `<div class="association-social-media">`;
       for (const socialMedia of association.socialMedia) {
         content += `<div class="social-media-link">`;
-        content += `<a href="${socialMedia.url}" title="${socialMedia.linkText || socialMedia.platform}" target="_blank">`;
+        content += `<a href="${socialMedia.url}"`;
+        content += ` title="${socialMedia.linkText || socialMedia.platform}"`;
+        content += ` target="_blank">`;
         content += this.getSocialMediaIcon(socialMedia.platform);
         content += `</a>`;
         content += `</div>`;
@@ -844,7 +866,9 @@ export class OsmMapComponent implements OnInit, OnDestroy {
       || platform === SocialMediaPlatform.OTHER || platform === 'Other') {
       return '';
     }
-    return `<div class="social-media-icon mini-icon"><img src="assets/${platform.toLowerCase()}.png" alt="${alt ? platform : ''}"/></div>`;
+    return `<div class="social-media-icon mini-icon">`
+      +`<img src="assets/${platform.toLowerCase()}.png"`
+      +` alt="${alt ? platform : ''}"/></div>`;
   }
 
   /**
