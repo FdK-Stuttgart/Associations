@@ -760,7 +760,6 @@ export class OsmMapComponent implements OnInit, OnDestroy {
 
     if (association.contacts && association.contacts.length > 0) {
       content += `<div class="association-contacts">`;
-      content += `<h3>Kontaktinformationen</h3>`;
       for (const contact of association.contacts) {
         content += `<div class="association-contact">`;
         if (contact.phone) {
