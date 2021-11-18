@@ -42,6 +42,7 @@ guix shell \
      --share=$file_path/node_modules=$HOME/node_modules \
      --share=$file_path/map/app-map/node_modules=$HOME/node_modules/map/app-map/ \
      --share=$file_path/map/app-form/node_modules=$HOME/node_modulesmap/app-form/ \
+     --share=$HOME/.gitconfig=$HOME/.gitconfig \
      --share=$file_path/etc=/usr/etc \
      --share=$file_path/var/log=/var/log \
      --share=$file_path/var/lib/mysql/data=/var/lib/mysql/data \
