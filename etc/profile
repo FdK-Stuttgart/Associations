@@ -18,13 +18,14 @@ alias ng='node $HOME/node_modules/\@angular/cli/bin/ng'
 #  serve_map_cmd="$node_bin $ng_bin serve --port 4021"
 # serve_form_cmd="$node_bin $ng_bin serve --port 4022"
 
+prjdir=~/dec/fdk
 port_map=4201
 port_form=4202
 
-p1=~/dec/fdk/map/app-map/package.json
-p11=~/dec/fdk/map/app-map/package-lock.json
-p2=~/dec/fdk/map/app-form/package.json
-p22=~/dec/fdk/map/app-form/package-lock.json
+p1=$prjdir/map/app-map/package.json
+p11=$prjdir/map/app-map/package-lock.json
+p2=$prjdir/map/app-form/package.json
+p22=$prjdir/map/app-form/package-lock.json
 
 
 test_php () {
@@ -38,8 +39,8 @@ start_php () {
     mysqld_safe 1>/dev/null &
     # phpApi paths
     sed -i -e "s|localhost/AssociationMap|localhost:4200|" \
-        ~/dec/fdk/map/app-map/src/environments/environment.ts \
-        ~/dec/fdk/map/app-form/src/environments/environment.ts
+        $prjdir/map/app-map/src/environments/environment.ts \
+        $prjdir/map/app-form/src/environments/environment.ts
 
     # php -c /usr/etc -f /usr/etc/db-connect-test.php
 
@@ -48,7 +49,7 @@ start_php () {
     # set -x  # Print commands and their arguments as they are executed.
     php -q -c /usr/etc \
         -S localhost:4200 \
-        -t ~/dec/fdk/map/database/ \
+        -t $prjdir/map/database/ \
         &>/var/log/php_stdout.log &
     # set +x  # Don't print commands
 
@@ -62,12 +63,8 @@ start_php () {
 #         --title="php" \
 #         --command='env PROMPT_COMMAND="unset PROMPT_COMMAND
 # # php -c /usr/etc -f /usr/etc/db-connect-test.php
-# php -c /usr/etc -S localhost:4200 -t ~/dec/fdk/map/database/ 1>/dev/null &
+# php -c /usr/etc -S localhost:4200 -t $prjdir/map/database/ 1>/dev/null &
 # " bash'
-}
-# just an alias
-php () {
-    start_php
 }
 
 kill_all () {
@@ -83,7 +80,7 @@ kill_all () {
 serve_map () {
     # test_php
     # set -x
-    cd ~/dec/fdk/map/app-map/
+    cd $prjdir/map/app-map/
     logfile=/var/log/serve_map.log
     printf "See %s\n" $logfile
     # ng serve --port $port_map &>$logfile &
@@ -92,7 +89,7 @@ serve_map () {
     # set +x
 
 #     xfce4-terminal \
-#         --working-directory="~/dec/fdk/map/app-map/" \
+#         --working-directory="$prjdir/map/app-map/" \
 #         --title="app-map" \
 #         --command='env PROMPT_COMMAND="unset PROMPT_COMMAND
 # curl --request GET http://localhost:4200/api/associations/read-associations.php
@@ -100,15 +97,10 @@ serve_map () {
 # " bash'
 }
 
-# just an alias
-map () {
-    serve_map
-}
-
 serve_form () {
     # test_php
     # set -x
-    cd ~/dec/fdk/map/app-form/
+    cd $prjdir/map/app-form/
     logfile=/var/log/serve_form.log
     printf "See %s\n" $logfile
     # ng serve --port $port_form &>$logfile &
@@ -117,17 +109,12 @@ serve_form () {
     # set +x
 
 #     xfce4-terminal \
-#         --working-directory="~/dec/fdk/map/app-form/" \
+#         --working-directory="$prjdir/map/app-form/" \
 #         --title="app-form" \
 #         --command='env PROMPT_COMMAND="unset PROMPT_COMMAND
 # curl --request GET http://localhost:4200/api/associations/read-associations.php
 # ng serve --port 4202
 # " bash'
-}
-
-# just an alias
-form () {
-    serve_form
 }
 
 start () {
@@ -150,7 +137,7 @@ set_version () {
 }
 
 version () {
-    cd ~/dec/fdk
+    cd $prjdir
     git stash
 
     cd $(dirname $p1)
@@ -163,7 +150,7 @@ version () {
     # npm run app-form:version:commit
     ver_form=$(set_version $p2)
 
-    cd ~/dec/fdk
+    cd $prjdir
     # -lt 5: all 3 version numbers MAJOR.MINOR.PATCH must be non-empty
     if [[ "$ver_form" != "$ver_map" && ${#ver_map} -lt 5 ]]; then
         printf "Wrong version numbers: ver_form: '%s', ver_map: '%s'\n" \
@@ -181,10 +168,10 @@ version () {
 }
 
 build () {
-    cd ~/dec/fdk
+    cd $prjdir
     git stash
     set_ng $p1
-    cd ~/dec/fdk/map/app-map
+    cd $prjdir/map/app-map
     npm run app-map:build:prod
 
     set_ng $p2
@@ -193,11 +180,11 @@ build () {
     sed -i \
         "s|\(npm-run-all\)|node $HOME/dec/fdk/map/app-form/node_modules/npm-run-all/bin/npm-run-all/main.js \1|" \
         $p2
-    cd ~/dec/fdk/map/app-form
+    cd $prjdir/map/app-form
     npm run app-form:build:prod
 
     git checkout -- $p1 $p2 $p11 $p22
-    cd ~/dec/fdk
+    cd $prjdir
     git stash pop
     return 0
 }
@@ -214,10 +201,7 @@ ver_build () {
 }
 
 deploy_test () {
-    # test_login=
-    # test_server=
-    # test_home=
-    if [[ -z "$test_login" || -z "$test_server" || -z "$test_home" ]]; then
+    if [[ -z "$fdk_test_login" || -z "$fdk_test_server" || -z "$fdk_test_home" ]]; then
         printf "Undefined variable(s):\n"
         printf "    test_login:  '%s'\n" $test_login
         printf "    test_server: '%s'\n" $test_server
@@ -277,6 +261,10 @@ deploy_prod () {
     fi
 }
 
+alias form=serve_form
+alias map=serve_map
+alias php=start_php
+
 # Random password generator
 # @param $1 password length
 randpw () {
@@ -289,9 +277,9 @@ if [ $countMatchingLines -eq 0 ]; then
     npm install @angular/cli << EOF
 N
 EOF
-    cd dec/fdk/map/app-form/
+    cd $prjdir/map/app-form/
     npm install
-    cd dec/fdk/map/app-map/
+    cd $prjdir/map/app-map/
     npm install
 fi
 
