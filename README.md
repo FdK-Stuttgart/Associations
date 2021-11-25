@@ -5,14 +5,8 @@ See also [OpenStreetMap uMap](https://wiki.openstreetmap.org/wiki/UMap)
    relative route within `shared_path`. E.g.:
 ```shell
 ./run.sh ~/dec fdk
-# load the profile inside the container:
-source /usr/etc/profile
-# start the services:
-start
-```
-
-1. In a new terminal
-```shell
+# start PHP server:
+start_php
 # test database access:
 curl --request GET http://localhost:4200/api/associations/read-associations.php
 ```
@@ -20,19 +14,14 @@ curl --request GET http://localhost:4200/api/associations/read-associations.php
 1. In a new terminal start the app-map
 ```shell
 ./run.sh ~/dec fdk
-# load the profile inside the container:
-source /usr/etc/profile
 serve_map
 ```
 
 1. In a new terminal start the app-form
 ```shell
 ./run.sh ~/dec fdk
-# load the profile inside the container:
-source /usr/etc/profile
 serve_form
 ```
-
 
 ## On Ubuntu
 
