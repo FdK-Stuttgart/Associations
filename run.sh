@@ -39,6 +39,7 @@ cliTools="$cliTools grep git coreutils sed node which"
 guix shell \
      --container --network --no-cwd --check \
      node php mariadb nss-certs curl $cliTools \
+     --preserve=^fdk \
      --share=$file_path/.bash_profile=$HOME/.bash_profile \
      --share=$file_path/.bashrc=$HOME/.bashrc \
      --share=$file_path/node_modules=$HOME/node_modules \
