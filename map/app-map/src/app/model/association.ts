@@ -41,6 +41,8 @@ export interface Contact {
   markedPhone?: string;
   fax?: string;
   markedFax?: string;
+  poBox?: string;
+  markedPoBox?: string;
   associationId?: string;
 }
 

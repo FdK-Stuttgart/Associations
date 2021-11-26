@@ -91,6 +91,7 @@ if (isset($postdata) && !empty($postdata)) {
         foreach ($contacts as $i => $contact) {
             $contactId = mysqli_real_escape_string($con, trim($contact->id));
             $contactName = mysqli_real_escape_string($con, trim($contact->name));
+			$poBox = mysqli_real_escape_string($con, trim($contact->poBox));
             $phone = mysqli_real_escape_string($con, trim($contact->phone));
             $mail = mysqli_real_escape_string($con, trim($contact->mail));
 			$fax = mysqli_real_escape_string($con, trim($contact->fax));
@@ -98,6 +99,7 @@ if (isset($postdata) && !empty($postdata)) {
 
             $sql .= "\n\nINSERT INTO contacts SET id = '$contactId',
                                  name = '$contactName',
+								 poBox = '$poBox',
                                  phone = '$phone',
                                  mail = '$mail',
 								 fax = '$fax',
@@ -106,6 +108,7 @@ if (isset($postdata) && !empty($postdata)) {
                                  current = 1
                          ON DUPLICATE KEY UPDATE
                                  name = '$contactName',
+								 poBox = '$poBox',
                                  phone = '$phone',
                                  mail = '$mail',
 								 fax = '$fax',
