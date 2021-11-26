@@ -1,7 +1,11 @@
-import {ChangeDetectorRef, Component, ElementRef,
-        OnDestroy, OnInit, Renderer2, ViewChild} from '@angular/core';
-import {SocialMediaPlatform, Association,
-        Link, SocialMediaLink, Image, Contact} from '../model/association';
+import {
+  ChangeDetectorRef, Component, ElementRef,
+  OnDestroy, OnInit, Renderer2, ViewChild
+} from '@angular/core';
+import {
+  SocialMediaPlatform, Association,
+  Link, SocialMediaLink, Image, Contact
+} from '../model/association';
 import Map from 'ol/Map';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
@@ -12,8 +16,10 @@ import OverlayPositioning from 'ol/OverlayPositioning';
 import {Coordinate} from 'ol/coordinate';
 import {ResizeObserver} from 'resize-observer';
 import {Size} from 'ol/size';
-import {DropdownOption, getAllOptions,
-        getSubOptions} from '../model/dropdown-option';
+import {
+  DropdownOption, getAllOptions,
+  getSubOptions
+} from '../model/dropdown-option';
 import {AutoComplete} from 'primeng/autocomplete';
 import {MysqlQueryService} from '../services/mysql-query.service';
 import {MyHttpResponse} from '../model/http-response';
@@ -89,9 +95,9 @@ export class OsmMapComponent implements OnInit, OnDestroy {
   noPubAddrAssocIds: string[] = [];
 
   @ViewChild('osmContainer',
-             {static: true}) osmContainer!: ElementRef<HTMLDivElement>;
+    {static: true}) osmContainer!: ElementRef<HTMLDivElement>;
   @ViewChild('autoComplete',
-             {static: true}) autoComplete?: AutoComplete;
+    {static: true}) autoComplete?: AutoComplete;
   resizeObserver?: ResizeObserver;
 
   constructor(private renderer2: Renderer2,
@@ -445,6 +451,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
             || s.activities?.text?.toLowerCase().includes(q)
             || s.contacts?.some((contact: Contact) =>
               contact.name?.toLowerCase().includes(q)
+              || contact.poBox?.toLowerCase().includes(q)
               || contact.phone?.toLowerCase().includes(q)
               || contact.fax?.toLowerCase().includes(q)
               || contact.mail?.toLowerCase().includes(q)
@@ -473,7 +480,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
     }
     this.filteredAssociations = filteredResult;
     if (JSON.stringify(filteredResult)
-        !== JSON.stringify(previousFilteredResult)) {
+      !== JSON.stringify(previousFilteredResult)) {
       if (this.clusterLayer) {
         this.updateClusterLayerStyle();
       }
@@ -681,7 +688,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
         this.zoomViewDetails : this.map?.getView().getZoom();
       if (this.map && size) {
         const mapContainer:
-        HTMLElement | null = document.getElementById('osm-map');
+          HTMLElement | null = document.getElementById('osm-map');
         const horizontalCenter = mapContainer
           ? (mapContainer.clientWidth / 2)
           : (this.osmContainer.nativeElement.clientWidth / 2);
@@ -775,11 +782,13 @@ export class OsmMapComponent implements OnInit, OnDestroy {
       }
       if (contact.mail) {
         contact.markedMail = contact.mail;
-      }});
+      }
+    });
     association.links?.some((link: Link) => {
       if (link.linkText) {
         link.markedLink = link.linkText;
-      }});
+      }
+    });
 
     if (this.queryString) {
       const re = new RegExp(this.queryString, 'gi');
@@ -821,11 +830,16 @@ export class OsmMapComponent implements OnInit, OnDestroy {
         }
         if (contact.mail) {
           contact.markedMail = contact.mail.replace(re, '<mark>$&</mark>');
-        }});
+        }
+        if (contact.poBox) {
+          contact.markedPoBox = contact.poBox.replace(re, '<mark>$&</mark>');
+        }
+      });
       association.links?.some((link: Link) => {
         if (link.linkText) {
           link.markedLink = link.linkText.replace(re, '<mark>$&</mark>');
-        }});
+        }
+      });
     }
 
     let content = `<div class="osm-association-inner-container">`;
@@ -864,7 +878,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
       }
       if (association.postcode || association.city) {
         content += `<p class="postcode-city">`;
-        content += `${association.postcode ? (association.markedPostcode+' ') : ''}`;
+        content += `${association.postcode ? (association.markedPostcode + ' ') : ''}`;
         content += `${association.city}`;
         content += `</p>`;
       }
@@ -876,6 +890,18 @@ export class OsmMapComponent implements OnInit, OnDestroy {
 
     if (association.contacts && association.contacts.length > 0) {
       content += `<div class="association-contacts">`;
+      for (const contact of association.contacts) {
+        content += `<div class="association-contact">`;
+        if (contact.poBox) {
+          content += `<div class="association-contact">`;
+          content += `<div class="association-contact-row">`;
+          content += this.getSocialMediaIcon('pobox', false);
+          content += `<p class="mail">`;
+          content += `${contact.markedPoBox}`;
+          content += `</a></p></div></div>`;
+        }
+        content += `</div>`;
+      }
       for (const contact of association.contacts) {
         content += `<div class="association-contact">`;
         if (contact.phone) {
@@ -934,7 +960,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
       content += `<h3>Aktivitätsgebiete</h3>`;
       content += `<div class="association-chips-container">`;
       for (const activeIn of getAllOptions(this.districtOptions,
-                                           association.districtList)) {
+        association.districtList)) {
         content += `<div class="association-chips">`;
         content += activeIn.label;
         content += `</div>`;
@@ -985,8 +1011,8 @@ export class OsmMapComponent implements OnInit, OnDestroy {
       return '';
     }
     return `<div class="social-media-icon mini-icon">`
-      +`<img src="assets/${platform.toLowerCase()}.png"`
-      +` alt="${alt ? platform : ''}"/></div>`;
+      + `<img src="assets/${platform.toLowerCase()}.png"`
+      + ` alt="${alt ? platform : ''}"/></div>`;
   }
 
   /**

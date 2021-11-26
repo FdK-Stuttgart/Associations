@@ -185,14 +185,22 @@
            [formGroup]="contactFormGroup">
         <div class="row p-fluid form-array-block"
              [ngClass]="{ 'invalid-block': !getFormArrayFormGroup('contacts', i)?.valid
-                        || (!contactFormGroup.value.name && !contactFormGroup.value.phone && !contactFormGroup.value.fax && !contactFormGroup.value.mail)}">
+                        || (!contactFormGroup.value.name && !contactFormGroup.value.poBox && !contactFormGroup.value.phone && !contactFormGroup.value.fax && !contactFormGroup.value.mail)}">
+          <div class="p-field col-xs-12 col-md-12">
+            <label for="contact-{{i}}-pobox-input">Postfach</label>
+            <input pInputText
+                   id="contact-{{i}}-pobox-input"
+                   type="text"
+                   [formControl]="contactFormGroup.controls.poBox"
+                   placeholder="Postfach"/>
+          </div>
           <div class="p-field col-xs-12 col-md-6">
             <label for="contact-{{i}}-name-input">Name der Kontaktperson / des Ansprechpartners</label>
             <input pInputText
                    id="contact-{{i}}-name-input"
                    type="text"
                    [formControl]="contactFormGroup.controls.name"
-                   placeholder="Name der Kontaktperson / des Ansprechpartners"/>
+                   placeholder="Name der Kontaktperson / des Ansprechpartners" />
           </div>
           <div class="p-field col-xs-12 col-md-6">
             <label for="contact-{{i}}-phone-input">Telefonnummer</label>
@@ -544,13 +552,14 @@
             <p>Keine Adressdaten angegeben.</p>
           </ng-template>
 
-          <h3 *ngIf="associationForm.value.contacts && associationForm.value.contacts.length > 0">
-            Kontaktinformationen</h3>
-
           <div *ngIf="associationForm.value.contacts && associationForm.value.contacts.length > 0"
                class="association-contacts">
             <div *ngFor="let contact of associationForm.value.contacts" class="association-contact">
               <p class="name">{{ contact.name }}</p>
+              <div class="association-contact-row" *ngIf="contact.poBox">
+                <span [innerHTML]="getSocialMediaIcon('pobox' )"></span>
+                {{ contact.poBox }}
+              </div>
               <div class="association-contact-row" *ngIf="contact.phone">
                 <span [innerHTML]="getSocialMediaIcon('phone' )"></span>
                 <a [href]="telephoneLink(contact.phone)">{{ contact.phone }}</a>

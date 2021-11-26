@@ -13,7 +13,7 @@ import {LoginService} from '../../login/login.service';
 
 function contactFilledValidator(): ValidatorFn {
   return (control: FormGroup): { [key: string]: boolean } | null => {
-    if (!control.value.name && !control.value.phone && !control.value.fax && !control.value.mail) {
+    if (!control.value.name && !control.value.poBox && !control.value.phone && !control.value.fax && !control.value.mail) {
       return {contactfilled: true};
     }
     return null;
@@ -28,6 +28,7 @@ function getEmptyFormArrayElement(type: 'contact' | 'link' | 'socialMedia' | 'im
       return new FormGroup({
         id: new FormControl(uuidv4()),
         name: new FormControl(''),
+        poBox: new FormControl(''),
         phone: new FormControl(''),
         fax: new FormControl(''),
         mail: new FormControl(''),
@@ -91,7 +92,7 @@ export class AssociationEditFormComponent implements OnChanges, OnDestroy {
 
   districtOptions: DropdownOption[] = [];
 
-  isPublicAddress: boolean = false;
+  isPublicAddress = false;
 
   uploadedFiles: any[] = [];
 
@@ -239,6 +240,7 @@ export class AssociationEditFormComponent implements OnChanges, OnDestroy {
         contactControl.push(this.formBuilder.group({
           id: new FormControl(contact.id || uuidv4()),
           name: new FormControl(contact.name || ''),
+          poBox: new FormControl(contact.poBox || ''),
           phone: new FormControl(contact.phone || ''),
           fax: new FormControl(contact.fax || ''),
           mail: new FormControl(contact.mail || '')
