@@ -243,9 +243,6 @@ function processTableRowAngular(
         associationId
       });
     }
-
-    console.log(name);
-    console.log(arrContact);
   }
 
   const arrSocialMediaLink: SocialMediaLink[] = [];
