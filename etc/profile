@@ -276,7 +276,7 @@ EOF
     npm install
 fi
 
-## Install MariaDB on first run
+## Install MariaDB on the first run
 if [ ! -d /var/lib/mysql/data/mysql ]; then
     # Awful hack, required to solve a bug on mariadb guix' package
     lc_messages_dir=$(find /gnu/store -type d -name english | grep mysql)
