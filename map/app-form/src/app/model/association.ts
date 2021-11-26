@@ -33,6 +33,7 @@ export interface Contact {
   mail?: string;
   phone?: string;
   fax?: string;
+  poBox?: string;
   associationId?: string;
 }
 

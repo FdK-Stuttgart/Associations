@@ -201,9 +201,12 @@ function processTableRowAngular(
     const emails = [];
     const phoneNumbers = [];
     const faxNumbers = [];
+    const poBoxes = [];
     for (const cdi of contactDetails) {
       if (cdi.match(/@/)) {
         emails.push(cdi);
+      } else if (cdi.toLowerCase().includes('postfach')) {
+        poBoxes.push(cdi);
       } else {
         if (cdi.match(new RegExp(/.*fax.*/, 'i'))) {
           const faxNo = cdi
@@ -236,9 +239,13 @@ function processTableRowAngular(
         mail: emails[i] || '',
         phone: phoneNumbers[i] || '',
         fax: faxNumbers[i] || '',
+        poBox: poBoxes[i] || '',
         associationId
       });
     }
+
+    console.log(name);
+    console.log(arrContact);
   }
 
   const arrSocialMediaLink: SocialMediaLink[] = [];
