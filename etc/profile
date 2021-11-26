@@ -200,20 +200,23 @@ ver_build () {
     fi
 }
 
-deploy_test () {
-    if [[ -z "$fdk_test_login" || -z "$fdk_test_server" || -z "$fdk_test_home" ]]; then
-        printf "Undefined variable(s):\n"
-        printf "    fdk_test_login:  '%s'\n" $fdk_test_login
-        printf "    fdk_test_server: '%s'\n" $fdk_test_server
-        printf "    fdk_test_home:   '%s'\n" $fdk_test_home
+deploy () {
+    fdk_login=$1
+    fdk_server=$2
+    fdk_home=$3
+    if [[ -z "$fdk_login" || -z "$fdk_server" || -z "$fdk_home" ]]; then
+        printf "Error: undefined variable(s):\n"
+        printf "    fdk_login:  '%s'\n" $fdk_login
+        printf "    fdk_server: '%s'\n" $fdk_server
+        printf "    fdk_home:   '%s'\n" $fdk_home
     else
         timestamp=$(date '+%s')
         echo "" > /tmp/backup.sh
         echo "set -v" >> /tmp/backup.sh
-        echo "cd $fdk_test_home" >> /tmp/backup.sh
+        echo "cd $fdk_home" >> /tmp/backup.sh
         echo "cp -r AssociationMap/ AssociationMap.backup-$timestamp/" >> /tmp/backup.sh
         echo "chmod -R -w AssociationMap.backup-$timestamp/" >> /tmp/backup.sh
-        ssh -t $fdk_test_login@$fdk_test_server < /tmp/backup.sh
+        ssh -t $fdk_login@$fdk_server < /tmp/backup.sh
         cd $prjdir
         # file transfer DEV -> TEST:
         set -v
@@ -222,35 +225,30 @@ deploy_test () {
               --exclude="AssociationMap/edit/.htaccess" \
               --exclude="AssociationMap/api/database.php" \
               ./map/dist/AssociationMap \
-              $fdk_test_login@$fdk_test_server:$fdk_test_home
+              $fdk_login@$fdk_server:$fdk_home
         set +v
+    fi
+}
+
+deploy_test () {
+    if [[ -z "$fdk_test_login" || -z "$fdk_test_server" || -z "$fdk_test_home" ]]; then
+        printf "Error: undefined variable(s):\n"
+        printf "    fdk_test_login:  '%s'\n" $fdk_test_login
+        printf "    fdk_test_server: '%s'\n" $fdk_test_server
+        printf "    fdk_test_home:   '%s'\n" $fdk_test_home
+    else
+        deploy $fdk_test_login $fdk_test_server $fdk_test_home
     fi
 }
 
 deploy_prod () {
     if [[ -z "$fdk_prod_login" || -z "$fdk_prod_server" || -z "$fdk_prod_home" ]]; then
-        printf "Undefined variable(s):\n"
+        printf "Error: undefined variable(s):\n"
         printf "    fdk_prod_login:  '%s'\n" $fdk_prod_login
         printf "    fdk_prod_server: '%s'\n" $fdk_prod_server
         printf "    fdk_prod_home:   '%s'\n" $fdk_prod_home
     else
-        timestamp=$(date '+%s')
-        echo "" > /tmp/backup.sh
-        echo "set -v" >> /tmp/backup.sh
-        echo "cd $fdk_prod_home" >> /tmp/backup.sh
-        echo "cp -r AssociationMap/ AssociationMap.backup-$timestamp/" >> /tmp/backup.sh
-        echo "chmod -R -w AssociationMap.backup-$timestamp/" >> /tmp/backup.sh
-        ssh -t $fdk_prod_login@$fdk_prod_server < /tmp/backup.sh
-        cd $prjdir
-        # file transfer TEST -> PROD:
-        set -v
-        rsync -ravz \
-              --exclude="AssociationMap/.htaccess" \
-              --exclude="AssociationMap/edit/.htaccess" \
-              --exclude="AssociationMap/api/database.php" \
-              ./map/dist/AssociationMap \
-              $fdk_prod_login@$fdk_prod_server:$fdk_prod_home
-        set +v
+        deploy $fdk_prod_login $fdk_prod_server $fdk_prod_home
     fi
 }
 
