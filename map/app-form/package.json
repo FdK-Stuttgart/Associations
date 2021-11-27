@@ -3,7 +3,7 @@
   "version": "0.9.29",
   "scripts": {
     "app-form:ng": "ng",
-    "app-form:start": "ng serve --port 4100",
+    "app-form:start": "ng serve",
     "app-form:build": "ng build",
     "app-form:build:prod": "ng build --prod --base-href /edit/",
     "postapp-form:build:prod": "npm-run-all --continue-on-error -l --sequential copy-api-folder delete-api-folder",
