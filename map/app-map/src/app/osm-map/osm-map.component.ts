@@ -782,6 +782,9 @@ export class OsmMapComponent implements OnInit, OnDestroy {
       if (contact.mail) {
         contact.markedMail = contact.mail;
       }
+      if (contact.poBox) {
+        contact.markedPoBox = contact.poBox;
+      }
     });
     association.links?.some((link: Link) => {
       if (link.linkText) {
@@ -895,7 +898,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
           content += `<div class="association-contact">`;
           content += `<div class="association-contact-row">`;
           content += this.getSocialMediaIcon('pobox', false);
-          content += `<p class="mail">`;
+          content += `<p class="pobox">`;
           content += `${contact.markedPoBox}`;
           content += `</a></p></div></div>`;
         }
