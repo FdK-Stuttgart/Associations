@@ -77,9 +77,18 @@ kill_all () {
     # set +x
 }
 
+create_database_php () {
+    local db_php=$prjdir/map/database/api/database.php
+    if [[ ! -f $db_php ]]; then
+        cp $(dirname $db_php)/_$(basename $db_php) $db_php
+        sed -i -e "s|'DB_NAME',.*''|'DB_NAME', 'associations'|" $db_php
+        sed -i -e "s|'DB_USER',.*''|'DB_USER', '$USER'|" $db_php
+    fi
+}
 serve_map () {
     # test_php
     # set -x
+    create_database_php
     cd $prjdir/map/app-map/
     local logfile=/var/log/serve_map.log
     printf "See %s\n" $logfile
@@ -100,6 +109,7 @@ serve_map () {
 serve_form () {
     # test_php
     # set -x
+    create_database_php
     cd $prjdir/map/app-form/
     logfile=/var/log/serve_form.log
     printf "See %s\n" $logfile
@@ -289,6 +299,7 @@ if [ ! -d /var/lib/mysql/data/mysql ]; then
 
     mysql_install_db
     mysqld_safe &
+    # execution of `mysql_secure_installation` is not needed
     sleep 3
     set_mysqlPassword
     mysql --user $USER << EOF
@@ -300,10 +311,10 @@ select '-- Loading test data ...' AS '';
 SOURCE dec/fdk/map/database/db-export/associations.sql;
 -- SHOW TABLES;
 -- SHOW COLUMNS IN activities;
-SELECT count(*) as 'count-of-activities (should be ~130)'
+SELECT count(*) as 'count-of-activities (should be ~130):'
 FROM associations.activities;
 EOF
-    mysqladmin shutdown
+    mysqladmin --user $USER shutdown
 fi
 
 cat << EOF
