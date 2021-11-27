@@ -200,7 +200,7 @@
                    id="contact-{{i}}-name-input"
                    type="text"
                    [formControl]="contactFormGroup.controls.name"
-                   placeholder="Name der Kontaktperson / des Ansprechpartners" />
+                   placeholder="Name der Kontaktperson / des Ansprechpartners"/>
           </div>
           <div class="p-field col-xs-12 col-md-6">
             <label for="contact-{{i}}-phone-input">Telefonnummer</label>
@@ -516,8 +516,6 @@
             </div>
           </div>
 
-          <h2>Basisdaten</h2>
-
           <div class="association-address" *ngIf="associationForm.getRawValue().addressLine1
                                                   || associationForm.getRawValue().addressLine2
                                                   || associationForm.getRawValue().addressLine3
@@ -525,7 +523,6 @@
                                                   || associationForm.getRawValue().postcode
                                                   || associationForm.getRawValue().city
                                                   || associationForm.getRawValue().country; else noAddressGiven">
-            <h3>Adresse</h3>
 
             <div *ngIf="associationForm.getRawValue().addressLine1">
               <p class="address-line-1">{{associationForm.getRawValue().addressLine1}}</p>
@@ -575,11 +572,6 @@
             </div>
           </div>
 
-          <h2 *ngIf="(associationForm.value.goals && associationForm.value.goals.text && associationForm.value.goals.text !== '')
-                    || (associationForm.value.activities && associationForm.value.activities.text && associationForm.value.activities.text !== '')">
-            Beschreibung
-          </h2>
-
           <div class="association-goals"
                *ngIf="associationForm.value.goals && associationForm.value.goals.text && associationForm.value.goals.text !== ''">
             <h3>Ziele des Vereins</h3>
@@ -605,28 +597,20 @@
 
           <div class="association-social-media"
                *ngIf="associationForm.value.socialMedia && associationForm.value.socialMedia.length > 0">
-            <h3>Social Media</h3>
-            <div class="social-media-link" *ngFor="let link of associationForm.value.socialMedia">
-              <span [innerHTML]="getSocialMediaIcon(link.platform)"></span>
+            <span *ngFor="let link of associationForm.value.socialMedia">
               <a [href]="link.url"
-                 [title]="link.linkText || link.url"
-                 target="_blank">
-                {{ link.linkText || link.platform || link.url }}
+                 [title]="link.linkText || link.url">
+                <span [innerHTML]="getSocialMediaIcon(link.platform)"></span>
               </a>
-            </div>
+            </span>
           </div>
-
-          <div *ngIf="(associationForm.value.districtList && associationForm.value.districtList.length > 0)">
-            <h2>Schlagwörter</h2>
-
-            <div class="association-districts"
-                 *ngIf="associationForm.value.districtList && associationForm.value.districtList.length > 0">
-              <h3>Aktivitätsgebiete</h3>
-              <div class="association-chips-container">
-                <div class="association-chips"
-                     *ngFor="let district of getAllOptions(districtOptions, associationForm.value.districtList)">
-                  {{ district.label }}
-                </div>
+          <div class="association-districts"
+               *ngIf="associationForm.value.districtList && associationForm.value.districtList.length > 0">
+            <h3>Aktivitätsgebiete</h3>
+            <div class="association-chips-container">
+              <div class="association-chips"
+                   *ngFor="let district of getAllOptions(districtOptions, associationForm.value.districtList)">
+                {{ district.label }}
               </div>
             </div>
           </div>
