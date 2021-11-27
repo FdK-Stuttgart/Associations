@@ -35,7 +35,6 @@ $sql = "SELECT
             activityList,
             districtList,
             contacts.name AS contactName,
-			poBox,
             phone,
             mail,
             fax,
@@ -199,7 +198,6 @@ if ($result = mysqli_query($con, $sql)) {
             $contact = [];
             $contact['id'] = $contactId;
             $contact['name'] = $row['contactName'];
-			$contact['poBox'] = $row['poBox'];
             $contact['phone'] = $row['phone'];
 			$contact['fax'] = $row['fax'];
             $contact['mail'] = $row['mail'];
