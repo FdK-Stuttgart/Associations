@@ -485,18 +485,17 @@ export class OsmMapComponent implements OnInit, OnDestroy {
         this.updateClusterLayerStyle();
       }
     }
-    if (this.popupVisible) {
-      if (this.popupLat != undefined
-        && this.popupLng != undefined
-        && this.popupId != undefined
-        && this.popupZoomIn != undefined) {
-        this.popupVisible = false;
-        this.togglePopupOverlay(
-          this.popupLat,
-          this.popupLng,
-          this.popupId,
-          this.popupZoomIn);
-      }
+    if (this.popupVisible
+      && this.popupLat != undefined
+      && this.popupLng != undefined
+      && this.popupId != undefined
+      && this.popupZoomIn != undefined) {
+      this.popupVisible = false;
+      this.togglePopupOverlay(
+        this.popupLat,
+        this.popupLng,
+        this.popupId,
+        this.popupZoomIn);
     }
     this.blocked = false;
     return true;
