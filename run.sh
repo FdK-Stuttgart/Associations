@@ -26,9 +26,20 @@ file_path=$(dirname "$0") # path to this file
 grep -qF "#mysqld_user#" $file_path/etc/my.cnf &&\
     sed -i -e "s|#mysqld_user#|$(whoami)|" $file_path/etc/my.cnf
 
-if [ ! -d $file_path/node_modules ]; then
-    mkdir $file_path/node_modules
-fi
+prj_dirs=(
+    $file_path/node_modules
+    $file_path/map/app-map/node_modules
+    $file_path/map/app-form/node_modules
+    $file_path/var/log
+    $file_path/var/lib/mysql/data
+)
+
+# `git clean --force -dx` destroys the prj_dirs. Recreate it:
+for prjd in ${prj_dirs[@]}; do
+    if [ ! -d $prjd ]; then
+        mkdir --parent $prjd
+    fi
+done
 
 # $file_path/node_modules should contain only the packages needed by angular
 # (the ng) itself. Both app-map and app-form have their node_modules-directories
