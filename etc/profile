@@ -264,7 +264,7 @@ deploy_prod () {
 
 alias form=serve_form
 alias map=serve_map
-alias php=start_php
+alias shp=start_php
 
 # Random password generator
 # @param $1 password length
