@@ -24,6 +24,17 @@ export class AssociationsListComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  remove_eV(a : Association) {
+    let s = a.name;
+    if (s) {
+      s = s.replace(/ e\. V\./g, ' e\.V\.');
+      return s.replace(/ e\.V\./g, '');
+    }
+    else {
+      return s;
+    }
+  }
+
   emitClick(s: Association): void {
     this.selected.emit(s);
   }

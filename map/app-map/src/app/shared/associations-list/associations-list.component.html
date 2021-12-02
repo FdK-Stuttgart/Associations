@@ -20,7 +20,7 @@
                     && association[identifiedByFieldName] === selectedAssociationField"></i>
         </div>
         <div class="text">
-          {{ association.shortName || association.name }}
+          {{ association.shortName || this.remove_eV(association) }}
         </div>
       </div>
     </a>
