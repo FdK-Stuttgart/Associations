@@ -85,11 +85,22 @@ create_database_php () {
         sed -i -e "s|'DB_USER',.*''|'DB_USER', '$USER'|" $db_php
     fi
 }
+
+install_node_modules () {
+    # test if the directory is empty
+    if [ -z "$(ls -A ./node_modules)" ]; then
+        # do not ask 'Would you like to share anonymous usage data'
+        ng analytics off
+        npm install
+    fi
+}
+
 serve_map () {
     # test_php
     # set -x
     create_database_php
     cd $prjdir/map/app-map/
+    install_node_modules
     local logfile=/var/log/serve_map.log
     printf "See %s\n" $logfile
     # ng serve --port $port_map &>$logfile &
@@ -111,6 +122,7 @@ serve_form () {
     # set -x
     create_database_php
     cd $prjdir/map/app-form/
+    install_node_modules
     logfile=/var/log/serve_form.log
     printf "See %s\n" $logfile
     # ng serve --port $port_form &>$logfile &
