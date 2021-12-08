@@ -67,6 +67,7 @@ start_php () {
 # " bash'
 }
 
+# kill_all is broken: killing a node process messes up the terminal
 kill_all () {
     # mysqladmin shutdown
     # set -x
@@ -238,17 +239,17 @@ deploy () {
         echo "cd $fdk_home" >> /tmp/backup.sh
         echo "cp -r AssociationMap/ AssociationMap.backup-$timestamp/" >> /tmp/backup.sh
         echo "chmod -R -w AssociationMap.backup-$timestamp/" >> /tmp/backup.sh
+        set -x
         ssh -t $fdk_login@$fdk_server < /tmp/backup.sh
         cd $prjdir
         # file transfer DEV -> TEST:
-        set -v
         rsync -ravz \
               --exclude="AssociationMap/.htaccess" \
               --exclude="AssociationMap/edit/.htaccess" \
               --exclude="AssociationMap/api/database.php" \
               ./map/dist/AssociationMap \
               $fdk_login@$fdk_server:$fdk_home
-        set +v
+        set +x
     fi
 }
 
@@ -339,5 +340,4 @@ cat << EOF
 
 Welcome! Available commands:
   start_php, serve_map, serve_form, version, build, deploy_test, deploy_prod
-  kill_all : (broken: killing a node process messes up the terminal)
 EOF

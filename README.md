@@ -1,25 +1,23 @@
 See also [OpenStreetMap uMap](https://wiki.openstreetmap.org/wiki/UMap)
 
 ## On GNU Guix
-1. Execute `run.sh <shared_path> <public_path>` where `public_path` is a
-   relative route within `shared_path`. E.g.:
+1. start the PHP server and optionally test the database access:
 ```shell
-./run.sh ~/dec fdk
-# start PHP server:
+./run.sh
 start_php
-# test database access:
+# optionally test database access:
 curl --request GET http://localhost:4200/api/associations/read-associations.php
 ```
 
 1. In a new terminal start the app-map
 ```shell
-./run.sh ~/dec fdk
+./run.sh
 serve_map
 ```
 
 1. In a new terminal start the app-form
 ```shell
-./run.sh ~/dec fdk
+./run.sh
 serve_form
 ```
 
