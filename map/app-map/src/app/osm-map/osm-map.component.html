@@ -60,7 +60,7 @@
     <h3>
       <span
         *ngIf="!associations?.length || (filteredAssociations?.length && associations.length === filteredAssociations.length); else filteredCount">
-        Vereine ({{associations?.length || 0}})
+        Vereine
       </span>
       <ng-template #filteredCount>
         Gefundene Vereine ({{filteredAssociations?.length ? filteredAssociations.length : 0}}
