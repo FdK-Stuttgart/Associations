@@ -24,3 +24,4 @@ data/*.class
 /var/lib/mysql/data/*
 /var/log/*
 /node_modules/
+/.envrc
