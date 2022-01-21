@@ -107,11 +107,11 @@ body *:not(i):not(.pi) {
 }
 
 .container {
-  padding-top: 100px !important;
+  padding-top: 70px !important;
   padding-bottom: 60px;
 
   .sidebar-content {
-    padding-top: 100px !important;
+    padding-top: 70px !important;
   }
 
   .p-sidebar-close {
@@ -246,7 +246,7 @@ p-autoComplete {
 hr {
   border: 0;
   border-bottom: 1px solid #dedede;
-  margin-top: 24px;
+  /* margin-top: 24px; */
   margin-bottom: 24px;
 }
 
@@ -315,9 +315,9 @@ p-confirmDialog .p-dialog-content .p-confirm-dialog-message {
 }
 
 .form-container {
-  margin: auto;
+  /* margin: auto; */
   max-width: 768px;
-  padding: 20px;
+  padding: 10px;
 }
 
 fieldset, div.fieldset {
@@ -560,7 +560,7 @@ fieldset, div.fieldset {
   }
 
   h3 {
-    margin-top: 24px;
+    /* margin-top: 24px; */
     margin-bottom: 0;
   }
 
@@ -664,4 +664,9 @@ fieldset, div.fieldset {
 
 .row.p-fluid {
   padding-bottom: 12px;
+}
+
+.p-menubar {
+  padding: 0px !important;
+  /* background-color: blue !important; */
 }
