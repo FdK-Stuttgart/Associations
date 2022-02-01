@@ -1,52 +1,30 @@
-import {
-  ChangeDetectorRef, Component, ElementRef,
-  OnDestroy, OnInit, Renderer2, ViewChild
-} from '@angular/core';
-import {
-  SocialMediaPlatform, Association,
-  Link, SocialMediaLink, Image, Contact
-} from '../model/association';
-import Map from 'ol/Map';
-import View from 'ol/View';
-import TileLayer from 'ol/layer/Tile';
+import {ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, Renderer2
+        , ViewChild} from '@angular/core';
+import {SocialMediaPlatform, Association, Link, SocialMediaLink, Image, Contact
+       } from '../model/association';
+import {Circle as CircleStyle, Fill, Stroke, Style, Text, Icon} from 'ol/style';
+import {Map, View, Overlay, Feature} from 'ol';
+import {Coordinate} from 'ol/coordinate';
+import {Size} from 'ol/size';
+import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer';
 import {fromLonLat} from 'ol/proj';
 import OSM from 'ol/source/OSM';
-import {Overlay} from 'ol';
 import OverlayPositioning from 'ol/OverlayPositioning';
-import {Coordinate} from 'ol/coordinate';
 import {ResizeObserver} from 'resize-observer';
-import {Size} from 'ol/size';
-import {
-  DropdownOption, getAllOptions,
-  getSubOptions
-} from '../model/dropdown-option';
+import {DropdownOption, getAllOptions, getSubOptions
+       } from '../model/dropdown-option';
 import {AutoComplete} from 'primeng/autocomplete';
 import {MysqlQueryService} from '../services/mysql-query.service';
 import {MyHttpResponse} from '../model/http-response';
 import {MessageService} from 'primeng/api';
-import VectorSource from 'ol/source/Vector';
-import Cluster from 'ol/source/Cluster';
-import Feature from 'ol/Feature';
-import CircleStyle from 'ol/style/Circle';
-import VectorLayer from 'ol/layer/Vector';
-import Style from 'ol/style/Style';
-import Stroke from 'ol/style/Stroke';
-import Fill from 'ol/style/Fill';
-import Text from 'ol/style/Text';
-import Point from 'ol/geom/Point';
+import {Vector as VectorSource, Cluster} from 'ol/source';
+import {Point, Geometry} from 'ol/geom';
 import RenderFeature from 'ol/render/Feature';
-import Geometry from 'ol/geom/Geometry';
-import Icon from 'ol/style/Icon';
 import {createEmpty, extend, Extent} from 'ol/extent';
 // @ts-ignore
 import AnimatedCluster from 'ol-ext/layer/AnimatedCluster';
-import {
-  getFeatureCoordinate,
-  getFirstOriginalFeatureId,
-  getOriginalFeatures,
-  getOriginalFeaturesIds,
-  isClusteredFeature
-} from './map.utils';
+import {getFeatureCoordinate, getFirstOriginalFeatureId, getOriginalFeatures
+        , getOriginalFeaturesIds, isClusteredFeature} from './map.utils';
 
 @Component({
   selector: 'app-osm-map',
