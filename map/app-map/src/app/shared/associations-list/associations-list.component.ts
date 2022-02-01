@@ -17,6 +17,8 @@ export class AssociationsListComponent implements OnInit {
   @Input() primeNgNoPubAddrSelected = 'pi pi-map noPubAddr';
 
   @Output() selected: EventEmitter<Association> = new EventEmitter<Association>();
+  @Output() mover: EventEmitter<Association> = new EventEmitter<Association>();
+  @Output() mout: EventEmitter<Association> = new EventEmitter<Association>();
 
   constructor() {
   }
@@ -35,7 +37,15 @@ export class AssociationsListComponent implements OnInit {
     }
   }
 
-  emitClick(s: Association): void {
-    this.selected.emit(s);
+  emitClick(a: Association): void {
+    this.selected.emit(a);
+  }
+
+  emitMouseOver(a: Association): void {
+    this.mover.emit(a);
+  }
+
+  emitMouseOut(a: Association): void {
+    this.mout.emit(a);
   }
 }

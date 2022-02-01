@@ -3,7 +3,10 @@
   <div class="association-entry"
        [ngClass]="{ 'selected': association[identifiedByFieldName] === selectedAssociationField }"
        *ngFor="let association of associations">
-    <a (click)="emitClick(association)">
+    <a (click)="emitClick(association)"
+      (mouseover)="emitMouseOver(association)"
+      (mouseout)="emitMouseOut(association)"
+    >
       <div class="icon-and-text">
         <div class="icon">
           <i class="{{ primeNgNoPubAddr }} icon-padding"

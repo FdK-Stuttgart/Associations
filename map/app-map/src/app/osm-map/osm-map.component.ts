@@ -26,6 +26,14 @@ import AnimatedCluster from 'ol-ext/layer/AnimatedCluster';
 import {getFeatureCoordinate, getFirstOriginalFeatureId, getOriginalFeatures
         , getOriginalFeaturesIds, isClusteredFeature} from './map.utils';
 
+enum Marker {
+  ActivePublic = "ActivePublic",
+  ActivePrivate = "ActivePrivate",
+  InactivePublic = "InactivePublic",
+  InactivePrivate = "InactivePrivate",
+  MouseOver = "MouseOver",
+};
+
 @Component({
   selector: 'app-osm-map',
   templateUrl: './osm-map.component.html',
@@ -69,6 +77,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
 
   associations: Association[] = [];
   filteredAssociations: Association[] = [];
+  mouseOverAssocId: string = '';
 
   noPubAddrAssocIds: string[] = [];
 
@@ -202,61 +211,54 @@ export class OsmMapComponent implements OnInit, OnDestroy {
     return clusterLayer;
   }
 
+  getCircleStyle(isMouseOver: boolean): CircleStyle {
+    return new CircleStyle({
+      radius: 15,
+      stroke: new Stroke({
+        color: 'white',
+      }),
+      fill: new Fill({
+        color: isMouseOver ? '#008000' : '#d13858', // '#ed2227',
+      }),
+    });
+  }
+  imgOver = this.getCircleStyle(true);
+  imgOut  = this.getCircleStyle(false);
+
+  fill = new Fill({color: '#fff'});
+
   /**
    * style function that returns the style for marker cluster features
    * @param feature map feature
    */
   getAnimatedClusterStyle = (feature: Feature<Geometry> | RenderFeature) => {
     const originalFeatures = getOriginalFeatures(feature);
-    const featureIds: string[] = getOriginalFeaturesIds(feature);
-    const filteredIds: string[] =
-      this.filteredAssociations.map((a: Association) => a.id);
-    const allIncluded: boolean =
-      featureIds.every((id: string) => filteredIds.includes(id));
-    const isFiltered: boolean =
-      featureIds.some((id: string) => filteredIds.includes(id));
     const size = originalFeatures?.length;
     let style;
-    const baseColor = '#d13858'; // '#ed2227'
-    if (!style) {
-      if (size && size > 1) {
-        style = new Style({
-          image: new CircleStyle({
-            radius: 15,
-            stroke: new Stroke({
-              color: 'white',
-            }),
-            fill: new Fill({
-              color: allIncluded ?
-                baseColor : isFiltered ? '#B47172' : '#989898',
-            }),
-          }),
-          text: new Text({
-            text: size.toString(),
-            font: '14px Alegreya',
-            fill: new Fill({
-              color: '#fff'
-            }),
-            offsetY: 2, // default: 0
-          }),
-        });
-      } else {
-        const noPubAddr: boolean = featureIds.some(
-          (id: string) => this.noPubAddrAssocIds.includes(id));
-        const noPubAddrColor = '#00bfff'; // DeepSkyBlue
-        const color = noPubAddr ? noPubAddrColor : baseColor;
-
-        style = new Style({
-          image: new Icon({
-            img: isFiltered ?
-              // this.getActiveMarkerImgColor(color)
-              this.getActiveMarkerImg(noPubAddr)
-              : this.getInactiveMarkerImg(noPubAddr),
-            imgSize: [30, 40],
-            anchor: [0.5, 1]
-          })
-        });
-      }
+    const featureIds: string[] = getOriginalFeaturesIds(feature);
+    const isMouseOver: boolean = featureIds.some(
+      (id: string) => (this.mouseOverAssocId == id));
+    if (size && size > 1) {
+      style = new Style({
+        image: isMouseOver ? this.imgOver : this.imgOut,
+        text: new Text({
+          text: size.toString(),
+          font: '14px Alegreya',
+          fill: this.fill,
+          offsetY: 2, // default: 0
+        }),
+      });
+    } else {
+      const privateAddr: boolean = featureIds.some(
+        (id: string) => this.noPubAddrAssocIds.includes(id));
+      const activeStyle = privateAddr ?
+        this.sActivePrivateAddr : this.sActivePublicAddr;
+      const filteredIds: string[] =
+        this.filteredAssociations.map((a: Association) => a.id);
+      const isFiltered: boolean =
+        featureIds.some((id: string) => filteredIds.includes(id));
+      style = isFiltered ? activeStyle : this.sInactivePrivateArr;
+      style = isMouseOver ? this.sMouseOver : style;
     }
     return style;
   }
@@ -486,11 +488,12 @@ export class OsmMapComponent implements OnInit, OnDestroy {
     // BUG FIX: after the cluster layer style changed, render the map a few
     // times to prevent markers from disappearing with no replacement
     this.clusterLayer?.setStyle(this.getAnimatedClusterStyle);
-    for (let i = 0; i <= 1500; i += 100) {
-      setTimeout(() => {
-        this.clusterLayer?.changed();
-      }, i);
-    }
+    // this.clusterLayer?.changed();
+    // for (let i = 0; i <= 1500; i += 100) {
+    //   setTimeout(() => {
+    //     this.clusterLayer?.changed();
+    //   }, i);
+    // }
   }
 
   /**
@@ -504,7 +507,6 @@ export class OsmMapComponent implements OnInit, OnDestroy {
       return option && !!option.category;
     });
   }
-
 
   /**
    * adds a new marker feature to the cluster on the map
@@ -536,28 +538,58 @@ export class OsmMapComponent implements OnInit, OnDestroy {
     this.cluster.setSource(this.clusterSource);
   }
 
-  /**
-   * return the active marker image element.
-   */
-  getActiveMarkerImg(noPubAddr: boolean): HTMLImageElement {
-    const markerImg: HTMLImageElement = this.renderer2.createElement('img');
-    const attr = noPubAddr ? 'assets/pin-noPubAddr.png' : 'assets/pin-prod.png';
-    markerImg.setAttribute('src', attr);
-    return markerImg;
-  }
-
-  /**
-   * return the inactive marker image element (gray marker)
-   */
-  getInactiveMarkerImg(noPubAddr: boolean): HTMLImageElement {
-    const markerImg: HTMLImageElement = this.renderer2.createElement('img');
+  getMarkerStyle(marker: Marker): Style {
     // TODO different colors for inactive associations with no public address?
-    const attr = noPubAddr ?
-      'assets/pin-noPubAddr-inactive.png' : 'assets/pin-inactive-small.png';
-    markerImg.setAttribute('src', attr);
-    return markerImg;
+    let attr;
+    switch (marker) {
+      case Marker.MouseOver:
+        attr = 'assets/pinHover.png';
+        break;
+      case Marker.ActivePublic:
+        attr = 'assets/pinActivePublic.png';
+        break;
+      case Marker.ActivePrivate:
+        attr = 'assets/pinActivePrivate.png';
+        break;
+      case Marker.InactivePublic:
+        attr = 'assets/pinInactivePublic.png';
+        break;
+      case Marker.InactivePrivate:
+        attr = 'assets/pinInactivePrivate.png';
+        break;
+      default:
+        throw Error(`Unknown marker type: ${marker}`)
+    }
+    const elem: HTMLImageElement = this.renderer2.createElement('img');
+    elem.setAttribute('src', attr);
+    return new Style({
+      image: new Icon({
+        img: elem,
+        imgSize: [30, 40],
+        anchor: [0.5, 1]
+      })
+    });
   }
+  sMouseOver          = this.getMarkerStyle(Marker.MouseOver);
+  sActivePublicAddr   = this.getMarkerStyle(Marker.ActivePublic);
+  sActivePrivateAddr  = this.getMarkerStyle(Marker.ActivePrivate);
+  sInactivePublicAddr = this.getMarkerStyle(Marker.InactivePublic);
+  sInactivePrivateArr = this.getMarkerStyle(Marker.InactivePrivate);
 
+  mouseOverAssoc(a: Association): void {
+    console.log('mouseOverAssoc');
+    if (this.mouseOverAssocId != a.id) {
+      this.mouseOverAssocId = a.id;
+      this.updateClusterLayerStyle();
+    }
+  }
+  mouseOutAssoc(a: Association): void {
+    console.log('mouseOutAssoc');
+    if (this.mouseOverAssocId != '') {
+      this.mouseOverAssocId = '';
+      this.updateClusterLayerStyle();
+    }
+  }
   /**
    * selects an association and toggles its popup overlay
    * @param association the association to select

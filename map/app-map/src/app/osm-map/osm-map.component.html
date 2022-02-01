@@ -84,11 +84,16 @@
       </div>
     </div>
 
-    <app-associations-list [associations]="filteredAssociations"
-                           [noPubAddrAssocIds]="noPubAddrAssocIds"
-                           [selectedAssociationField]="popupContentAssociationId"
-                           [identifiedByFieldName]="'id'"
-                           (selected)="selectAssociation($event)">
+    <!-- (mouseover)="mouseOverAssoc($event)" -->
+    <app-associations-list
+      [associations]="filteredAssociations"
+      [noPubAddrAssocIds]="noPubAddrAssocIds"
+      [selectedAssociationField]="popupContentAssociationId"
+      [identifiedByFieldName]="'id'"
+      (selected)="selectAssociation($event)"
+      (mover)="mouseOverAssoc($event)"
+      (mout)="mouseOutAssoc($event)"
+    >
     </app-associations-list>
 
 
