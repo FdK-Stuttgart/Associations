@@ -7,7 +7,7 @@
 #
 # Wishlist: Include XDebug
 
-wd=$(dirname "$0") # path to this file, should be also the working directory
+wd=$(pwd) # WD=$(dirname "$0") # i.e. path to this file
 
 # MariaDB
 grep -qF "#mysqld_user#" $wd/etc/my.cnf &&\
@@ -36,10 +36,10 @@ cliTools="$cliTools busybox rsync openssh bash ripgrep less mycli"
 cliTools="$cliTools grep git coreutils sed node which"
 
 # --preserve=^fdk
-#   preserve environment variables matching ^fdk
+#   preserve environment variables matching REGEX
 set -x
 guix shell \
-     --container --network --no-cwd \
+     --container --network --check \
      node php mariadb nss-certs curl $cliTools \
      --preserve=^fdk \
      --share=$wd/.bash_profile=$HOME/.bash_profile \
@@ -52,5 +52,5 @@ guix shell \
      --share=$wd/etc=/usr/etc \
      --share=$wd/var/log=/var/log \
      --share=$wd/var/lib/mysql/data=/var/lib/mysql/data \
-     --share=$(pwd) \
+     --share=$wd \
      -- bash
