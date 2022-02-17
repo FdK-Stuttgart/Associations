@@ -12,6 +12,11 @@ ls -1d /usr/etc/* | while read filepath; do
     ln -s $filepath /etc/
 done
 
+# https://www.reddit.com/r/GUIX/comments/kt7tqr/clearing_a_terminal_in_guix
+clear () {
+    printf '\e[2J\e[H'
+}
+
 alias ng='node $HOME/node_modules/\@angular/cli/bin/ng'
 # node_bin=`which node`
 # ng_bin=$HOME/node_modules/\@angular/cli/bin/ng
