@@ -8,6 +8,10 @@ Import location and street address information by uploading an OpenDocument
 spreadsheet (ods-table) into a WordPress-PostgreSQL database and display its
 content on an OpenStreetMap layer.
 
+To respect data privacy, providing street address information is optional. In
+such a case a corresponding map-marker is placed on a nearby public place (park,
+lake, etc.)
+
 See the ods-table format
 [description](/map/app-form/src/app/services/ods-table/ods.ts).
 
