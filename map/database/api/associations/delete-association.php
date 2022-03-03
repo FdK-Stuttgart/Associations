@@ -3,11 +3,27 @@
 /**
  * Deletes one association by ID.
  */
-require '../database.php';
+require '../auth.php';
 
-$id = $_GET['id'] != null && strlen(trim($_GET['id'])) == 36 ? mysqli_real_escape_string($con, trim($_GET['id'])) : false;
+$auth = authorize($con);
+if (!$auth) {
+    lg("ERR: delete-association: authorize: '$auth'");
+    return http_response_code(401);
+}
 
-if (!$id) {
+function getPrm($prm, $con) {
+    $val = $_GET[$prm];
+    if ($val != null) {
+        return mysqli_real_escape_string($con, trim($val));
+    }
+    else {
+        lg("ERR: getPrm; prm: '$prm'");
+        return false;
+    }
+}
+
+$id = getPrm('id', $con);
+if (!$id || strlen($id) != 36) {
     return http_response_code(400);
 }
 

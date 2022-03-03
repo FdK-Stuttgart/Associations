@@ -7,6 +7,7 @@ import {MysqlQueryService} from '../../services/mysql-query.service';
 import {getAssociations} from '../../services/ods-table/json';
 import * as XLSX from 'xlsx';
 import {ActivatedRoute, Router} from '@angular/router';
+import {LoginService} from '../../login/login.service';
 
 @Component({
   selector: 'app-edit-import-form',
@@ -41,7 +42,8 @@ export class ImportEditFormComponent implements OnInit {
     private mySqlPersistService: MysqlPersistService,
     private messageService: MessageService,
     private router: Router,
-    private route: ActivatedRoute) {
+    private route: ActivatedRoute,
+    private loginService: LoginService) {
   }
 
   async ngOnInit(): Promise<void> {
@@ -49,6 +51,17 @@ export class ImportEditFormComponent implements OnInit {
   }
 
   async importTable(event): Promise<void> {
+    const loggedIn = await this.loginService.checkLoginStatus();
+    if (!loggedIn) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Berechtigungsfehler',
+        detail: 'Bitte loggen Sie sich erneut ein.',
+        key: 'editFormToast'
+      });
+      this.emitBlockUi(false);
+      return;
+    }
     for (const file of event.files) {
       this.uploadedFiles.push(file);
       const reader: FileReader = new FileReader();
@@ -65,12 +78,14 @@ export class ImportEditFormComponent implements OnInit {
           ws
         );
 
-        this.mySqlPersistService.deleteAllAssociations().toPromise()
+        this.mySqlPersistService.deleteAllAssociations(
+          this.loginService.username, this.loginService.password).toPromise()
           .then(() => {
             // console.log("deleteAllAssociations done")
             let importFailed = false;
             for (const a of assocs) {
-              this.mySqlPersistService.createOrUpdateAssociation(a).toPromise()
+              this.mySqlPersistService.createOrUpdateAssociation(
+                a, this.loginService.username, this.loginService.password).toPromise()
                 .then(() => {
                   // console.log("Saved", a.name)
                 })

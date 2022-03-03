@@ -16,9 +16,9 @@ export class WordpressAuthService {
   }
 
   authenticate(username: string, password: string): Observable<any> {
-    return this.httpClient.post<MyHttpResponse<any>>(`${this.AUTH_SERVER_BASE_PATH}/jwt-auth/v1/token`, {
-      username, password
-    })
+    return this.httpClient.post<MyHttpResponse<any>>(
+      `${this.AUTH_SERVER_BASE_PATH}/jwt-auth/v1/token`
+      , {username, password})
       .pipe(
         timeout(this.CONNECTION_TIMEOUT),
         catchError(err => {
@@ -28,7 +28,8 @@ export class WordpressAuthService {
       );
   }
 
-  async getAuthenticate(username: string, password: string): Promise<MyHttpResponse<any>> {
+  async getAuthenticate(username: string, password: string):
+  Promise<MyHttpResponse<any>> {
     try {
       return await this.authenticate(username, password).toPromise().then(
         (res) => {

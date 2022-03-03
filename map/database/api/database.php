@@ -1,10 +1,6 @@
 <?php
 
-/* fill in database connection params */
-define('DB_HOST', '');
-define('DB_NAME', '');
-define('DB_USER', '');
-define('DB_PASS', '');
+require 'environment.php';
 
 header("Access-Control-Allow-Methods: GET,POST");
 header("Access-Control-Allow-Headers:*");

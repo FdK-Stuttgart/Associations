@@ -359,7 +359,8 @@ export class OptionsEditFormComponent implements OnInit, OnDestroy {
       !a.category && !!b.category ? -1 : !!a.category && !b.category ? 1 : 0
     );
     if (this.optionType === 'districts') {
-      await this.mySqlPersistService.createDistrictOptions(options).toPromise()
+      await this.mySqlPersistService.createDistrictOptions(
+        options, this.loginService.username, this.loginService.password).toPromise()
         .then(async () => {
           this.blocked = false;
           this.messageService.add({
