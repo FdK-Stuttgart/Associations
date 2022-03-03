@@ -39,7 +39,7 @@ cliTools="$cliTools grep git coreutils sed node which"
 #   preserve environment variables matching REGEX
 set -x
 guix shell \
-     --container --network --check \
+     --container --network \
      node php mariadb nss-certs curl $cliTools \
      --preserve=^fdk \
      --share=$wd/.bash_profile=$HOME/.bash_profile \
