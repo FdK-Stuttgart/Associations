@@ -565,7 +565,8 @@ export class AssociationEditFormComponent implements OnChanges, OnDestroy {
     this.associationForm.controls.addressLine3.enable();
     this.associationForm.updateValueAndValidity();
 
-    await this.mySqlPersistService.createOrUpdateAssociation(this.associationForm.value).toPromise()
+    await this.mySqlPersistService.createOrUpdateAssociation(
+      this.associationForm.value, this.loginService.username, this.loginService.password).toPromise()
       .then(() => {
         this.emitBlockUi(false);
         this.messageService.add({
@@ -612,7 +613,8 @@ export class AssociationEditFormComponent implements OnChanges, OnDestroy {
           return;
         }
 
-        await this.mySqlPersistService.deleteAssociation(id).toPromise()
+        await this.mySqlPersistService.deleteAssociation(
+          id, this.loginService.username, this.loginService.password).toPromise()
           .then(() => {
             this.emitBlockUi(false);
             this.messageService.add({
@@ -660,7 +662,8 @@ export class AssociationEditFormComponent implements OnChanges, OnDestroy {
           return;
         }
 
-        await this.mySqlPersistService.deleteAllAssociations().toPromise()
+        await this.mySqlPersistService.deleteAllAssociations(
+          this.loginService.username, this.loginService.password).toPromise()
           .then(() => {
             this.emitBlockUi(false);
             this.messageService.add({

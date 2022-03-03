@@ -11,10 +11,12 @@ export class ExportImportService {
   constructor() {
   }
 
-  async exportAssociations(associations: Association[],
-                           districts: DropdownOption[] = [],
-                           activities: DropdownOption[] = []): Promise<void> {
-    let flatAssociations: { [key: string]: number | string }[] = associations.map((a: Association) => {
+  async exportAssociations(
+    associations: Association[],
+    districts: DropdownOption[] = [],
+    activities: DropdownOption[] = []): Promise<void> {
+    let flatAssociations: { [key: string]: number | string }[]
+      = associations.map((a: Association) => {
       const contacts = this.flatten(a.contacts, 'contact');
       const links = this.flatten(a.links, 'link');
       const socialMedia = this.flatten(a.socialMedia, 'socialMedia');
@@ -60,7 +62,8 @@ export class ExportImportService {
       }
     });
 
-    flatAssociations = flatAssociations.map((flat: { [key: string]: string | number }) => {
+    flatAssociations = flatAssociations.map(
+      (flat: { [key: string]: string | number }) => {
       outputKeys.forEach((key: string) => {
         if (!flat[key]) {
           flat[key] = '';
@@ -116,7 +119,9 @@ export class ExportImportService {
         if (typeof val === 'string') {
           val = '"' + val + '"';
         } else if (typeof val === 'number') {
-          val = '"' + val.toLocaleString('de-DE', {maximumFractionDigits: 20}) + '"';
+          val = '"' + val.toLocaleString(
+            'de-DE',
+            {maximumFractionDigits: 20}) + '"';
         }
 
         rows += val || '';
@@ -133,14 +138,16 @@ export class ExportImportService {
 
   private flatten(inputArray: any[], prefix: string): any {
     const outputObject: any = {};
-    const sortedInputArray = inputArray.sort((a, b) => !a.orderIndex ? 1 : !b.orderIndex ? -1 : a.orderIndex < b.orderIndex ? -1 : 1);
+    const sortedInputArray = inputArray.sort((a, b) => !a.orderIndex
+      ? 1 : !b.orderIndex ? -1 : a.orderIndex < b.orderIndex ? -1 : 1);
 
     if (sortedInputArray.length) {
       for (let i = 0; i < sortedInputArray.length; i++) {
         const j = i + 1;
         for (const key of Object.keys(sortedInputArray[i])) {
           if (key !== 'id' && key !== 'associationId' && key !== 'orderIndex') {
-            const capitalizedKey = key.length > 1 ? key.charAt(0).toUpperCase() + key.slice(1) : key.toUpperCase();
+            const capitalizedKey = key.length > 1
+              ? key.charAt(0).toUpperCase() + key.slice(1) : key.toUpperCase();
             const outputObjectKey: string = prefix + j + capitalizedKey;
             outputObject[outputObjectKey] = sortedInputArray[i][key] || '';
           }
@@ -150,7 +157,8 @@ export class ExportImportService {
     return outputObject;
   }
 
-  private extractOptions(optionList: string[], options: DropdownOption[]): string {
+  private extractOptions(optionList: string[],
+                         options: DropdownOption[]): string {
     let output = '';
 
     optionList.forEach((id: string) => {

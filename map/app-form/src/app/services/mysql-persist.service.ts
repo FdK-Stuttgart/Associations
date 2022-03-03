@@ -15,24 +15,45 @@ export class MysqlPersistService {
   constructor(private httpClient: HttpClient) {
   }
 
-  createOrUpdateAssociation(association: Association): Observable<MyHttpResponse<any>> {
-    return this.httpClient.post<MyHttpResponse<any>>(`${this.PHP_API_SERVER_PATH}/associations/create-association.php`, association)
-      .pipe(catchError(this.handleError));
+  httpOptions(username: string, password: string): { headers: HttpHeaders } {
+    return {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json',
+        // base64 encoding
+        'Authorization': 'Basic '+ btoa(username+':'+password)})
+    };
   }
 
-  deleteAssociation(id: string): Observable<HttpResponse<any>> {
-    return this.httpClient.get<HttpResponse<any>>(`${this.PHP_API_SERVER_PATH}/associations/delete-association.php?id=${id}`)
-      .pipe(catchError(this.handleError));
+  createOrUpdateAssociation(
+    association: Association, username: string, password: string):
+  Observable<MyHttpResponse<any>> {
+    return this.httpClient.post<MyHttpResponse<any>>
+      (`${this.PHP_API_SERVER_PATH}/associations/create-association.php`
+       , association
+       , this.httpOptions(username, password)
+      ).pipe(catchError(this.handleError));
   }
 
-  deleteAllAssociations(): Observable<HttpResponse<any>> {
-    return this.httpClient.get<HttpResponse<any>>(`${this.PHP_API_SERVER_PATH}/associations/delete-all-associations.php`)
-      .pipe(catchError(this.handleError));
+  deleteAssociation(id: string, username: string, password: string): Observable<HttpResponse<any>> {
+    return this.httpClient.get<HttpResponse<any>>(
+      `${this.PHP_API_SERVER_PATH}/associations/delete-association.php?id=${id}`
+      , this.httpOptions(username, password)
+    ).pipe(catchError(this.handleError));
   }
 
-  createDistrictOptions(postdata: any): Observable<HttpResponse<any>> {
-    return this.httpClient.post<HttpResponse<any>>(`${this.PHP_API_SERVER_PATH}/districts-options/create-district-options.php`, postdata)
-      .pipe(catchError(this.handleError));
+  deleteAllAssociations(username: string, password: string): Observable<HttpResponse<any>> {
+    return this.httpClient.get<HttpResponse<any>>(
+      `${this.PHP_API_SERVER_PATH}/associations/delete-all-associations.php`
+      , this.httpOptions(username, password)
+    ).pipe(catchError(this.handleError));
+  }
+
+  createDistrictOptions(postdata: any, username: string, password: string): Observable<HttpResponse<any>> {
+    return this.httpClient.post<HttpResponse<any>>(
+      `${this.PHP_API_SERVER_PATH}/districts-options/create-district-options.php`
+      , postdata
+      , this.httpOptions(username, password)
+    ).pipe(catchError(this.handleError));
   }
 
   private handleError(error: HttpErrorResponse): Observable<never> {

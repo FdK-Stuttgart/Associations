@@ -2,7 +2,13 @@
 /**
  * Creates an association.
  */
-require '../database.php';
+require '../auth.php';
+
+$auth = authorize($con);
+if (!$auth) {
+    lg("ERR: create-association: authorize: '$auth'");
+    return http_response_code(401);
+}
 
 $postdata = file_get_contents("php://input");
 
