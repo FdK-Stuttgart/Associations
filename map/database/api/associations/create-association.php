@@ -4,6 +4,13 @@
  */
 require '../database.php';
 
+$auth = authorize($con);
+if (!$auth) {
+    $log_file = "/var/log/php-server.log";
+    error_log("create-association Not authorized \n", 3, $log_file);
+    return http_response_code(401);
+}
+
 $postdata = file_get_contents("php://input");
 
 if (isset($postdata) && !empty($postdata)) {

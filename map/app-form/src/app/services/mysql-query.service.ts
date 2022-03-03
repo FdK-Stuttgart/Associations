@@ -21,7 +21,8 @@ export class MysqlQueryService {
   }
 
   private readAssociations(): Observable<Association[] | null> {
-    return this.httpClient.get<Association[]>(`${this.PHP_API_SERVER_PATH}/associations/read-associations.php`,
+    return this.httpClient.get<Association[]>(
+      `${this.PHP_API_SERVER_PATH}/associations/read-associations.php`,
       {headers: this.HEADERS})
       .pipe(
         timeout(this.CONNECTION_TIMEOUT),

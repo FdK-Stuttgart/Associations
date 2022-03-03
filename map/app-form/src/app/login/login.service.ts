@@ -9,6 +9,8 @@ import {CookieService} from 'ngx-cookie-service';
 })
 export class LoginService {
   loginStatusChange$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  username: string | undefined;
+  password: string | undefined;
 
   constructor(private wordpressAuthService: WordpressAuthService,
               private cookieService: CookieService) {
@@ -18,7 +20,7 @@ export class LoginService {
           const res = await this.checkLoginStatus();
           this.loginStatusChange$.next(res);
         }
-      }, 30000);
+      }, 30000); // time_in_milliseconds = 30 seconds
       this.loginStatusChange$.next(this.loginStatus);
     }
   }
@@ -65,6 +67,8 @@ export class LoginService {
         || loginResult.data.user_roles.includes('editor')
          ) {
         this.token = loginResult.data.token;
+        this.username = username;
+        this.password = password;
       } else {
         this.removeToken();
       }
@@ -90,6 +94,8 @@ export class LoginService {
 
   removeToken(): void {
     this.token = '';
+    this.username = '';
+    this.password = '';
     this.loginStatusChange$.next(false);
   }
 }

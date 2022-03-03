@@ -34,13 +34,14 @@ done
 # TODO replace busybox with env
 cliTools="$cliTools busybox rsync openssh bash ripgrep less mycli"
 cliTools="$cliTools grep git coreutils sed node which"
+cliTools="$cliTools node php mariadb jq nss-certs curl"
 
 # --preserve=^fdk
 #   preserve environment variables matching REGEX
 set -x
 guix shell \
      --container --network \
-     node php mariadb nss-certs curl $cliTools \
+     $cliTools \
      --preserve=^fdk \
      --share=$wd/.bash_profile=$HOME/.bash_profile \
      --share=$wd/.bashrc=$HOME/.bashrc \

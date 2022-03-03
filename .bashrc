@@ -37,20 +37,72 @@ p11=$prjdir/map/app-map/package-lock.json
 p2=$prjdir/map/app-form/package.json
 p22=$prjdir/map/app-form/package-lock.json
 
-
 test_php () {
-    printf "Testing php websrver... \n"
+    printf "Testing php WebServer... \n"
     url=http://localhost:4200/api/associations/read-associations.php
     cnt_chars=$(curl --silent --request GET $url | wc -c)
     printf "... %s chars received\n" $cnt_chars
 }
 
-# localhost:4200/wordpress/wp-admin/install.php
+wp_auth_test () {
+    data='{"username":"'$fdk_test_wp_username'","password":"'$fdk_test_wp_password'"}'
+    set -x  # Print commands and their arguments as they are executed.
+    curl -v -H 'Content-Type: application/json' \
+         --data $data $fdk_test_wp_authApi_basePath/jwt-auth/v1/token
 
-#    wget https://downloads.wordpress.org/plugin/code-snippets.zip \
-#         https://downloads.wordpress.org/plugin/jwt-authentication-for-wp-rest-api.1.2.6.zip \
-#         --directory-prefix=$HOME/Downloads/
+    # --head  print only the headers
+    # curl --head $fdk_test_wp_authApi_basePath/jwt-auth/v1/token
+    # Don't print commands
+    { retval="$?";
+      set +x; } 2>/dev/null
+}
 
+wp_auth_prod () {
+    # --head  print only the headers
+    # curl --head $fdk_prod_wp_authApi_basePath=https/jwt-auth/v1/token
+    data='{"username":"'$fdk_prod_wp_username'","password":"'$fdk_prod_wp_password'"}'
+    set -x  # Print commands and their arguments as they are executed.
+    curl -v -H 'Content-Type: application/json' \
+         --data $data $fdk_prod_wp_authApi_basePath/jwt-auth/v1/token
+    # Don't print commands
+    { retval="$?";
+      set +x; } 2>/dev/null
+}
+
+wp_auth_test_token () {
+    token=$(wp_auth_test)
+    printf "%s\n" $(echo $token | jq -r '.token')
+}
+
+test_wp_dev () {
+    token=$(wp_auth_test_token)
+    # --head print only the headers
+    set -x  # print commands and their arguments as they are executed.
+    curl --oauth2-bearer $token --head $fdk_dev_wp_authApi_basePath/jwt-auth/v1/token
+    { retval="$?";
+      set +x; } 2>/dev/null
+}
+
+download () {
+    set -x  # Print commands and their arguments as they are executed.
+    # wget \
+    #       https://wordpress.org/latest.zip \
+    #       https://files.phpmyadmin.net/phpMyAdmin/5.1.3/phpMyAdmin-5.1.3-all-languages.zip \
+    #       https://downloads.wordpress.org/plugin/code-snippets.zip \
+    #       https://downloads.wordpress.org/plugin/jwt-authentication-for-wp-rest-api.1.2.6.zip \
+    #       --directory-prefix=$prjdir/map/database
+    # unzip phpMyAdmin-5.1.3-all-languages.zip
+    # unzip latest.zip
+    # Don't print commands
+    { retval="$?";
+      set +x; } 2>/dev/null
+    printf "Open:\n"
+    printf "      http://localhost:4200/wordpress/wp-admin/install.php\n"
+    printf "      http://localhost:4200/phpMyAdmin-5.1.3-all-languages/index.php\n"
+    printf "      http://localhost:4200/wordpress/index.php?rest_route=/\n"
+    printf "      http://localhost:4200/wordpress/index.php?rest_route=/jwt-auth/v1\n"
+    printf "      http://localhost:4200/wordpress/index.php?rest_route=/jwt-auth/v1/token\n"
+}
 
 start_php () {
     mysqld_safe 1>/dev/null &
@@ -297,6 +349,9 @@ deploy_prod () {
     fi
 }
 
+alias dow=download
+alias twt=wp_auth_test
+alias twd=test_wp_dev
 alias form=serve_form
 alias map=serve_map
 alias shp=start_php
@@ -343,7 +398,7 @@ CREATE DATABASE IF NOT EXISTS associations;
 GRANT ALL PRIVILEGES ON associations.* TO '$USER'@'localhost' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
 select '-- Loading test data ...' AS '';
-SOURCE dec/fdk/map/database/db-export/associations.sql;
+SOURCE map/database/db-export/associations.sql;
 -- SHOW TABLES;
 -- SHOW COLUMNS IN activities;
 SELECT count(*) as 'count-of-activities (should be ~130):'

@@ -15,24 +15,31 @@ export class MysqlPersistService {
   constructor(private httpClient: HttpClient) {
   }
 
-  createOrUpdateAssociation(association: Association): Observable<MyHttpResponse<any>> {
-    return this.httpClient.post<MyHttpResponse<any>>(`${this.PHP_API_SERVER_PATH}/associations/create-association.php`, association)
+  createOrUpdateAssociation(
+    association: Association, username: string, password: string):
+  Observable<MyHttpResponse<any>> {
+    return this.httpClient.post<MyHttpResponse<any>>
+      (`${this.PHP_API_SERVER_PATH}/associations/create-association.php?username=${username}&password=${password}`
+       , association)
       .pipe(catchError(this.handleError));
   }
 
-  deleteAssociation(id: string): Observable<HttpResponse<any>> {
-    return this.httpClient.get<HttpResponse<any>>(`${this.PHP_API_SERVER_PATH}/associations/delete-association.php?id=${id}`)
-      .pipe(catchError(this.handleError));
+  deleteAssociation(id: string, username: string, password: string): Observable<HttpResponse<any>> {
+    return this.httpClient.get<HttpResponse<any>>(
+      `${this.PHP_API_SERVER_PATH}/associations/delete-association.php?id=${id}&username=${username}&password=${password}`
+    ).pipe(catchError(this.handleError));
   }
 
-  deleteAllAssociations(): Observable<HttpResponse<any>> {
-    return this.httpClient.get<HttpResponse<any>>(`${this.PHP_API_SERVER_PATH}/associations/delete-all-associations.php`)
-      .pipe(catchError(this.handleError));
+  deleteAllAssociations(username: string, password: string): Observable<HttpResponse<any>> {
+    return this.httpClient.get<HttpResponse<any>>(
+      `${this.PHP_API_SERVER_PATH}/associations/delete-all-associations.php?username=${username}&password=${password}`
+    ).pipe(catchError(this.handleError));
   }
 
-  createDistrictOptions(postdata: any): Observable<HttpResponse<any>> {
-    return this.httpClient.post<HttpResponse<any>>(`${this.PHP_API_SERVER_PATH}/districts-options/create-district-options.php`, postdata)
-      .pipe(catchError(this.handleError));
+  createDistrictOptions(postdata: any, username: string, password: string): Observable<HttpResponse<any>> {
+    return this.httpClient.post<HttpResponse<any>>(
+      `${this.PHP_API_SERVER_PATH}/districts-options/create-district-options.php?username=${username}&password=${password}`
+      , postdata).pipe(catchError(this.handleError));
   }
 
   private handleError(error: HttpErrorResponse): Observable<never> {

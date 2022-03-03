@@ -5,9 +5,15 @@
  */
 require '../database.php';
 
-$id = $_GET['id'] != null && strlen(trim($_GET['id'])) == 36 ? mysqli_real_escape_string($con, trim($_GET['id'])) : false;
+$auth = authorize($con);
+if (!$auth) {
+    $log_file = "/var/log/php-server.log";
+    error_log("delete-association Not authorized \n", 3, $log_file);
+    return http_response_code(401);
+}
 
-if (!$id) {
+$id = getPrm('id', $con);
+if (!$id || strlen($id) != 36) {
     return http_response_code(400);
 }
 

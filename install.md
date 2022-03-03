@@ -137,7 +137,7 @@ or
    ```shell
    wget https://downloads.wordpress.org/plugin/code-snippets.zip \
         https://downloads.wordpress.org/plugin/jwt-authentication-for-wp-rest-api.1.2.6.zip \
-        --directory-prefix=~/Downloads/
+        --directory-prefix=$HOME/Downloads/
    ```
    Install the plugins `Plugin -> Add New -> Upload Plugin -> Browse ...` and activate them.
 
