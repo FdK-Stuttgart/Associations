@@ -2,7 +2,7 @@
 /**
  * Creates an association.
  */
-require '../database.php';
+require '../auth.php';
 
 $auth = authorize($con);
 if (!$auth) {

@@ -3,7 +3,7 @@
 /**
  * Deletes one activity option by value.
  */
-require '../database.php';
+require '../auth.php';
 
 $value = $_GET['value'] != null && strlen(trim($_GET['value'])) == 36 ? mysqli_real_escape_string($con, trim($_GET['value'])) : false;
 

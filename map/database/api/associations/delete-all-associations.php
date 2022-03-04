@@ -3,7 +3,7 @@
 /**
  * Deletes i.e. deactivates all associations.
  */
-require '../database.php';
+require '../auth.php';
 
 $auth = authorize($con);
 if (!$auth) {

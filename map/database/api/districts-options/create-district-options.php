@@ -2,7 +2,7 @@
 /**
  * Creates or updates the district options.
  */
-require '../database.php';
+require '../auth.php';
 
 $postdata = file_get_contents("php://input");
 

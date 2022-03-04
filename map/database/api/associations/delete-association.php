@@ -3,7 +3,7 @@
 /**
  * Deletes one association by ID.
  */
-require '../database.php';
+require '../auth.php';
 
 $auth = authorize($con);
 if (!$auth) {

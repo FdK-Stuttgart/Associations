@@ -2,7 +2,7 @@
 /**
  * Creates or updates the activity options.
  */
-require '../database.php';
+require '../auth.php';
 
 $postdata = file_get_contents("php://input");
 
