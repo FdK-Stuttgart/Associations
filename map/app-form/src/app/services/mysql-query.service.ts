@@ -27,7 +27,7 @@ export class MysqlQueryService {
       .pipe(
         timeout(this.CONNECTION_TIMEOUT),
         catchError(err => {
-          console.log(('Vereine konnten nicht abgerufen werden.'), err);
+          console.log('Vereine konnten nicht abgerufen werden.', err);
           return throwError(err);
         })
       );
@@ -70,12 +70,13 @@ export class MysqlQueryService {
 
 
   private readDistrictOptions(): Observable<DropdownOption[] | null> {
-    return this.httpClient.get<DropdownOption[]>(`${this.PHP_API_SERVER_PATH}/districts-options/read-districts-options.php`,
+    return this.httpClient.get<DropdownOption[]>(
+      `${this.PHP_API_SERVER_PATH}/districts-options/read-districts-options.php`,
       {headers: this.HEADERS})
       .pipe(
         timeout(this.CONNECTION_TIMEOUT),
         catchError(err => {
-          console.log(('Dropdown-Optionen für Aktivitätsgebiete konnten nicht abgerufen werden.'), err);
+          console.log('Dropdown-Optionen für Aktivitätsgebiete konnten nicht abgerufen werden.', err);
           return throwError(err);
         })
       );
