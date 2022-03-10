@@ -44,29 +44,34 @@ test_php () {
     printf "... %s chars received\n" $cnt_chars
 }
 
-wp_auth_test () {
-    data='{"username":"'$fdk_test_wp_username'","password":"'$fdk_test_wp_password'"}'
-    set -x  # Print commands and their arguments as they are executed.
-    curl -v -H 'Content-Type: application/json' \
-         --data $data $fdk_test_wp_authApi_basePath/jwt-auth/v1/token
+data () {
+    printf '{"username":"%s","password":"%s"}' $1 $2
+}
 
+wp_auth_test () {
+    set -x  # Print commands and their arguments as they are executed.
+    curl -H 'Content-Type: application/json' \
+         --data $(data $fdk_test_wp_username $fdk_test_wp_password) \
+         $fdk_test_wp_authApi_basePath/jwt-auth/v1/token
     # --head  print only the headers
     # curl --head $fdk_test_wp_authApi_basePath/jwt-auth/v1/token
     # Don't print commands
     { retval="$?";
       set +x; } 2>/dev/null
+    printf "\n"
 }
 
 wp_auth_prod () {
     # --head  print only the headers
     # curl --head $fdk_prod_wp_authApi_basePath=https/jwt-auth/v1/token
-    data='{"username":"'$fdk_prod_wp_username'","password":"'$fdk_prod_wp_password'"}'
     set -x  # Print commands and their arguments as they are executed.
-    curl -v -H 'Content-Type: application/json' \
-         --data $data $fdk_prod_wp_authApi_basePath/jwt-auth/v1/token
+    curl -H 'Content-Type: application/json' \
+         --data $(data $fdk_prod_wp_username $fdk_prod_wp_password) \
+         $fdk_prod_wp_authApi_basePath/jwt-auth/v1/token
     # Don't print commands
     { retval="$?";
       set +x; } 2>/dev/null
+    printf "\n"
 }
 
 wp_auth_test_token () {
@@ -75,10 +80,21 @@ wp_auth_test_token () {
 }
 
 test_wp_dev () {
-    token=$(wp_auth_test_token)
     # --head print only the headers
     set -x  # print commands and their arguments as they are executed.
-    curl --oauth2-bearer $token --head $fdk_dev_wp_authApi_basePath/jwt-auth/v1/token
+    curl --oauth2-bearer $(wp_auth_test_token) \
+         --head $fdk_dev_wp_authApi_basePath/jwt-auth/v1/token
+    { retval="$?";
+      set +x; } 2>/dev/null
+}
+
+test_basic_auth () {
+    assocId=744b3317-7f5c-4dc2-be61-03e25859223c
+    # encstr=$(echo 'Hello world!' | base64) # returns: SGVsbG8gd29ybGQh
+    encstr=$(echo $fdk_test_wp_username':'$fdk_test_wp_password | base64)
+    set -x  # print commands and their arguments as they are executed.
+    curl -H "Authorization: Basic ${encstr}" \
+         $fdk_dev_wp_authApi/api/associations/delete-association.php?id=$assocId
     { retval="$?";
       set +x; } 2>/dev/null
 }
@@ -143,20 +159,22 @@ start_php () {
 # kill_all is broken: killing a node process messes up the terminal
 kill_all () {
     # mysqladmin shutdown
-    # set -x
+    # set -x  # Print commands and their arguments as they are executed.
     killall mariadbd # 'killall mysqld_safe' doesn't work
     killall php
     pkill -f "ng serve --port $port_map"
     pkill -f "ng serve --port $port_form"
-    # set +x
+    # # Don't print commands
+    # { retval="$?";
+    #   set +x; } 2>/dev/null
 }
 
-create_database_php () {
-    local db_php=$prjdir/map/database/api/database.php
-    if [[ ! -f $db_php ]]; then
-        cp $(dirname $db_php)/_$(basename $db_php) $db_php
-        sed -i -e "s|'DB_NAME',.*''|'DB_NAME', 'associations'|" $db_php
-        sed -i -e "s|'DB_USER',.*''|'DB_USER', '$USER'|" $db_php
+create_environment_php () {
+    local env_php=$prjdir/map/database/api/environment.php
+    if [[ ! -f $env_php ]]; then
+        cp $(dirname $env_php)/_$(basename $env_php) $env_php
+        sed -i -e "s|'DB_NAME',.*''|'DB_NAME', 'associations'|" $env_php
+        sed -i -e "s|'DB_USER',.*''|'DB_USER', '$USER'|" $env_php
     fi
 }
 
@@ -171,17 +189,13 @@ install_node_modules () {
 
 serve_map () {
     # test_php
-    # set -x
-    create_database_php
-    cd $prjdir/map/app-map/
-    install_node_modules
+    create_environment_php
+    cd $prjdir/map/app-map/ && install_node_modules
     local logfile=/var/log/serve_map.log
     printf "See %s\n" $logfile
     # ng serve --port $port_map &>$logfile &
     ng serve --port $port_map
     # cd -
-    # set +x
-
 #     xfce4-terminal \
 #         --working-directory="$prjdir/map/app-map/" \
 #         --title="app-map" \
@@ -193,17 +207,13 @@ serve_map () {
 
 serve_form () {
     # test_php
-    # set -x
-    create_database_php
-    cd $prjdir/map/app-form/
-    install_node_modules
+    create_environment_php
+    cd $prjdir/map/app-form/ && install_node_modules
     logfile=/var/log/serve_form.log
     printf "See %s\n" $logfile
     # ng serve --port $port_form &>$logfile &
     ng serve --port $port_form
     # cd -
-    # set +x
-
 #     xfce4-terminal \
 #         --working-directory="$prjdir/map/app-form/" \
 #         --title="app-form" \
@@ -233,16 +243,13 @@ set_version () {
 }
 
 version () {
-    cd $prjdir
-    git stash
+    cd $prjdir && git stash
 
-    cd $(dirname $p1)
-    npm run app-map:version # no autocommit
+    cd $(dirname $p1) && npm run app-map:version  # no autocommit
     # npm run app-map:version:commit
     local ver_map=$(set_version $p1)
 
-    cd $(dirname $p2)
-    npm run app-form:version # no autocommit
+    cd $(dirname $p2) && npm run app-form:version # no autocommit
     # npm run app-form:version:commit
     local ver_form=$(set_version $p2)
 
@@ -264,11 +271,9 @@ version () {
 }
 
 build () {
-    cd $prjdir
-    git stash
+    cd $prjdir && git stash
     set_ng $p1
-    cd $prjdir/map/app-map
-    npm run app-map:build:prod
+    cd $prjdir/map/app-map && npm run app-map:build:prod
 
     set_ng $p2
     sed -i "s|del-cli --force|rm -rf|" $p2
@@ -276,12 +281,10 @@ build () {
     sed -i \
         "s|\(npm-run-all\)|node $HOME/dec/fdk/map/app-form/node_modules/npm-run-all/bin/npm-run-all/main.js \1|" \
         $p2
-    cd $prjdir/map/app-form
-    npm run app-form:build:prod
+    cd $prjdir/map/app-form && npm run app-form:build:prod
 
     git checkout -- $p1 $p2 $p11 $p22
-    cd $prjdir
-    git stash pop
+    cd $prjdir && git stash pop
     return 0
 }
 
@@ -306,13 +309,13 @@ deploy () {
         printf "    fdk_server: '%s'\n" $fdk_server
         printf "    fdk_home:   '%s'\n" $fdk_home
     else
-        local timestamp=$(date '+%s')
+        local timestamp=$(date '+%F_%T')
         echo "" > /tmp/backup.sh
         echo "set -v" >> /tmp/backup.sh
         echo "cd $fdk_home" >> /tmp/backup.sh
         echo "cp -r AssociationMap/ AssociationMap.backup-$timestamp/" >> /tmp/backup.sh
         echo "chmod -R -w AssociationMap.backup-$timestamp/" >> /tmp/backup.sh
-        set -x
+        set -x  # Print commands and their arguments as they are executed.
         ssh -t $fdk_login@$fdk_server < /tmp/backup.sh
         cd $prjdir
         # file transfer DEV -> TEST:
@@ -320,10 +323,12 @@ deploy () {
         rsync -avz \
               --exclude="AssociationMap/.htaccess" \
               --exclude="AssociationMap/edit/.htaccess" \
-              --exclude="AssociationMap/api/database.php" \
+              --exclude="AssociationMap/api/environment.php" \
               ./map/dist/AssociationMap \
               $fdk_login@$fdk_server:$fdk_home
-        set +x
+        # Don't print commands
+        { retval="$?";
+          set +x; } 2>/dev/null
     fi
 }
 
@@ -369,10 +374,8 @@ if [ $countMatchingLines -eq 0 ]; then
 N
 EOF
     curdir=$(pwd)
-    cd $prjdir/map/app-form/
-    npm install
-    cd $prjdir/map/app-map/
-    npm install
+    cd $prjdir/map/app-form/ && npm install
+    cd $prjdir/map/app-map/  && npm install
     cd $curdir
 fi
 

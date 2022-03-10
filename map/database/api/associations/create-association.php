@@ -6,8 +6,7 @@ require '../auth.php';
 
 $auth = authorize($con);
 if (!$auth) {
-    $log_file = "/var/log/php-server.log";
-    error_log("create-association Not authorized \n", 3, $log_file);
+    lg("ERR: create-association: authorize: '$auth'");
     return http_response_code(401);
 }
 

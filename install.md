@@ -155,12 +155,12 @@ or
    The test:
    ```shell
    curl -H 'Content-Type: application/json' \
-        -d '{"username":"wordpress","password":"<password>"}' \
-        http://localhost/blog/index.php/wp-json/jwt-auth/v1/token
+        -d '{"username":"<username>","password":"<password>"}' \
+        http://localhost:4200/wp-json/jwt-auth/v1/token
    ```
    should return:
    ```json
-   {"token":"...","user_email":"<some email>","user_nicename":"wordpress","user_display_name":"wordpress"}
+   {"token":"...","user_email":"...","user_nicename":"...","user_display_name":"..."}
    ```
 
    Add a new Code Snippet (in PHP):
@@ -180,12 +180,12 @@ or
    The test:
    ```shell
    curl -H 'Content-Type: application/json' \
-        -d '{"username":"wordpress","password":"<password>"}' \
-        http://localhost/blog/index.php/wp-json/jwt-auth/v1/token
+        -d '{"username":"<username>","password":"<password>"}' \
+        http://localhost:4200/wp-json/jwt-auth/v1/token
    ```
    should return:
    ```json
-   {"token":"...","user_email":"<some email>","user_nicename":"wordpress","user_display_name":"wordpress","user_roles":["administrator"]}
+   {"token":"...","user_email":"...","user_nicename":"...","user_display_name":"...","user_roles":["administrator"]}
    ```
 
 1. In order to invalidate the JWT Token after 8 hours, add another Code Snippet:

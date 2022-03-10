@@ -25,3 +25,5 @@ data/*.class
 /var/log/*
 /node_modules/
 /.envrc
+
+/map/database/api/environment.php

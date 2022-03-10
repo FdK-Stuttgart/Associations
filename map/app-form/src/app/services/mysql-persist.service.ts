@@ -19,8 +19,8 @@ export class MysqlPersistService {
     return {
       headers: new HttpHeaders({
         'Content-Type':  'application/json',
-        'Authorization': 'Basic '+ btoa(username+':'+password)  // base64 encoding
-      })
+        // base64 encoding
+        'Authorization': 'Basic '+ btoa(username+':'+password)})
     };
   }
 
@@ -28,9 +28,10 @@ export class MysqlPersistService {
     association: Association, username: string, password: string):
   Observable<MyHttpResponse<any>> {
     return this.httpClient.post<MyHttpResponse<any>>
-      (`${this.PHP_API_SERVER_PATH}/associations/create-association.php?username=${username}&password=${password}`
-       , association)
-      .pipe(catchError(this.handleError));
+      (`${this.PHP_API_SERVER_PATH}/associations/create-association.php`
+       , association
+       , this.httpOptions(username, password)
+      ).pipe(catchError(this.handleError));
   }
 
   deleteAssociation(id: string, username: string, password: string): Observable<HttpResponse<any>> {

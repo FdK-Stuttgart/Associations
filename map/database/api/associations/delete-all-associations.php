@@ -7,8 +7,7 @@ require '../auth.php';
 
 $auth = authorize($con);
 if (!$auth) {
-    $log_file = "/var/log/php-server.log";
-    error_log("delete-all-associations Not authorized \n", 3, $log_file);
+    lg("ERR: delete-all-associations: authorize: '$auth'");
     return http_response_code(401);
 }
 

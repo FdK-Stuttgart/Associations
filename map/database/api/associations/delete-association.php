@@ -7,9 +7,19 @@ require '../auth.php';
 
 $auth = authorize($con);
 if (!$auth) {
-    $log_file = "/var/log/php-server.log";
-    error_log("delete-association Not authorized \n", 3, $log_file);
+    lg("ERR: delete-association: authorize: '$auth'");
     return http_response_code(401);
+}
+
+function getPrm($prm, $con) {
+    $val = $_GET[$prm];
+    if ($val != null) {
+        return mysqli_real_escape_string($con, trim($val));
+    }
+    else {
+        lg("ERR: getPrm; prm: '$prm'");
+        return false;
+    }
 }
 
 $id = getPrm('id', $con);
