@@ -23,17 +23,28 @@ function authorize($con) {
     $authorized = true;
     $not_authorized = !$authorized;
 
-    // foreach ($_SERVER as $key => $value) {
-    //     lg("_SERVER[$key]: $value");
-    // }
-    $username = $_SERVER['PHP_AUTH_USER'];
-    if (!$username) {
-        lg("ERR: undefined _SERVER['PHP_AUTH_USER']");
+    lg("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv");
+    foreach ($_SERVER as $key => $value) {
+        lg("DBG: _SERVER['$key']: $value");
+    }
+    lg("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+    lg("isset(PHP_AUTH_USER): '".isset($PHP_AUTH_USER)."'; isset(_SERVER['PHP_AUTH_USER']): '".isset($_SERVER['PHP_AUTH_USER'])."'");
+    lg("PHP_AUTH_USER: '".$PHP_AUTH_USER."'; _SERVER['PHP_AUTH_USER']: '".$_SERVER['PHP_AUTH_USER']."'");
+
+    lg("isset(PHP_AUTH_PW): ".isset($PHP_AUTH_PW)."'; isset(_SERVER['PHP_AUTH_PW']): '".isset($_SERVER['PHP_AUTH_PW'])."'");
+    lg("PHP_AUTH_PW: '".$PHP_AUTH_PW."'; _SERVER['PHP_AUTH_PW']: '".$_SERVER['PHP_AUTH_PW']."'");
+
+    lg("isset(PHP_AUTH_PW): ".isset($HTTP_AUTHORIZATION)."'; isset(_SERVER['HTTP_AUTHORIZATION']): '".isset($_SERVER['HTTP_AUTHORIZATION'])."'");
+    lg("HTTP_AUTHORIZATION: '".$HTTP_AUTHORIZATION."'; _SERVER['HTTP_AUTHORIZATION']: '".$_SERVER['HTTP_AUTHORIZATION']."'");
+
+    $username = $PHP_AUTH_USER ? $PHP_AUTH_USER : $_SERVER['PHP_AUTH_USER'];
+    if (!isset($username)) {
+        lg("ERR: neither PHP_AUTH_USER nor _SERVER['PHP_AUTH_USER'] are defined");
         return $not_authorized;
     }
-    $password = $_SERVER['PHP_AUTH_PW'];
-    if (!$password) {
-        lg("ERR: undefined _SERVER['PHP_AUTH_PW']");
+    $password = $PHP_AUTH_PW ? $PHP_AUTH_PW : $_SERVER['PHP_AUTH_PW'];
+    if (!isset($password)) {
+        lg("ERR: neither PHP_AUTH_PW nor _SERVER['PHP_AUTH_PW'] are defined");
         return $not_authorized;
     }
 
