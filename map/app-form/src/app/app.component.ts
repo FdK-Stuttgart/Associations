@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {version} from '../../package.json';
+import * as packageJson from '../../package.json';
 import {LoginService} from './login/login.service';
 
 @Component({
@@ -9,10 +9,11 @@ import {LoginService} from './login/login.service';
 })
 export class AppComponent {
   title = 'Stadtteilkarte - Daten eingeben';
-  version = version;
+  private packageInfo = packageJson;
+  version = this.packageInfo.version;
 
-  constructor(private loginService: LoginService) {}
-
+  constructor(private loginService: LoginService) {
+  }
 
   get loginStatus(): boolean {
     return this.loginService.loginStatus;
