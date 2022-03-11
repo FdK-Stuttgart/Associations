@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {version} from '../../package.json';
+import * as packageJson from '../../package.json';
 
 @Component({
   selector: 'app-root',
@@ -8,7 +8,8 @@ import {version} from '../../package.json';
 })
 export class AppComponent {
   title = 'Stadtteilkarte';
-  version = version;
+  private packageInfo = packageJson;
+  version = this.packageInfo.version;
 
   get fullscreenEnabled(): boolean {
     return document.fullscreenEnabled
