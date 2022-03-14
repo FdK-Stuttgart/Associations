@@ -36,6 +36,11 @@ cliTools="$cliTools busybox rsync openssh bash ripgrep less mycli"
 cliTools="$cliTools grep git coreutils sed node which"
 cliTools="$cliTools node php mariadb jq nss-certs curl"
 
+cmd=guix
+if [[ ! $(command -v $cmd) ]]; then
+    printf "Command not available: %s\n" $cmd
+    exit 1;
+fi
 # --preserve=^fdk
 #   preserve environment variables matching REGEX
 set -x
