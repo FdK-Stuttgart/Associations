@@ -17,11 +17,6 @@ ls -1d /usr/etc/* | while read filepath; do
     ln -s $filepath /etc/
 done
 
-# https://www.reddit.com/r/GUIX/comments/kt7tqr/clearing_a_terminal_in_guix
-clear () {
-    printf '\e[2J\e[H'
-}
-
 alias ng='node $HOME/node_modules/\@angular/cli/bin/ng'
 # node_bin=`which node`
 # ng_bin=$HOME/node_modules/\@angular/cli/bin/ng
@@ -40,7 +35,10 @@ p22=$prjdir/map/app-form/package-lock.json
 test_php () {
     printf "Testing php WebServer... \n"
     url=http://localhost:4200/api/associations/read-associations.php
+    set -x  # Print commands and their arguments as they are executed.
     cnt_chars=$(curl --silent --request GET $url | wc -c)
+    { retval="$?";
+      set +x; } 2>/dev/null
     printf "... %s chars received\n" $cnt_chars
 }
 
@@ -436,9 +434,6 @@ then
     # Don't do anything else.
     return
 fi
-
-# Source the system-wide file.
-# source /etc/bashrc
 
 guix_prompt
 
