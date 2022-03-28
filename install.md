@@ -23,18 +23,21 @@
 
 ```shell
 # install AngularJS:
+sudo apt install npm
 npm install -g @angular/cli
-# install Wordpress, PHP, MySQL phpMyAdmin:
-sudo apt install wordpress php libapache2-mod-php php-mysql mysql-server mysql-client mysql-common phpmyadmin
+
+# install MySQL
+sudo apt install mysql-server mysql-client mysql-commoy
 # make sure MySQL is running:
-systemctl status mysql.service
+systemctl status mysql
 # set up the database:
 userPasswd=<YOUR-PASSWORD>
+userPasswd=bost
 sudo mysql -uroot << EOF
 DROP DATABASE IF EXISTS associations;
 CREATE DATABASE IF NOT EXISTS associations;
-CREATE USER '$USER@'localhost' IDENTIFIED BY '$userPasswd';
-GRANT ALL PRIVILEGES ON associations.* TO $USER'@'localhost' WITH GRANT OPTION;
+CREATE USER $USER IDENTIFIED BY '$userPasswd';
+GRANT ALL PRIVILEGES ON associations.* TO $USER WITH GRANT OPTION;
 FLUSH PRIVILEGES;
 select '-- Loading test data ...' AS '';
 SOURCE dec/fdk/map/database/db-export/associations.sql;
@@ -45,6 +48,12 @@ FROM associations.activities;
 exit
 EOF
 ```
+
+# install Wordpress, PHP, phpMyAdmin:
+sudo apt install apache2 libapache2-mod-php
+sudo apt install php php-mysql php-curl
+sudo apt install wordpress phpmyadmin
+
 ### MySQL installation and setup
 
 Depending on your MySQL environment, you can do this using the from the command
