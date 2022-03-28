@@ -22,6 +22,15 @@ $dbname = 'associations';
 
 echo "Connecting to dbhost: '$dbhost' dbuser: '$dbuser' dbname: '$dbname' ...\n";
 
+/*
+  TODO mysqli_connect is deprecated
+  This extension was deprecated in PHP 5.5.0, and it was removed in PHP 7.0.0.
+  Instead, the MySQLi or PDO_MySQL extension should be used. See also MySQL:
+  choosing an API guide. Alternatives to this function include:
+
+ mysqli_connect()
+ PDO::__construct()
+ */
 $link = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
 if (mysqli_connect_errno()) {
     echo "Failed to connect: " . mysqli_connect_error() . "\n";
