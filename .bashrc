@@ -297,6 +297,23 @@ ver_build () {
     fi
 }
 
+deploy_dev () {
+    # ssh-copy-id -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p 10022 bost@localhost
+    # local remoteShell="ssh -o LogLevel=ERROR -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p 10022"
+    local remoteShell="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p 10022"
+    cd $prjdir
+    set -x  # Print commands and their arguments as they are executed.
+    rsync -avz --rsh="$remoteShell" \
+          --exclude="AssociationMap/.htaccess" \
+          --exclude="AssociationMap/edit/.htaccess" \
+          --exclude="AssociationMap/api/environment.php" \
+          ./map/dist/AssociationMap \
+          bost@localhost:/tmp \
+          2> >(grep -v "Permanently added '\[localhost\]:10022'" 1>&2)
+    { retval="$?";
+      set +x; } 2>/dev/null
+}
+
 deploy () {
     local fdk_login=$1
     local fdk_server=$2
@@ -352,6 +369,7 @@ deploy_prod () {
     fi
 }
 
+alias d=deploy_dev
 alias dow=download
 alias twt=wp_auth_test
 alias twd=test_wp_dev
