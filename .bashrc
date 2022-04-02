@@ -343,7 +343,7 @@ CREATE DATABASE IF NOT EXISTS associations;
 GRANT ALL PRIVILEGES ON associations.* TO '$USER'@'localhost' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
 select '-- Loading test data ...' AS '';
-SOURCE dec/fdk/map/database/db-export/associations.sql;
+SOURCE map/database/db-export/associations.sql;
 -- SHOW TABLES;
 -- SHOW COLUMNS IN activities;
 SELECT count(*) as 'count-of-activities (should be ~130):'
