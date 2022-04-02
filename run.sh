@@ -13,16 +13,16 @@ wd=$(pwd) # WD=$(dirname "$0") # i.e. path to this file
 grep -qF "#mysqld_user#" $wd/etc/my.cnf &&\
     sed -i -e "s|#mysqld_user#|$(whoami)|" $wd/etc/my.cnf
 
-prj_dirs=(
-    $wd/node_modules
-    $wd/map/app-map/node_modules
-    $wd/map/app-form/node_modules
-    $wd/var/log
-    $wd/var/lib/mysql/data
-)
-
-# `git clean --force -dx` destroys the prj_dirs. Recreate it:
-for prjd in ${prj_dirs[@]}; do
+# Recreate the dirs destroyed by `git clean --force -dx`:
+for prjd in \
+        $wd/node_modules \
+        $wd/map/app-map/node_modules \
+        $wd/map/app-form/node_modules \
+        $wd/var/log \
+        $wd/var/lib/mysql/data \
+        ;
+    do
+    # printf "prjd: $prjd\n"
     if [ ! -d $prjd ]; then
         mkdir --parent $prjd
     fi
@@ -37,7 +37,8 @@ cliTools="$cliTools grep git coreutils sed node which ncurses"
 cliTools="$cliTools node php mariadb jq nss-certs curl"
 
 cmd=guix
-if [[ ! $(command -v $cmd) ]]; then
+# [[ ! $(command -v $cmd) ]] - '[[' is a bashishm
+if [ ! "$(command -v $cmd)" ]; then
     printf "Command not available: %s\n" $cmd
     exit 1;
 fi
