@@ -6,7 +6,7 @@
     "app-form:start": "ng serve",
     "app-form:start:parallel": "ng serve --port 4100",
     "app-form:build": "ng build",
-    "app-form:build:prod": "ng build --prod --base-href /edit/",
+    "app-form:build:prod": "ng build --configuration production --base-href /edit/",
     "postapp-form:build:prod": "npm-run-all --continue-on-error -l --sequential copy-api-folder delete-api-folder",
     "copy-api-folder": "robocopy \"../dist/AssociationMap/edit/api\" \"../dist/AssociationMap/api\" *.* /S /E /IS",
     "delete-api-folder": "del-cli --force \"../dist/AssociationMap/edit/api\"",
