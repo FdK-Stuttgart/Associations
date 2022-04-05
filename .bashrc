@@ -339,6 +339,7 @@ deploy () {
               --exclude="AssociationMap/.htaccess" \
               --exclude="AssociationMap/edit/.htaccess" \
               --exclude="AssociationMap/api/environment.php" \
+              --exclude="AssociationMap/edit/api/environment.php" \
               ./map/dist/AssociationMap \
               $fdk_login@$fdk_server:$fdk_home
         # Don't print commands
