@@ -319,19 +319,25 @@ deploy () {
     local fdk_server=$2
     local fdk_home=$3
     if [[ -z "$fdk_login" || -z "$fdk_server" || -z "$fdk_home" ]]; then
-        printf "Error: undefined variable(s):\n"
+        printf "ERR: undefined variable(s):\n"
         printf "    fdk_login:  '%s'\n" $fdk_login
         printf "    fdk_server: '%s'\n" $fdk_server
         printf "    fdk_home:   '%s'\n" $fdk_home
     else
-        local timestamp=$(date '+%F_%T')
-        echo "" > /tmp/backup.sh
-        echo "set -v" >> /tmp/backup.sh
-        echo "cd $fdk_home" >> /tmp/backup.sh
-        echo "cp -r AssociationMap/ AssociationMap.backup-$timestamp/" >> /tmp/backup.sh
-        echo "chmod -R -w AssociationMap.backup-$timestamp/" >> /tmp/backup.sh
+        local AMO=$fdk_test_home/AssociationMap
+        local AMB=$AMO.backup-$(date '+%F_%T')
+        echo "" > /tmp/script.sh
+        echo "set -v"                                                                                                >> /tmp/script.sh
+        echo "if [ -d $AMO ]; then"                                                                                  >> /tmp/script.sh
+        echo "    cp -r $AMO $AMB"                                                                                     >> /tmp/script.sh
+        echo "    chmod -R -w $AMB"                                                                                    >> /tmp/script.sh
+        echo "    find $AMO -not -name .htaccess -and -not -name environment.php -and -not -name database.php -delete" >> /tmp/script.sh
+        echo "    find $AMO -empty -type d -delete"                                                                    >> /tmp/script.sh
+        echo "else"                                                                                                  >> /tmp/script.sh
+        echo "    printf \"ERR: Directory doesn't exist: $AMO\\n\""                                                    >> /tmp/script.sh
+        echo "fi"                                                                                                    >> /tmp/script.sh
         set -x  # Print commands and their arguments as they are executed.
-        ssh -t $fdk_login@$fdk_server < /tmp/backup.sh
+        ssh -t $fdk_login@$fdk_server < /tmp/script.sh
         cd $prjdir
         # file transfer DEV -> TEST:
         # --archive --verbose --compress
@@ -350,7 +356,7 @@ deploy () {
 
 deploy_test () {
     if [[ -z "$fdk_test_login" || -z "$fdk_test_server" || -z "$fdk_test_home" ]]; then
-        printf "Error: undefined variable(s):\n"
+        printf "ERR: undefined variable(s):\n"
         printf "    fdk_test_login:  '%s'\n" $fdk_test_login
         printf "    fdk_test_server: '%s'\n" $fdk_test_server
         printf "    fdk_test_home:   '%s'\n" $fdk_test_home
@@ -361,7 +367,7 @@ deploy_test () {
 
 deploy_prod () {
     if [[ -z "$fdk_prod_login" || -z "$fdk_prod_server" || -z "$fdk_prod_home" ]]; then
-        printf "Error: undefined variable(s):\n"
+        printf "ERR: undefined variable(s):\n"
         printf "    fdk_prod_login:  '%s'\n" $fdk_prod_login
         printf "    fdk_prod_server: '%s'\n" $fdk_prod_server
         printf "    fdk_prod_home:   '%s'\n" $fdk_prod_home
