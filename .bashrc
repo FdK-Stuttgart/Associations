@@ -23,14 +23,14 @@ alias ng='node $HOME/node_modules/\@angular/cli/bin/ng'
 #  serve_map_cmd="$node_bin $ng_bin serve --port 4021"
 # serve_form_cmd="$node_bin $ng_bin serve --port 4022"
 
-prjdir=~/dec/fdk
+prjd=~/dec/fdk
 port_map=4201
 port_form=4202
 
-p1=$prjdir/map/app-map/package.json
-p11=$prjdir/map/app-map/package-lock.json
-p2=$prjdir/map/app-form/package.json
-p22=$prjdir/map/app-form/package-lock.json
+p1=$prjd/map/app-map/package.json
+p11=$prjd/map/app-map/package-lock.json
+p2=$prjd/map/app-form/package.json
+p22=$prjd/map/app-form/package-lock.json
 
 test_php () {
     printf "Testing php WebServer... \n"
@@ -104,7 +104,7 @@ download () {
     #       https://files.phpmyadmin.net/phpMyAdmin/5.1.3/phpMyAdmin-5.1.3-all-languages.zip \
     #       https://downloads.wordpress.org/plugin/code-snippets.zip \
     #       https://downloads.wordpress.org/plugin/jwt-authentication-for-wp-rest-api.1.2.6.zip \
-    #       --directory-prefix=$prjdir/map/database
+    #       --directory-prefix=$prjd/map/database
     # unzip phpMyAdmin-5.1.3-all-languages.zip
     # unzip latest.zip
     # Don't print commands
@@ -122,19 +122,19 @@ start_php () {
     mysqld_safe 1>/dev/null &
     # phpApi paths
     sed -i -e "s|localhost/AssociationMap|localhost:4200|" \
-        $prjdir/map/app-map/src/environments/environment.ts \
-        $prjdir/map/app-form/src/environments/environment.ts
+        $prjd/map/app-map/src/environments/environment.ts \
+        $prjd/map/app-form/src/environments/environment.ts
 
     # php -c /usr/etc -f /usr/etc/db-connect-test.php
 
-    # --no-header / -q   means quiet-mode
-    # -c <path>|<file>   Look for php.ini file in this directory
-    # -t <docroot>       Specify document root <docroot> for built-in web server.
+    # --no-header / -q  means quiet-mode
+    # -c <path>|<file>  Look for php.ini file in this directory
+    # -t <docroot>      Specify document root <docroot> for built-in web server.
     # redirection '... 1>/var/log/php_stdout.log &' doesn't work
     set -x  # Print commands and their arguments as they are executed.
     php -q -c /usr/etc \
         -S localhost:4200 \
-        -t $prjdir/map/database/ \
+        -t $prjd/map/database/ \
         &>/var/log/php_stdout.log &
     # Don't print commands
     { retval="$?";
@@ -150,7 +150,7 @@ start_php () {
 #         --title="php" \
 #         --command='env PROMPT_COMMAND="unset PROMPT_COMMAND
 # # php -c /usr/etc -f /usr/etc/db-connect-test.php
-# php -c /usr/etc -S localhost:4200 -t $prjdir/map/database/ 1>/dev/null &
+# php -c /usr/etc -S localhost:4200 -t $prjd/map/database/ 1>/dev/null &
 # " bash'
 }
 
@@ -168,7 +168,7 @@ kill_all () {
 }
 
 create_environment_php () {
-    local env_php=$prjdir/map/database/api/environment.php
+    local env_php=$prjd/map/database/api/environment.php
     if [[ ! -f $env_php ]]; then
         cp $(dirname $env_php)/_$(basename $env_php) $env_php
         sed -i -e "s|'DB_NAME',.*''|'DB_NAME', 'associations'|" $env_php
@@ -188,14 +188,14 @@ install_node_modules () {
 serve_map () {
     # test_php
     create_environment_php
-    cd $prjdir/map/app-map/ && install_node_modules
+    cd $prjd/map/app-map/ && install_node_modules
     local logfile=/var/log/serve_map.log
     printf "See %s\n" $logfile
     # ng serve --port $port_map &>$logfile &
     ng serve --port $port_map
     # cd -
 #     xfce4-terminal \
-#         --working-directory="$prjdir/map/app-map/" \
+#         --working-directory="$prjd/map/app-map/" \
 #         --title="app-map" \
 #         --command='env PROMPT_COMMAND="unset PROMPT_COMMAND
 # curl --request GET http://localhost:4200/api/associations/read-associations.php
@@ -206,14 +206,14 @@ serve_map () {
 serve_form () {
     # test_php
     create_environment_php
-    cd $prjdir/map/app-form/ && install_node_modules
+    cd $prjd/map/app-form/ && install_node_modules
     logfile=/var/log/serve_form.log
     printf "See %s\n" $logfile
     # ng serve --port $port_form &>$logfile &
     ng serve --port $port_form
     # cd -
 #     xfce4-terminal \
-#         --working-directory="$prjdir/map/app-form/" \
+#         --working-directory="$prjd/map/app-form/" \
 #         --title="app-form" \
 #         --command='env PROMPT_COMMAND="unset PROMPT_COMMAND
 # curl --request GET http://localhost:4200/api/associations/read-associations.php
@@ -241,7 +241,7 @@ set_version () {
 }
 
 version () {
-    cd $prjdir && git stash
+    cd $prjd && git stash
 
     cd $(dirname $p1) && npm run app-map:version  # no autocommit
     # npm run app-map:version:commit
@@ -251,7 +251,7 @@ version () {
     # npm run app-form:version:commit
     local ver_form=$(set_version $p2)
 
-    cd $prjdir
+    cd $prjd
     # -lt 5: all 3 version numbers MAJOR.MINOR.PATCH must be non-empty
     if [[ "$ver_form" != "$ver_map" && ${#ver_map} -lt 5 ]]; then
         printf "Wrong version numbers: ver_form: '%s', ver_map: '%s'\n" \
@@ -269,9 +269,9 @@ version () {
 }
 
 build () {
-    cd $prjdir && git stash
+    cd $prjd && git stash
     set_ng $p1
-    cd $prjdir/map/app-map && npm run app-map:build:prod
+    cd $prjd/map/app-map && npm run app-map:build:prod
 
     set_ng $p2
     sed -i "s|del-cli --force|rm -rf|" $p2
@@ -279,10 +279,10 @@ build () {
     sed -i \
         "s|\(npm-run-all\)|node $HOME/dec/fdk/map/app-form/node_modules/npm-run-all/bin/npm-run-all/main.js \1|" \
         $p2
-    cd $prjdir/map/app-form && npm run app-form:build:prod
+    cd $prjd/map/app-form && npm run app-form:build:prod
 
     git checkout -- $p1 $p2 $p11 $p22
-    cd $prjdir && git stash pop
+    cd $prjd && git stash pop
     return 0
 }
 
@@ -301,7 +301,7 @@ deploy_dev () {
     # ssh-copy-id -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p 10022 bost@localhost
     # local remoteShell="ssh -o LogLevel=ERROR -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p 10022"
     local remoteShell="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p 10022"
-    cd $prjdir
+    cd $prjd
     set -x  # Print commands and their arguments as they are executed.
     rsync -avz --rsh="$remoteShell" \
           --exclude="AssociationMap/.htaccess" \
@@ -327,18 +327,18 @@ deploy () {
         local AMO=$fdk_test_home/AssociationMap
         local AMB=$AMO.backup-$(date '+%F_%T')
         echo "" > /tmp/script.sh
-        echo "set -v"                                                                                                >> /tmp/script.sh
-        echo "if [ -d $AMO ]; then"                                                                                  >> /tmp/script.sh
+        echo "set -v"                                                                                                  >> /tmp/script.sh
+        echo "if [ -d $AMO ]; then"                                                                                    >> /tmp/script.sh
         echo "    cp -r $AMO $AMB"                                                                                     >> /tmp/script.sh
         echo "    chmod -R -w $AMB"                                                                                    >> /tmp/script.sh
         echo "    find $AMO -not -name .htaccess -and -not -name environment.php -and -not -name database.php -delete" >> /tmp/script.sh
         echo "    find $AMO -empty -type d -delete"                                                                    >> /tmp/script.sh
-        echo "else"                                                                                                  >> /tmp/script.sh
+        echo "else"                                                                                                    >> /tmp/script.sh
         echo "    printf \"ERR: Directory doesn't exist: $AMO\\n\""                                                    >> /tmp/script.sh
-        echo "fi"                                                                                                    >> /tmp/script.sh
+        echo "fi"                                                                                                      >> /tmp/script.sh
         set -x  # Print commands and their arguments as they are executed.
         ssh -t $fdk_login@$fdk_server < /tmp/script.sh
-        cd $prjdir
+        cd $prjd
         # file transfer DEV -> TEST:
         # --archive --verbose --compress
         rsync -avz \
@@ -355,7 +355,9 @@ deploy () {
 }
 
 deploy_test () {
-    if [[ -z "$fdk_test_login" || -z "$fdk_test_server" || -z "$fdk_test_home" ]]; then
+    if [[   -z "$fdk_test_login"
+         || -z "$fdk_test_server"
+         || -z "$fdk_test_home" ]]; then
         printf "ERR: undefined variable(s):\n"
         printf "    fdk_test_login:  '%s'\n" $fdk_test_login
         printf "    fdk_test_server: '%s'\n" $fdk_test_server
@@ -366,7 +368,9 @@ deploy_test () {
 }
 
 deploy_prod () {
-    if [[ -z "$fdk_prod_login" || -z "$fdk_prod_server" || -z "$fdk_prod_home" ]]; then
+    if [[   -z "$fdk_prod_login"
+         || -z "$fdk_prod_server"
+         || -z "$fdk_prod_home" ]]; then
         printf "ERR: undefined variable(s):\n"
         printf "    fdk_prod_login:  '%s'\n" $fdk_prod_login
         printf "    fdk_prod_server: '%s'\n" $fdk_prod_server
@@ -391,15 +395,24 @@ randpw () {
 }
 
 ## Install nodejs packages on the first run
-countMatchingLines=$(npm list @angular/cli | grep -c @angular/cli)
-if [ $countMatchingLines -eq 0 ]; then
+cntMatches=$(npm list @angular/cli 2>/dev/null | grep -c "UNMET DEPENDENCY")
+if [ $cntMatches -eq 1 ]; then
+    # printf "DBG: first run: cntMatches: %s\n" $cntMatches
+    # printf "DBG: install nodejs packages...\n"
+    wd=$(pwd)
+    set -x  # Print commands and their arguments as they are executed.
     npm install @angular/cli << EOF
 N
 EOF
-    curdir=$(pwd)
-    cd $prjdir/map/app-form/ && npm install
-    cd $prjdir/map/app-map/  && npm install
-    cd $curdir
+    cd $prjd/map/app-form/ && npm install
+    cd $prjd/map/app-map/  && npm install
+    cd $wd
+    # Don't print commands
+    { retval="$?";
+      set +x; } 2>/dev/null
+    # printf "DBG: install nodejs packages... done\n"
+# else
+#     printf "DBG: consecutive run: cntMatches: %s\n" $cntMatches
 fi
 
 set_mysqlPassword () {
@@ -408,7 +421,10 @@ set_mysqlPassword () {
 }
 
 ## Install MariaDB on the first run
-if [ ! -d /var/lib/mysql/data/mysql ]; then
+dbd=/var/lib/mysql/data/mysql
+if [ ! -d $dbd ]; then
+    # printf "DBG: first run: dbd doesn't exist: %s\n" $dbd
+    # printf "DBG: install MariaDB...\n"
     # Awful hack, required to solve a bug on mariadb guix' package
     lc_messages_dir=$(find /gnu/store -type d -name english | grep mysql)
     sed -i -e "s|#lc_messages_dir#|$lc_messages_dir|" /usr/etc/my.cnf
@@ -431,8 +447,10 @@ SELECT count(*) as 'count-of-activities (should be ~130):'
 FROM associations.activities;
 EOF
     mysqladmin --user $USER shutdown
+#     printf "DBG: install MariaDB... done\n"
+# else
+#     printf "DBG: first run: dbd exists already: %s\n" $dbd
 fi
-
 
 guix_prompt () {
     cat << EOF

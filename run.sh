@@ -34,12 +34,12 @@ done
 # TODO replace busybox with env
 cliTools="$cliTools busybox rsync openssh bash ripgrep less mycli"
 cliTools="$cliTools grep git coreutils sed node which ncurses"
-cliTools="$cliTools node php mariadb jq nss-certs curl"
+cliTools="$cliTools node php mariadb pgcli jq nss-certs curl"
 
 cmd=guix
 # [[ ! $(command -v $cmd) ]] - '[[' is a bashishm
 if [ ! "$(command -v $cmd)" ]; then
-    printf "Command not available: %s\n" $cmd
+    printf "ERR: Command not available: %s\n" $cmd
     exit 1;
 fi
 # --preserve=^fdk
