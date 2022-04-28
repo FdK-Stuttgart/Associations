@@ -5,11 +5,11 @@
  */
 require '../auth.php';
 
-$auth = authorize($con);
-if (!$auth) {
-    lg("ERR: delete-all-associations: authorize: '$auth'");
-    return http_response_code(401);
-}
+// $auth = authorize($con);
+// if (!$auth) {
+//     lg("ERR: delete-all-associations: authorize: '$auth'");
+//     return http_response_code(401);
+// }
 
 $sql = "UPDATE associations SET current = 0;";
 
