@@ -212,61 +212,75 @@
     :zoom 14 ;; default zoom level
     }
    :geometry {:type "Point" :coordinates [9.148864  48.760262]}
-   :layers (->> features
-                (mapv (fn [feature]
-                        (debugf "%s; %s - %s: %s"
-                                (get-in feature [:properties :name])
-                                (get-in feature [:properties :search_address])
-                                (get-in feature [:properties :search_district])
-                                (cstr/join " "
-                                           (map (fn [v] (utn/round-precision v 6))
-                                                (get-in feature [:geometry :coordinates]))))
-                        feature))
-                (create-groups)
-                (mapv (fn [[cat-name cat-members]]
-                        (layer main-color cat-name cat-members))))})
+   :layers
+   ((comp
+     (partial mapv (fn [[cat-name cat-members]] (layer main-color cat-name cat-members)))
+     create-groups
+     (partial mapv (fn [feature]
+                     ;; (def feature feature)
+                     (debugf "%s; %s - %s: %s"
+                             (get-in feature [:properties :name])
+                             (get-in feature [:properties :search_address])
+                             (get-in feature [:properties :search_district])
+                             (cstr/join " "
+                                        (map (fn [v]
+                                               ;; (def v v)
+                                               (utn/round-precision v 6))
+                                             (get-in feature [:geometry :coordinates]))))
+                     feature)))
+    features)})
 
-(defn ftype [feature] (get-in feature [:properties :geocoding :type]))
+(defn f-type [feature] (get-in feature [:properties :geocoding :type]))
+(defn f-place-id [feature] (get-in feature [:properties :geocoding :place_id]))
+(defn f-osm-type [feature] (get-in feature [:properties :geocoding :osm_type]))
+(defn f-category [feature] (get-in feature [:properties :category]))
 
-(defn place-id [feature] (get-in feature [:properties :geocoding :place_id]))
-
-(defn osm-type [feature] (get-in feature [:properties :osm_type]))
-
-(defn category [feature] (get-in feature [:properties :category]))
+(def desired-feature-types [#_"public_building" "administrative" "studio"])
 
 (defn relevant-feature?
-  "Created add-hoc. Hmm"
+  "Created add-hoc. Hmm
+  (relevant-feature? all-features feature)
+  "
   [all-features feature]
   (def all-features all-features)
+  (def feature feature)
   (let [count-features (count all-features)]
     (cond
       (> count-features 1)
       (or
-       (let [category (category feature)
-             osm_type (osm-type feature)]
+       (let [category (f-category feature)
+             osm_type (f-osm-type feature)]
+         ;; (def category category)
+         ;; (def osm_type osm_type)
          (or
           (utc/in? ["building"] category)
           (and (utc/in? ["amenity"] category)
                (utc/in? ["node"] osm_type))))
-       (let [ftype (ftype feature)
-             osm_type (osm-type feature)]
+       (let [ftype (f-type feature)
+             osm_type (f-osm-type feature)]
+         ;; (def ftype ftype)
+         ;; (def osm_type osm_type)
          (or
           (and (utc/in? ["way"] osm_type)
-               (utc/in? ["yes"] ftype))
+               (utc/in? ["yes" "hostel" "community_centre" "social_facility"
+                         "bar" "public_building" "theatre"] ftype))
+          (and (utc/in? ["relation"] osm_type)
+               (utc/in? ["public" "concert_hall"] ftype))
           (and (utc/in? ["node"] osm_type)
-               (utc/in? ["library" "parking"] ftype))))
-       (let [desired-feature-types ["administrative" "studio"]
-             all-desired-features
-             (filter (fn [f] (utc/in? desired-feature-types (ftype f)))
+               (utc/in? ["library" "school" "community_centre" "cafe"
+                         "theatre" "restaurant" #_"parking"] ftype))))
+       (let [all-desired-features
+             (filter (comp (partial utc/in? desired-feature-types)
+                           f-type)
                      all-features)]
          (and
-          (utc/in? desired-feature-types (ftype feature))
-          (= (place-id feature)
-             (place-id (if (= 1 (count all-desired-features))
-                         (first all-desired-features)
-                         (second all-desired-features))))))
+          (utc/in? desired-feature-types (f-type feature))
+          (= (f-place-id feature)
+             (f-place-id (if (= 1 (count all-desired-features))
+                           (first all-desired-features)
+                           (second all-desired-features))))))
 
-       (let [ftype (ftype feature)]
+       (let [ftype (f-type feature)]
          (utc/in? ["square"] ftype)))
 
       (= count-features 1)
@@ -340,10 +354,14 @@
     norm-addr))
 
 (defn process-table-row
+  "(process-table-row no-addr-color request-format row)"
   [no-addr-color
    request-format
    {:keys [address city-district name desc goal activity coordinates
            logos] :as row}]
+  ;; (def no-addr-color no-addr-color)
+  ;; (def request-format request-format)
+  ;; (def row row)
   (let [norm-addr (normalize-address address)
         all-features
         (if (empty? coordinates)
@@ -357,7 +375,7 @@
                                     :address)
                              (create-url)
                              (request))]
-                #_(def req req)
+                ;; (def req req)
                 (get-in req [:features]))))
           [{:type "Feature"
             :properties {:geocoding {:name ""}}
@@ -370,45 +388,51 @@
         (cstr/join
          "\n"
          (map encode-line (cstr/split-lines desc)))]
+    ;; (def all-features all-features)
     ;; (debugf "type %s; empty? %s; %s" (type coordinates) (empty? coordinates) coordinates)
-    (->> all-features
-         ;; this looks like a monadic container
-         (filter (fn [feature] (relevant-feature? all-features feature)))
-         #_(mapv (fn [feature]
-                 (debugf "norm-addr %s; line %s; coords %s" norm-addr (:idx row)
-                         (cstr/join " "
-                                    (map (fn [v] (utn/round-precision v 6))
-                                         (get-in feature [:geometry :coordinates]))))
-                 feature))
-         (mapv (fn [feature]
-                 (update-in
-                  feature
-                  [:properties]
-                  (fn [properties]
-                    #_(def properties properties)
-                    (conj (assoc properties
-                                 :description
-                                 (reduce str
-                                         (map (fn [[fmt s]]
-                                                (when-not (empty? (cstr/trim s))
-                                                  (format fmt s)))
-                                              (into
-                                               (mapv (fn [logo] [
-                                                                "{{%s}}\n"
-                                                                #_"{{%s|269}}" logo]) logos)
-                                               [
-                                                ["%s\n\n" address]
-                                                ["%s\n\n" desc-markdown]
-                                                ["Aktiv in Stadtteil(en): %s\n\n" city-district]
-                                                ["Ziele des Vereins: %s\n\n" goal]
-                                                ["Aktivitätsbereiche: %s" activity]])))
-                                 :name name)
-                          (search-properties no-addr-color
-                                             {:addr norm-addr
-                                              :desc desc ;; not desc-markdown
-                                              :city-district city-district
-                                              :goal goal
-                                              :activity activity})))))))))
+    ((comp
+      (partial
+       mapv
+       (fn [feature]
+         (update-in
+          feature
+          [:properties]
+          (fn [properties]
+            ;; (def properties properties)
+            (conj (assoc properties
+                         :description
+                         (reduce str
+                                 (map (fn [[fmt s]]
+                                        (when-not (empty? (cstr/trim s))
+                                          (format fmt s)))
+                                      (into
+                                       (mapv (fn [logo] [
+                                                         "{{%s}}\n"
+                                                         #_"{{%s|269}}" logo]) logos)
+                                       [
+                                        ["%s\n\n" address]
+                                        ["%s\n\n" desc-markdown]
+                                        ["Aktiv in Stadtteil(en): %s\n\n" city-district]
+                                        ["Ziele des Vereins: %s\n\n" goal]
+                                        ["Aktivitätsbereiche: %s" activity]])))
+                         :name name)
+                  (search-properties no-addr-color
+                                     {:addr norm-addr
+                                      :desc desc ;; not desc-markdown
+                                      :city-district city-district
+                                      :goal goal
+                                      :activity activity}))))))
+      #_
+      (partial
+       mapv
+       (fn [feature]
+         (debugf "norm-addr %s; line %s; coords %s" norm-addr (:idx row)
+                 (cstr/join " "
+                            (map (fn [v] (utn/round-precision v 6))
+                                 (get-in feature [:geometry :coordinates]))))
+         feature))
+      (partial filter (partial relevant-feature? all-features)))
+     all-features)))
 
 (defn calc-geo-data
   [no-addr-color {:keys [ods-table format] :or {format #_:geojson :umap}}]
@@ -446,10 +470,11 @@
 (defn json
   "(fdk.geo/json :umap)"
   [{:keys [colors]} fname]
-  (umap (:main colors)
-        (calc-geo-data
-         (:no-addr colors)
-         {:ods-table (ods/read-table fname)})))
+  (let [geo-data (calc-geo-data
+                  (:no-addr colors)
+                  {:ods-table (ods/read-table fname)})]
+    ;; (def geo-data geo-data)
+    (umap (:main colors) geo-data)))
 
 (defn save-json
   "During evaluation it defines the `json` var for debugging purposes. E.g.:
@@ -459,9 +484,14 @@
   (spit filename
         (cheshire/generate-string json {:pretty true})))
 
+#_"(fdk.geo/-main
+    \"resources/Vereinsinformationen_öffentlich_Stadtteilkarte.ods\"
+    \"out.umap\"
+    \"{:colors {:main \\\"#d13858\\\" :no-addr \\\"DeepSkyBlue\\\"}}\")"
+
 (defn -main
   "(fdk.geo/-main
-    \"resources/Vereinsinformationen_öffentlich_Stadtteilkarte.ods\"
+    \"/home/bost/Downloads/Raumliste.ods\"
     \"out.umap\"
     \"{:colors {:main \\\"#d13858\\\" :no-addr \\\"DeepSkyBlue\\\"}}\")"
   [& [input-file output-file prm-colors]]
