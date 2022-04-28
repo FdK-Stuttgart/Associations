@@ -62,6 +62,18 @@
         *ngIf="!associations?.length || (filteredAssociations?.length && associations.length === filteredAssociations.length); else filteredCount">
         Vereine
       </span>
+      <span
+        *ngIf="!associations?.length || (filteredAssociations?.length && associations.length === filteredAssociations.length); else filteredCount">
+        Räume
+      </span>
+
+      <ng-template #filteredCount>
+        Gefundene Vereine ({{filteredAssociations?.length ? filteredAssociations.length : 0}}
+        von {{associations?.length ? associations.length : 0}})
+      </ng-template>
+    </h3>
+
+    <h3>
       <ng-template #filteredCount>
         Gefundene Vereine ({{filteredAssociations?.length ? filteredAssociations.length : 0}}
         von {{associations?.length ? associations.length : 0}})
