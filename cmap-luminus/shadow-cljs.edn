@@ -1,0 +1,21 @@
+{:nrepl {:port 7002}
+
+ ;; :build-defaults
+ ;; {:build-hooks [(shadow-git-inject.core/hook)]}
+
+ :builds
+        {:app
+               {:target     :browser
+                :output-dir "target/cljsbuild/public/js"
+                :asset-path "/js"
+                :modules    {:app {:entries [cmap.app]}}
+                :devtools   {:watch-dir "resources/public"
+                             :preloads  [re-frisk.preload]}
+                ;; :compiler-options
+                ;;             {:closure-defines
+                ;;              { cmap.config/version :shadow-git-inject/version}}
+                :dev        {:closure-defines {"re_frame.trace.trace_enabled_QMARK_" true}}
+                :release    {}}
+         :test {:target  :node-test, :output-to "target/test/test.js"
+                :autorun true}}
+ :lein  {:profile "+dev"}}

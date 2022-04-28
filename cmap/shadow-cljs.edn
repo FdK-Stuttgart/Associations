@@ -1,0 +1,53 @@
+{:nrepl {:port 8777}
+
+ :jvm-opts ["-Xmx1G"]
+
+ :source-paths ["src" "test"]
+
+ :dependencies
+ [[reagent "1.1.1"]
+  [re-frame "1.2.0"]
+
+  ;; css
+  [garden "1.3.10"]
+
+  ;; css
+  [net.dhleong/spade "1.1.0"]
+
+  [binaryage/devtools "1.0.6"]
+  ;; try dirac
+  #_[binaryage/dirac "1.7.2"]
+
+  [cider/cider-nrepl "0.28.3"]
+  [day8/shadow-git-inject "0.0.5"]
+
+  ;; TODO cleanup org.clojars.bost/utils:
+  ;; It produce a lot of warnings (probably because of differences clojure vs.
+  ;; clojurescript)
+  ;; [org.clojars.bost/utils "0.0.0-49-0x726c"]
+
+  ]
+
+ :build-defaults
+ {:build-hooks [(shadow-git-inject.core/hook)]}
+
+ :dev-http
+ {8280 "resources/public"
+  8290 "target/browser-test"}
+
+ :builds
+ {:app
+  {:target     :browser
+   :output-dir "resources/public/js/compiled"
+   :asset-path "/js/compiled"
+   :modules
+   {:app {:init-fn cmap.core/init}}
+   :compiler-options
+   {:closure-defines
+    { cmap.config/version :shadow-git-inject/version}}
+   :devtools
+   {:preloads []}
+   :dev
+   {:compiler-options
+    {:closure-defines
+     { }}}}}}
