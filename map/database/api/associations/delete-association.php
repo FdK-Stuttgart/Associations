@@ -5,11 +5,11 @@
  */
 require '../auth.php';
 
-$auth = authorize($con);
-if (!$auth) {
-    lg("ERR: delete-association: authorize: '$auth'");
-    return http_response_code(401);
-}
+// $auth = authorize($con);
+// if (!$auth) {
+//     lg("ERR: delete-association: authorize: '$auth'");
+//     return http_response_code(401);
+// }
 
 function getPrm($prm, $con) {
     $val = $_GET[$prm];
