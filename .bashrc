@@ -103,8 +103,7 @@ test_php () {
     printf "Testing php WebServer... \n"
     set -x  # Print commands and their arguments as they are executed.
     cnt_chars=$(curl --silent --request GET $url | wc -c)
-    { retval="$?";
-      set +x; } 2>/dev/null
+    { retval="$?"; set +x; } 2>/dev/null
     printf "... %s chars received\n" $cnt_chars
 }
 
@@ -120,8 +119,7 @@ wp_auth_test () {
     # --head  print only the headers
     # curl --head $fdk_test_wp_authApi_basePath/jwt-auth/v1/token
     # Don't print commands
-    { retval="$?";
-      set +x; } 2>/dev/null
+    { retval="$?"; set +x; } 2>/dev/null
     printf "\n"
 }
 
@@ -133,8 +131,7 @@ wp_auth_prod () {
          --data $(data $fdk_prod_wp_username $fdk_prod_wp_password) \
          $fdk_prod_wp_authApi_basePath/jwt-auth/v1/token
     # Don't print commands
-    { retval="$?";
-      set +x; } 2>/dev/null
+    { retval="$?"; set +x; } 2>/dev/null
     printf "\n"
 }
 
@@ -148,8 +145,7 @@ test_wp_dev () {
     set -x  # print commands and their arguments as they are executed.
     curl --oauth2-bearer $(wp_auth_test_token) \
          --head $fdk_dev_wp_authApi_basePath/jwt-auth/v1/token
-    { retval="$?";
-      set +x; } 2>/dev/null
+    { retval="$?"; set +x; } 2>/dev/null
 }
 
 test_basic_auth () {
@@ -159,8 +155,7 @@ test_basic_auth () {
     set -x  # print commands and their arguments as they are executed.
     curl -H "Authorization: Basic ${encstr}" \
          $fdk_dev_wp_authApi/api/associations/delete-association.php?id=$assocId
-    { retval="$?";
-      set +x; } 2>/dev/null
+    { retval="$?"; set +x; } 2>/dev/null
 }
 
 download () {
@@ -174,8 +169,7 @@ download () {
     # unzip phpMyAdmin-5.1.3-all-languages.zip
     # unzip latest.zip
     # Don't print commands
-    { retval="$?";
-      set +x; } 2>/dev/null
+    { retval="$?"; set +x; } 2>/dev/null
     printf "Open:\n"
     printf "      http://localhost:4200/wordpress/wp-admin/install.php\n"
     printf "      http://localhost:4200/phpMyAdmin-5.1.3-all-languages/index.php\n"
@@ -203,8 +197,7 @@ start_php () {
         -t $prjd/map/database/ \
         &>/var/log/php_stdout.log &
     # Don't print commands
-    { retval="$?";
-      set +x; } 2>/dev/null
+    { retval="$?"; set +x; } 2>/dev/null
 
 #     xterm -e 'env DISPLAY=":1.0" PROMPT_COMMAND="unset PROMPT_COMMAND
 # ls -la
@@ -229,8 +222,7 @@ kill_all () {
     pkill -f "ng serve --port $port_map"
     pkill -f "ng serve --port $port_form"
     # # Don't print commands
-    # { retval="$?";
-    #   set +x; } 2>/dev/null
+    # { retval="$?"; set +x; } 2>/dev/null
 }
 
 create_environment_php () {
@@ -376,8 +368,7 @@ deploy_dev () {
           ./map/dist/AssociationMap \
           bost@localhost:/tmp \
           2> >(grep -v "Permanently added '\[localhost\]:10022'" 1>&2)
-    { retval="$?";
-      set +x; } 2>/dev/null
+    { retval="$?"; set +x; } 2>/dev/null
 }
 
 deploy () {
@@ -415,8 +406,7 @@ deploy () {
               ./map/dist/AssociationMap \
               $fdk_login@$fdk_server:$fdk_home
         # Don't print commands
-        { retval="$?";
-          set +x; } 2>/dev/null
+        { retval="$?"; set +x; } 2>/dev/null
     fi
 }
 
@@ -474,8 +464,7 @@ EOF
     cd $prjd/map/app-map/  && npm install
     cd $wd
     # Don't print commands
-    { retval="$?";
-      set +x; } 2>/dev/null
+    { retval="$?"; set +x; } 2>/dev/null
     # printf "DBG: install nodejs packages... done\n"
 # else
 #     printf "DBG: consecutive run: cntMatches: %s\n" $cntMatches
