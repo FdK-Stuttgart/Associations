@@ -15,7 +15,7 @@ function lg($s) {
       ?string $additional_headers = null
      */
     // error_log("[".$d."] ".$s."\n", 3, LOG_FILE);
-    error_log("[".$d."] ".$s."\n", 0);
+    error_log("[".$d."] ".$s, 0);
 }
 
 // TODO check if sensitive info leaks in the log when something goes wrong

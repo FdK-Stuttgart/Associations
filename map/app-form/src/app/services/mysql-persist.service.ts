@@ -34,21 +34,35 @@ export class MysqlPersistService {
       ).pipe(catchError(this.handleError));
   }
 
-  deleteAssociation(id: string, username: string, password: string): Observable<HttpResponse<any>> {
+  deleteAssociation(id: string, username: string, password: string):
+  Observable<HttpResponse<any>> {
     return this.httpClient.get<HttpResponse<any>>(
       `${this.PHP_API_SERVER_PATH}/associations/delete-association.php?id=${id}`
       , this.httpOptions(username, password)
     ).pipe(catchError(this.handleError));
   }
 
-  deleteAllAssociations(username: string, password: string): Observable<HttpResponse<any>> {
+  deleteAllAssociations(username: string, password: string):
+  Observable<HttpResponse<any>> {
     return this.httpClient.get<HttpResponse<any>>(
       `${this.PHP_API_SERVER_PATH}/associations/delete-all-associations.php`
       , this.httpOptions(username, password)
     ).pipe(catchError(this.handleError));
   }
 
-  createDistrictOptions(postdata: any, username: string, password: string): Observable<HttpResponse<any>> {
+  createAllAssociations(
+    associations: Association[], username: string, password: string):
+  Observable<MyHttpResponse<any>> {
+    return this.httpClient.post<MyHttpResponse<any>>(
+      `${this.PHP_API_SERVER_PATH}/associations/create-all-associations.php`
+       , associations
+       , this.httpOptions(username, password)
+      ).pipe(catchError(this.handleError));
+  }
+
+  createDistrictOptions(
+    postdata: any, username: string, password: string):
+  Observable<HttpResponse<any>> {
     return this.httpClient.post<HttpResponse<any>>(
       `${this.PHP_API_SERVER_PATH}/districts-options/create-district-options.php`
       , postdata

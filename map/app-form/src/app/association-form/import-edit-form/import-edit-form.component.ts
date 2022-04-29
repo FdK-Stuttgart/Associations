@@ -81,36 +81,20 @@ export class ImportEditFormComponent implements OnInit {
         this.mySqlPersistService.deleteAllAssociations(
           this.loginService.username, this.loginService.password).toPromise()
           .then(() => {
-            // console.log("deleteAllAssociations done")
-            let importFailed = false;
-            for (const a of assocs) {
-              this.mySqlPersistService.createOrUpdateAssociation(
-                a, this.loginService.username, this.loginService.password).toPromise()
+            this.mySqlPersistService.createAllAssociations(
+              assocs, this.loginService.username, this.loginService.password).toPromise()
                 .then(() => {
                   // console.log("Saved", a.name)
                 })
                 .catch((reason) => {
-                  importFailed = true;
                   this.emitBlockUi(false);
                   this.messageService.add({
                     severity: 'error',
-                    summary: a.name + ' konnte nicht gespeichert werden.',
+                    summary: 'Vereine konnten nicht gespeichert werden.',
                     detail: JSON.stringify(reason),
                     key: 'editFormToast'
                   });
                 });
-              if (importFailed) {
-                break;
-              }
-            }
-            if (!importFailed) {
-              this.emitBlockUi(false);
-              this.messageService.add({
-                severity: 'success',
-                summary: assocs.length + ' Vereine importiert.',
-                key: 'editFormToast'
-              });
-            }
           })
           .catch((reason) => {
             this.emitBlockUi(false);
