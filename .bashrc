@@ -17,6 +17,73 @@ ls -1d /usr/etc/* | while read filepath; do
     ln -s $filepath /etc/
 done
 
+# nodejsVer=v16.15.0 # LTS version
+# # set -x  # Print commands and their arguments as they are executed.
+# node --version 2>/dev/null | grep "$nodejsVer"
+# { retval="$?"; set +x; } 2>/dev/null
+# if [ ! $retval -eq 0 ]; then
+#     # printf "DBG: command not available in required version.\n"
+
+#     VERSION=$nodejsVer
+#     DISTRO=linux-x64
+#     nodeArchive=node-$VERSION-$DISTRO.tar.xz
+
+#     ks=hkp://keyserver.ubuntu.com:80
+#     # ks=hkps://keys.openpgp.org
+#     for key in  \
+#         4ED778F539E3634C779C87C6D7062848A1AB005C \
+#             141F07595B7B3FFE74309A937405533BE57C7D57 \
+#             94AE36675C464D64BAFA68DD7434390BDBE9B9C5 \
+#             74F12602B6F1C4E913FAA37AD3A89613643B6201 \
+#             71DCFD284A79C3B38668286BC97EC7A07EDE3FC1 \
+#             8FCCA13FEF1D0C2E91008E09770F7A9A5AE15600 \
+#             C4F0DFFF4E8C1A8236409D08E73BC641CC11F4C8 \
+#             C82FA3AE1CBEDC6BE46B9360C43CEC45C17AB93C \
+#             DD8F2338BAE7501E3DD5AC78C273792F7D83545D \
+#             A48C2BEE680E841632CD4E44F07496B3EB3C1762 \
+#             108F52B48DB57BB0CC439B2997B01419BD92F80A \
+#             B9E2F5981AA6E0CD28160D9FF13993A75599653C \
+#         ;
+#     do
+#         gpg --quiet --keyserver $ks --recv-keys $key
+#     done
+
+#     if [ ! -e $nodeArchive ]; then
+#         wget https://nodejs.org/dist/$nodejsVer/$nodeArchive
+#     fi
+#     if [ ! -e SHASUMS256.txt ]; then
+#         curl -O https://nodejs.org/dist/$nodejsVer/SHASUMS256.txt
+#     fi
+#     if [ ! -e SHASUMS256.txt.sig ]; then
+#         curl -O https://nodejs.org/dist/$nodejsVer/SHASUMS256.txt.sig
+#     fi
+#     set -x  # Print commands and their arguments as they are executed.
+#     grep $nodeArchive SHASUMS256.txt | sha256sum -c -
+#     { retval="$?"; set +x; } 2>/dev/null
+
+#     set -x  # Print commands and their arguments as they are executed.
+#     gpg --verify SHASUMS256.txt.sig SHASUMS256.txt 2>&1 | grep "Good signature"
+#     { retval="$?"; set +x; } 2>/dev/null
+#     if [ $retval -eq 0 ]; then
+#         mkdir -p $HOME/.local/lib/nodejs
+#         tar xfJ $nodeArchive -C $HOME/.local/lib/nodejs
+#         export PATH=$HOME/.local/lib/nodejs/node-$VERSION-$DISTRO/bin:$PATH
+#     else
+#         printf "ERR: Bad signature\n"
+#         exit 1
+#     fi
+#     # source ~/.bashrc
+
+#     set -x  # Print commands and their arguments as they are executed.
+#     node --version 2>/dev/null | grep "$nodejsVer"
+#     { retval="$?"; set +x; } 2>/dev/null
+#     if [ ! $retval -eq 0 ]; then
+#         file=$(command -v node)
+#         printf "ERR: couldn't properly install: %s %s\n" $(basename $file) $nodejsVer
+#         exit $retval
+#     fi
+# fi
+
 alias ng='node $HOME/node_modules/\@angular/cli/bin/ng'
 # node_bin=`which node`
 # ng_bin=$HOME/node_modules/\@angular/cli/bin/ng
@@ -34,7 +101,6 @@ p22=$prjd/map/app-form/package-lock.json
 
 test_php () {
     printf "Testing php WebServer... \n"
-    url=http://localhost:4200/api/associations/read-associations.php
     set -x  # Print commands and their arguments as they are executed.
     cnt_chars=$(curl --silent --request GET $url | wc -c)
     { retval="$?";

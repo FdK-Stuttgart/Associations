@@ -32,9 +32,10 @@ done
 # (the ng) itself. Both app-map and app-form have their node_modules-directories
 
 # TODO replace busybox with env
-cliTools="$cliTools busybox rsync openssh bash ripgrep less mycli"
-cliTools="$cliTools grep git coreutils sed node which ncurses"
-cliTools="$cliTools node php mariadb pgcli jq nss-certs curl"
+cliTools="$cliTools gnupg busybox rsync openssh bash ripgrep less mycli"
+cliTools="$cliTools grep git coreutils sed which ncurses"
+cliTools="$cliTools php mariadb pgcli jq nss-certs curl"
+cliTools="$cliTools node"
 
 cmd=guix
 # [[ ! $(command -v $cmd) ]] - '[[' is a bashishm
