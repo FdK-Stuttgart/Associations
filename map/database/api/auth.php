@@ -99,7 +99,7 @@ function authorize($con) {
         foreach ($user_roles as $role) {
             if ($role == 'administrator' || $role == 'editor') {
                 $user = $dec['user_display_name'];
-                lg("INF: user authorized. user: $user, role: $role, token: <PRESENT>");
+                lg("INF: user: $user, role: $role, token: <PRESENT> authorized");
                 return $authorized;
             }
         }

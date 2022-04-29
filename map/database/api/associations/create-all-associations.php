@@ -14,7 +14,7 @@ $postdata = file_get_contents("php://input");
 
 if (isset($postdata) && !empty($postdata)) {
     $associations = json_decode($postdata);
-    lg("Inserting ".count($associations)." associations...");
+    lg("INF: Inserting ".count($associations)." associations...");
     foreach ($associations as $request) {
         // Validate.
         if (trim($request->id) == null
@@ -229,6 +229,6 @@ if (isset($postdata) && !empty($postdata)) {
 
         }
     }
-    lg("Importing ".$associations." associations... done");
+    lg("DBG: Importing ".$associations." associations... done");
 
 }
