@@ -100,6 +100,7 @@ p2=$prjd/map/app-form/package.json
 p22=$prjd/map/app-form/package-lock.json
 
 test_php () {
+    url=http://localhost:4200/api/associations/read-associations.php
     printf "Testing php WebServer... \n"
     set -x  # Print commands and their arguments as they are executed.
     cnt_chars=$(curl --silent --request GET $url | wc -c)
@@ -178,8 +179,12 @@ download () {
     printf "      http://localhost:4200/wordpress/index.php?rest_route=/jwt-auth/v1/token\n"
 }
 
-start_php () {
+start_db () {
     mysqld_safe 1>/dev/null &
+}
+
+start_php () {
+    start_db
     # phpApi paths
     sed -i -e "s|localhost/AssociationMap|localhost:4200|" \
         $prjd/map/app-map/src/environments/environment.ts \
@@ -434,15 +439,6 @@ deploy_prod () {
     fi
 }
 
-alias d=deploy_dev
-alias dt=deploy_test
-alias dow=download
-alias twt=wp_auth_test
-alias twd=test_wp_dev
-alias form=serve_form
-alias map=serve_map
-alias shp=start_php
-
 # Random password generator
 # @param $1 password length
 randpw () {
@@ -469,9 +465,11 @@ EOF
 #     printf "DBG: consecutive run: cntMatches: %s\n" $cntMatches
 fi
 
-set_mysqlPassword () {
-    local mysqlPassword=$(randpw 24)
-    sed -i -e "s|# password|password = $mysqlPassword|" /usr/etc/my.cnf
+test_db () {
+    mysql --user $USER << EOF
+SELECT count(*) as "count-of-activities (should be ~130):"
+FROM associations.activities;
+EOF
 }
 
 ## Install MariaDB on the first run
@@ -483,22 +481,38 @@ if [ ! -d $dbd ]; then
     lc_messages_dir=$(find /gnu/store -type d -name english | grep mysql)
     sed -i -e "s|#lc_messages_dir#|$lc_messages_dir|" /usr/etc/my.cnf
 
-    mysql_install_db
+    # TODO if the PAM authentication plugin is needed
+    # guix_plugind=$(find /gnu/store/ -name auth_pam.so -type f | xargs dirname)
+    # cp -r $guix_plugind /var/lib/mysql
+
+    ## ignore the text:
+    # chown: cannot access '/auth_pam_tool_dir/auth_pam_tool': No such file or directory
+    # Couldn't set an owner to '/auth_pam_tool_dir/auth_pam_tool'.
+    # It must be root, the PAM authentication plugin doesn't work otherwise..
+    #
+    # chown: cannot access '/auth_pam_tool_dir': No such file or directory
+    # Cannot change ownership of the '/auth_pam_tool_dir' directory
+    # to the 'bost' user. Check that you have the necessary permissions and try again.
+
+    mysql_install_db 2>&1 | sed '/^chown: cannot access/,/try again\.$/d'
+    set -x
     mysqld_safe &
+    { retval="$?"; set +x; } 2>/dev/null
     # execution of `mysql_secure_installation` is not needed
     sleep 3
-    set_mysqlPassword
     mysql --user $USER << EOF
 DROP DATABASE IF EXISTS associations;
 CREATE DATABASE IF NOT EXISTS associations;
+DELETE FROM mysql.user WHERE User='';
 GRANT ALL PRIVILEGES ON associations.* TO '$USER'@'localhost' WITH GRANT OPTION;
+CREATE USER 'foo'@'localhost' IDENTIFIED BY '';
+GRANT ALL PRIVILEGES ON *.* TO 'foo'@'localhost' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
-select '-- Loading test data ...' AS '';
+SELECT user,password FROM mysql.user;
+SELECT '-- Loading test data ...' AS '';
 SOURCE map/database/db-export/associations.sql;
 -- SHOW TABLES;
 -- SHOW COLUMNS IN activities;
-SELECT count(*) as 'count-of-activities (should be ~130):'
-FROM associations.activities;
 EOF
     mysqladmin --user $USER shutdown
 #     printf "DBG: install MariaDB... done\n"
@@ -531,6 +545,18 @@ then
     # Don't do anything else.
     return
 fi
+
+alias d=deploy_dev
+alias dt=deploy_test
+# alias twt=wp_auth_test
+# alias twd=test_wp_dev
+alias form=serve_form
+alias map=serve_map
+alias shp=start_php
+alias sd=start_db
+alias mb='mysql --user bost'
+alias mf='mysql --user foo'
+alias tp=test_php
 
 guix_prompt
 
