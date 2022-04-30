@@ -68,7 +68,7 @@ upload the sql file.
 
 1. Copy connection-template to a new file:
    ```shell
-   cp map/database/api/_database.php map/database/api/database.php
+   cp map/database/api/_environment.php map/database/api/environment.php
    ```
 
 1. Edit `DB_HOST`, `DB_NAME`, `DB_USER` and `DB_PASS` according to your
@@ -87,9 +87,15 @@ upload the sql file.
    define('DB_PASS', '<YOUR-PASSWORD>');
    ```
 
-   Leave the `database.php` file in the `/database/api/` directory. This way, it
+   Leave the `environment.php` file in the `/database/api/` directory. This way, it
    will be copied to the right location when deploying the apps. **The file will
    NOT be committed to the Git repository.**
+
+   When developing, in case of "mysqli_connect(): (HY000/2002): No such file or
+   directory" use `127.0.0.1` instead of `localhost`:
+   ```php
+   define('DB_HOST', '127.0.0.1');
+   ```
 
 1. Development on Ubuntu: a PHP server may need to be started:
    ```shell
@@ -104,10 +110,9 @@ upload the sql file.
    ```ts
    serverBasePath: 'http://localhost:4200/api'
    ```
-   Also for the development, make sure the `map/database/api/database.php`
-   contains:
-   ```php
-   header("Access-Control-Allow-Origin: *");
+   Test database access:
+   ```shell
+   curl http://localhost:4201/api/districts-options/read-districts-options.php
    ```
 
 ### Setup Wordpress Development Environment
@@ -198,36 +203,38 @@ or
    ```
 
 1. In order to invalidate the JWT Token after 8 hours, add another Code Snippet:
-
-```php
-function jwt_auth_expire_8_hours() {
-  return time() + (DAY_IN_SECONDS / 3);
-  }
-add_filter('jwt_auth_expire', 'jwt_auth_expire_8_hours');
-```
+   ```php
+   function jwt_auth_expire_8_hours() {
+     return time() + (DAY_IN_SECONDS / 3);
+   }
+   add_filter('jwt_auth_expire', 'jwt_auth_expire_8_hours');
+   ```
 
    Save and activate the code snippet!
 
 #### Angular Apps
 
-For the information on how to install and setup angular as well as on how to
-build an app, see here: [Angular Docs](https://angular.io/guide/setup-local)
+See also [Angular - Setting up the local environment and workspace](https://angular.io/guide/setup-local).
+* If on Ubuntu install Angular:
+  ```shell
+  sudo npm install -g @angular/cli
+  ```
+* else if on a virtualized file-system (GNU Guix) run
+  [npm-g_nosudo](https://github.com/glenpike/npm-g_nosudo). Then install
+  Angular:
+  ```shell
+  npm install -g @angular/cli
+  ```
 
-#### Angular App versioning, build and deployment
+#### Versioning & build
 
-Make sure you have set up your `database.php` file described in the section
-above ("Setting up the database scripts"). This only has to be done once when
-deploying the apps for the first time or if the database configuration has
-changed.
-
-Versioning & Build:
-Run the `build` function from the `etc/profile`. After the build the `map/dist/`
+Run the `build` function from the `.bashrc`. After the build the `map/dist/`
 should have this structure:
 ```
 - dist/
   - AssociationMap/
     - api/
-      - database.php
+      - environment.php
       - ...
     - assets/
       - ...
@@ -240,8 +247,8 @@ should have this structure:
     - ...
 ```
 
-Deployment:
-Run the `deploy_test` and/or `deploy_prod` function from the `etc/profile`.
+#### Deployment
+Run the `deploy_test` and/or `deploy_prod` function from the `.basrc`.
 
 #### Changing paths
 
@@ -282,7 +289,6 @@ sudo mysql -uroot
 ```sql
 DROP DATABASE wordpress;
 ```
-
 
 ## Data conversion ODS to JSON
 
