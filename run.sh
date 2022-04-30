@@ -10,8 +10,7 @@
 wd=$(pwd) # WD=$(dirname "$0") # i.e. path to this file
 
 # MariaDB
-grep -qF "#mysqld_user#" $wd/etc/my.cnf &&\
-    sed -i -e "s|#mysqld_user#|$(whoami)|" $wd/etc/my.cnf
+sed -i -e "s|#mysql_user#|$(whoami)|" $wd/etc/my.cnf
 
 # Recreate the dirs destroyed by `git clean --force -dx`:
 for prjd in \
