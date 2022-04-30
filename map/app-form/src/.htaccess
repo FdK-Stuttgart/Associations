@@ -1,12 +1,15 @@
-ErrorDocument 400 /edit/
-ErrorDocument 401 /edit/
-ErrorDocument 403 /edit/
-ErrorDocument 404 /edit/
-ErrorDocument 500 /edit/
+ErrorDocument 400 /
+ErrorDocument 401 /
+ErrorDocument 403 /
+ErrorDocument 404 /
+ErrorDocument 500 /
+
+# CGIPassAuth On # this doesn't work on the test
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
   RewriteCond %{HTTPS} !=on
   RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+  RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 </IfModule>

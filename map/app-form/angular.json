@@ -39,7 +39,7 @@
                 "input": "../database/api",
                 "output": "./api/",
                 "ignore": [
-                  "_database.php"
+                  "_environment.php"
                 ]
               }
             ],
@@ -115,7 +115,7 @@
                 "input": "../database/api",
                 "output": "./api/",
                 "ignore": [
-                  "_database.php"
+                  "_environment.php"
                 ]
               }
             ],

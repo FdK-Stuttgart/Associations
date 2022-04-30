@@ -338,6 +338,9 @@ build () {
         "s|\(npm-run-all\)|node $HOME/dec/fdk/map/app-form/node_modules/npm-run-all/bin/npm-run-all/main.js \1|" \
         $p2
     cd $prjd/map/app-form && npm run app-form:build:prod
+    distd=$prjd/map/dist
+    rm -rf $distd/AssociationMap/edit/api
+    mv $distd/AssociationMap/edit/.htaccess $distd/AssociationMap/.htaccess
 
     git checkout -- $p1 $p2 $p11 $p22
     cd $prjd && git stash pop
@@ -362,8 +365,6 @@ deploy_dev () {
     cd $prjd
     set -x  # Print commands and their arguments as they are executed.
     rsync -avz --rsh="$remoteShell" \
-          --exclude="AssociationMap/.htaccess" \
-          --exclude="AssociationMap/edit/.htaccess" \
           --exclude="AssociationMap/api/environment.php" \
           ./map/dist/AssociationMap \
           bost@localhost:/tmp \
@@ -388,7 +389,7 @@ deploy () {
         echo "if [ -d $AMO ]; then"                                                                                    >> /tmp/script.sh
         echo "    cp -r $AMO $AMB"                                                                                     >> /tmp/script.sh
         echo "    chmod -R -w $AMB"                                                                                    >> /tmp/script.sh
-        echo "    find $AMO -not -name .htaccess -and -not -name environment.php -and -not -name database.php -delete" >> /tmp/script.sh
+        echo "    find $AMO -not -name environment.php -delete" >> /tmp/script.sh
         echo "    find $AMO -empty -type d -delete"                                                                    >> /tmp/script.sh
         echo "else"                                                                                                    >> /tmp/script.sh
         echo "    printf \"ERR: Directory doesn't exist: $AMO\\n\""                                                    >> /tmp/script.sh
@@ -399,10 +400,7 @@ deploy () {
         # file transfer DEV -> TEST:
         # --archive --verbose --compress
         rsync -avz \
-              --exclude="AssociationMap/.htaccess" \
-              --exclude="AssociationMap/edit/.htaccess" \
               --exclude="AssociationMap/api/environment.php" \
-              --exclude="AssociationMap/edit/api/environment.php" \
               ./map/dist/AssociationMap \
               $fdk_login@$fdk_server:$fdk_home
         # Don't print commands
@@ -437,6 +435,7 @@ deploy_prod () {
 }
 
 alias d=deploy_dev
+alias dt=deploy_test
 alias dow=download
 alias twt=wp_auth_test
 alias twd=test_wp_dev
