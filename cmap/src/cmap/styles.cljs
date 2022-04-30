@@ -13,18 +13,15 @@
   [dir [c1 p1] [c2 p2]]))
 
 #_(defglobal d [:body {:color :red}])
-
-(do
-  (defn universal-selector-factory$ [style-name24356 params24357]
-    {:name style-name24356, :css (spade.runtime/compile-css [[:* {:box-sizing :border-box}]])})
-  (let [factory-name24358 (spade.util/factory->name universal-selector-factory$)]
-    (def universal-selector
-      (spade.runtime/ensure-style! :global factory-name24358 universal-selector-factory$ nil))))
+(let [fun (fn [style-name params]
+            {:name style-name
+             :css (spade.runtime/compile-css [[:* {:box-sizing :border-box}]])})]
+  (def universal-selector
+    (spade.runtime/ensure-style!
+     :global (spade.util/factory->name fun) fun nil)))
 
 (defglobal defaults
-  [
-   ;; :&:* {:box-sizing :border-box}
-   :body
+  [:body
    {:color               :red
     :background-color    :#ddd
     :background-image    [(linear-gradient :white (px 2) :transparent (px 2))
@@ -50,16 +47,11 @@
 (defclass left [] {:width "75%"})
 (defclass right [] {:width "25%"})
 
-;; Clear floats after the columns
 ;; (defclass row [] {:content "\"\"" :display "table" :clear "both"})
-(do
-  (defn row-factory$ [style-name23148 params23149]
-    (let [style23151 [(str "." style-name23148 "::after")
-                      {:content "\"\"", :display "table", :clear "both"}]]
-      {:css (spade.runtime/compile-css style23151), :name style-name23148}))
-  (let [factory-name23150 (spade.util/factory->name row-factory$)]
-    (defn row []
-      (spade.runtime/ensure-style! :class factory-name23150 row-factory$ []))))
-
-
-
+(let [fun (fn [style-name params]
+            ;; ::after - clear floats after the columns
+            (let [style [(str "." style-name "::after")
+                         {:content "\"\"" :display "table" :clear "both"}]]
+              {:css (spade.runtime/compile-css style) :name style-name}))]
+  (defn row []
+    (spade.runtime/ensure-style! :class (spade.util/factory->name fun) fun [])))
