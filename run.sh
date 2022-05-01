@@ -72,6 +72,7 @@ guix shell \
      --share=$HOME/.bash_history=$HOME/.bash_history \
      --share=$HOME/.config/fish=$HOME/.config/fish \
      --share=$HOME/.gitconfig=$HOME/.gitconfig \
+     --share=$HOME/.m2/=$HOME/.m2/ \
      --share=$HOME/.ssh/=$HOME/.ssh/ \
      --share=$wd/.bash_profile=$HOME/.bash_profile \
      --share=$wd/.bashrc=$HOME/.bashrc \
