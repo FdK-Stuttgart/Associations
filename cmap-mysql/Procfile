@@ -1,1 +1,0 @@
-web: java -Dclojure.main.report=stderr -cp target/uberjar/cmap.jar clojure.main -m cmap.core
