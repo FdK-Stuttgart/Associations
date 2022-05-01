@@ -13,8 +13,8 @@
            (do
              (log/warn
               (str "Database connection URL not found."
-                   " Please set :database-url in your config. "
-                   " E.g: dev-config.edn"))
+                   " Please set :database-url in your config."
+                   " E.g: dev-config.edn or test-config.edn"))
              *db*))
   :stop (conman/disconnect! *db*))
 

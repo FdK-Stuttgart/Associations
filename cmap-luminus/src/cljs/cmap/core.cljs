@@ -42,8 +42,12 @@
 
 (defn home-page []
   [:section.section>div.container>div.content
-   (when-let [docs @(rf/subscribe [:docs])]
-     [:div {:dangerouslySetInnerHTML {:__html (md->html docs)}}])])
+   [:div
+    (when-let [db-vals @(rf/subscribe [:db-vals])]
+      [:div (str "db-vals: " db-vals)])
+    (when-let [docs @(rf/subscribe [:docs])]
+      [:div
+       {:dangerouslySetInnerHTML {:__html (md->html docs)}}])]])
 
 (defn page []
   (if-let [page @(rf/subscribe [:common/page])]
@@ -58,7 +62,9 @@
   (reitit/router
     [["/" {:name        :home
            :view        #'home-page
-           :controllers [{:start (fn [_] (rf/dispatch [:page/init-home]))}]}]
+           :controllers [{:start (fn [_]
+                                   (rf/dispatch [:page/init-db])
+                                   (rf/dispatch [:page/init-home]))}]}]
      ["/about" {:name :about
                 :view #'about-page}]]))
 

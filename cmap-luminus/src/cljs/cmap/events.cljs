@@ -26,9 +26,22 @@
     {:common/navigate-fx! [url-key params query]}))
 
 (rf/reg-event-db
-  :set-docs
-  (fn [db [_ docs]]
-    (assoc db :docs docs)))
+  :set-db-vals
+  (fn [db [_ vals]]
+    (assoc db :db-vals vals)))
+
+(rf/reg-event-fx
+ :fetch-from-db
+ (fn [_ _]
+   {:http-xhrio {:method          :get
+                 :uri             "/db-vals"
+                 :response-format (ajax/raw-response-format)
+                 :on-success       [:set-db-vals]}}))
+
+(rf/reg-event-db
+ :set-docs
+ (fn [db [_ docs]]
+   (assoc db :docs docs)))
 
 (rf/reg-event-fx
   :fetch-docs
@@ -44,9 +57,12 @@
     (assoc db :common/error error)))
 
 (rf/reg-event-fx
+ :page/init-db
+ (fn [_ _] {:dispatch [:fetch-from-db]}))
+
+(rf/reg-event-fx
   :page/init-home
-  (fn [_ _]
-    {:dispatch [:fetch-docs]}))
+  (fn [_ _] {:dispatch [:fetch-docs]}))
 
 ;;subscriptions
 
@@ -66,6 +82,11 @@
   :<- [:common/route]
   (fn [route _]
     (-> route :data :view)))
+
+(rf/reg-sub
+ :db-vals
+ (fn [db _]
+   (:db-vals db)))
 
 (rf/reg-sub
   :docs

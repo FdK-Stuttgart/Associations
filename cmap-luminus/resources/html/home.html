@@ -6,7 +6,12 @@
       <title>Welcome to cmap</title>
   </head>
   <body>
-    
+
+    {% if messages %}
+    <div>messages:</div>
+    {{messages}}
+    {% endif %}
+
     <div id="app">
       <section class="section">
         <div class="container is-fluid">
