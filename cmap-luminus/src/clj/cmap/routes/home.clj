@@ -22,10 +22,11 @@
    ["/" {:get home-page}]
    ["/db-vals" {:get (fn [_]
                        (-> (response/ok
-                            (let [vs (->> (db/get-messages)
+                            (let [vs (->> #_(db/get-messages)
+                                          (db/read-associations)
                                           (pr)
                                           (with-out-str))]
-                              (log/info "\n $$$$$$$ db-vals:" vs)
+                              #_(log/info "\n$$$$$$$ db-vals:" vs)
                               vs))
                            (response/header "Content-Type" "text/plain; charset=utf-8")))}]
    ["/docs" {:get (fn [_]

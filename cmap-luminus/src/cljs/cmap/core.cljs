@@ -1,72 +1,37 @@
 (ns cmap.core
+  "entry point, plus history, routing, etc"
   (:require
     [day8.re-frame.http-fx]
     [reagent.dom :as rdom]
     [reagent.core :as r]
     [re-frame.core :as rf]
     [goog.events :as events]
-    [goog.history.EventType :as HistoryEventType]
-    [markdown.core :refer [md->html]]
+    #_[goog.history.EventType :as HistoryEventType]
     [cmap.ajax :as ajax]
-    [cmap.events]
+
+    ;; https://day8.github.io/re-frame/App-Structure/#the-gotcha
+    [cmap.events] ;; must be required
+    [cmap.subs] ;; must be required
+
+    [cmap.views :as views]
+    [cmap.config :as config]
     [reitit.core :as reitit]
-    [reitit.frontend.easy :as rfe]
-    [clojure.string :as string])
-  (:import goog.History))
+    [reitit.frontend.easy :as rfe])
+  #_(:import goog.History))
 
-(defn nav-link [uri title page]
-  [:a.navbar-item
-   {:href   uri
-    :class (when (= page @(rf/subscribe [:common/page-id])) :is-active)}
-   title])
-
-(defn navbar []
-  (r/with-let [expanded? (r/atom false)]
-              [:nav.navbar.is-info>div.container
-               [:div.navbar-brand
-                [:a.navbar-item {:href "/" :style {:font-weight :bold}} "cmap"]
-                [:span.navbar-burger.burger
-                 {:data-target :nav-menu
-                  :on-click #(swap! expanded? not)
-                  :class (when @expanded? :is-active)}
-                 [:span][:span][:span]]]
-               [:div#nav-menu.navbar-menu
-                {:class (when @expanded? :is-active)}
-                [:div.navbar-start
-                 [nav-link "#/" "Home" :home]
-                 [nav-link "#/about" "About" :about]]]]))
-
-(defn about-page []
-  [:section.section>div.container>div.content
-   [:img {:src "/img/warning_clojure.png"}]])
-
-(defn home-page []
-  [:section.section>div.container>div.content
-   [:div
-    (when-let [db-vals @(rf/subscribe [:db-vals])]
-      [:div (str "db-vals: " db-vals)])
-    (when-let [docs @(rf/subscribe [:docs])]
-      [:div
-       {:dangerouslySetInnerHTML {:__html (md->html docs)}}])]])
-
-(defn page []
-  (if-let [page @(rf/subscribe [:common/page])]
-    [:div
-     [navbar]
-     [page]]))
+(def >evt re-frame.core/dispatch)
 
 (defn navigate! [match _]
   (rf/dispatch [:common/navigate match]))
 
 (def router
   (reitit/router
-    [["/" {:name        :home
-           :view        #'home-page
-           :controllers [{:start (fn [_]
-                                   (rf/dispatch [:page/init-db])
-                                   (rf/dispatch [:page/init-home]))}]}]
-     ["/about" {:name :about
-                :view #'about-page}]]))
+   [["/" {:name        :home
+          :view        views/home-page
+          :controllers [{:start (fn [_]
+                                  (rf/dispatch [:page/init-home]))}]}]
+    ["/about" {:name :about
+               :view views/about-page}]]))
 
 (defn start-router! []
   (rfe/start!
@@ -74,13 +39,19 @@
     navigate!
     {}))
 
-;; -------------------------
-;; Initialize app
+(defn dev-setup []
+  (when config/debug?
+    (println "dev mode")))
+
 (defn ^:dev/after-load mount-components []
   (rf/clear-subscription-cache!)
-  (rdom/render [#'page] (.getElementById js/document "app")))
+  (let [root-el (.getElementById js/document "app")]
+    (rdom/unmount-component-at-node root-el)
+    (rdom/render [views/page] root-el)))
 
 (defn init! []
+  (dev-setup)
   (start-router!)
   (ajax/load-interceptors!)
+  (rf/dispatch [:page/init-db])
   (mount-components))

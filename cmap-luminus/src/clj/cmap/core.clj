@@ -58,12 +58,13 @@
 
 (defn -main [& args]
   (-> args
-                            (parse-opts cli-options)
-                            (mount/start-with-args #'cmap.config/env))
+      (parse-opts cli-options)
+      (mount/start-with-args #'cmap.config/env))
   (cond
     (nil? (:database-url env))
     (do
-      (log/error "Database configuration not found, :database-url environment variable must be set before running")
+      (log/error (str "Database configuration not found. "
+                      ":database-url environment variable must be set before running"))
       (System/exit 1))
     (some #{"init"} args)
     (do

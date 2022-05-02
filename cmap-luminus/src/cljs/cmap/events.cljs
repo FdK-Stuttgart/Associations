@@ -1,11 +1,14 @@
 (ns cmap.events
+  "event handlers (control/update layer)"
   (:require
     [re-frame.core :as rf]
     [ajax.core :as ajax]
     [reitit.frontend.easy :as rfe]
     [reitit.frontend.controllers :as rfc]))
 
-;;dispatchers
+;; dispatchers
+;; What is the difference between reg-event-db, reg-event-fx and reg-event-ctx in Re-frame?
+;; https://stackoverflow.com/a/54864938/5151982
 
 (rf/reg-event-db
   :common/navigate
@@ -15,6 +18,7 @@
                                  (rfc/apply-controllers (:controllers old-match) match))]
       (assoc db :common/route new-match))))
 
+;; effects handler
 (rf/reg-fx
   :common/navigate-fx!
   (fn [[k & [params query]]]
@@ -25,10 +29,7 @@
   (fn [_ [_ url-key params query]]
     {:common/navigate-fx! [url-key params query]}))
 
-(rf/reg-event-db
-  :set-db-vals
-  (fn [db [_ vals]]
-    (assoc db :db-vals vals)))
+(rf/reg-event-db :set-db-vals (fn [db [_ vals]] (assoc db :db-vals vals)))
 
 (rf/reg-event-fx
  :fetch-from-db
@@ -38,10 +39,7 @@
                  :response-format (ajax/raw-response-format)
                  :on-success       [:set-db-vals]}}))
 
-(rf/reg-event-db
- :set-docs
- (fn [db [_ docs]]
-   (assoc db :docs docs)))
+(rf/reg-event-db :set-docs (fn [db [_ docs]] (assoc db :docs docs)))
 
 (rf/reg-event-fx
   :fetch-docs
@@ -51,49 +49,6 @@
                   :response-format (ajax/raw-response-format)
                   :on-success       [:set-docs]}}))
 
-(rf/reg-event-db
-  :common/set-error
-  (fn [db [_ error]]
-    (assoc db :common/error error)))
-
-(rf/reg-event-fx
- :page/init-db
- (fn [_ _] {:dispatch [:fetch-from-db]}))
-
-(rf/reg-event-fx
-  :page/init-home
-  (fn [_ _] {:dispatch [:fetch-docs]}))
-
-;;subscriptions
-
-(rf/reg-sub
-  :common/route
-  (fn [db _]
-    (-> db :common/route)))
-
-(rf/reg-sub
-  :common/page-id
-  :<- [:common/route]
-  (fn [route _]
-    (-> route :data :name)))
-
-(rf/reg-sub
-  :common/page
-  :<- [:common/route]
-  (fn [route _]
-    (-> route :data :view)))
-
-(rf/reg-sub
- :db-vals
- (fn [db _]
-   (:db-vals db)))
-
-(rf/reg-sub
-  :docs
-  (fn [db _]
-    (:docs db)))
-
-(rf/reg-sub
-  :common/error
-  (fn [db _]
-    (:common/error db)))
+(rf/reg-event-db :common/set-error (fn [db [_ error]] (assoc db :common/error error)))
+(rf/reg-event-fx :page/init-db     (fn [_ _] {:dispatch [:fetch-from-db]}))
+(rf/reg-event-fx :page/init-home   (fn [_ _] {:dispatch [:fetch-docs]}))

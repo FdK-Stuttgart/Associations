@@ -63,51 +63,21 @@ SELECT
     images.altText AS imageAltText,
     images.orderIndex AS imageOrderIndex
 FROM
-  `associations`
+  associations
 LEFT JOIN(
-    SELECT
-        *
-    FROM
-        `images`
-    WHERE
-        images.current = 1
-) AS images
-ON
-    `images`.`associationId` = `associations`.`id`
+  SELECT * FROM images WHERE images.current = 1
+) AS images ON images.associationId = associations.id
 LEFT JOIN(
-    SELECT
-        *
-    FROM
-      associations.`links`
-    WHERE
-        links.current = 1
-) AS links
-ON
-    `links`.`associationId` = `associations`.`id`
+    SELECT * FROM associations.links WHERE links.current = 1
+) AS links ON links.associationId = associations.id
 LEFT JOIN(
-    SELECT
-        *
-    FROM
-        `socialmedia`
-    WHERE
-        socialmedia.current = 1
-) AS socialmedia
-ON
-    `socialmedia`.`associationId` = `associations`.`id`
+  SELECT * FROM socialmedia WHERE socialmedia.current = 1
+) AS socialmedia ON socialmedia.associationId = associations.id
 LEFT JOIN(
-    SELECT
-        *
-    FROM
-        `contacts`
-    WHERE
-        contacts.current = 1
-) AS contacts
-ON
-    `contacts`.`associationId` = `associations`.`id`
-WHERE
-    associations.current = 1
-ORDER BY
-    associationId
+    SELECT * FROM contacts WHERE contacts.current = 1
+) AS contacts ON contacts.associationId = associations.id
+WHERE associations.current = 1
+ORDER BY associationId
 
 
 -- :name get-messages :? :
