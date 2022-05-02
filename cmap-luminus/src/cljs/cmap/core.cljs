@@ -30,7 +30,7 @@
    [["/" {:name        :home
           :view        views/home-page
           :controllers [{:start (fn [_]
-                                  (rf/dispatch [:page/init-home]))}]}]
+                                  #_(rf/dispatch [:page/init-home]))}]}]
     ["/about" {:name :about
                :view views/about-page}]]))
 

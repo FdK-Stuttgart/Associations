@@ -2,7 +2,8 @@
   "subscriptions / subscription handlers (query layer)"
   (:require
    [re-frame.core :as rf]
-   [markdown.core :refer [md->html]]))
+   [markdown.core :refer [md->html]]
+   [clojure.string :as s]))
 
 (rf/reg-sub :common/route
             (fn [db _] (-> db :common/route)))
@@ -13,8 +14,13 @@
 (rf/reg-sub :db-vals
             (fn [db _]
               ((comp
-                (partial vector :div)
-                (partial map (comp (partial vector :div) :name first))
+                (partial map
+                         (fn [ms]
+                           (let [m (first ms)]
+                             [(:associationid m)
+                              ((comp (fn [s] (s/replace s " e. V." ""))
+                                     :name)
+                               m)])))
                 vals
                 (partial group-by :associationid)
                 cljs.reader/read-string
