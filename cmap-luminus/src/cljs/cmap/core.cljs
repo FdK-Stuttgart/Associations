@@ -19,7 +19,8 @@
     [reitit.frontend.easy :as rfe])
   #_(:import goog.History))
 
-(def >evt re-frame.core/dispatch)
+;; https://lambdaisland.com/blog/11-02-2017-re-frame-form-1-subscriptions
+;; (def >evt "Dispatch outgoing an outgoing event" re-frame.core/dispatch)
 
 (defn navigate! [match _]
   (rf/dispatch [:common/navigate match]))
