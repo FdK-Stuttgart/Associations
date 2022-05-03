@@ -3,6 +3,7 @@
   (:require
    [re-frame.core :as rf]
    [markdown.core :refer [md->html]]
+   [cmap.data :as data]
    [clojure.string :as s]))
 
 (rf/reg-sub :common/route
@@ -25,7 +26,8 @@
                 (partial group-by :associationid)
                 cljs.reader/read-string
                 :db-vals)
-               db)))
+               data/db ;; load saved data
+               #_db)))
 (rf/reg-sub :docs
             (fn [db _] ((comp md->html :docs) db)))
 (rf/reg-sub :common/error
