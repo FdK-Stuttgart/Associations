@@ -49,7 +49,57 @@
              :TourEiffel    #js [2.294 48.858]
              :Montmartre    #js [2.342 48.887]
              })
+;; primeNgPubAddr           = 'pi pi-map-marker pubAddr';
+;; primeNgNoPubAddr         = 'pi pi-map-marker noPubAddr';
 
+;; primeNgPubAddrSelected   = 'pi pi-map        pubAddr';
+;; primeNgNoPubAddrSelected = 'pi pi-map        noPubAddr';
+
+
+;; primeNgNoPubAddr          icon-padding" *ngIf="noPubAddrAssocIds.includes(association.id) === true  && association[identifiedByFieldName] !== selectedAssociationField"
+;; primeNgPubAddr            icon-padding" *ngIf="noPubAddrAssocIds.includes(association.id) === false && association[identifiedByFieldName] !== selectedAssociationField"
+;; primeNgNoPubAddrSelected  icon-padding" *ngIf="noPubAddrAssocIds.includes(association.id) === true  && association[identifiedByFieldName] === selectedAssociationField"
+;; primeNgPubAddrSelected    icon-padding" *ngIf="noPubAddrAssocIds.includes(association.id) === false && association[identifiedByFieldName] === selectedAssociationField"
+
+(defn right []
+  [Tab {:panes
+        [{:menuItem "Tab 1" :render
+          (when-let [t @(re-frame/subscribe [:db-vals])]
+            (fn []
+              ((comp
+                reagent/as-element
+                (partial vector :div {:class "ui attached segment active tab"})
+                (partial vector :div {:class "sidebar-content ng-tns-c14-0"})
+                (partial vector :div {:class "association-entries ng-star-inserted"})
+                #_(partial take 2)
+                (partial
+                 map
+                 (fn [[k v]]
+                   [:span {:key k}
+                    [:div {:class "association-entry ng-star-inserted"}
+                     [:a
+                      [:div {:class "icon"}
+                       [:i {:class "icon-padding pi pi-map-marker pubAddr ng-star-inserted"}]
+                       v]]]])))
+               t)))}
+         {:menuItem "Tab 2" :render
+          (when-let [t @(re-frame/subscribe [:db-vals])]
+            (fn []
+              ((comp
+                reagent/as-element
+                (partial vector :div {:class "ui attached segment active tab"})
+                (partial take 3)
+                (partial map (fn [[k v]] [:span {:key k} [:div v]])))
+               t)))}
+         #_{:menuItem "Tab 3" :render
+            (when-let [t @(re-frame/subscribe [:db-vals])]
+              (fn []
+                ((comp
+                  reagent/as-element
+                  (partial vector :div {:class "ui attached segment active tab"})
+                  (partial take 4)
+                  (partial map (fn [[k v]] [:span {:key k} [:div v]])))
+                 t)))}]}])
 (defn main-panel []
   (let [name (re-frame/subscribe [::subs/name])]
     [:div
@@ -61,33 +111,5 @@
          [RFeature {:geometry (new geom/Point (.fromLonLat proj (:ArcDeTriomphe coords)))}
           [RStyle
            [RIcon {:src "/img/location.svg" :anchor [0.5 0.8]}]]]]]]
-      [:div {:class [(styles/column) (styles/right)]}
-       #_"right"
-       [Tab {:panes [{:menuItem "Tab 1" :render
-                      (when-let [t @(re-frame/subscribe [:db-vals])]
-                        (fn []
-                          ((comp
-                            reagent/as-element
-                            (partial vector :div {:class "ui attached segment active tab"})
-                            #_(partial take 2)
-                            (partial map (fn [[k v]] [:span {:key k} [:div v]])))
-                           t)))}
-                     {:menuItem "Tab 2" :render
-                      (when-let [t @(re-frame/subscribe [:db-vals])]
-                        (fn []
-                          ((comp
-                            reagent/as-element
-                            (partial vector :div {:class "ui attached segment active tab"})
-                            (partial take 3)
-                            (partial map (fn [[k v]] [:span {:key k} [:div v]])))
-                           t)))}
-                     #_{:menuItem "Tab 3" :render
-                      (when-let [t @(re-frame/subscribe [:db-vals])]
-                        (fn []
-                          ((comp
-                            reagent/as-element
-                            (partial vector :div {:class "ui attached segment active tab"})
-                            (partial take 4)
-                            (partial map (fn [[k v]] [:span {:key k} [:div v]])))
-                           t)))}]}]]]
+      [:div {:class [(styles/column) (styles/right)]} [right]]]
      [:div {:class (styles/level1)} @name" v"config/version]]))

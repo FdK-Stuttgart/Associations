@@ -114,6 +114,8 @@ Start a temporary local web server, build the app with the `dev` profile, and se
 browser test runner and karma test runner with hot reload:
 
 ```sh
+# `npm install semantic-ui-css semantic-ui-react shadow-cljs` && \
+# `npm install --save rlayers ol react react-dom` && \
 rm -rf node_modules/ target/ resources/public/js/compiled/ && \
 npm install && \
 npx shadow-cljs watch app
