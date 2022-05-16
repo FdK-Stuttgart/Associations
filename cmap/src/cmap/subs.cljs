@@ -31,7 +31,11 @@
                                    [(:associationid m)
                                     ((comp (fn [s] (s/replace s " e. V." ""))
                                            :name)
-                                     m)])))
+                                     m)
+                                    (:addressline1 m)
+                                    (:lat m)
+                                    (:lng m)
+                                    ])))
                       vals
                       (partial group-by :associationid)
                       db-vals)

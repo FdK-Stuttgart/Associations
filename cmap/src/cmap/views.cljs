@@ -17,16 +17,18 @@
    ;; ["semantic-ui-css/components/tab" :as csu]
    ;; ["ol/css" :as css]
 
+   [clojure.string :as s]
+   ["react" :as react]
    ))
 
 (def props
   {
    ;; :width "50%"
-   :height "90vh"
-   :initial {:center (js->clj (.fromLonLat proj #js [2.364 48.82]))
+   :height #_"90vh" "100%"
+   ;; TODO recenter map to Stuttgart city center
+   :initial {:center (js->clj (.fromLonLat proj #js [9.163174 48.774901]))
              :zoom 11}})
 
-;; import { RMap, ROSM, RLayerVector, RFeature, RPopup } from "rlayers";
 (def RMap (reagent/adapt-react-class rl/RMap))
 (def ROSM (reagent/adapt-react-class rl/ROSM))
 (def RLayerVector (reagent/adapt-react-class rl/RLayerVector))
@@ -42,30 +44,25 @@
 
 (def Tab (reagent/adapt-react-class rsu/Tab))
 
-(def coords {:origin        #js [2.364 48.82]
-             :ArcDeTriomphe #js [2.295 48.8737]
-             :PlaceDItalie  #js [2.355 48.831]
-             :Bastille      #js [2.369 48.853]
-             :TourEiffel    #js [2.294 48.858]
-             :Montmartre    #js [2.342 48.887]
-             })
 ;; primeNgPubAddr           = 'pi pi-map-marker pubAddr';
 ;; primeNgNoPubAddr         = 'pi pi-map-marker noPubAddr';
 
 ;; primeNgPubAddrSelected   = 'pi pi-map        pubAddr';
 ;; primeNgNoPubAddrSelected = 'pi pi-map        noPubAddr';
 
+;; TODO public-address? computation should be done elsewhere
+(defn public-address? [norm-addr]
+  (not (re-find #"(?i).*keine|Postfach.*" norm-addr)))
 
 ;; primeNgNoPubAddr          icon-padding" *ngIf="noPubAddrAssocIds.includes(association.id) === true  && association[identifiedByFieldName] !== selectedAssociationField"
 ;; primeNgPubAddr            icon-padding" *ngIf="noPubAddrAssocIds.includes(association.id) === false && association[identifiedByFieldName] !== selectedAssociationField"
 ;; primeNgNoPubAddrSelected  icon-padding" *ngIf="noPubAddrAssocIds.includes(association.id) === true  && association[identifiedByFieldName] === selectedAssociationField"
 ;; primeNgPubAddrSelected    icon-padding" *ngIf="noPubAddrAssocIds.includes(association.id) === false && association[identifiedByFieldName] === selectedAssociationField"
 
-(defn right []
+(defn right [t]
   [Tab {:panes
         [{:menuItem "Tab 1" :render
-          (when-let [t @(re-frame/subscribe [:db-vals])]
-            (fn []
+          (fn []
               ((comp
                 reagent/as-element
                 (partial vector :div {:class "ui attached segment active tab"})
@@ -74,14 +71,21 @@
                 #_(partial take 2)
                 (partial
                  map
-                 (fn [[k v]]
-                   [:span {:key k}
+                 (fn [[k name addr _ _]]
+                   [:span {:key k :on-click (fn [e] (println "on-click" e))}
                     [:div {:class "association-entry ng-star-inserted"}
                      [:a
                       [:div {:class "icon"}
-                       [:i {:class "icon-padding pi pi-map-marker pubAddr ng-star-inserted"}]
-                       v]]]])))
-               t)))}
+                       ((comp
+                         #_(partial vector :div {:class "icon"})
+                         (partial vector :i)
+                         (partial hash-map :class)
+                         (partial s/join " ")
+                         (fn [c] (conj c (if (public-address? addr)
+                                           "pubAddr" "noPubAddr"))))
+                        ["icon-padding" "pi" "pi-map-marker" "ng-star-inserted"])
+                       name]]]])))
+               t))}
          {:menuItem "Tab 2" :render
           (when-let [t @(re-frame/subscribe [:db-vals])]
             (fn []
@@ -100,16 +104,74 @@
                   (partial take 4)
                   (partial map (fn [[k v]] [:span {:key k} [:div v]])))
                  t)))}]}])
-(defn main-panel []
-  (let [name (re-frame/subscribe [::subs/name])]
+
+(defn greeting [message]
+  [:h1 message])
+
+(defn clock [time-color]
+  (let [[timer update-time] (react/useState (js/Date.))
+        time-str (-> timer .toTimeString (s/split " ") first)]
+    (react/useEffect
+     (fn []
+       (let [i (js/setInterval #(update-time (js/Date.)) 1000)]
+         (fn []
+           (js/clearInterval i)))))
+    [:div.example-clock
+     {:style {:color time-color}}
+     time-str]))
+
+(defn color-input [time-color update-time-color]
+  [:div.color-input
+   "Time color: "
+   [:input {:type "text"
+            :value time-color
+            :on-change #(update-time-color (-> % .-target .-value))}]])
+
+(defn simple-example []
+  (let [[time-color update-time-color] (react/useState "#f34")]
     [:div
-     [:div {:class (styles/row)}
-      [:div {:class [(styles/column) (styles/left)]}
-       ;; "left"
-       [RMap props [ROSM]
-        [RLayerVector {:zIndex 10}
-         [RFeature {:geometry (new geom/Point (.fromLonLat proj (:ArcDeTriomphe coords)))}
-          [RStyle
-           [RIcon {:src "/img/location.svg" :anchor [0.5 0.8]}]]]]]]
-      [:div {:class [(styles/column) (styles/right)]} [right]]]
-     [:div {:class (styles/level1)} @name" v"config/version]]))
+     #_(println "view" view "setView" setView)
+     #_[greeting "Hello world, it is now"]
+     #_[clock time-color]
+     #_[color-input time-color update-time-color]
+
+     ;; Or with the default options you can create function components using :f> shortcut:
+     [greeting "Hello world, it is now"]
+     [:f> clock time-color]
+     [:f> color-input time-color update-time-color]
+     ]))
+
+(defn main-panel []
+  (let [[view setView] [] #_(react/useState (clj->js {:center "origin" :zoom 11}))]
+    (println "view" view "setView" setView)
+    (let [name (re-frame/subscribe [::subs/name])]
+      (when-let [t @(re-frame/subscribe [:db-vals])]
+        [:div {:class (styles/ex-container)}
+         [:div {:class (styles/wrapper)}
+          [:div {:class [(styles/header)]}
+           [:f> simple-example]]
+          #_[:div {:class [(styles/left)]} "left"]
+          [:div {:class [(styles/center)]}
+           [RMap props [ROSM]
+            ((comp
+              (partial into [RLayerVector {:zIndex 10}])
+              (partial
+               mapv (fn [[_ name addr lat lng]]
+                      [RFeature
+                       {:geometry (new geom/Point
+                                       (.fromLonLat proj (clj->js [lng lat])))}
+                       [RStyle
+                        [RIcon {:src
+                                (str "/img/" (if (public-address? addr)
+                                               "pub-addr.svg" "priv-addr.svg") )
+                                :anchor [0.5 0.8]}]]
+                       [RPopup {:trigger
+                                "click"
+                                #_"hover"
+                                :class "example-overlay"}
+                        [:div {:class "card"}]
+                        [:p {:class "card-header"} name]
+                        #_[:p {:class "card-body text-center"} "Popup on click"]]])))
+             t)]]
+          [:div {:class [(styles/right)]} [right t]]
+          [:div {:class [(styles/footer)]} @name" v"config/version]]]))))
