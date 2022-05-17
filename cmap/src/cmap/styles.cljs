@@ -32,9 +32,35 @@
     :background-size     [[(px 100) (px 100)] [(px 100) (px 100)] [(px 20) (px 20)] [(px 20) (px 20)]]
     :background-position [[(px -2) (px -2)] [(px -2) (px -2)] [(px -1) (px -1)] [(px -1) (px -1)]]}])
 
-(defclass level1
-  []
-  {:color :green})
+(defclass ex-container []
+  {
+   :resize "both"
+   :position "relative"
+   :overflow "hidden"
+   :height "100%"
+   :width "100%"
+   :z-index "2"
+   :box-shadow "0 0 20px -10px hsl(187deg 97% 24%)"
+   :display "grid"
+   :align-items "center"
+   ;; :background "white"
+   }
+  )
+
+
+(defclass wrapper [] {:resize "both"
+                      :height "100vh"
+                      :display "grid" :grid-template "auto 1fr auto / auto 1fr auto"})
+(defclass header  [] {:grid-column "1 / 4" :background "lightpink" :padding "2rem"})
+(defclass left    [] {:grid-column "1 / 2" :background "lightblue" :padding "1rem"})
+(defclass center  [] {:grid-column "2 / 3" :background "coral"     :padding "1rem"})
+(defclass right   [] {:grid-column "3 / 4" :background "yellow"    :padding "1rem"
+                      :overflow-y "auto"})
+(defclass footer  [] {:grid-column "1 / 4" :background "wheat"     :padding "2rem" :text-align "center" })
+
+;; .left-sidebar, .right-sidebar {padding 1rem}
+
+(defclass level1 [] {:color :green})
 
 ;; Create two unequal columns that floats next to each other
 (defclass column []
@@ -45,10 +71,6 @@
    :height (px 300)
    })
 
-(defclass left [] {:width "75%"})
-(defclass right [] {:width "25%"})
-
-;; (defclass row [] {:content "\"\"" :display "table" :clear "both"})
 (let [fun (fn [style-name params]
             ;; ::after - clear floats after the columns
             (let [style [(str "." style-name "::after")
