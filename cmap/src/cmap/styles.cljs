@@ -42,11 +42,7 @@
    :z-index "2"
    :box-shadow "0 0 20px -10px hsl(187deg 97% 24%)"
    :display "grid"
-   :align-items "center"
-   ;; :background "white"
-   }
-  )
-
+   :align-items "center"})
 
 (defclass wrapper [] {:resize "both"
                       :height "100vh"
@@ -70,11 +66,3 @@
    :padding (px 10)
    :height (px 300)
    })
-
-(let [fun (fn [style-name params]
-            ;; ::after - clear floats after the columns
-            (let [style [(str "." style-name "::after")
-                         {:content "\"\"" :display "table" :clear "both"}]]
-              {:css (spade.runtime/compile-css style) :name style-name}))]
-  (defn row []
-    (spade.runtime/ensure-style! :class (spade.util/factory->name fun) fun [])))
