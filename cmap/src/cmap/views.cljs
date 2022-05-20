@@ -75,7 +75,7 @@
                            (fn [x] (.-value x))
                            (fn [x] (.-target x)))}]]]))
 
-(defn right [t setView]
+(defn right [db-vals set-view]
   [:div
    [:f> simple-example]
    [Tab {:panes
@@ -90,7 +90,7 @@
                 map
                 (fn [[k name addr _ _]]
                   [:span {:key k :on-click (fn [e]
-                                             (setView
+                                             (set-view
                                               ((comp
                                                 clj->js
                                                 (partial hash-map :zoom 11 :center)
@@ -108,31 +108,30 @@
                                           "pubAddr" "noPubAddr"))))
                        ["icon-padding" "pi" "pi-map-marker" "ng-star-inserted"])
                       name]]]])))
-              t))}
+              db-vals))}
           {:menuItem "Tab 2" :render
-           (when-let [t @(re-frame/subscribe [:db-vals])]
-             (fn []
-               ((comp
-                 reagent/as-element
-                 (partial vector :div {:class "ui attached segment active tab"})
-                 #_(partial take 3)
-                 (partial map (fn [[k v]] [:span {:key k} [:div v]])))
-                t)))}
+           (fn []
+             ((comp
+               reagent/as-element
+               (partial vector :div {:class "ui attached segment active tab"})
+               #_(partial take 3)
+               (partial map (fn [[k v]] [:span {:key k} [:div v]])))
+              db-vals))}
           #_{:menuItem "Tab 3" :render
-             (when-let [t @(re-frame/subscribe [:db-vals])]
+             (when-let [db-vals @(re-frame/subscribe [:db-vals])]
                (fn []
                  ((comp
                    reagent/as-element
                    (partial vector :div {:class "ui attached segment active tab"})
                    (partial take 4)
                    (partial map (fn [[k v]] [:span {:key k} [:div v]])))
-                  t)))}]}]])
+                  db-vals)))}]}]])
 
-(defn rlayers-map [t view setView]
+(defn rlayers-map [db-vals view set-view]
   ((comp
     (partial conj
              [RMap {#_#_:width "50%" :height #_"90vh" "100%"
-                    :initial view :view [view setView]}
+                    :initial view :view [view set-view]}
               #_(let [this (reagent/current-component)]
                 (js/console.log "this" this))
               [ROSM]])
@@ -154,10 +153,10 @@
               [:div {:class "card"}]
               [:p {:class "card-header"} name]
               #_[:p {:class "card-body text-center"} "Popup on click"]]])))
-   t))
+   db-vals))
 
-(defn go [t]
-  (let [[view setView] ((comp
+(defn go [db-vals]
+  (let [[view set-view] ((comp
                          react/useState
                          clj->js
                          (partial hash-map :zoom 11 :center)
@@ -170,11 +169,11 @@
      [
       #_[:div {:class [(styles/header)]}]
       #_[:div {:class [(styles/left)]} "left"]
-      [:div {:class [(styles/center)]} [:f> rlayers-map t view setView]]
-      [:div {:class [(styles/right)]} [right t setView]]
+      [:div {:class [(styles/center)]} [:f> rlayers-map db-vals view set-view]]
+      [:div {:class [(styles/right)]} [right db-vals set-view]]
       [:div {:class [(styles/footer)]}
        (str @(re-frame/subscribe [::subs/name]) " v" config/version)]])))
 
 (defn main-panel []
-  (when-let [t @(re-frame/subscribe [:db-vals])]
-    [:f> go t]))
+  (when-let [db-vals @(re-frame/subscribe [:db-vals])]
+    [:f> go db-vals]))
