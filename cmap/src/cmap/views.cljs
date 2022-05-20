@@ -3,6 +3,7 @@
    [re-frame.core :as re-frame]
    [cmap.styles :as styles]
    [cmap.subs :as subs]
+   [cmap.lang :refer [de]]
    [cmap.config :as config]
    [reagent.core :as reagent]
 
@@ -83,7 +84,7 @@
     (partial vector :div {:class "association-entries ng-star-inserted"})
     (partial
      map
-     (fn [[k name addr coords]]
+     (fn [[k [name _ _] addr coords]]
        [:span {:key k :on-click (fn [e]
                                   (set-view
                                    ((comp
@@ -130,6 +131,63 @@
                    (partial map (fn [[k v]] [:span {:key k} [:div v]])))
                   db-vals)))}]}]])
 
+
+(defn popup [name activities goals]
+  [:div
+   #_{:class "on-top" :style "position: absolute; pointer-events: auto; transform: translate(-50%, -100%) translate(510px, 603px);"}
+   [:div
+    ;; _ngcontent-ugm-c34=""
+    #_#_{:class "association-container osm-association-container"}
+    [:a
+     ;; _ngcontent-ugm-c34=""
+     #_{:class "association-container-close-icon" :id "popup-close" :style "cursor: pointer;"}
+     [:i #_{:class "pi pi-times"}]]
+    [:div #_{:class "osm-association-inner-container"}
+     [:div #_{:class "association-title"}
+      [:h2 name]]
+     [:div #_{:class "association-images"}
+      [:div #_{:class "association-image"}
+       #_[:img
+          {:src
+           "https://house-of-resources-stuttgart.de/wp-content/uploads/2021/02/ADAN_LOGO-1.png"
+           :alt ""}]]]
+     [:div #_{:class "association-address"}
+      [:p #_{:class "name"} [:strong (de :cmap.lang/no-pub-addr)]]]
+     [:div #_{:class "association-contacts"}
+      [:div #_{:class "association-contact"}]
+      [:div #_{:class "association-contact"}]
+      [:div #_{:class "association-contact"}]
+      [:div #_{:class "association-contact"}
+       [:div #_{:class "association-contact"}
+        [:div #_{:class "association-contact-row"}
+         [:div #_{:class "social-media-icon mini-icon"} [:img {:src "assets/mail.png" :alt ""}]]
+         [:p #_{:class "mail"}
+          [:a {:href "mailto:stuttgart@ada-netzwerk.com"}
+           "stuttgart@ada-netzwerk.com"]]]]]]
+     [:div #_{:class "association-description"} [:h3 (de :cmap.lang/goals)] goals]
+     [:div #_{:class "association-description"} [:h3 (de :cmap.lang/activities)] activities]
+     [:div #_{:class "association-active-in"}
+      [:h3 (de :cmap.lang/activity-areas)]
+      [:div #_{:class "association-chips-container"}
+       [:div #_{:class "association-chips"} "Stuttgart-Mitte"]]]
+     [:div #_{:class "association-links"}
+      [:h3 "Links"]
+      [:ul
+       [:li [:a {:href "https://ada-netzwerk.com/"
+                 :title "https://ada-netzwerk.com/" :target "_blank"}
+             "https://ada-netzwerk.com/"]]]]
+     [:div #_{:class "association-social-media"}
+      [:div #_{:class "social-media-link"}
+       [:a {:href "https://www.facebook.com/adanetzwerk"
+            :title (de :cmap.lang/facebook) :target "_blank"}
+        [:div #_{:class "social-media-icon mini-icon"}
+         [:img {:src "assets/facebook.png" :alt (de :cmap.lang/facebook)}]]]]
+      [:div #_{:class "social-media-link"}
+       [:a {:href "https://www.instagram.com/adanetzwerk/?hl=de"
+            :title (de :cmap.lang/instagram) :target "_blank"}
+        [:div #_{:class "social-media-icon mini-icon"}
+         [:img {:src "assets/instagram.png" :alt (de :cmap.lang/instagram)}]]]]]]]])
+
 (defn rlayers-map [db-vals view set-view]
   ((comp
     (partial conj
@@ -140,7 +198,7 @@
               [ROSM]])
     (partial into [RLayerVector {:zIndex 10}])
     (partial
-     mapv (fn [[_ name addr coords]]
+     mapv (fn [[_ [name activities goals] addr coords]]
             [RFeature
              {:geometry (new geom/Point
                              (fromLonLat coords))}
@@ -153,9 +211,11 @@
                       "click"
                       #_"hover"
                       :class [(styles/example-overlay)]}
-              [:div {:class "card"}]
-              [:p {:class "card-header"} name]
-              #_[:p {:class "card-body text-center"} "Popup on click"]]])))
+              [:div {:class [(styles/card)]}
+               [:p {:class [(styles/card-header)]}
+                [popup name activities goals]
+                ]
+               #_[:p {:class "card-body text-center"} "Popup on click"]]]])))
    db-vals))
 
 (defn go [db-vals]

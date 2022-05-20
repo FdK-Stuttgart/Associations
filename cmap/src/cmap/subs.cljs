@@ -22,19 +22,23 @@
       :db-vals)
      db))
 
-(re-frame/reg-sub :db-vals
-                  (fn [db _]
-                    ((comp
-                      (partial map
-                               (fn [ms]
-                                 (let [m (first ms)]
-                                   [(:associationid m)
-                                    ((comp (fn [s] (s/replace s " e. V." ""))
-                                           :name)
-                                     m)
-                                    (:addressline1 m)
-                                    [(:lng m) (:lat m)]])))
-                      vals
-                      (partial group-by :associationid)
-                      db-vals)
-                     db)))
+(re-frame/reg-sub
+ :db-vals
+ (fn [db _]
+   ((comp
+     (partial map
+              (fn [ms]
+                (let [m (first ms)]
+                  [(:associationid m)
+                   [((comp (fn [s] (s/replace s " e. V." ""))
+                           :name)
+                     m)
+                    (:activities_text m)
+                    (:goals_text m)]
+                   (:addressline1 m)
+                   [(:lng m) (:lat m)]])))
+     vals
+     (partial group-by :associationid)
+     db-vals)
+    db)))
+
