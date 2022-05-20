@@ -36,7 +36,8 @@
                     (:activities_text m)
                     (:goals_text m)]
                    (:addressline1 m)
-                   [(:lng m) (:lat m)]])))
+                   [(:lng m) (:lat m)]
+                   (:imageurl m)])))
      vals
      (partial group-by :associationid)
      db-vals)

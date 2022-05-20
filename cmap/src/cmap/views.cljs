@@ -132,7 +132,9 @@
                   db-vals)))}]}]])
 
 
-(defn popup [name activities goals]
+(defn popup
+  "addr has only 'keine öffentliche Anschrift'"
+  [name addr activities goals imageurl]
   [:div
    #_{:class "on-top" :style "position: absolute; pointer-events: auto; transform: translate(-50%, -100%) translate(510px, 603px);"}
    [:div
@@ -147,12 +149,12 @@
       [:h2 name]]
      [:div #_{:class "association-images"}
       [:div #_{:class "association-image"}
-       #_[:img
+       [:img
           {:src
-           "https://house-of-resources-stuttgart.de/wp-content/uploads/2021/02/ADAN_LOGO-1.png"
+           imageurl
            :alt ""}]]]
      [:div #_{:class "association-address"}
-      [:p #_{:class "name"} [:strong (de :cmap.lang/no-pub-addr)]]]
+      [:p #_{:class "name"} [:strong addr]]]
      [:div #_{:class "association-contacts"}
       [:div #_{:class "association-contact"}]
       [:div #_{:class "association-contact"}]
@@ -198,7 +200,8 @@
               [ROSM]])
     (partial into [RLayerVector {:zIndex 10}])
     (partial
-     mapv (fn [[_ [name activities goals] addr coords]]
+     mapv (fn [[_ [name activities goals] addr coords imageurl]]
+            (js/console.log addr)
             [RFeature
              {:geometry (new geom/Point
                              (fromLonLat coords))}
@@ -213,8 +216,7 @@
                       :class [(styles/example-overlay)]}
               [:div {:class [(styles/card)]}
                [:p {:class [(styles/card-header)]}
-                [popup name activities goals]
-                ]
+                [popup name addr activities goals imageurl]]
                #_[:p {:class "card-body text-center"} "Popup on click"]]]])))
    db-vals))
 
