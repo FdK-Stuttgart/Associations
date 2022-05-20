@@ -33,9 +33,7 @@
                                            :name)
                                      m)
                                     (:addressline1 m)
-                                    (:lat m)
-                                    (:lng m)
-                                    ])))
+                                    [(:lng m) (:lat m)]])))
                       vals
                       (partial group-by :associationid)
                       db-vals)

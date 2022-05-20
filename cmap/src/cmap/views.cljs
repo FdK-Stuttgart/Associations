@@ -21,7 +21,7 @@
    ["react" :as react]
    ))
 
-(defn fromLonLat [lon-lat] (.fromLonLat proj (clj->js lon-lat)))
+(defn fromLonLat [[lon lat]] (.fromLonLat proj (clj->js [lon lat])))
 
 (def RMap (reagent/adapt-react-class rl/RMap))
 (def ROSM (reagent/adapt-react-class rl/ROSM))
@@ -75,40 +75,43 @@
                            (fn [x] (.-value x))
                            (fn [x] (.-target x)))}]]]))
 
+(defn tab1 [db-vals set-view]
+  ((comp
+    reagent/as-element
+    (partial vector :div {:class "ui attached segment active tab"})
+    (partial vector :div {:class "sidebar-content ng-tns-c14-0"})
+    (partial vector :div {:class "association-entries ng-star-inserted"})
+    (partial
+     map
+     (fn [[k name addr coords]]
+       [:span {:key k :on-click (fn [e]
+                                  (set-view
+                                   ((comp
+                                     clj->js
+                                     (partial hash-map :zoom (+ 4 11) :center)
+                                     fromLonLat)
+                                    coords)))}
+        [:div {:class "association-entry ng-star-inserted"}
+         [:a
+          [:div {:class "icon"}
+           ((comp
+             #_(partial vector :div {:class "icon"})
+             (partial vector :i)
+             (partial hash-map :class)
+             (partial s/join " ")
+             (fn [c] (conj c (if (public-address? addr)
+                               "pubAddr" "noPubAddr"))))
+            ["icon-padding" "pi" "pi-map-marker" "ng-star-inserted"])
+           name]]]]))
+    (fn [x] (def db x) x))
+   db-vals))
+
 (defn right [db-vals set-view]
   [:div
    [:f> simple-example]
    [Tab {:panes
          [{:menuItem "Tab 1" :render
-           (fn []
-             ((comp
-               reagent/as-element
-               (partial vector :div {:class "ui attached segment active tab"})
-               (partial vector :div {:class "sidebar-content ng-tns-c14-0"})
-               (partial vector :div {:class "association-entries ng-star-inserted"})
-               (partial
-                map
-                (fn [[k name addr _ _]]
-                  [:span {:key k :on-click (fn [e]
-                                             (set-view
-                                              ((comp
-                                                clj->js
-                                                (partial hash-map :zoom 11 :center)
-                                                fromLonLat)
-                                               [10.163174 48.774901])))}
-                   [:div {:class "association-entry ng-star-inserted"}
-                    [:a
-                     [:div {:class "icon"}
-                      ((comp
-                        #_(partial vector :div {:class "icon"})
-                        (partial vector :i)
-                        (partial hash-map :class)
-                        (partial s/join " ")
-                        (fn [c] (conj c (if (public-address? addr)
-                                          "pubAddr" "noPubAddr"))))
-                       ["icon-padding" "pi" "pi-map-marker" "ng-star-inserted"])
-                      name]]]])))
-              db-vals))}
+           (fn [] (tab1 db-vals set-view))}
           {:menuItem "Tab 2" :render
            (fn []
              ((comp
@@ -137,10 +140,10 @@
               [ROSM]])
     (partial into [RLayerVector {:zIndex 10}])
     (partial
-     mapv (fn [[_ name addr lat lng]]
+     mapv (fn [[_ name addr coords]]
             [RFeature
              {:geometry (new geom/Point
-                             (fromLonLat [lng lat]))}
+                             (fromLonLat coords))}
              [RStyle
               [RIcon {:src
                       (str "/img/" (if (public-address? addr)
@@ -149,7 +152,7 @@
              [RPopup {:trigger
                       "click"
                       #_"hover"
-                      :class "example-overlay"}
+                      :class [(styles/example-overlay)]}
               [:div {:class "card"}]
               [:p {:class "card-header"} name]
               #_[:p {:class "card-body text-center"} "Popup on click"]]])))
