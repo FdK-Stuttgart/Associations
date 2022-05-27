@@ -54,7 +54,7 @@
    [:div
     [:div
      [Tab {:panes [{:menuItem "Tab 1" :render
-                    (when-let [t @(rf/subscribe [:db-vals])]
+                    (when-let [t @(rf/subscribe [:db-associations])]
                       (fn []
                         ((comp
                           r/as-element
@@ -63,7 +63,7 @@
                           (partial map (fn [[k v]] [:span {:key k} [:div v]])))
                          t)))}
                    {:menuItem "Tab 2" :render
-                    (when-let [t @(rf/subscribe [:db-vals])]
+                    (when-let [t @(rf/subscribe [:db-associations])]
                       (fn []
                         ((comp
                           r/as-element
@@ -72,7 +72,7 @@
                           (partial map (fn [[k v]] [:span {:key k} [:div v]])))
                          t)))}
                    {:menuItem "Tab 3" :render
-                    (when-let [t @(rf/subscribe [:db-vals])]
+                    (when-let [t @(rf/subscribe [:db-associations])]
                       (fn []
                         ((comp
                           r/as-element

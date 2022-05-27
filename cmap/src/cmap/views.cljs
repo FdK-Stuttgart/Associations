@@ -122,7 +122,7 @@
                (partial map (fn [[k v]] [:span {:key k} [:div v]])))
               db-vals))}
           #_{:menuItem "Tab 3" :render
-             (when-let [db-vals @(re-frame/subscribe [:db-vals])]
+             (when-let [db-associations @(re-frame/subscribe [:db-associations])]
                (fn []
                  ((comp
                    reagent/as-element
@@ -134,7 +134,7 @@
 
 (defn popup
   "addr has only 'keine öffentliche Anschrift'"
-  [name addr activities goals imageurl]
+  [name addr districts email activities goals imageurl]
   [:div
    #_{:class "on-top" :style "position: absolute; pointer-events: auto; transform: translate(-50%, -100%) translate(510px, 603px);"}
    [:div
@@ -164,14 +164,13 @@
         [:div #_{:class "association-contact-row"}
          [:div #_{:class "social-media-icon mini-icon"} [:img {:src "assets/mail.png" :alt ""}]]
          [:p #_{:class "mail"}
-          [:a {:href "mailto:stuttgart@ada-netzwerk.com"}
-           "stuttgart@ada-netzwerk.com"]]]]]]
+          [:a {:href (str "mailto:" email)} email]]]]]]
      [:div #_{:class "association-description"} [:h3 (de :cmap.lang/goals)] goals]
      [:div #_{:class "association-description"} [:h3 (de :cmap.lang/activities)] activities]
      [:div #_{:class "association-active-in"}
       [:h3 (de :cmap.lang/activity-areas)]
       [:div #_{:class "association-chips-container"}
-       [:div #_{:class "association-chips"} "Stuttgart-Mitte"]]]
+       (map (partial vector :div #_{:class "association-chips"}) districts)]]
      [:div #_{:class "association-links"}
       [:h3 "Links"]
       [:ul
@@ -200,8 +199,8 @@
               [ROSM]])
     (partial into [RLayerVector {:zIndex 10}])
     (partial
-     mapv (fn [[_ [name activities goals] addr coords imageurl]]
-            (js/console.log addr)
+     mapv (fn [[_ [name activities goals] addr districts email coords imageurl]]
+            #_(js/console.log districts)
             [RFeature
              {:geometry (new geom/Point
                              (fromLonLat coords))}
@@ -216,7 +215,7 @@
                       :class [(styles/example-overlay)]}
               [:div {:class [(styles/card)]}
                [:p {:class [(styles/card-header)]}
-                [popup name addr activities goals imageurl]]
+                [popup name addr districts email activities goals imageurl]]
                #_[:p {:class "card-body text-center"} "Popup on click"]]]])))
    db-vals))
 
@@ -240,5 +239,5 @@
        (str @(re-frame/subscribe [::subs/name]) " v" config/version)]])))
 
 (defn main-panel []
-  (when-let [db-vals @(re-frame/subscribe [:db-vals])]
-    [:f> go db-vals]))
+  (when-let [db-associations @(re-frame/subscribe [:db-associations])]
+    [:f> go db-associations]))

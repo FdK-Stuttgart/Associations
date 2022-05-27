@@ -12,7 +12,7 @@
             (fn [route _] (-> route :data :name)))
 (rf/reg-sub :common/page    :<- [:common/route]
             (fn [route _] (-> route :data :view)))
-(rf/reg-sub :db-vals
+(rf/reg-sub :db-associations
             (fn [db _]
               ((comp
                 (partial map
@@ -25,7 +25,7 @@
                 vals
                 (partial group-by :associationid)
                 cljs.reader/read-string
-                :db-vals)
+                :db-associations)
                data/db ;; load saved data
                #_db)))
 (rf/reg-sub :docs

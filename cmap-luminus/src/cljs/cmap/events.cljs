@@ -29,7 +29,7 @@
   (fn [_ [_ url-key params query]]
     {:common/navigate-fx! [url-key params query]}))
 
-(rf/reg-event-db :set-db-vals (fn [db [_ vals]] (assoc db :db-vals vals)))
+(rf/reg-event-db :set-db-associations (fn [db [_ vals]] (assoc db :db-associations vals)))
 
 (rf/reg-event-fx
  :fetch-from-db

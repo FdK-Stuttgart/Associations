@@ -23,7 +23,8 @@
    ["/db-vals" {:get (fn [_]
                        (-> (response/ok
                             (let [vs (->> #_(db/get-messages)
-                                          (db/read-associations)
+                                          #_(db/read-associations)
+                                          (db/read-districts-options)
                                           (pr)
                                           (with-out-str))]
                               #_(log/info "\n$$$$$$$ db-vals:" vs)

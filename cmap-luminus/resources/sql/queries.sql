@@ -21,6 +21,23 @@ DELETE FROM users
 WHERE id = :id
 
 
+
+-- :name read-districts-options :n
+-- :doc read districts options
+SELECT
+  districts.value AS value,
+  districts.label AS label,
+  districts.category AS category,
+  upper.label AS categoryLabel,
+  districts.orderIndex AS orderIndex
+FROM associations.districts
+     LEFT JOIN associations.districts AS upper
+         ON districts.category = upper.value
+WHERE districts.current = 1
+ORDER BY orderIndex, categoryLabel, label
+
+
+
 -- :name read-associations :n
 -- :doc read all associations
 SELECT
@@ -83,5 +100,3 @@ ORDER BY associationId
 -- :name get-messages :? :
 -- :doc restart `lein run` to see changes; select * from activities where label in ('Ausstellungen', 'Turniere')
 select * from activities row limit 3
-
-
