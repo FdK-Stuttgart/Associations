@@ -48,52 +48,56 @@
            d
            (println)
            d))
-      :db-associations)
+      :db-districts)
      db))
-
 
 (re-frame/reg-sub
  ::name
  (fn [db]
    (:name db)))
 
+(defn adjust-associations [ms]
+  ((comp
+    (fn [m] (dissoc m :lng :lat))
+    (fn [m] (assoc-in m [:coords] (vals (select-keys m [:lng :lat]))))
+    (fn [m]
+      (clojure.set/rename-keys m
+                               {:associationid :k
+                                :addressline1 :addr
+                                :districtlist :districts
+                                :mail :email
+                                :activities_text :activities
+                                :goals_text :goals
+                                }))
+    (fn [m] (update-in m [:name] (fn [s] (s/replace s " e. V." ""))))
+    (fn [m] (select-keys m [:associationid
+                            :name
+                            :activities_text
+                            :goals_text
+                            :addressline1
+                            :districtlist
+                            :mail
+                            :lng
+                            :lat
+                            :imageurl
+                            :linkurl
+                            :linktext
+                            :socialmediaid
+                            :socialmediaplatform
+                            :socialmediaurl
+                            :socialmediaorderindex
+                            :socialmedialinktext]))
+    first)
+   ms))
+
 (re-frame/reg-sub
  :db-associations
  (fn [db _]
    ((comp
-     (partial map
-              (fn [ms]
-                (let [m (first ms)]
-                  [(:associationid m)
-                   [((comp (fn [s] (s/replace s " e. V." ""))
-                           :name)
-                     m)
-                    (:activities_text m)
-                    (:goals_text m)]
-                   (:addressline1 m)
-                   (:districtlist m)
-                   (:mail m)
-                   [(:lng m) (:lat m)]
-                   (:imageurl m)])))
+     (partial map adjust-associations)
      vals
      (partial group-by :associationid)
      associations)
     db)))
 
-(re-frame/reg-sub
- :db-districts
- (fn [db _]
-   ((comp
-     (partial map
-              (fn [ms]
-                (let [m (first ms)]
-                  [
-                   (:value m) ;; "connect" :value with :districtlist
-                   (:label m)
-                   (:category m)
-                   (:categoryLabel m)
-                   (:orderIndex m)
-                   ])))
-     associations)
-    db)))
 

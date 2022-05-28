@@ -84,7 +84,7 @@
     (partial vector :div {:class "association-entries ng-star-inserted"})
     (partial
      map
-     (fn [[k [name _ _] addr coords]]
+     (fn [{:keys [k name addr coords]}]
        [:span {:key k :on-click (fn [e]
                                   (set-view
                                    ((comp
@@ -134,7 +134,7 @@
 
 (defn popup
   "addr has only 'keine öffentliche Anschrift'"
-  [name addr districts email activities goals imageurl]
+  [{:keys [name addr districts email activities goals imageurl linkurl linktext]}]
   [:div
    #_{:class "on-top" :style "position: absolute; pointer-events: auto; transform: translate(-50%, -100%) translate(510px, 603px);"}
    [:div
@@ -174,9 +174,9 @@
      [:div #_{:class "association-links"}
       [:h3 "Links"]
       [:ul
-       [:li [:a {:href "https://ada-netzwerk.com/"
-                 :title "https://ada-netzwerk.com/" :target "_blank"}
-             "https://ada-netzwerk.com/"]]]]
+       [:li [:a {:href linkurl
+                 :title linktext :target "_blank"}
+             (if (empty? linktext) linkurl linktext)]]]]
      [:div #_{:class "association-social-media"}
       [:div #_{:class "social-media-link"}
        [:a {:href "https://www.facebook.com/adanetzwerk"
@@ -199,8 +199,7 @@
               [ROSM]])
     (partial into [RLayerVector {:zIndex 10}])
     (partial
-     mapv (fn [[_ [name activities goals] addr districts email coords imageurl]]
-            #_(js/console.log districts)
+     mapv (fn [{:keys [addr coords] :as prm}]
             [RFeature
              {:geometry (new geom/Point
                              (fromLonLat coords))}
@@ -209,13 +208,14 @@
                       (str "/img/" (if (public-address? addr)
                                      "pub-addr.svg" "priv-addr.svg") )
                       :anchor [0.5 0.8]}]]
+             ;; TODO RPopup toggle - i.e. max one popup can be displayed at the time
              [RPopup {:trigger
                       "click"
                       #_"hover"
                       :class [(styles/example-overlay)]}
               [:div {:class [(styles/card)]}
                [:p {:class [(styles/card-header)]}
-                [popup name addr districts email activities goals imageurl]]
+                [popup prm]]
                #_[:p {:class "card-body text-center"} "Popup on click"]]]])))
    db-vals))
 
