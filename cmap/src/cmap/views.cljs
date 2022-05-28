@@ -170,7 +170,7 @@
      [:div #_{:class "association-active-in"}
       [:h3 (de :cmap.lang/activity-areas)]
       [:div #_{:class "association-chips-container"}
-       (map (partial vector :div #_{:class "association-chips"}) districts)]]
+       (map-indexed (fn [idx elem] (vector :div {:key idx} #_{:class "association-chips"} )) districts)]]
      [:div #_{:class "association-links"}
       [:h3 "Links"]
       [:ul
@@ -214,7 +214,7 @@
                       #_"hover"
                       :class [(styles/example-overlay)]}
               [:div {:class [(styles/card)]}
-               [:p {:class [(styles/card-header)]}
+               [:div {:class [(styles/card-header)]}
                 [popup prm]]
                #_[:p {:class "card-body text-center"} "Popup on click"]]]])))
    db-vals))
