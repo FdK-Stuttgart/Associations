@@ -35,6 +35,7 @@ cliTools="$cliTools gnupg busybox rsync openssh bash ripgrep less mycli"
 cliTools="$cliTools grep git coreutils sed which ncurses"
 cliTools="$cliTools php mariadb pgcli jq nss-certs curl"
 cliTools="$cliTools node"
+cliTools="$cliTools openjdk@17.0.3:jdk leiningen"
 
 cmd=guix
 # [[ ! $(command -v $cmd) ]] - '[[' is a bashishm
@@ -44,6 +45,7 @@ if [ ! "$(command -v $cmd)" ]; then
 fi
 # --preserve=^fdk
 #   preserve environment variables matching REGEX
+# TODO add '--export-manifest' to obtain an scm file
 set -x
 guix shell \
      --container --network \
