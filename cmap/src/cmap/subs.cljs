@@ -2,6 +2,7 @@
   (:require
    [re-frame.core :as re-frame]
    [cmap.data :as data]
+   [clojure.set :refer [rename-keys]]
    [clojure.string :as s]))
 
 (def districts--id-name
@@ -57,6 +58,16 @@
    (:name db)))
 
 (defn adjust-associations [ms]
+  #_((comp
+    (fn [m]
+      (select-keys m [:id :platform :url :orderindex :linktext]))
+    (partial map (fn [m]
+                   (rename-keys m {:socialmediaid :id
+                                   :socialmediaplatform :platform
+                                   :socialmediaurl :url
+                                   :socialmediaorderindex :orderindex
+                                   :socialmedialinktext :linktext}))))
+   ms)
   ((comp
     (fn [m] (dissoc m :lng :lat))
     (fn [m] (assoc-in m [:coords] (vals (select-keys m [:lng :lat]))))
@@ -97,6 +108,8 @@
      (partial map adjust-associations)
      vals
      (partial group-by :associationid)
+     (fn [ms] (println "(count ms)" (count ms)) ms)
+     (partial filter (fn [m] (= (:name m) "Afro Deutsches Akademiker Netzwerk ADAN")))
      associations)
     db)))
 

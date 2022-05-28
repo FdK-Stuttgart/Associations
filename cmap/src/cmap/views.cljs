@@ -122,11 +122,13 @@
                (partial map (fn [[k v]] [:span {:key k} [:div v]])))
               db-vals))}
           #_{:menuItem "Tab 3" :render
-             (when-let [db-associations @(re-frame/subscribe [:db-associations])]
+             (when-let [db-associations
+                        @(re-frame/subscribe [:db-associations])]
                (fn []
                  ((comp
                    reagent/as-element
-                   (partial vector :div {:class "ui attached segment active tab"})
+                   (partial vector
+                            :div {:class "ui attached segment active tab"})
                    (partial take 4)
                    (partial map (fn [[k v]] [:span {:key k} [:div v]])))
                   db-vals)))}]}]])
@@ -134,25 +136,25 @@
 
 (defn popup
   "addr has only 'keine öffentliche Anschrift'"
-  [{:keys [name addr districts email activities goals imageurl linkurl linktext]}]
+  [{:keys [name addr districts email activities goals
+           imageurl linkurl linktext]}]
   [:div
-   #_{:class "on-top" :style "position: absolute; pointer-events: auto; transform: translate(-50%, -100%) translate(510px, 603px);"}
+   #_{:class "on-top"
+      :style "position: absolute; pointer-events: auto; transform: translate(-50%, -100%) translate(510px, 603px);"}
    [:div
     ;; _ngcontent-ugm-c34=""
     #_#_{:class "association-container osm-association-container"}
     [:a
      ;; _ngcontent-ugm-c34=""
-     #_{:class "association-container-close-icon" :id "popup-close" :style "cursor: pointer;"}
+     #_{:class "association-container-close-icon" :id "popup-close"
+        :style "cursor: pointer;"}
      [:i #_{:class "pi pi-times"}]]
     [:div #_{:class "osm-association-inner-container"}
      [:div #_{:class "association-title"}
       [:h2 name]]
      [:div #_{:class "association-images"}
       [:div #_{:class "association-image"}
-       [:img
-          {:src
-           imageurl
-           :alt ""}]]]
+       [:img {:src imageurl :alt ""}]]]
      [:div #_{:class "association-address"}
       [:p #_{:class "name"} [:strong addr]]]
      [:div #_{:class "association-contacts"}
@@ -162,15 +164,20 @@
       [:div #_{:class "association-contact"}
        [:div #_{:class "association-contact"}
         [:div #_{:class "association-contact-row"}
-         [:div #_{:class "social-media-icon mini-icon"} [:img {:src "assets/mail.png" :alt ""}]]
+         [:div #_{:class "social-media-icon mini-icon"}
+          [:img {:src "assets/mail.png" :alt ""}]]
          [:p #_{:class "mail"}
           [:a {:href (str "mailto:" email)} email]]]]]]
-     [:div #_{:class "association-description"} [:h3 (de :cmap.lang/goals)] goals]
-     [:div #_{:class "association-description"} [:h3 (de :cmap.lang/activities)] activities]
+     [:div #_{:class "association-description"}
+      [:h3 (de :cmap.lang/goals)] goals]
+     [:div #_{:class "association-description"}
+      [:h3 (de :cmap.lang/activities)] activities]
      [:div #_{:class "association-active-in"}
       [:h3 (de :cmap.lang/activity-areas)]
       [:div #_{:class "association-chips-container"}
-       (map-indexed (fn [idx elem] (vector :div {:key idx} #_{:class "association-chips"} )) districts)]]
+       (map-indexed (fn [idx elem]
+                      (vector :div {:key idx} #_{:class "association-chips"}))
+                    districts)]]
      [:div #_{:class "association-links"}
       [:h3 "Links"]
       [:ul
