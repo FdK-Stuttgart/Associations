@@ -113,7 +113,6 @@
      (partial map (partial sort-by :socialmediaorderindex))
      vals
      (partial group-by :associationid)
-     ;; TODO the height of map should not depend on the length of the list of the associations
      #_(partial filter (fn [m] (in? ["Kalimera e. V. Deutsch-Griechische Kulturinitiative"
                                    "Afro Deutsches Akademiker Netzwerk ADAN"]
                                   (:name m))))

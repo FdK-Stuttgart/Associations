@@ -45,14 +45,36 @@
    :align-items "center"})
 
 (defclass wrapper [] {:resize "both"
+                      ;; :padding "10mm"
                       :height "100vh"
-                      :display "grid" :grid-template "auto 1fr auto / auto 1fr auto"})
-(defclass header  [] {:grid-column "1 / 4" :background "lightpink" :padding "2rem"})
-(defclass left    [] {:grid-column "1 / 2" :background "lightblue" :padding "1rem"})
-(defclass center  [] {:grid-column "2 / 3" :background "coral"     :padding "1rem"})
-(defclass right   [] {:grid-column "3 / 4" :background "yellow"    :padding "1rem"
-                      :overflow-y "auto"})
-(defclass footer  [] {:grid-column "1 / 4" :background "wheat"     :padding "2rem" :text-align "center" })
+                      :display "grid"
+                      ;; :grid-template "auto 200px auto / auto 1fr auto"
+                      ;; "grid-template-rows" / "grid-template-columns"
+                      ;; 1fr - 1 fraction of the free space
+                      ;; "auto 1fr auto / auto 1fr auto"
+                      :grid-template-rows "auto 1fr auto"
+                      :grid-template-columns "auto 1fr auto"
+                      :grid-template-areas "none"
+                      })
+;; "starts on column" / "end before column"
+;; em	Relative to the font-size of the element (2em means 2 times the size of the current font)
+;; rem Relative to font-size of the root element
+(defclass header  [] {:grid-column "1 / 4" :background "lightpink"
+                      :text-align "center"
+                      ;; :padding "2rem"
+                      })
+(defclass left    [] {:grid-column "1 / 2" :background "lightblue" :padding "1mm"})
+(defclass center  [] {:grid-column "2 / 3" :background "coral"     :padding "3mm"
+                      ;; :min-height "100vh"
+                      ;; :min-height "fit-content"
+                      })
+(defclass right   [] {:grid-column "3 / 4" :background "yellow"    :padding "1mm"
+                      :overflow-y "auto"
+                      })
+(defclass footer  [] {:grid-column "1 / 4" :background "wheat"
+                      ;; :padding "2rem"
+                      :text-align "center"
+                      })
 
 ;; .left-sidebar, .right-sidebar {padding 1rem}
 

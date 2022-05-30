@@ -238,8 +238,8 @@
       #_(partial conj [:div {:class (styles/ex-container)}])
       (partial into [:div {:class (styles/wrapper)}]))
      [
-      #_[:div {:class [(styles/header)]}]
-      #_[:div {:class [(styles/left)]} "left"]
+      [:div {:class [(styles/header)]} #_"header"]
+      #_[:div {:class [(styles/left)]} #_"left"]
       [:div {:class [(styles/center)]} [:f> rlayers-map db-vals view set-view]]
       [:div {:class [(styles/right)]} [right db-vals set-view]]
       [:div {:class [(styles/footer)]}
