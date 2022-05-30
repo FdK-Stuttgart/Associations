@@ -3,6 +3,10 @@
    [re-frame.core :as re-frame]
    [cmap.data :as data]
    [clojure.set :refer [rename-keys]]
+   ;; TODO cleanup org.clojars.bost/utils:
+   ;; It produce a lot of warnings (probably because of differences clojure vs.
+   ;; clojurescript)
+   #_[utils.core :refer [in?]]
    [clojure.string :as s]))
 
 (def districts--id-name
@@ -24,21 +28,7 @@
                                 (partial mapv (partial get districts--id-name))
                                 cljs.reader/read-string)))
 
-(defn associations [db]
-  ((comp
-    (partial map ids-to-names))
-   data/associations ;; load saved data
-   #_((comp
-       cljs.reader/read-string
-       #_(fn [d]
-           (->>
-            #_{:a 1 :b 2 :x "fox"}
-            d
-            (println)
-            d))
-       :db-associations)
-      db)))
-
+;; TODO districts need to be obtained from the db
 (defn districts [db]
   data/districts ;; load saved data
   #_((comp
@@ -52,34 +42,18 @@
       :db-districts)
      db))
 
-(re-frame/reg-sub
- ::name
- (fn [db]
-   (:name db)))
+(re-frame/reg-sub ::name (fn [db] (:name db)))
 
 (defn adjust-associations [ms]
-  #_((comp
-    (fn [m]
-      (select-keys m [:id :platform :url :orderindex :linktext]))
-    (partial map (fn [m]
-                   (rename-keys m {:socialmediaid :id
-                                   :socialmediaplatform :platform
-                                   :socialmediaurl :url
-                                   :socialmediaorderindex :orderindex
-                                   :socialmedialinktext :linktext}))))
-   ms)
   ((comp
     (fn [m] (dissoc m :lng :lat))
     (fn [m] (assoc-in m [:coords] (vals (select-keys m [:lng :lat]))))
-    (fn [m]
-      (clojure.set/rename-keys m
-                               {:associationid :k
-                                :addressline1 :addr
-                                :districtlist :districts
-                                :mail :email
-                                :activities_text :activities
-                                :goals_text :goals
-                                }))
+    (fn [m] (rename-keys m {:associationid :k
+                            :addressline1 :addr
+                            :districtlist :districts
+                            :mail :email
+                            :activities_text :activities
+                            :goals_text :goals}))
     (fn [m] (update-in m [:name] (fn [s] (s/replace s " e. V." ""))))
     (fn [m] (select-keys m [:associationid
                             :name
@@ -101,6 +75,32 @@
     first)
    ms))
 
+(defn in?
+  "true if `sequence` contains `elem`. See (contains? (set sequence) elem)"
+  [sequence elem]
+  (boolean (some (fn [e] (= elem e)) sequence)))
+
+(defn group-by-socialmedia [ms]
+  ((comp
+    (fn [m] (assoc m
+                   :socialmedia
+                   {
+                    :ids         (keep :socialmediaid ms)
+                    :platforms   (keep :socialmediaplatform ms)
+                    :urls        (keep :socialmediaurl ms)
+                    ;; :orderindexs (keep :socialmediaorderindex ms)
+                    :linktexts   (keep :socialmedialinktext ms)}))
+    first
+    (partial map (fn [m]
+                   (dissoc m
+                           :socialmediaid
+                           :socialmediaplatform
+                           :socialmediaurl
+                           :socialmediaorderindex
+                           :socialmedialinktext
+                           ))))
+   ms))
+
 (re-frame/reg-sub
  :db-associations
  (fn [db _]
@@ -108,9 +108,22 @@
      (partial map adjust-associations)
      vals
      (partial group-by :associationid)
-     (fn [ms] (println "(count ms)" (count ms)) ms)
-     (partial filter (fn [m] (= (:name m) "Afro Deutsches Akademiker Netzwerk ADAN")))
-     associations)
+     (fn [m] (def ns m) m)
+     (partial map group-by-socialmedia)
+     (partial map (partial sort-by :socialmediaorderindex))
+     vals
+     (partial group-by :associationid)
+     ;; TODO the height of map should not depend on the length of the list of the associations
+     #_(partial filter (fn [m] (in? ["Kalimera e. V. Deutsch-Griechische Kulturinitiative"
+                                   "Afro Deutsches Akademiker Netzwerk ADAN"]
+                                  (:name m))))
+     (partial map ids-to-names)
+     (fn [_] "load saved data" data/associations)
+     #_(comp cljs.reader/read-string
+             #_(fn [d] (->>
+                        #_{:a 1 :b 2 :x "fox"}
+                        d
+                        (println)
+                        d))
+             :db-associations))
     db)))
-
-

@@ -19,7 +19,14 @@
   #_[binaryage/dirac "1.7.2"]
 
   [cider/cider-nrepl "0.28.3"]
-  [day8/shadow-git-inject "0.0.5"]]
+  [day8/shadow-git-inject "0.0.5"]
+
+  ;; TODO cleanup org.clojars.bost/utils:
+  ;; It produce a lot of warnings (probably because of differences clojure vs.
+  ;; clojurescript)
+  ;; [org.clojars.bost/utils "0.0.0-49-0x726c"]
+
+  ]
 
  :build-defaults
  {:build-hooks [(shadow-git-inject.core/hook)]}
