@@ -67,10 +67,8 @@
                                               .toTimeString
                                               (s/split " ")
                                               first)])
-     [:div.color-input
-      "Time color: "
-      [:input {:type "text"
-               :value time-color
+     [:div.color-input "Time color: "
+      [:input {:type "text" :value time-color
                :on-change (comp
                            update-time-color
                            (fn [x] (.-value x))
@@ -116,7 +114,7 @@
 
 (defn right [set-view db-vals]
   ((comp
-    (partial vector :div {:id "right"} [:f> simple-example]))
+    #_(partial vector :div {:id "right"} [:f> simple-example]))
    #_[:div (map (partial list-elem set-view) db-vals)]
    [Tab {:id "tab-panes"
          :panes
@@ -125,10 +123,13 @@
           {:menuItem "Tab 2" :render
            (fn []
              ((comp
-               reagent/as-element
-               (partial vector :div {:class "ui attached segment active tab"})
-               #_(partial take 3)
-               (partial map (fn [[k v]] [:span {:key k} [:div v]])))
+               (partial tab1 set-view)
+               (partial filter (fn [m] (subs/in?
+                                        ["Kalimera e. V. Deutsch-Griechische Kulturinitiative"
+                                         "Afro Deutsches Akademiker Netzwerk ADAN"
+                                         "Schwedischer Schulverein Stuttgart"]
+                                        (:name m))))
+               #_(partial take 2))
               db-vals))}
           #_{:menuItem "Tab 3" :render
              (when-let [db-associations

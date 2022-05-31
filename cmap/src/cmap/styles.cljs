@@ -1,10 +1,11 @@
 (ns cmap.styles
   (:require-macros
-    [garden.def :refer [defcssfn]])
+   [garden.def :refer [defcssfn]])
   (:require
-    [spade.core   :refer [defglobal defclass]]
-    [garden.units :refer [deg px]]
-    [garden.color :refer [rgba]]))
+   [clojure.string :as s]
+   [spade.core   :refer [defglobal defclass]]
+   [garden.units :refer [deg px]]
+   [garden.color :refer [rgba]]))
 
 (defclass wrapper [] {:resize "both"
                       ;; :padding "10mm"
@@ -15,7 +16,8 @@
                       ;; 1fr - 1 fraction of the free space
                       ;; "auto 1fr auto / auto 1fr auto"
                       :grid-template-rows "auto 1fr auto"
-                      :grid-template-columns "auto 1fr auto"
+                      :grid-template-columns
+                      (s/join " " ["auto" "1fr" #_"fit-content(30%)" "30%"])
                       :grid-template-areas "none"
                       })
 ;; "starts on column" / "end before column"
