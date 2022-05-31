@@ -76,43 +76,52 @@
                            (fn [x] (.-value x))
                            (fn [x] (.-target x)))}]]]))
 
-(defn tab1 [db-vals set-view]
+(defn list-elem [set-view {:keys [k name addr coords]}]
+  [:span {:key k :on-click (fn [e]
+                             (set-view
+                              ((comp
+                                clj->js
+                                (partial hash-map :zoom (+ 4 11) :center)
+                                fromLonLat)
+                               coords)))}
+   [:div {:class (s/join " " ["association-entry" "ng-star-inserted"])}
+    [:a
+     [:div {:class "icon"}
+      ((comp
+        #_(partial vector :div {:class "icon"})
+        (partial vector :i)
+        (partial hash-map :class)
+        (partial s/join " ")
+        (fn [c] (conj c (if (public-address? addr)
+                          "pubAddr" "noPubAddr"))))
+       ["icon-padding" "pi" "pi-map-marker" "ng-star-inserted"])
+      name]]]])
+
+(defn tab1 [set-view db-vals]
   ((comp
     reagent/as-element
-    (partial vector :div {:class "ui attached segment active tab"})
-    (partial vector :div {:class "sidebar-content ng-tns-c14-0"})
-    (partial vector :div {:class "association-entries ng-star-inserted"})
-    (partial
-     map
-     (fn [{:keys [k name addr coords]}]
-       [:span {:key k :on-click (fn [e]
-                                  (set-view
-                                   ((comp
-                                     clj->js
-                                     (partial hash-map :zoom (+ 4 11) :center)
-                                     fromLonLat)
-                                    coords)))}
-        [:div {:class "association-entry ng-star-inserted"}
-         [:a
-          [:div {:class "icon"}
-           ((comp
-             #_(partial vector :div {:class "icon"})
-             (partial vector :i)
-             (partial hash-map :class)
-             (partial s/join " ")
-             (fn [c] (conj c (if (public-address? addr)
-                               "pubAddr" "noPubAddr"))))
-            ["icon-padding" "pi" "pi-map-marker" "ng-star-inserted"])
-           name]]]]))
-    (fn [x] (def db x) x))
+    (partial vector :div
+             {:id "tab1-content"
+              :class (s/join " " [
+                                  (styles/tab-content)
+                                  "ui"
+                                  "attached"
+                                  "segment"
+                                  "active"
+                                  "tab"])})
+    #_(partial vector :div {:class "sidebar-content ng-tns-c14-0"})
+    #_(partial vector :div {:class "association-entries ng-star-inserted"})
+    (partial map (partial list-elem set-view)))
    db-vals))
 
-(defn right [db-vals set-view]
-  [:div
-   [:f> simple-example]
-   [Tab {:panes
+(defn right [set-view db-vals]
+  ((comp
+    (partial vector :div {:id "right"} [:f> simple-example]))
+   #_[:div (map (partial list-elem set-view) db-vals)]
+   [Tab {:id "tab-panes"
+         :panes
          [{:menuItem "Tab 1" :render
-           (fn [] (tab1 db-vals set-view))}
+           (fn [] (tab1 set-view db-vals))}
           {:menuItem "Tab 2" :render
            (fn []
              ((comp
@@ -131,8 +140,7 @@
                             :div {:class "ui attached segment active tab"})
                    (partial take 4)
                    (partial map (fn [[k v]] [:span {:key k} [:div v]])))
-                  db-vals)))}]}]])
-
+                  db-vals)))}]}]))
 
 (defn popup
   "addr has only 'keine öffentliche Anschrift'"
@@ -196,11 +204,10 @@
         [:div #_{:class "social-media-icon mini-icon"}
          [:img {:src "assets/instagram.png" :alt (de :cmap.lang/instagram)}]]]]]]]])
 
-(defn rlayers-map [db-vals view set-view]
+(defn rlayers-map [view set-view db-vals ]
   ((comp
     (partial conj
-             [RMap {#_#_:width "50%" :height #_"90vh" "100%"
-                    :initial view :view [view set-view]}
+             [RMap {:height "100%" :initial view :view [view set-view]}
               #_(let [this (reagent/current-component)]
                 (js/console.log "this" this))
               [ROSM]])
@@ -216,9 +223,7 @@
                                      "pub-addr.svg" "priv-addr.svg") )
                       :anchor [0.5 0.8]}]]
              ;; TODO RPopup toggle - i.e. max one popup can be displayed at the time
-             [RPopup {:trigger
-                      "click"
-                      #_"hover"
+             [RPopup {:trigger "click" #_"hover"
                       :class [(styles/example-overlay)]}
               [:div {:class [(styles/card)]}
                [:div {:class [(styles/card-header)]}
@@ -235,13 +240,12 @@
                         ;; TODO recenter map to Stuttgart city center
                         [9.163174 48.774901])]
     ((comp
-      #_(partial conj [:div {:class (styles/ex-container)}])
       (partial into [:div {:class (styles/wrapper)}]))
      [
       [:div {:class [(styles/header)]} #_"header"]
       #_[:div {:class [(styles/left)]} #_"left"]
-      [:div {:class [(styles/center)]} [:f> rlayers-map db-vals view set-view]]
-      [:div {:class [(styles/right)]} [right db-vals set-view]]
+      [:div {:class [(styles/center)]} [:f> rlayers-map view set-view db-vals]]
+      [:div {:class [(styles/right)]}  [right set-view db-vals]]
       [:div {:class [(styles/footer)]}
        (str @(re-frame/subscribe [::subs/name]) " v" config/version)]])))
 

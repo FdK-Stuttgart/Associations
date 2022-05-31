@@ -6,44 +6,6 @@
     [garden.units :refer [deg px]]
     [garden.color :refer [rgba]]))
 
-(defcssfn linear-gradient
- ([c1 p1 c2 p2]
-  [[c1 p1] [c2 p2]])
- ([dir c1 p1 c2 p2]
-  [dir [c1 p1] [c2 p2]]))
-
-#_(defglobal d [:body {:color :red}])
-(let [fun (fn [style-name params]
-            {:name style-name
-             :css (spade.runtime/compile-css [[:* {:box-sizing :border-box}]])})]
-  (def universal-selector
-    (spade.runtime/ensure-style!
-     :global (spade.util/factory->name fun) fun nil)))
-
-(defglobal defaults
-  [:body
-   {
-    ;; :color               :red
-    :background-color    :#ddd
-    :background-image    [(linear-gradient :white (px 2) :transparent (px 2))
-                          (linear-gradient (deg 90) :white (px 2) :transparent (px 2))
-                          (linear-gradient (rgba 255 255 255 0.3) (px 1) :transparent (px 1))
-                          (linear-gradient (deg 90) (rgba 255 255 255 0.3) (px 1) :transparent (px 1))]
-    :background-size     [[(px 100) (px 100)] [(px 100) (px 100)] [(px 20) (px 20)] [(px 20) (px 20)]]
-    :background-position [[(px -2) (px -2)] [(px -2) (px -2)] [(px -1) (px -1)] [(px -1) (px -1)]]}])
-
-(defclass ex-container []
-  {
-   :resize "both"
-   :position "relative"
-   :overflow "hidden"
-   :height "100%"
-   :width "100%"
-   :z-index "2"
-   :box-shadow "0 0 20px -10px hsl(187deg 97% 24%)"
-   :display "grid"
-   :align-items "center"})
-
 (defclass wrapper [] {:resize "both"
                       ;; :padding "10mm"
                       :height "100vh"
@@ -64,7 +26,7 @@
                       ;; :padding "2rem"
                       })
 (defclass left    [] {:grid-column "1 / 2" :background "lightblue" :padding "1mm"})
-(defclass center  [] {:grid-column "2 / 3" :background "coral"     :padding "3mm"
+(defclass center  [] {:grid-column "2 / 3" :background "coral"     :padding "1mm"
                       ;; :min-height "100vh"
                       ;; :min-height "fit-content"
                       })
@@ -75,10 +37,11 @@
                       ;; :padding "2rem"
                       :text-align "center"
                       })
-
-;; .left-sidebar, .right-sidebar {padding 1rem}
-
-(defclass level1 [] {:color :green})
+(defclass tab-content [] {
+                          :background "green"
+                          ;; :height "70vh"
+                          :overflow-y "auto"
+                          })
 
 ;; Create two unequal columns that floats next to each other
 (defclass column []
