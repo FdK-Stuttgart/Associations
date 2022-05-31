@@ -57,6 +57,9 @@
     (fn [m] (update-in m [:name] (fn [s] (s/replace s " e. V." ""))))
     (fn [m] (select-keys m [:associationid
                             :name
+                            :street
+                            :postcode-city
+                            :city
                             :activities_text
                             :goals_text
                             :addressline1
@@ -65,13 +68,8 @@
                             :lng
                             :lat
                             :imageurl
-                            :linkurl
-                            :linktext
-                            :socialmediaid
-                            :socialmediaplatform
-                            :socialmediaurl
-                            :socialmediaorderindex
-                            :socialmedialinktext]))
+                            :links
+                            :socialmedia]))
     first)
    ms))
 
@@ -80,9 +78,15 @@
   [sequence elem]
   (boolean (some (fn [e] (= elem e)) sequence)))
 
-(defn group-by-socialmedia [ms]
+(defn group-by-stuff [ms]
   ((comp
     (fn [m] (assoc m
+                   :postcode-city (str (:postcode m) " " (:city m))
+                   :links
+                   {
+                    :url  (keep :linkurl ms)
+                    :text (keep :linklinktext ms)
+                    }
                    :socialmedia
                    {
                     :ids         (keep :socialmediaid ms)
@@ -98,9 +102,12 @@
                            :socialmediaurl
                            :socialmediaorderindex
                            :socialmedialinktext
+                           :linklinktext
+                           :linkurl
                            ))))
    ms))
 
+;; TODO the 'e. V.' should appear in the popups but not in the right panel
 (re-frame/reg-sub
  :db-associations
  (fn [db _]
@@ -108,13 +115,16 @@
      (partial map adjust-associations)
      vals
      (partial group-by :associationid)
-     (fn [m] (def ns m) m)
-     (partial map group-by-socialmedia)
+     #_(fn [m] (def as m) m)
+     (partial map group-by-stuff)
      (partial map (partial sort-by :socialmediaorderindex))
      vals
      (partial group-by :associationid)
-     #_(partial filter (fn [m] (in? ["Kalimera e. V. Deutsch-Griechische Kulturinitiative"
-                                   "Afro Deutsches Akademiker Netzwerk ADAN"]
+     (fn [m] (def bs m) m)
+     (partial filter (fn [m] (in? [
+                                   #_"Kalimera e. V. Deutsch-Griechische Kulturinitiative"
+                                   "Afro Deutsches Akademiker Netzwerk ADAN"
+                                   "Africa Workshop Organisation e. V."]
                                   (:name m))))
      (partial map ids-to-names)
      (fn [_] "load saved data" data/associations)

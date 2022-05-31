@@ -146,6 +146,7 @@
 }
  .association-container, .osm-association-container .osm-association-inner-container {
 	 min-width: 200px;
+   max-width: min(95vw,360px);
 }
  .association-container p, .osm-association-container .osm-association-inner-container p, .association-container h2, .osm-association-container .osm-association-inner-container h2, .association-container h3, .osm-association-container .osm-association-inner-container h3, .association-container a, .osm-association-container .osm-association-inner-container a, .association-container li, .osm-association-container .osm-association-inner-container li, .association-container div, .osm-association-container .osm-association-inner-container div {
 	 -webkit-touch-callout: default;

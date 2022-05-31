@@ -45,52 +45,6 @@
                           :overflow-y "auto"
                           })
 
-;; Create two unequal columns that floats next to each other
-(defclass column []
-  {
-   ;; :flex "70%"
-   :float "left"
-   :padding (px 10)
-   :height (px 300)
-   })
-
-(defclass example-overlay []
-  {
-   :user-select "none"
-   :pointer-events "none"
-   :position "absolute"
-   :width "max-content"
-   :background-color "white"
-   :box-shadow "0 1px 4px rgba(0,0,0,0.2)"
-   :padding "15px"
-   :border-radius "10px"
-   :border "1px solid #cccccc"
-   })
-
-(defclass card []
-  {
-   :position "relative"
-   :display "flex"
-   :flex-direction "column"
-   :min-width "0"
-   :word-wrap "break-word"
-   :background-color "#fff"
-   :background-clip "border-box"
-   :border "1px solid rgba(0,0,0,.125)"
-   :border-radius "0.25rem"
-   })
-
-;; .card-header:first-child {
-;;  border-radius: calc(0.25rem - 1px) calc(0.25rem - 1px) 0 0;
-;;  }
-(defclass card-header []
-  {
-   :padding "0.5rem 1rem"
-   :margin-bottom "0"
-   :background-color "rgba(0,0,0,.03)"
-   :border-bottom "1px solid rgba(0,0,0,.125)"
-   })
-
 ;; .example-map p, .jumbotron p {
 ;;     margin: 0;
 ;;     padding: 0;

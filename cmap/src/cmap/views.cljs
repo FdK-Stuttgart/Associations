@@ -119,7 +119,14 @@
    [Tab {:id "tab-panes"
          :panes
          [{:menuItem "Tab 1" :render
-           (fn [] (tab1 set-view db-vals))}
+           (fn []
+             ((comp
+               (partial tab1 set-view)
+               #_(partial filter (fn [m] (subs/in?
+                                        ["Afro Deutsches Akademiker Netzwerk ADAN"]
+                                        (:name m))))
+               #_(partial take 2))
+              db-vals))}
           {:menuItem "Tab 2" :render
            (fn []
              ((comp
@@ -145,67 +152,89 @@
 
 (defn popup
   "addr has only 'keine öffentliche Anschrift'"
-  [{:keys [name addr districts email activities goals
-           imageurl linkurl linktext]}]
+  [{:keys [name addr street postcode-city districts email activities goals
+           imageurl links socialmedia] :as prm}]
   [:div
-   #_{:class "on-top"
-      :style "position: absolute; pointer-events: auto; transform: translate(-50%, -100%) translate(510px, 603px);"}
+   {:class "on-top"
+    ;; :style "position: absolute; pointer-events: auto; transform: translate(-50%, -100%) translate(510px, 603px);"
+    }
    [:div
     ;; _ngcontent-ugm-c34=""
-    #_#_{:class "association-container osm-association-container"}
+    {:class "association-container osm-association-container"}
     [:a
      ;; _ngcontent-ugm-c34=""
-     #_{:class "association-container-close-icon" :id "popup-close"
-        :style "cursor: pointer;"}
-     [:i #_{:class "pi pi-times"}]]
-    [:div #_{:class "osm-association-inner-container"}
-     [:div #_{:class "association-title"}
-      [:h2 name]]
-     [:div #_{:class "association-images"}
-      [:div #_{:class "association-image"}
+     {:class "association-container-close-icon" :id "popup-close"
+      ;; :style "cursor: pointer;"
+      }
+     [:i {:class "pi pi-times"}]]
+    [:div {:class "osm-association-inner-container"}
+     [:div {:class "association-title"} [:h2 name]]
+     [:div {:class "association-images"}
+      [:div {:class "association-image"}
        [:img {:src imageurl :alt ""}]]]
-     [:div #_{:class "association-address"}
-      [:p #_{:class "name"} [:strong addr]]]
-     [:div #_{:class "association-contacts"}
-      [:div #_{:class "association-contact"}]
-      [:div #_{:class "association-contact"}]
-      [:div #_{:class "association-contact"}]
-      [:div #_{:class "association-contact"}
-       [:div #_{:class "association-contact"}
-        [:div #_{:class "association-contact-row"}
-         [:div #_{:class "social-media-icon mini-icon"}
+     [:div {:class "association-address"}
+      [:p {:class "street"} street]
+      [:p {:class "postcode-city"} postcode-city]
+      [:p {:class "name"} [:strong addr]]]
+     [:div {:class "association-contacts"}
+      [:div {:class "association-contact"}]
+      [:div {:class "association-contact"}]
+      [:div {:class "association-contact"}]
+      [:div {:class "association-contact"}
+       [:div {:class "association-contact"}
+        [:div {:class "association-contact-row"}
+         [:div {:class "social-media-icon mini-icon"}
           [:img {:src "assets/mail.png" :alt ""}]]
-         [:p #_{:class "mail"}
+         [:p {:class "mail"}
           [:a {:href (str "mailto:" email)} email]]]]]]
-     [:div #_{:class "association-description"}
+     [:div {:class "association-description"}
       [:h3 (de :cmap.lang/goals)] goals]
-     [:div #_{:class "association-description"}
+     [:div {:class "association-description"}
       [:h3 (de :cmap.lang/activities)] activities]
-     [:div #_{:class "association-active-in"}
+     [:div {:class "association-active-in"}
       [:h3 (de :cmap.lang/activity-areas)]
-      [:div #_{:class "association-chips-container"}
+      [:div {:class "association-chips-container"}
        (map-indexed (fn [idx elem]
-                      (vector :div {:key idx} #_{:class "association-chips"}))
+                      (vector :div (conj {:key idx}
+                                         {:class "association-chips"})
+                              elem))
                     districts)]]
-     [:div #_{:class "association-links"}
+     [:div {:class "association-links"}
       [:h3 "Links"]
       [:ul
-       [:li [:a {:href linkurl
-                 :title linktext :target "_blank"}
-             (if (empty? linktext) linkurl linktext)]]]]
-     [:div #_{:class "association-social-media"}
-      [:div #_{:class "social-media-link"}
-       [:a {:href "https://www.facebook.com/adanetzwerk"
-            :title (de :cmap.lang/facebook) :target "_blank"}
-        [:div #_{:class "social-media-icon mini-icon"}
-         [:img {:src "assets/facebook.png" :alt (de :cmap.lang/facebook)}]]]]
-      [:div #_{:class "social-media-link"}
-       [:a {:href "https://www.instagram.com/adanetzwerk/?hl=de"
-            :title (de :cmap.lang/instagram) :target "_blank"}
-        [:div #_{:class "social-media-icon mini-icon"}
-         [:img {:src "assets/instagram.png" :alt (de :cmap.lang/instagram)}]]]]]]]])
+       (map (fn [idx url text]
+              [:li {:key idx}
+               [:a {:href url
+                    :title text :target "_blank"}
+                    (if (empty? text) url text)]])
+            (range (count (:url links)))
+            (:url links)
+            (:text links))]]
+     #_[:div {:class "association-social-media"}
+        [:div {:class "social-media-link"}
+         [:a {:href "https://www.facebook.com/adanetzwerk"
+              :title (de :cmap.lang/facebook) :target "_blank"}
+          [:div {:class "social-media-icon mini-icon"}
+           [:img {:src "assets/facebook.png" :alt (de :cmap.lang/facebook)}]]]]
+        [:div {:class "social-media-link"}
+         [:a {:href "https://www.instagram.com/adanetzwerk/?hl=de"
+              :title (de :cmap.lang/instagram) :target "_blank"}
+          [:div {:class "social-media-icon mini-icon"}
+           [:img {:src "assets/instagram.png" :alt (de :cmap.lang/instagram)}]]]]]
 
-(defn rlayers-map [view set-view db-vals ]
+     [:div {:class "association-social-media"}
+      ((comp
+        (partial map-indexed
+                 (fn [idx m]
+                   [:div {:key idx :class "social-media-link"}
+                    [:a {:href (:url m)
+                         :title (de :cmap.lang/facebook) :target "_blank"}
+                     [:div {:class "social-media-icon mini-icon"}
+                      [:img {:src "assets/facebook.png"
+                             :alt (de :cmap.lang/facebook)}]]]])))
+       socialmedia)]]]])
+
+(defn rlayers-map [view set-view db-vals]
   ((comp
     (partial conj
              [RMap {:height "100%" :initial view :view [view set-view]}
@@ -214,36 +243,30 @@
               [ROSM]])
     (partial into [RLayerVector {:zIndex 10}])
     (partial
-     mapv (fn [{:keys [addr coords] :as prm}]
-            [RFeature
-             {:geometry (new geom/Point
-                             (fromLonLat coords))}
-             [RStyle
-              [RIcon {:src
-                      (str "/img/" (if (public-address? addr)
-                                     "pub-addr.svg" "priv-addr.svg") )
-                      :anchor [0.5 0.8]}]]
-             ;; TODO RPopup toggle - i.e. max one popup can be displayed at the time
-             [RPopup {:trigger "click" #_"hover"
-                      :class [(styles/example-overlay)]}
-              [:div {:class [(styles/card)]}
-               [:div {:class [(styles/card-header)]}
-                [popup prm]]
-               #_[:p {:class "card-body text-center"} "Popup on click"]]]])))
+     map (fn [{:keys [addr coords] :as prm}]
+           [RFeature
+            {:geometry (new geom/Point
+                            (fromLonLat coords))}
+            [RStyle
+             [RIcon {:src
+                     (str "/img/" (if (public-address? addr)
+                                    "pub-addr.svg" "priv-addr.svg") )
+                     :anchor [0.5 0.8]}]]
+            ;; TODO RPopup toggle - i.e. max one popup can be displayed at the time
+            [RPopup {:trigger "click" #_"hover"} [popup prm]]])))
    db-vals))
 
 (defn go [db-vals]
-  (let [[view set-view] ((comp
-                         react/useState
-                         clj->js
-                         (partial hash-map :zoom 11 :center)
-                         fromLonLat)
-                        ;; TODO recenter map to Stuttgart city center
-                        [9.163174 48.774901])]
-    ((comp
-      (partial into [:div {:class (styles/wrapper)}]))
-     [
-      [:div {:class [(styles/header)]} #_"header"]
+  ((comp
+    (partial into [:div {:class (styles/wrapper)}]))
+   (let [[view set-view] ((comp
+                           react/useState
+                           clj->js
+                           (partial hash-map :zoom 11 :center)
+                           fromLonLat)
+                          ;; TODO recenter map to Stuttgart city center
+                          [9.163174 48.774901])]
+     [[:div {:class [(styles/header)]} #_"header"]
       #_[:div {:class [(styles/left)]} #_"left"]
       [:div {:class [(styles/center)]} [:f> rlayers-map view set-view db-vals]]
       [:div {:class [(styles/right)]}  [right set-view db-vals]]
