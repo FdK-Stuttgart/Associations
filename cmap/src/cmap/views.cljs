@@ -161,6 +161,33 @@
        name)
    105))
 
+(def social-media
+  {"YouTube"   {:title (de :cmap.lang/youtube)
+                :img {:src "assets/youtube.png"
+                      :alt (de :cmap.lang/youtube)}}
+   "LinkedIn" {:title (de :cmap.lang/linkedin)
+               :img {:src "assets/linkedin.png"
+                     :alt (de :cmap.lang/linkedin)}}
+   "Messenger" {:title (de :cmap.lang/messenger)
+                :img {:src "assets/messenger.png"
+                      :alt (de :cmap.lang/messenger)}}
+   "Snapchat" {:title (de :cmap.lang/snapchat)
+               :img {:src "assets/snapchat.png"
+                     :alt (de :cmap.lang/snapchat)}}
+   "Twitter" {:title (de :cmap.lang/twitter)
+              :img {:src "assets/twitter.png"
+                    :alt (de :cmap.lang/twitter)}}
+   "WhatsApp" {:title (de :cmap.lang/whatsapp)
+               :img {:src "assets/whatsapp.png"
+                     :alt (de :cmap.lang/whatsapp)}}
+   "Facebook"  {:title (de :cmap.lang/facebook)
+                :img {:src "assets/facebook.png"
+                      :alt (de :cmap.lang/facebook)}}
+
+   "Instagram" {:title (de :cmap.lang/instagram)
+                :img {:src "assets/instagram.png"
+                      :alt (de :cmap.lang/instagram)}}})
+
 (defn popup
   "addr has only 'keine öffentliche Anschrift'"
   [idx {:keys [name addr street postcode-city districts email activities goals
@@ -170,8 +197,7 @@
     :class ["on-top"
             #_(styles/pos)]
     ;; :style "position: absolute; pointer-events: auto; transform: translate(-50%, -100%) translate(510px, 603px);"
-    :style {:transform (str "translate(-50%, -" (translate name) "%)")}
-    }
+    :style {:transform (str "translate(-50%, -" (translate name) "%)")}}
    [:div
     ;; _ngcontent-ugm-c34=""
     {:class "association-container osm-association-container"}
@@ -221,15 +247,15 @@
                 (range (count (:url links))) (:url links) (:text links))]]
      [:div {:class "association-social-media"}
       ((comp
-        (partial map-indexed
-                 (fn [idx m]
+        (partial map
+                 (fn [idx]
                    [:div {:key idx :class "social-media-link"}
-                    [:a {:href (:url m)
-                         :title (de :cmap.lang/facebook) :target "_blank"}
-                     [:div {:class "social-media-icon mini-icon"}
-                      [:img {:src "assets/facebook.png"
-                             :alt (de :cmap.lang/facebook)}]]]])))
-       socialmedia)]]]])
+                    (let [sm-name (nth (get socialmedia :platforms) idx)]
+                      [:a {:href (nth (get socialmedia :urls) idx) :target "_blank"
+                           :title (get-in social-media [sm-name :title])}
+                       [:div {:class "social-media-icon mini-icon"}
+                        [:img (get-in social-media [sm-name :img])]]])])))
+       (range (count (:ids socialmedia))))]]]])
 
 (defn feature [idx {:keys [addr coords] :as prm}]
   [RFeature

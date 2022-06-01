@@ -112,19 +112,21 @@
  :db-associations
  (fn [db _]
    ((comp
+     (fn [m] (def as m) m)
      (partial map adjust-associations)
      vals
      (partial group-by :associationid)
-     #_(fn [m] (def as m) m)
      (partial map group-by-stuff)
      (partial map (partial sort-by :socialmediaorderindex))
      vals
      (partial group-by :associationid)
-     (fn [m] (def bs m) m)
-     (partial filter (fn [m] (in? [
+     #_(fn [m] (def bs m) m)
+     #_(partial filter (fn [m] (in? [
+                                     ;; Evidence and COEXIST are overlapping
+                                   "Evidence e. V."
                                    #_"Kalimera e. V. Deutsch-Griechische Kulturinitiative"
-                                   "Afro Deutsches Akademiker Netzwerk ADAN"
-                                   "Africa Workshop Organisation e. V."]
+                                   #_"Afro Deutsches Akademiker Netzwerk ADAN"
+                                   #_"Africa Workshop Organisation e. V."]
                                   (:name m))))
      (partial map ids-to-names)
      (fn [_] "load saved data" data/associations)
