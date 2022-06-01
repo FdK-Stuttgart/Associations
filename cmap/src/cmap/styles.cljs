@@ -45,6 +45,19 @@
                           :overflow-y "auto"
                           })
 
+(defclass pos []
+  {
+   ;; :position "absolute"
+   ;; :positioning "center-center"
+   ;; :pointer-events "auto"
+   :transform "translate(-50%, -100%)"
+   ;; :transform-origin "0% 100px"
+   ;; :transform "translate(410px, 724px)"
+   ;; :transform "translate(-50%, -100%) translate(410px, 724px)"
+   ;; :transform "translate(-50%, -100%) translate(510px, 603px)"
+   }
+  )
+
 ;; .example-map p, .jumbotron p {
 ;;     margin: 0;
 ;;     padding: 0;

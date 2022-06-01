@@ -150,13 +150,27 @@
                    (partial map (fn [[k v]] [:span {:key k} [:div v]])))
                   db-vals)))}]}]))
 
+;; TODO better transform & translate. E.g. in the class
+(defn translate [name]
+  (or (get
+       {
+        #_"Kalimera e. V. Deutsch-Griechische Kulturinitiative"
+        "Afro Deutsches Akademiker Netzwerk ADAN" 106
+        "Africa Workshop Organisation" 108
+        }
+       name)
+   105))
+
 (defn popup
   "addr has only 'keine öffentliche Anschrift'"
-  [{:keys [name addr street postcode-city districts email activities goals
-           imageurl links socialmedia] :as prm}]
+  [idx {:keys [name addr street postcode-city districts email activities goals
+               imageurl links socialmedia] :as prm}]
   [:div
-   {:class "on-top"
+   {:id (str "p" idx)
+    :class ["on-top"
+            #_(styles/pos)]
     ;; :style "position: absolute; pointer-events: auto; transform: translate(-50%, -100%) translate(510px, 603px);"
+    :style {:transform (str "translate(-50%, -" (translate name) "%)")}
     }
    [:div
     ;; _ngcontent-ugm-c34=""
@@ -201,27 +215,10 @@
                     districts)]]
      [:div {:class "association-links"}
       [:h3 "Links"]
-      [:ul
-       (map (fn [idx url text]
-              [:li {:key idx}
-               [:a {:href url
-                    :title text :target "_blank"}
-                    (if (empty? text) url text)]])
-            (range (count (:url links)))
-            (:url links)
-            (:text links))]]
-     #_[:div {:class "association-social-media"}
-        [:div {:class "social-media-link"}
-         [:a {:href "https://www.facebook.com/adanetzwerk"
-              :title (de :cmap.lang/facebook) :target "_blank"}
-          [:div {:class "social-media-icon mini-icon"}
-           [:img {:src "assets/facebook.png" :alt (de :cmap.lang/facebook)}]]]]
-        [:div {:class "social-media-link"}
-         [:a {:href "https://www.instagram.com/adanetzwerk/?hl=de"
-              :title (de :cmap.lang/instagram) :target "_blank"}
-          [:div {:class "social-media-icon mini-icon"}
-           [:img {:src "assets/instagram.png" :alt (de :cmap.lang/instagram)}]]]]]
-
+      [:ul (map (fn [idx url text]
+                  [:li {:key idx} [:a {:href url :title text :target "_blank"}
+                                   (if (empty? text) url text)]])
+                (range (count (:url links))) (:url links) (:text links))]]
      [:div {:class "association-social-media"}
       ((comp
         (partial map-indexed
@@ -234,6 +231,31 @@
                              :alt (de :cmap.lang/facebook)}]]]])))
        socialmedia)]]]])
 
+(defn feature [idx {:keys [addr coords] :as prm}]
+  [RFeature
+   {:geometry (new geom/Point (fromLonLat coords))
+    :on-click (fn [e]
+                #_(.log js/console "RFeature on-click" e)
+                #_
+                (let [p (-> js/document
+                            (.getElementById (str "p" idx))
+                            (.-parentNode)
+                            (.-parentNode))
+                      c (-> js/window (.getComputedStyle p nil))]
+                  (.log js/console "RFeature on-click"
+                        c (-> c (.getPropertyValue "-webkit-transform"))
+                        (-> c (.getPropertyValue "height")))))}
+   [RStyle
+    [RIcon {#_#_:on-click (fn [e] (.log js/console "RIcon on-click" e))
+            :src
+            (str "/img/" (if (public-address? addr)
+                           "pub-addr.svg" "priv-addr.svg") )
+            :anchor [0.5 0.8]}]]
+   ;; TODO RPopup toggle - i.e. max one popup can be displayed at the time
+   [RPopup {:class "" :trigger "click" #_"hover"
+            #_#_:on-click (fn [e] (.log js/console "RPopup on-click" e))}
+    [popup idx prm]]])
+
 (defn rlayers-map [view set-view db-vals]
   ((comp
     (partial conj
@@ -242,18 +264,7 @@
                 (js/console.log "this" this))
               [ROSM]])
     (partial into [RLayerVector {:zIndex 10}])
-    (partial
-     map (fn [{:keys [addr coords] :as prm}]
-           [RFeature
-            {:geometry (new geom/Point
-                            (fromLonLat coords))}
-            [RStyle
-             [RIcon {:src
-                     (str "/img/" (if (public-address? addr)
-                                    "pub-addr.svg" "priv-addr.svg") )
-                     :anchor [0.5 0.8]}]]
-            ;; TODO RPopup toggle - i.e. max one popup can be displayed at the time
-            [RPopup {:trigger "click" #_"hover"} [popup prm]]])))
+    (partial map-indexed feature))
    db-vals))
 
 (defn go [db-vals]
