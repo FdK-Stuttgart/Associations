@@ -240,7 +240,7 @@
                               elem))
                     districts)]]
      [:div {:class "association-links"}
-      [:h3 "Links"]
+      [:h3 (de :cmap.lang/links)]
       [:ul (map (fn [idx url text]
                   [:li {:key idx} [:a {:href url :title text :target "_blank"}
                                    (if (empty? text) url text)]])
