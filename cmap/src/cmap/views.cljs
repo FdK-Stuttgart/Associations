@@ -194,18 +194,10 @@
                imageurl links socialmedia] :as prm}]
   [:div
    {:id (str "p" idx)
-    :class ["on-top"
-            #_(styles/pos)]
-    ;; :style "position: absolute; pointer-events: auto; transform: translate(-50%, -100%) translate(510px, 603px);"
+    :class ["on-top" #_(styles/pos)]
     :style {:transform (str "translate(-50%, -" (translate name) "%)")}}
-   [:div
-    ;; _ngcontent-ugm-c34=""
-    {:class "association-container osm-association-container"}
-    [:a
-     ;; _ngcontent-ugm-c34=""
-     {:class "association-container-close-icon" :id "popup-close"
-      ;; :style "cursor: pointer;"
-      }
+   [:div {:class "association-container osm-association-container"}
+    [:a {:class "association-container-close-icon" :id "popup-close"}
      [:i {:class "pi pi-times"}]]
     [:div {:class "osm-association-inner-container"}
      [:div {:class "association-title"} [:h2 name]]
@@ -217,9 +209,6 @@
       [:p {:class "postcode-city"} postcode-city]
       [:p {:class "name"} [:strong addr]]]
      [:div {:class "association-contacts"}
-      [:div {:class "association-contact"}]
-      [:div {:class "association-contact"}]
-      [:div {:class "association-contact"}]
       [:div {:class "association-contact"}
        [:div {:class "association-contact"}
         [:div {:class "association-contact-row"}
@@ -251,10 +240,12 @@
                  (fn [idx]
                    [:div {:key idx :class "social-media-link"}
                     (let [sm-name (nth (get socialmedia :platforms) idx)]
-                      [:a {:href (nth (get socialmedia :urls) idx) :target "_blank"
+                      [:a {:href (nth (get socialmedia :urls) idx)
+                           :target "_blank"
                            :title (get-in social-media [sm-name :title])}
                        [:div {:class "social-media-icon mini-icon"}
-                        [:img (get-in social-media [sm-name :img])]]])])))
+                        [:img (get-in social-media [sm-name :img])]]])]))
+        )
        (range (count (:ids socialmedia))))]]]])
 
 (defn feature [idx {:keys [addr coords] :as prm}]
