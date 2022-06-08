@@ -117,6 +117,10 @@
                            ))))
    ms))
 
+;; TODO overlapping associations:
+;; Evidence COEXIST
+;; FdK Kalimera
+
 ;; TODO the 'e. V.' should appear in the popups but not in the right panel
 (re-frame/reg-sub
  :db-associations
@@ -131,14 +135,16 @@
      (partial map (partial sort-by :socialmediaorderindex))
      vals
      (partial group-by :associationid)
-     #_(fn [m] (def bs m) m)
-     #_(partial filter (fn [m] (in? [
-                                     ;; Evidence and COEXIST are overlapping
-                                   "Evidence e. V."
-                                   #_"Kalimera e. V. Deutsch-Griechische Kulturinitiative"
-                                   #_"Afro Deutsches Akademiker Netzwerk ADAN"
-                                   #_"Africa Workshop Organisation e. V."]
-                                  (:name m))))
+     #_(partial filter
+              (comp (partial in?
+                             s/includes?
+                             [
+                              "Evidence"
+                              "Forum der Kulturen"
+                              #_"Kalimera"
+                              #_"Afro Deutsches Akademiker Netzwerk ADAN"
+                              #_"Africa Workshop Organisation"])
+                    :name))
      (partial map ids-to-names)
      (fn [_] "load saved data" data/associations)
      #_(comp cljs.reader/read-string
@@ -148,4 +154,20 @@
                         (println)
                         d))
              :db-associations))
+    db)))
+
+;; Docstring doesn't work for re-frame/reg-sub
+;; "Center is the location the FdK"
+(re-frame/reg-sub
+ :center-map
+ (fn [db _]
+   ((comp
+     vals
+     (fn [m] (select-keys m [:lng :lat]))
+     first
+     (partial filter
+              (comp (partial in? s/includes? ["Forum der Kulturen"])
+                    :name))
+     (partial map ids-to-names)
+     (fn [_] "load saved data" data/associations))
     db)))

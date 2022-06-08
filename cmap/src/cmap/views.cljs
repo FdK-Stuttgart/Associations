@@ -264,7 +264,7 @@
     (partial map-indexed feature))
    db-vals))
 
-(defn go [db-vals]
+(defn go [db-vals center-map]
   ((comp
     (partial into [:div {:class (styles/wrapper)}]))
    (let [[view set-view] ((comp
@@ -272,8 +272,7 @@
                            clj->js
                            (partial hash-map :zoom 11 :center)
                            fromLonLat)
-                          ;; TODO recenter map to Stuttgart city center
-                          [9.163174 48.774901])]
+                          center-map)]
      [[:div {:class [(styles/header)]} #_"header"]
       #_[:div {:class [(styles/left)]} #_"left"]
       [:div {:class [(styles/center)]} [:f> rlayers-map view set-view db-vals]]
@@ -283,4 +282,4 @@
 
 (defn main-panel []
   (when-let [db-associations @(re-frame/subscribe [:db-associations])]
-    [:f> go db-associations]))
+    [:f> go db-associations @(re-frame/subscribe [:center-map])]))
