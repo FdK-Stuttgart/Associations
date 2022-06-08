@@ -74,9 +74,19 @@
    ms))
 
 (defn in?
-  "true if `sequence` contains `elem`. See (contains? (set sequence) elem)"
-  [sequence elem]
-  (boolean (some (fn [e] (= elem e)) sequence)))
+  "Generic. Returns true if `sequence` \"contains\" `elem`.
+  See (contains? (set sequence) elem). E.g.:
+  (in?                             [\"a\" \"b\" \"c\"] \"b\")
+  (in? cljs.core/=                 [\"a\" \"b\" \"c\"] \"b\")
+  (in? clojure.string/includes?    [\"a\" \"b\" \"c\"] \"xyzb\")
+  (in? clojure.string/starts-with? [\"a\" \"b\" \"c\"] \"cxyz\")
+  "
+  ([sequence elem] (in? cljs.core/= sequence elem))
+  ([matching-fun patterns full-string]
+   ((comp
+     boolean
+     (partial some (partial matching-fun full-string)))
+    patterns)))
 
 (defn group-by-stuff [ms]
   ((comp
