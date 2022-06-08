@@ -113,6 +113,7 @@
  (fn [db _]
    ((comp
      (fn [m] (def as m) m)
+     (partial sort-by :name)
      (partial map adjust-associations)
      vals
      (partial group-by :associationid)
