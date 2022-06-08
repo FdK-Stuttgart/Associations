@@ -5,15 +5,12 @@
    [cmap.subs :as subs]
    [cmap.lang :refer [de]]
    [cmap.config :as config]
+   [cmap.react-components :as rc]
    [reagent.core :as reagent]
 
    ["ol/proj" :as proj]
    ["ol/geom" :as geom]
 
-   ["rlayers" :as rl]
-   ["rlayers/style" :as style]
-
-   ["semantic-ui-react" :as rsu]
    ;; TODO use import instead of <link rel="stylesheet" ...>
    ;; ["semantic-ui-css/components/tab" :as csu]
    ;; ["ol/css" :as css]
@@ -23,21 +20,6 @@
    ))
 
 (defn fromLonLat [[lon lat]] (.fromLonLat proj (clj->js [lon lat])))
-
-(def RMap (reagent/adapt-react-class rl/RMap))
-(def ROSM (reagent/adapt-react-class rl/ROSM))
-(def RLayerVector (reagent/adapt-react-class rl/RLayerVector))
-(def RFeature (reagent/adapt-react-class rl/RFeature))
-(def RPopup (reagent/adapt-react-class rl/RPopup))
-
-;; import { RStyle, RIcon, RFill, RStroke } from "rlayers/style";
-(def RStyle (reagent/adapt-react-class style/RStyle))
-(def RIcon (reagent/adapt-react-class style/RIcon))
-
-;; (.log js/console "RMap" RMap)
-;; (.log js/console "ROSM" ROSM)
-
-(def Tab (reagent/adapt-react-class rsu/Tab))
 
 ;; primeNgPubAddr           = 'pi pi-map-marker pubAddr';
 ;; primeNgNoPubAddr         = 'pi pi-map-marker noPubAddr';
@@ -100,13 +82,8 @@
     reagent/as-element
     (partial vector :div
              {:id "tab1-content"
-              :class (s/join " " [
-                                  (styles/tab-content)
-                                  "ui"
-                                  "attached"
-                                  "segment"
-                                  "active"
-                                  "tab"])})
+              :class (s/join " " [(styles/tab-content)
+                                  "ui" "attached" "segment" "active" "tab"])})
     #_(partial vector :div {:class "sidebar-content ng-tns-c14-0"})
     #_(partial vector :div {:class "association-entries ng-star-inserted"})
     (partial map (partial list-elem set-view)))
@@ -116,39 +93,40 @@
   ((comp
     #_(partial vector :div {:id "right"} [:f> simple-example]))
    #_[:div (map (partial list-elem set-view) db-vals)]
-   [Tab {:id "tab-panes"
-         :panes
-         [{:menuItem "Tab 1" :render
+   [rc/Tab
+    {:id "tab-panes"
+     :panes
+     [{:menuItem "Tab 1" :render
+       (fn []
+         ((comp
+           (partial tab1 set-view)
+           #_(partial filter (fn [m] (subs/in?
+                                      ["Afro Deutsches Akademiker Netzwerk ADAN"]
+                                      (:name m))))
+           #_(partial take 2))
+          db-vals))}
+      {:menuItem "Tab 2" :render
+       (fn []
+         ((comp
+           (partial tab1 set-view)
+           (partial filter (fn [m] (subs/in?
+                                    ["Kalimera e. V. Deutsch-Griechische Kulturinitiative"
+                                     "Afro Deutsches Akademiker Netzwerk ADAN"
+                                     "Schwedischer Schulverein Stuttgart"]
+                                    (:name m))))
+           #_(partial take 2))
+          db-vals))}
+      #_{:menuItem "Tab 3" :render
+         (when-let [db-associations
+                    @(re-frame/subscribe [:db-associations])]
            (fn []
              ((comp
-               (partial tab1 set-view)
-               #_(partial filter (fn [m] (subs/in?
-                                        ["Afro Deutsches Akademiker Netzwerk ADAN"]
-                                        (:name m))))
-               #_(partial take 2))
-              db-vals))}
-          {:menuItem "Tab 2" :render
-           (fn []
-             ((comp
-               (partial tab1 set-view)
-               (partial filter (fn [m] (subs/in?
-                                        ["Kalimera e. V. Deutsch-Griechische Kulturinitiative"
-                                         "Afro Deutsches Akademiker Netzwerk ADAN"
-                                         "Schwedischer Schulverein Stuttgart"]
-                                        (:name m))))
-               #_(partial take 2))
-              db-vals))}
-          #_{:menuItem "Tab 3" :render
-             (when-let [db-associations
-                        @(re-frame/subscribe [:db-associations])]
-               (fn []
-                 ((comp
-                   reagent/as-element
-                   (partial vector
-                            :div {:class "ui attached segment active tab"})
-                   (partial take 4)
-                   (partial map (fn [[k v]] [:span {:key k} [:div v]])))
-                  db-vals)))}]}]))
+               reagent/as-element
+               (partial vector
+                        :div {:class "ui attached segment active tab"})
+               (partial take 4)
+               (partial map (fn [[k v]] [:span {:key k} [:div v]])))
+              db-vals)))}]}]))
 
 ;; TODO better transform & translate. E.g. in the class
 (defn translate [name]
@@ -159,7 +137,7 @@
         "Africa Workshop Organisation" 108
         }
        name)
-   105))
+      105))
 
 (def social-media
   {"YouTube"   {:title (de :cmap.lang/youtube)
@@ -249,38 +227,40 @@
        (range (count (:ids socialmedia))))]]]])
 
 (defn feature [idx {:keys [addr coords] :as prm}]
-  [RFeature
+  [rc/RFeature
    {:geometry (new geom/Point (fromLonLat coords))
     :on-click (fn [e]
-                #_(.log js/console "RFeature on-click" e)
+                #_(.log js/console "rc/RFeature on-click" e)
                 #_
                 (let [p (-> js/document
                             (.getElementById (str "p" idx))
                             (.-parentNode)
                             (.-parentNode))
                       c (-> js/window (.getComputedStyle p nil))]
-                  (.log js/console "RFeature on-click"
+                  (.log js/console "rc/RFeature on-click"
                         c (-> c (.getPropertyValue "-webkit-transform"))
                         (-> c (.getPropertyValue "height")))))}
-   [RStyle
-    [RIcon {#_#_:on-click (fn [e] (.log js/console "RIcon on-click" e))
-            :src
-            (str "/img/" (if (public-address? addr)
-                           "pub-addr.svg" "priv-addr.svg") )
-            :anchor [0.5 0.8]}]]
-   ;; TODO RPopup toggle - i.e. max one popup can be displayed at the time
-   [RPopup {:class "" :trigger "click" #_"hover"
-            #_#_:on-click (fn [e] (.log js/console "RPopup on-click" e))}
+   [rc/RStyle
+    [rc/RIcon
+     {#_#_:on-click (fn [e] (.log js/console "rc/RIcon on-click" e))
+      :src
+      (str "/img/" (if (public-address? addr)
+                     "pub-addr.svg" "priv-addr.svg") )
+      :anchor [0.5 0.8]}]]
+   ;; TODO rc/RPopup toggle - i.e. max one popup can be displayed at the time
+   [rc/RPopup {:class "" :trigger "click" #_"hover"
+               #_#_:on-click (fn [e] (.log js/console "rc/RPopup on-click" e))}
     [popup idx prm]]])
 
 (defn rlayers-map [view set-view db-vals]
   ((comp
     (partial conj
-             [RMap {:height "100%" :initial view :view [view set-view]}
+             [rc/RMap
+              {:height "100%" :initial view :view [view set-view]}
               #_(let [this (reagent/current-component)]
-                (js/console.log "this" this))
-              [ROSM]])
-    (partial into [RLayerVector {:zIndex 10}])
+                  (js/console.log "this" this))
+              [rc/ROSM]])
+    (partial into [rc/RLayerVector {:zIndex 10}])
     (partial map-indexed feature))
    db-vals))
 
