@@ -41,63 +41,7 @@
 </head>
 
 <body>
-    <div id="root"></div>
-    <script type="text/javascript">
-     const coords = {
-       origin: [2.364, 48.82],
-       ArcDeTriomphe: [2.295, 48.8737],
-       PlaceDItalie: [2.355, 48.831],
-       Bastille: [2.369, 48.853],
-       TourEiffel: [2.294, 48.858],
-       Montmartre: [2.342, 48.887],
-     };
-     const el =
-       React.createElement(
-         rlayers.RMap,
-         {
-           className: 'map',
-           initial: { center: ol.proj.fromLonLat([2.364, 48.82]), zoom: 11 }
-         },
-         React.createElement(
-           rlayers.ROSM
-           /* attributes must NOT be specified */
-         ),
-         React.createElement(
-           rlayers.RLayerVector, { zIndex: 10 },
-           React.createElement(
-             rlayers.RStyle.RStyle,
-             { /* attributes is a mandatory parameter even when empty */ },
-             React.createElement(
-               rlayers.RStyle.RIcon,
-               { src: './img/location.svg', anchor: [0.5, 0.8] })
-           ),
-           React.createElement(
-             rlayers.RFeature,
-             {
-               geometry: new ol.geom.Point(ol.proj.fromLonLat(coords.origin)),
-               onClick: (e) => {
-                 // TODO call this function from dev console
-                 console.log('RFeature onClick');
-                 e.map.getView().fit(
-                   e.target.getGeometry().getExtent(),
-                   {duration: 250, maxZoom: 15,})
-               }
-             },
-             React.createElement(
-               rlayers.ROverlay, { className: 'example-overlay' },
-               /* "origin", */
-               React.createElement(
-                 "div",
-                 { /* attributes is a mandatory parameter even when empty */ },
-                 "Click the PIN to zoom"
-               )
-             )
-           )
-         )
-       )
-
-     const root = ReactDOM.createRoot(document.getElementById('root'))
-     root.render(React.createElement(() => { return el }));
-    </script>
+    <div id="app"></div>
+    <script src="./js/static.js"></script>
 </body>
 </html>
