@@ -1,15 +1,17 @@
 const coords = [2.295, 48.8737]
 
-const style =
+const style_with_icon =
       React.createElement(
-          rlayers.RStyle.RStyle,
-          { /* attributes is a mandatory prm even when empty */ },
+          rlayers.RStyle.RStyle, {
+              /* attributes are mandatory even when empty */
+          },
           React.createElement(
-              rlayers.RStyle.RIcon,
-              { src: './img/location.svg', anchor: [0.5, 0.8] })
+              rlayers.RStyle.RIcon, {
+                  src: './img/location.svg', anchor: [0.5, 0.8]
+              })
       )
 
-const feature =
+const feature_with_overlay =
       React.createElement(
           rlayers.RFeature,
           {
@@ -19,32 +21,49 @@ const feature =
                   console.log('RFeature onClick');
                   e.map.getView().fit(
                       e.target.getGeometry().getExtent(),
-                      {duration: 250, maxZoom: 15})
+                      { duration: 250, maxZoom: 15 })
               }
           },
           React.createElement(
-              rlayers.ROverlay, { className: 'example-overlay' },
+              rlayers.ROverlay, {
+                  className: 'example-overlay'
+              },
               /* "some text", */
               React.createElement(
-                  "div",
-                  { /* attributes is a mandatory prm even when empty */ },
+                  "div", { /* attributes are mandatory even when empty */ },
                   "Click the PIN to zoom"
               )
           )
       )
 
+const feature_with_popup =
+      React.createElement(
+          rlayers.RFeature, {
+              geometry: new ol.geom.Point(ol.proj.fromLonLat(coords))
+          },
+          React.createElement(
+              rlayers.RPopup, {
+                  trigger: "click", className: 'example-overlay'
+              },
+              /* "some text", */
+              React.createElement(
+                  "div", { /* attributes are mandatory even when empty */ },
+                  "Popup on click"
+              )
+          )
+      )
+
 const el = React.createElement(
-    rlayers.RMap,
-    {
+    rlayers.RMap, {
         className: 'map',
         initial: { center: ol.proj.fromLonLat([2.364, 48.82]), zoom: 11 }
     },
+    React.createElement(rlayers.ROSM /* attributes must NOT be specified */),
     React.createElement(
-        rlayers.ROSM
-        /* attributes must NOT be specified */
-    ),
-    React.createElement(
-        rlayers.RLayerVector, { zIndex: 10 }, style, feature
+        rlayers.RLayerVector, { zIndex: 10 },
+        style_with_icon,
+        // feature_with_overlay
+        feature_with_popup
     )
 )
 
