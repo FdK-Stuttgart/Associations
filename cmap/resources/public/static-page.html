@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.14.1/css/ol.css"
+      type="text/css" />
+    <style>
+     .map {
+         height: 600px;
+         width: 60%;
+     }
+
+    </style>
+
+    <style>
+     .example-overlay {
+         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+         user-select: none;
+         pointer-events: none;
+         position: absolute;
+         width: max-content;
+         background-color: white;
+         box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+         padding: 15px;
+         border-radius: 10px;
+         border: 1px solid #cccccc;
+     }
+    </style>
+
+    <script
+      src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.14.1/build/ol.js">
+    </script>
+    <script crossorigin
+      src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin
+      src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/rlayers"></script>
+    <title>rlayers</title>
+</head>
+
+<body>
+    <div id="root"></div>
+    <script type="text/javascript">
+     const coords = {
+       origin: [2.364, 48.82],
+       ArcDeTriomphe: [2.295, 48.8737],
+       PlaceDItalie: [2.355, 48.831],
+       Bastille: [2.369, 48.853],
+       TourEiffel: [2.294, 48.858],
+       Montmartre: [2.342, 48.887],
+     };
+     const el =
+       React.createElement(
+         rlayers.RMap,
+         {
+           className: 'map',
+           initial: { center: ol.proj.fromLonLat([2.364, 48.82]), zoom: 11 }
+         },
+         React.createElement(
+           rlayers.ROSM
+           /* attributes must NOT be specified */
+         ),
+         React.createElement(
+           rlayers.RLayerVector, { zIndex: 10 },
+           React.createElement(
+             rlayers.RStyle.RStyle,
+             { /* attributes is a mandatory parameter even when empty */ },
+             React.createElement(
+               rlayers.RStyle.RIcon,
+               { src: './img/location.svg', anchor: [0.5, 0.8] })
+           ),
+           React.createElement(
+             rlayers.RFeature,
+             {
+               geometry: new ol.geom.Point(ol.proj.fromLonLat(coords.origin)),
+               onClick: (e) => {
+                 // TODO call this function from dev console
+                 console.log('RFeature onClick');
+                 e.map.getView().fit(
+                   e.target.getGeometry().getExtent(),
+                   {duration: 250, maxZoom: 15,})
+               }
+             },
+             React.createElement(
+               rlayers.ROverlay, { className: 'example-overlay' },
+               /* "origin", */
+               React.createElement(
+                 "div",
+                 { /* attributes is a mandatory parameter even when empty */ },
+                 "Click the PIN to zoom"
+               )
+             )
+           )
+         )
+       )
+
+     const root = ReactDOM.createRoot(document.getElementById('root'))
+     root.render(React.createElement(() => { return el }));
+    </script>
+</body>
+</html>
