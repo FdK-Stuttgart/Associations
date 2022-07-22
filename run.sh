@@ -63,4 +63,5 @@ guix shell \
      --share=$wd/var/log=/var/log \
      --share=$wd/var/lib/mysql/data=/var/lib/mysql/data \
      --share=$wd \
+     --search-paths \
      -- bash
