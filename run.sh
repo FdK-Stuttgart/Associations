@@ -53,6 +53,7 @@ guix shell \
      --preserve=^fdk \
      --share=$wd/.bash_profile=$HOME/.bash_profile \
      --share=$wd/.bashrc=$HOME/.bashrc \
+     --share=$wd/.envrc=$HOME/.envrc \
      --share=$wd/node_modules=$HOME/node_modules \
      --share=$wd/map/app-map/node_modules=$HOME/node_modules/map/app-map/ \
      --share=$wd/map/app-form/node_modules=$HOME/node_modules/map/app-form/ \
