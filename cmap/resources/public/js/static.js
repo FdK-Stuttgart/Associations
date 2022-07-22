@@ -35,30 +35,41 @@ const feature_with_overlay =
               )
           )
       )
+const popup =
+      React.createElement(
+          rlayers.RPopup, {
+              trigger: "click", className: 'example-overlay'
+         },
+          /* "some text", */
+          React.createElement(
+              "div", { /* attributes are mandatory even when empty */ },
+              "Popup on click"
+          )
+      )
 
 const feature_with_popup =
       React.createElement(
           rlayers.RFeature, {
               geometry: new ol.geom.Point(ol.proj.fromLonLat(coords))
           },
-          React.createElement(
-              rlayers.RPopup, {
-                  trigger: "click", className: 'example-overlay'
-              },
-              /* "some text", */
-              React.createElement(
-                  "div", { /* attributes are mandatory even when empty */ },
-                  "Popup on click"
-              )
-          )
+          popup
       )
+
+const osm =
+      React.createElement(rlayers.ROSM /* attributes must NOT be specified */)
+
+
+// console.log('p.props.trigger:', p.props.trigger)
+// const o = osm
+// const p = popup
+// const fp = feature_with_popup
 
 const el = React.createElement(
     rlayers.RMap, {
         className: 'map',
         initial: { center: ol.proj.fromLonLat([2.364, 48.82]), zoom: 11 }
     },
-    React.createElement(rlayers.ROSM /* attributes must NOT be specified */),
+    osm,
     React.createElement(
         rlayers.RLayerVector, { zIndex: 10 },
         style_with_icon,
