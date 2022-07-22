@@ -135,15 +135,16 @@
      (partial map (partial sort-by :socialmediaorderindex))
      vals
      (partial group-by :associationid)
-     #_(partial filter
+     #_
+     (partial filter
               (comp (partial in?
                              s/includes?
                              [
-                              "Evidence"
+                              #_"Evidence"
                               "Forum der Kulturen"
                               #_"Kalimera"
                               #_"Afro Deutsches Akademiker Netzwerk ADAN"
-                              #_"Africa Workshop Organisation"])
+                              "Africa Workshop Organisation"])
                     :name))
      (partial map ids-to-names)
      (fn [_] "load saved data" data/associations)

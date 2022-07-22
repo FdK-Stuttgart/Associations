@@ -8,6 +8,8 @@
    [cmap.react-components :as rc]
    [reagent.core :as reagent]
 
+   [reagent.impl.component :as ric]
+
    ["ol/proj" :as proj]
    ["ol/geom" :as geom]
 
@@ -18,6 +20,12 @@
    [clojure.string :as s]
    ["react" :as react]
    ))
+
+(enable-console-print!)
+
+(def cs  (atom nil))
+(def js  (atom nil))
+(def css (atom nil))
 
 (defn fromLonLat [[lon lat]] (.fromLonLat proj (clj->js [lon lat])))
 
@@ -36,9 +44,10 @@
 ;; primeNgNoPubAddrSelected  icon-padding" *ngIf="noPubAddrAssocIds.includes(association.id) === true  && association[identifiedByFieldName] === selectedAssociationField"
 ;; primeNgPubAddrSelected    icon-padding" *ngIf="noPubAddrAssocIds.includes(association.id) === false && association[identifiedByFieldName] === selectedAssociationField"
 
-
-(defn simple-example []
-  (let [[time-color update-time-color] (react/useState "#f34")]
+(defn full-search []
+  (let [[time-color update-time-color] (react/useState
+                                        ;; #00ff00
+                                        "#f34")]
     [:div
      (let [[timer update-time] (react/useState (js/Date.))]
        (react/useEffect
@@ -49,21 +58,26 @@
                                               .toTimeString
                                               (s/split " ")
                                               first)])
-     [:div.color-input "Time color: "
-      [:input {:type "text" :value time-color
+     [:div.color-input
+      [:input {:type "text"
+               ;; :value time-color
+               :placeholder (de :cmap.lang/search-hint)
                :on-change (comp
                            update-time-color
                            (fn [x] (.-value x))
                            (fn [x] (.-target x)))}]]]))
 
-(defn list-elem [set-view {:keys [k name addr coords]}]
+(defn list-elem
+  "set-view is determined by react/useState"
+  [set-view {:keys [k name addr coords]}]
+  #_(.log js/console "set-view" set-view)
   [:span {:key k :on-click (fn [e]
-                             (set-view
-                              ((comp
-                                clj->js
-                                (partial hash-map :zoom (+ 4 11) :center)
-                                fromLonLat)
-                               coords)))}
+                             ((comp
+                               set-view
+                               clj->js
+                               (partial hash-map :zoom (+ 4 11) :center)
+                               fromLonLat)
+                              coords))}
    [:div {:class (s/join " " ["association-entry" "ng-star-inserted"])}
     [:a
      [:div {:class "icon"}
@@ -89,22 +103,21 @@
     (partial map (partial list-elem set-view)))
    db-vals))
 
-(defn right [set-view db-vals]
+(defn right [set-view set-state db-vals]
   ((comp
-    #_(partial vector :div {:id "right"} [:f> simple-example]))
+    (partial vector :div {:id "btn"}
+             [:button
+              {:on-click
+               (fn [e] ((comp set-state
+                              #_clj->js) {:trigger "hover"}))}
+              "test"])
+    (partial vector :div {:id "full-search"} [:f> full-search]))
    #_[:div (map (partial list-elem set-view) db-vals)]
    [rc/Tab
     {:id "tab-panes"
      :panes
      [{:menuItem "Tab 1" :render
-       (fn []
-         ((comp
-           (partial tab1 set-view)
-           #_(partial filter (fn [m] (subs/in?
-                                      ["Afro Deutsches Akademiker Netzwerk ADAN"]
-                                      (:name m))))
-           #_(partial take 2))
-          db-vals))}
+       (fn [] (tab1 set-view db-vals))}
       {:menuItem "Tab 2" :render
        (fn []
          ((comp
@@ -165,68 +178,71 @@
    "Instagram" {:title (de :cmap.lang/instagram)
                 :img {:src "assets/instagram.png"
                       :alt (de :cmap.lang/instagram)}}})
-
 (defn popup
   "addr has only 'keine öffentliche Anschrift'"
   [idx {:keys [name addr street postcode-city districts email activities goals
                imageurl links socialmedia] :as prm}]
-  [:div
-   {:id (str "p" idx)
-    :class ["on-top" #_(styles/pos)]
-    :style {:transform (str "translate(-50%, -" (translate name) "%)")}}
-   [:div {:class "association-container osm-association-container"}
-    [:a {:class "association-container-close-icon" :id "popup-close"}
-     [:i {:class "pi pi-times"}]]
-    [:div {:class "osm-association-inner-container"}
-     [:div {:class "association-title"} [:h2 name]]
-     [:div {:class "association-images"}
-      [:div {:class "association-image"}
-       [:img {:src imageurl :alt ""}]]]
-     [:div {:class "association-address"}
-      [:p {:class "street"} street]
-      [:p {:class "postcode-city"} postcode-city]
-      [:p {:class "name"} [:strong addr]]]
-     [:div {:class "association-contacts"}
-      [:div {:class "association-contact"}
-       [:div {:class "association-contact"}
-        [:div {:class "association-contact-row"}
-         [:div {:class "social-media-icon mini-icon"}
-          [:img {:src "assets/mail.png" :alt ""}]]
-         [:p {:class "mail"}
-          [:a {:href (str "mailto:" email)} email]]]]]]
-     [:div {:class "association-description"}
-      [:h3 (de :cmap.lang/goals)] goals]
-     [:div {:class "association-description"}
-      [:h3 (de :cmap.lang/activities)] activities]
-     [:div {:class "association-active-in"}
-      [:h3 (de :cmap.lang/activity-areas)]
-      [:div {:class "association-chips-container"}
-       (map-indexed (fn [idx elem]
-                      (vector :div (conj {:key idx}
-                                         {:class "association-chips"})
-                              elem))
-                    districts)]]
-     [:div {:class "association-links"}
-      [:h3 (de :cmap.lang/links)]
-      [:ul (map (fn [idx url text]
-                  [:li {:key idx} [:a {:href url :title text :target "_blank"}
-                                   (if (empty? text) url text)]])
-                (range (count (:url links))) (:url links) (:text links))]]
-     [:div {:class "association-social-media"}
-      ((comp
-        (partial map
-                 (fn [idx]
-                   [:div {:key idx :class "social-media-link"}
-                    (let [sm-name (nth (get socialmedia :platforms) idx)]
-                      [:a {:href (nth (get socialmedia :urls) idx)
-                           :target "_blank"
-                           :title (get-in social-media [sm-name :title])}
-                       [:div {:class "social-media-icon mini-icon"}
-                        [:img (get-in social-media [sm-name :img])]]])]))
-        )
-       (range (count (:ids socialmedia))))]]]])
+  (let [c (reagent/current-component)]
+    #_(js/console.log "c" c))
+    [:div
+     {:id (str "p" idx)
+      :class ["on-top" #_(styles/pos)]
+      :style {:transform (str "translate(-50%, -" (translate name) "%)")}}
+     [:div {:class "association-container osm-association-container"}
+      [:a {:class "association-container-close-icon" :id "popup-close"}
+       [:i {:class "pi pi-times"}]]
+      [:div {:class "osm-association-inner-container"}
+       [:div {:class "association-title"} [:h2 name]]
+       [:div {:class "association-images"}
+        [:div {:class "association-image"}
+         [:img {:src imageurl :alt ""}]]]
+       [:div {:class "association-address"}
+        [:p {:class "street"} street]
+        [:p {:class "postcode-city"} postcode-city]
+        [:p {:class "name"} [:strong addr]]]
+       [:div {:class "association-contacts"}
+        [:div {:class "association-contact"}
+         [:div {:class "association-contact"}
+          [:div {:class "association-contact-row"}
+           [:div {:class "social-media-icon mini-icon"}
+            [:img {:src "assets/mail.png" :alt ""}]]
+           [:p {:class "mail"}
+            [:a {:href (str "mailto:" email)} email]]]]]]
+       [:div {:class "association-description"}
+        [:h3 (de :cmap.lang/goals)] goals]
+       [:div {:class "association-description"}
+        [:h3 (de :cmap.lang/activities)] activities]
+       [:div {:class "association-active-in"}
+        [:h3 (de :cmap.lang/activity-areas)]
+        [:div {:class "association-chips-container"}
+         (map-indexed (fn [idx elem]
+                        (vector :div (conj {:key idx}
+                                           {:class "association-chips"})
+                                elem))
+                      districts)]]
+       [:div {:class "association-links"}
+        [:h3 (de :cmap.lang/links)]
+        [:ul (map (fn [idx url text]
+                    [:li {:key idx} [:a {:href url :title text :target "_blank"}
+                                     (if (empty? text) url text)]])
+                  (range (count (:url links))) (:url links) (:text links))]]
+       [:div {:class "association-social-media"}
+        ((comp
+          (partial map
+                   (fn [idx]
+                     [:div {:key idx :class "social-media-link"}
+                      (let [sm-name (nth (get socialmedia :platforms) idx)]
+                        [:a {:href (nth (get socialmedia :urls) idx)
+                             :target "_blank"
+                             :title (get-in social-media [sm-name :title])}
+                         [:div {:class "social-media-icon mini-icon"}
+                          [:img (get-in social-media [sm-name :img])]]])]))
+          )
+         (range (count (:ids socialmedia))))]]]]
+  )
 
-(defn feature [idx {:keys [addr coords] :as prm}]
+(defn feature [idx state {:keys [addr coords] :as prm}]
+  (js/console.log "feature state" state)
   [rc/RFeature
    {:geometry (new geom/Point (fromLonLat coords))
     :on-click (fn [e]
@@ -248,11 +264,10 @@
                      "pub-addr.svg" "priv-addr.svg") )
       :anchor [0.5 0.8]}]]
    ;; TODO rc/RPopup toggle - i.e. max one popup can be displayed at the time
-   [rc/RPopup {:class "" :trigger "click" #_"hover"
-               #_#_:on-click (fn [e] (.log js/console "rc/RPopup on-click" e))}
+   [rc/RPopup state
     [popup idx prm]]])
 
-(defn rlayers-map [view set-view db-vals]
+(defn rlayers-map [view set-view state db-vals]
   ((comp
     (partial conj
              [rc/RMap
@@ -261,7 +276,7 @@
                   (js/console.log "this" this))
               [rc/ROSM]])
     (partial into [rc/RLayerVector {:zIndex 10}])
-    (partial map-indexed feature))
+    (partial map-indexed (fn [i v] (feature i state v))))
    db-vals))
 
 (defn go [db-vals center-map]
@@ -272,11 +287,15 @@
                            clj->js
                            (partial hash-map :zoom 11 :center)
                            fromLonLat)
-                          center-map)]
+                          center-map)
+         [state set-state] ((comp react/useState
+                                  #_clj->js) {:trigger "click" #_"hover"})
+         center [:f> rlayers-map view set-view state db-vals]
+         ]
      [[:div {:class [(styles/header)]} #_"header"]
       #_[:div {:class [(styles/left)]} #_"left"]
-      [:div {:class [(styles/center)]} [:f> rlayers-map view set-view db-vals]]
-      [:div {:class [(styles/right)]}  [right set-view db-vals]]
+      [:div {:class [(styles/center)]} center]
+      [:div {:class [(styles/right)]}  [right set-view set-state db-vals]]
       [:div {:class [(styles/footer)]}
        (str @(re-frame/subscribe [::subs/name]) " v" config/version)]])))
 

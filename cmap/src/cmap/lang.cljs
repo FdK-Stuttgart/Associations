@@ -2,6 +2,7 @@
 
 (def labels
   {:de {
+        ::search-hint "Vereinsdaten durchsuchen..."
         ::no-pub-addr "keine öffentliche Anschrift"
 
         ::instagram "Instagram"
