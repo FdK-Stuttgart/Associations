@@ -46,6 +46,11 @@ fi
 # --preserve=^fdk
 #   preserve environment variables matching REGEX
 # TODO add '--export-manifest' to obtain an scm file
+
+# Nothing happens when the '--search-paths' parameter is used. Only the
+# variables making up the environment are displayed.
+# guix shell --search-paths
+
 set -x
 guix shell \
      --container --network \
@@ -59,9 +64,9 @@ guix shell \
      --share=$wd/map/app-form/node_modules=$HOME/node_modules/map/app-form/ \
      --share=$HOME/.gitconfig=$HOME/.gitconfig \
      --share=$HOME/.ssh/=$HOME/.ssh/ \
+     --share=$HOME/.bash_history=$HOME/.bash_history \
      --share=$wd/etc=/usr/etc \
      --share=$wd/var/log=/var/log \
      --share=$wd/var/lib/mysql/data=/var/lib/mysql/data \
      --share=$wd \
-     --search-paths \
      -- bash
