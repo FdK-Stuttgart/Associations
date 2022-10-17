@@ -1,4 +1,8 @@
 ### On GNU Guix
+Note:
+Error under ungoogled-chromium: "... has been blocked by CORS policy ..."
+The problem doesn't exits in firefox
+
 1. start the PHP server and optionally test the database access:
    ```shell
    ./run.sh
