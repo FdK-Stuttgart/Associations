@@ -1,11 +1,6 @@
 #!/bin/sh
 #
 # Reproducible Development Environment
-#
-# TODO Add nginx php-fpm as in the guix-lemp-container
-# https://notabug.org/hackware/guix-lemp-container.git
-#
-# Wishlist: Include XDebug
 
 wd=$(pwd) # WD=$(dirname "$0") # i.e. path to this file
 
@@ -46,35 +41,36 @@ done
 # $wd/node_modules should contain only the packages needed by angular
 # (the ng) itself. Both app-map and app-form have their node_modules-directories
 
-cliTools=""
-
-# TODO replace busybox with env
-cliTools="$cliTools gnupg busybox rsync openssh bash ripgrep less mycli"
-cliTools="$cliTools grep git coreutils sed which ncurses"
-cliTools="$cliTools php mariadb pgcli jq nss-certs curl"
-cliTools="$cliTools node"
-cliTools="$cliTools openjdk@17.0.3:jdk leiningen"
-
 cmd=guix
 # [[ ! $(command -v $cmd) ]] - '[[' is a bashishm
 if [ ! "$(command -v $cmd)" ]; then
     printf "ERR: Command not available: %s\n" $cmd
     exit 1;
 fi
-# --preserve=^fdk
-#   preserve environment variables matching REGEX
-# TODO add '--export-manifest' to obtain an scm file
 
-# Nothing happens when the '--search-paths' parameter is used. Only the
+# --preserve=REGEX
+#   preserve environment variables matching REGEX
+#
+# The $DISPLAY is needed by clojure.inspector, however the
+#   --preserve=^DISPLAY
+# leads to an error in the REPL:
+#   Authorization required, but no authorization protocol specified
+# and:
+#   error in process filter: cljr--maybe-nses-in-bad-state: \
+#   Some namespaces are in a bad state: ...
+
+# No shell is started when the '--search-paths' parameter is used. Only the
 # variables making up the environment are displayed.
-# guix shell --search-paths
+#   guix shell --search-paths
 
 set -x
 guix shell \
+     --manifest=manifest.scm \
      --container --network \
-     $cliTools \
      --preserve=^fdk \
+     --share=/usr/bin \
      --share=$HOME/.bash_history=$HOME/.bash_history \
+     --share=$HOME/.config/fish=$HOME/.config/fish \
      --share=$HOME/.gitconfig=$HOME/.gitconfig \
      --share=$HOME/.ssh/=$HOME/.ssh/ \
      --share=$wd/.bash_profile=$HOME/.bash_profile \
