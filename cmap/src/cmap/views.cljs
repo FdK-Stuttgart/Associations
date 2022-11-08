@@ -7,18 +7,23 @@
    [cmap.config :as config]
    [cmap.react-components :as rc]
    [reagent.core :as reagent]
+   [reagent.dom :as rdom]
 
    [reagent.impl.component :as ric]
 
    ["ol/proj" :as proj]
    ["ol/geom" :as geom]
 
+   ["react-leaflet" :as rle]
+   [oops.core :refer [oget oset! ocall oapply ocall! oapply!
+                      oget+ oset!+ ocall+ oapply+ ocall!+ oapply!+]]
+
    ;; TODO use import instead of <link rel="stylesheet" ...>
    ;; ["semantic-ui-css/components/tab" :as csu]
    ;; ["ol/css" :as css]
 
    [clojure.string :as s]
-   ["react" :as react]
+   ;; ["react" :as react]
 
    [goog.string :as gstr]
    ))
@@ -282,9 +287,182 @@
 ;;    db-vals))
 ;; }}} React OpenLayers
 
+;; {{{ my ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; (defn reagent-render [params]
+;;   (js/console.log "[reagent-render] params" params)
+;;   [:div#map {:style {:height "360px"}}])
+
+;; (defn did-mount "" [ref]
+;;   (js/console.log "[did-mount] ref" ref)
+;;   (let [map (js/L.map "map")
+;;         point #js [51.505 -0.09]]
+;;     (.addTo (js/L.tileLayer "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+;;                         (clj->js
+;;                          {:attribution "&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors"
+;;                           :maxZoom 18}))
+;;             (.setView map point 13))
+;;     (let [point #js [51.507 -0.09]
+;;           marker (js/L.marker point)
+;;           map-with-marker (.addTo marker map)
+;;           map-with-marker-and-popup (.bindPopup map-with-marker
+;;                                                 "A pretty CSS3 popup.<br> Easily customizable.")]
+;;       (.openPopup map-with-marker-and-popup)
+;;       (let [point #js [51.50 -0.09]
+;;             popup (js/L.popup)]
+;;         (.setLatLng popup point)
+;;         (.setContent popup "popups as layers - CSS3 standalone popup.")
+;;         (.openOn popup map)))))
+
+;; (defn did-update "" [this]
+;;   (js/console.log "[did-update] this" this)
+;;   (let [newparams (reagent/props this)]
+;;     (js/console.log "[did-update] newparams" newparams)))
+
+;; (defn re-leaflet [params]
+;;   (js/console.log "[re-leaflet] params" params)
+;;   (reagent/create-class
+;;    {
+;;     :component-did-mount did-mount
+;;     :component-did-update did-update
+;;     :reagent-render reagent-render
+;;     :display-name (str "Leaflet Map - " "abcd")
+;;     }))
+;; }}} my ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defonce app-state (atom {:markers-pta [{:name "Lucky's Deli"
+                                         :lat 35.996834
+                                         :long -78.904467
+                                         :icon "green"}
+                                        {:name "Bull City Burgers and Brewery"
+                                         :lat 35.995602
+                                         :long -78.899779
+                                         :icon "green"}
+                                        {:name "Béyu Café"
+                                         :lat 35.996699
+                                         :long -78.903862
+                                         :icon "green"}
+                                        {:name "M Sushi"
+                                         :lat 35.997252
+                                         :long -78.901172
+                                         :icon "green"}
+                                        {:name "M Tempura"
+                                         :lat 35.996159
+                                         :long -78.900400
+                                         :icon "green"}]}))
+
+(def markers-layer-atom (reagent/atom nil))
+
+(defn re-leaflet-update-markers
+  [mapatom markers]
+  (let [mapinst @mapatom
+        markerslayer (if (nil? @markers-layer-atom)
+                       (js/L.layerGroup)
+                       @markers-layer-atom)]
+    (.clearLayers markerslayer)
+    (doall
+    (for [marker markers]
+      (-> (js/L.marker
+          (array
+            (:lat marker)
+            (:long marker))
+          #js {:icon (case (:icon marker)
+                       "dark" (js/L.icon (clj->js
+                                          {:iconUrl
+                                           "/icon/map_markers/dark_new.png"
+                                           :iconSize [30 42]
+                                           :iconAnchor [15 41]
+                                           :popupAnchor [0 -31]}))
+                       "red" (js/L.icon (clj->js
+                                         {:iconUrl
+                                          "/icon/map_markers/red_new.png"
+                                          :iconSize [30 42]
+                                          :iconAnchor [15 41]
+                                          :popupAnchor [0 -31]}))
+                       "orange" (js/L.icon (clj->js
+                                            {:iconUrl
+                                             "/icon/map_markers/orange_new.png"
+                                             :iconSize [30 42]
+                                             :iconAnchor [15 41]
+                                             :popupAnchor [0 -31]}))
+                       "green" (js/L.icon (clj->js
+                                           {:iconUrl
+                                            "/icon/map_markers/green_new.png"
+                                            :iconSize [30 42]
+                                            :iconAnchor [15 41]
+                                            :popupAnchor [0 -31]}))
+                       (js/L.icon (clj->js
+                                   {:iconUrl
+                                    "/icon/map_markers/green_new.png"
+                                    :iconSize [30 42]
+                                    :iconAnchor [15 41]
+                                    :popupAnchor [0 -31]})))})
+         (.addTo markerslayer)
+         (.bindPopup (:name marker)))))
+    (reset! markers-layer-atom markerslayer)
+    (.addTo @markers-layer-atom mapinst)
+    (reset! mapatom mapinst)))
+
+(defn get-status-colour
+  [status]
+  (case status
+    1 "#66B92E"
+    0 "#66B92E"
+    -1 "#DA932C"
+    -2 "#D65B4A"
+    "#657B93"))
+
+;;; Map Component
+
+(defn re-leaflet
+  [params]
+  (js/console.log "[re-leaflet] params" params)
+  (let [dn (reagent/atom nil)
+        mapatom (reagent/atom nil)
+        mn (:mapname params)
+        lt (:latitude params)
+        lg (:longitude params)
+        z (:zoom-level params)
+        producer-markers (:markers params)]
+    (reagent/create-class
+     {:component-did-mount
+      (fn [ref]
+        (reset! dn (rdom/dom-node ref))
+        (let [lmap (js/L.map @dn)
+              mappositioned (-> lmap (.setView (array lt lg) z))]
+          (.addTo (js/L.tileLayer
+                   "https://{s}.tile.OpenStreetMap.org/{z}/{x}/{y}.png")
+                  mappositioned)
+          (reset! mapatom mappositioned)))
+      :component-did-update
+      (fn [this]
+        (let [newparams (reagent/props this)
+              lmap @mapatom
+              mappositionednew (-> lmap
+                                   (.panTo
+                                    (array
+                                     (:latitude newparams)
+                                     (:longitude newparams))
+                                    (:zoom-level newparams)))]
+          (re-leaflet-update-markers mapatom (:markers params))
+          (reset! mapatom mappositionednew)))
+      :display-name (str "Leaflet Map - " mn)
+      :reagent-render
+      (fn [params]
+        (when @mapatom
+          (re-leaflet-update-markers mapatom (:markers params)))
+        [:div {:style {:height (:height params)}}])})))
+
 (defn center [db-vals]
-  (when @active-popup
-    [popup @active-popup]))
+  [:div
+   (when @active-popup [popup @active-popup])
+   [:div#map {:style {:height "360px"}}
+    [re-leaflet
+     {:mapname "my=map"
+      :latitude 35.99599
+      :longitude -78.90131
+      :zoom-level 17
+      :height 650
+      :markers (:markers-pta @app-state)}]]])
 
 (defn go [db-vals center-map]
   ((comp

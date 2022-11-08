@@ -8,7 +8,11 @@
    ["rlayers" :as rl]
    ["rlayers/style" :as style]
    ["semantic-ui-react" :as rsu]
+
+   ;; ["react-leaflet" :as rle]
+
    ))
+
 
 (def RMap (reagent/adapt-react-class rl/RMap))
 (def ROSM (reagent/adapt-react-class rl/ROSM))
@@ -25,3 +29,8 @@
 
 (def Tab (reagent/adapt-react-class rsu/Tab))
 
+;; (def MapContainer (reagent/adapt-react-class rle/MapContainer))
+;; (def TileLayer (reagent/adapt-react-class rle/TileLayer))
+;; (def Marker (reagent/adapt-react-class rle/Marker))
+;; (def Popup (reagent/adapt-react-class rle/Popup))
+;; (def useMap (reagent/adapt-react-class rle/useMap))
