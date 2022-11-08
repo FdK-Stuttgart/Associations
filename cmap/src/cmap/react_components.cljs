@@ -2,26 +2,14 @@
   "Third party react components"
   (:require
    [reagent.core :as reagent]
-   #_["ol/proj" :as proj]
-   #_["ol/geom" :as geom]
-
-   ["rlayers" :as rl]
-   ["rlayers/style" :as style]
    ["semantic-ui-react" :as rsu]
+   #_["react-leaflet" :as rle]
    ))
-
-(def RMap (reagent/adapt-react-class rl/RMap))
-(def ROSM (reagent/adapt-react-class rl/ROSM))
-(def RLayerVector (reagent/adapt-react-class rl/RLayerVector))
-(def RFeature (reagent/adapt-react-class rl/RFeature))
-(def RPopup (reagent/adapt-react-class rl/RPopup))
-
-;; import { RStyle, RIcon, RFill, RStroke } from "rlayers/style";
-(def RStyle (reagent/adapt-react-class style/RStyle))
-(def RIcon (reagent/adapt-react-class style/RIcon))
-
-;; (.log js/console "RMap" RMap)
-;; (.log js/console "ROSM" ROSM)
 
 (def Tab (reagent/adapt-react-class rsu/Tab))
 
+;; (def MapContainer (reagent/adapt-react-class rle/MapContainer))
+;; (def TileLayer (reagent/adapt-react-class rle/TileLayer))
+;; (def Marker (reagent/adapt-react-class rle/Marker))
+;; (def Popup (reagent/adapt-react-class rle/Popup))
+;; (def useMap (reagent/adapt-react-class rle/useMap))

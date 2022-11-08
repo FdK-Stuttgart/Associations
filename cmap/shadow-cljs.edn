@@ -15,7 +15,11 @@
   [net.dhleong/spade "1.1.0"]
 
   [binaryage/devtools "1.0.6"]
-  ;; try dirac
+
+  ;; Object OPerationS
+  [binaryage/oops "0.7.0"]
+
+  ;; A Chrome DevTools fork for ClojureScript developers
   #_[binaryage/dirac "1.7.2"]
 
   [cider/cider-nrepl "0.28.3"]
@@ -44,7 +48,7 @@
    {:app {:init-fn cmap.core/init}}
    :compiler-options
    {:closure-defines
-    { cmap.config/version :shadow-git-inject/version}}
+    {cmap.config/version :shadow-git-inject/version}}
    :devtools
    {:preloads []}
    :dev

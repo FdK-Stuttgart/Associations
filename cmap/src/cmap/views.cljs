@@ -3,187 +3,35 @@
    [re-frame.core :as re-frame]
    [cmap.styles :as styles]
    [cmap.subs :as subs]
+   [cmap.data :as data]
    [cmap.lang :refer [de]]
    [cmap.config :as config]
    [cmap.react-components :as rc]
    [reagent.core :as reagent]
-
+   [reagent.dom :as rdom]
+   [reagent.dom.server :as rserver]
    [reagent.impl.component :as ric]
-
-   ["ol/proj" :as proj]
-   ["ol/geom" :as geom]
-
+   [clojure.string :as s] ;; for s/join
+   [goog.string :as gstr]
+   [cljs.pprint :as pp]
+   ["react-leaflet" :as rle]
    ;; TODO use import instead of <link rel="stylesheet" ...>
    ;; ["semantic-ui-css/components/tab" :as csu]
-   ;; ["ol/css" :as css]
-
-   [clojure.string :as s]
-   ["react" :as react]
-
-   [goog.string :as gstr]
+   ;; ["react" :as react]
    ))
 
 (enable-console-print!)
 
-(def cs  (atom nil))
-(def js  (atom nil))
-(def css (atom nil))
 
-(def active-popup (reagent/atom nil))
-
-(defn fromLonLat [[lon lat]] (.fromLonLat proj (clj->js [lon lat])))
-
-;; primeNgPubAddr           = 'pi pi-map-marker pubAddr';
-;; primeNgNoPubAddr         = 'pi pi-map-marker noPubAddr';
-
-;; primeNgPubAddrSelected   = 'pi pi-map        pubAddr';
-;; primeNgNoPubAddrSelected = 'pi pi-map        noPubAddr';
-
-;; TODO public-address? computation should be done elsewhere
-(defn public-address? [norm-addr]
-  (not (re-find #"(?i).*keine|Postfach.*" norm-addr)))
-
-;; primeNgNoPubAddr          icon-padding" *ngIf="noPubAddrAssocIds.includes(association.id) === true  && association[identifiedByFieldName] !== selectedAssociationField"
-;; primeNgPubAddr            icon-padding" *ngIf="noPubAddrAssocIds.includes(association.id) === false && association[identifiedByFieldName] !== selectedAssociationField"
-;; primeNgNoPubAddrSelected  icon-padding" *ngIf="noPubAddrAssocIds.includes(association.id) === true  && association[identifiedByFieldName] === selectedAssociationField"
-;; primeNgPubAddrSelected    icon-padding" *ngIf="noPubAddrAssocIds.includes(association.id) === false && association[identifiedByFieldName] === selectedAssociationField"
-
-;; (defn full-search []
-;;   (let [[time-color update-time-color] (react/useSatate
-;;                                         ;; #00ff00
-;;                                         "#f34")]
-;;     [:div
-;;      (let [[timer update-time] (react/useState (js/Date.))]
-;;        (react/useEffect
-;;         (fn []
-;;           (let [i (js/setInterval (fn [] (update-time (js/Date.))) 1000)]
-;;             (fn [] (js/clearInterval i)))))
-;;        [:div {:style {:color time-color}} (-> timer
-;;                                               .toTimeString
-;;                                               (s/split " ")
-;;                                               first)])
-;;      [:div.color-input
-;;       [:input {:type "text"
-;;                ;; :value time-color
-;;                :placeholder (de :cmap.lang/search-hint)
-;;                :on-change (comp
-;;                            update-time-color
-;;                            (fn [x] (.-value x))
-;;                            (fn [x] (.-target x)))}]]]))
-
-(defn list-elem
-  [{:keys [k name addr coords] :as prm}]
-  [:span {:key k :on-click (fn [e]
-                             (js/console.log "list-elem - on-click current:" (:k @active-popup) "clicked:" k)
-                             (swap! active-popup (fn [_]
-                                                   (if (= (:k @active-popup) k)
-                                                     nil
-                                                     prm))))}
-   [:div {:class (s/join " " ["association-entry" "ng-star-inserted"])}
-    [:a
-     [:div {:class "icon"}
-      ((comp
-        #_(partial vector :div {:class "icon"})
-        (partial vector :i)
-        (partial hash-map :class)
-        (partial s/join " ")
-        (fn [c] (conj c (if (public-address? addr)
-                          "pubAddr" "noPubAddr"))))
-       ["icon-padding" "pi" "pi-map-marker" "ng-star-inserted"])
-      name]]]])
-
-(defn tab1 [db-vals]
-  ((comp
-    reagent/as-element
-    (partial vector :div
-             {:id "tab1-content"
-              :class (s/join " " [(styles/tab-content)
-                                  "ui" "attached" "segment" "active" "tab"])})
-    #_(partial vector :div {:class "sidebar-content ng-tns-c14-0"})
-    #_(partial vector :div {:class "association-entries ng-star-inserted"})
-    (partial map (partial list-elem)))
-   db-vals))
-
-(defn right [db-vals]
-  [:div
-   [:div.color-input
-    [:input {:type "text"
-             ;; :value time-color
-             :placeholder (de :cmap.lang/search-hint)
-             :on-change (comp
-                         (fn [x] (js/console.log
-                                  (gstr/format "new-val: '%s'" x)))
-                         (fn [x] (.-value x))
-                         (fn [x] (.-target x)))}]]
-   [rc/Tab
-    {:id "tab-panes"
-     :panes
-     [{:menuItem "Tab 1" :render
-       (fn [] (tab1 db-vals))}
-      {:menuItem "Tab 2" :render
-       (fn []
-         ((comp
-           (partial tab1)
-           (partial filter (fn [m] (subs/in?
-                                    ["Kalimera e. V. Deutsch-Griechische Kulturinitiative"
-                                     "Afro Deutsches Akademiker Netzwerk ADAN"
-                                     "Schwedischer Schulverein Stuttgart"]
-                                    (:name m))))
-           #_(partial take 2))
-          db-vals))}
-      #_{:menuItem "Tab 3" :render
-         (when-let [db-associations
-                    @(re-frame/subscribe [:db-associations])]
-           (fn []
-             ((comp
-               reagent/as-element
-               (partial vector
-                        :div {:class "ui attached segment active tab"})
-               (partial take 4)
-               (partial map (fn [[k v]] [:span {:key k} [:div v]])))
-              db-vals)))}]}]])
-
-;; TODO better transform & translate. E.g. in the class
-(defn translate [name]
-  (or (get
-       {
-        #_"Kalimera e. V. Deutsch-Griechische Kulturinitiative"
-        "Afro Deutsches Akademiker Netzwerk ADAN" 106
-        "Africa Workshop Organisation" 108
-        }
-       name)
-      105))
-
-(def social-media
-  {"YouTube"   {:title (de :cmap.lang/youtube)
-                :img {:src "assets/youtube.png"
-                      :alt (de :cmap.lang/youtube)}}
-   "LinkedIn" {:title (de :cmap.lang/linkedin)
-               :img {:src "assets/linkedin.png"
-                     :alt (de :cmap.lang/linkedin)}}
-   "Messenger" {:title (de :cmap.lang/messenger)
-                :img {:src "assets/messenger.png"
-                      :alt (de :cmap.lang/messenger)}}
-   "Snapchat" {:title (de :cmap.lang/snapchat)
-               :img {:src "assets/snapchat.png"
-                     :alt (de :cmap.lang/snapchat)}}
-   "Twitter" {:title (de :cmap.lang/twitter)
-              :img {:src "assets/twitter.png"
-                    :alt (de :cmap.lang/twitter)}}
-   "WhatsApp" {:title (de :cmap.lang/whatsapp)
-               :img {:src "assets/whatsapp.png"
-                     :alt (de :cmap.lang/whatsapp)}}
-   "Facebook"  {:title (de :cmap.lang/facebook)
-                :img {:src "assets/facebook.png"
-                      :alt (de :cmap.lang/facebook)}}
-
-   "Instagram" {:title (de :cmap.lang/instagram)
-                :img {:src "assets/instagram.png"
-                      :alt (de :cmap.lang/instagram)}}})
 (defn popup
   "addr has only 'keine öffentliche Anschrift'"
   [{:keys [k name addr street postcode-city districts email activities goals
            imageurl links socialmedia] :as prm}]
+  #_
+  (js/console.log
+   (pp/pprint
+    (select-keys prm [:k :name :addr :street :postcode-city :districts :email
+                      :activities :goals :imageurl :links :socialmedia])))
   [:div
    {:id k
     :class ["on-top" #_(styles/pos)]
@@ -235,66 +83,204 @@
                     (let [sm-name (nth (get socialmedia :platforms) idx)]
                       [:a {:href (nth (get socialmedia :urls) idx)
                            :target "_blank"
-                           :title (get-in social-media [sm-name :title])}
+                           :title (get-in data/social-media [sm-name :title])}
                        [:div {:class "social-media-icon mini-icon"}
-                        [:img (get-in social-media [sm-name :img])]]])]))
-        )
-       (range (count (:ids socialmedia))))]]]]
-  )
+                        [:img (get-in data/social-media [sm-name :img])]]])])))
+       (range (count (:ids socialmedia))))]]]])
 
-;; {{{ React OpenLayers
-;; (defn rlayers-feature [idx state {:keys [addr coords] :as prm}]
-;;   (js/console.log "rlayers-feature state" state)
-;;   [rc/RFeature
-;;    {:geometry (new geom/Point (fromLonLat coords))
-;;     :on-click (fn [e]
-;;                 #_(.log js/console "rc/RFeature on-click" e)
-;;                 #_
-;;                 (let [p (-> js/document
-;;                             (.getElementById (str "p" idx))
-;;                             (.-parentNode)
-;;                             (.-parentNode))
-;;                       c (-> js/window (.getComputedStyle p nil))]
-;;                   (.log js/console "rc/RFeature on-click"
-;;                         c (-> c (.getPropertyValue "-webkit-transform"))
-;;                         (-> c (.getPropertyValue "height")))))}
-;;    [rc/RStyle
-;;     [rc/RIcon
-;;      {#_#_:on-click (fn [e] (.log js/console "rc/RIcon on-click" e))
-;;       :src
-;;       (str "/img/" (if (public-address? addr)
-;;                      "pub-addr.svg" "priv-addr.svg") )
-;;       :anchor [0.5 0.8]}]]
-;;    ;; TODO rc/RPopup toggle - i.e. max one popup can be displayed at the time
-;;    [rc/RPopup state
-;;     [popup idx prm]]])
+(def markers-layer-atom (reagent/atom nil))
+;; Reload webpage when changed
+(defonce app-state (atom data/leaflet-data))
 
-;; (defn rlayers-map [view set-view state db-vals]
-;;   ((comp
-;;     (partial conj
-;;              [rc/RMap
-;;               {:height "100%" :initial view :view [view set-view]}
-;;               #_(let [this (reagent/current-component)]
-;;                   (js/console.log "this" this))
-;;               [rc/ROSM]])
-;;     (partial into [rc/RLayerVector {:zIndex 10}])
-;;     (partial map-indexed (fn [i v] (rlayers-feature i state v))))
-;;    db-vals))
-;; }}} React OpenLayers
+(defn re-leaflet-update-markers [active mapatom markers]
+  (let [mapinst @mapatom
+        markerslayer (if (nil? @markers-layer-atom)
+                       (js/L.layerGroup)
+                       @markers-layer-atom)]
+    #_(js/console.log "[re-leaflet-update-markers]" "markerslayer" markerslayer)
+    #_(js/console.log "[re-leaflet-update-markers]" "mapinst" mapinst)
+    #_(js/console.log "[re-leaflet-update-markers]" "markers" markers)
+    #_(.clearLayers markerslayer)
+    (doall
+     (for [marker markers]
+       (do
+         (let [map-with-marker-and-popup
+               (-> (js/L.marker
+                    (array (:lat marker) (:long marker))
+                    #js {:icon (js/L.icon (clj->js
+                                           {:iconUrl
+                                            "/icon/map_markers/green_new.png"
+                                            :iconSize [30 42]
+                                            :iconAnchor [15 41]
+                                            :popupAnchor [0 -31]}))})
+                   (.addTo markerslayer)
+                   (.bindPopup
+                    (rserver/render-to-string [popup (:prm marker)])))]
+           #_
+           (js/console.log "active" @active "open-popup?"
+                           (-> marker :prm :k) (= (-> marker :prm :k) @active))
+           (if (= (-> marker :prm :k) @active)
+             (.openPopup map-with-marker-and-popup)
+             map-with-marker-and-popup)))))
+    (reset! markers-layer-atom markerslayer)
+    (.addTo @markers-layer-atom mapinst)
+    (reset! mapatom mapinst)))
 
-(defn center [db-vals]
-  (when @active-popup
-    [popup @active-popup]))
+;; TODO public-address? computation should be done elsewhere
+(defn public-address? [norm-addr]
+  (not (re-find #"(?i).*keine|Postfach.*" norm-addr)))
+
+(defn list-elem [active mapatom markers {:keys [k name addr coords] :as prm}]
+  [:span {:key k :on-click (fn [e]
+                             (js/console.log "on-click" "old-active" @active "k" k)
+                             (reset! active (if (= @active k) nil k))
+                             (js/console.log "on-click" "new-active" @active)
+                             (re-leaflet-update-markers active mapatom markers)
+                             )}
+   [:div {:class (s/join " " ["association-entry" "ng-star-inserted"])}
+    [:a
+     [:div {:class "icon"}
+      ((comp
+        #_(partial vector :div {:class "icon"})
+        (partial vector :i)
+        (partial hash-map :class)
+        (partial s/join " ")
+        (fn [c] (conj c (if (public-address? addr)
+                          "pubAddr" "noPubAddr"))))
+       ["icon-padding" "pi" "pi-map-marker" "ng-star-inserted"])
+      name]]]])
+
+(defn tab1 [active mapatom markers db-vals]
+  ((comp
+    reagent/as-element
+    (partial vector :div
+             {:id "tab1-content"
+              :class (s/join " " [(styles/tab-content)
+                                  "ui" "attached" "segment" "active" "tab"])})
+    #_(partial vector :div {:class "sidebar-content ng-tns-c14-0"})
+    #_(partial vector :div {:class "association-entries ng-star-inserted"})
+    (partial map (partial list-elem active mapatom markers)))
+   db-vals))
+
+(defn right [active mapatom markers db-vals]
+  [:div
+   [:div.color-input
+    [:input {:type "text"
+             ;; :value time-color
+             :placeholder (de :cmap.lang/search-hint)
+             :on-change (comp
+                         (fn [x] (js/console.log
+                                  (gstr/format "new-val: '%s'" x)))
+                         (fn [x] (.-value x))
+                         (fn [x] (.-target x)))}]]
+   [rc/Tab
+    {:id "tab-panes"
+     :panes
+     [{:menuItem "Tab 1" :render
+       (fn [] (tab1 active mapatom markers db-vals))}
+      {:menuItem "Tab 2" :render
+       (fn []
+         ((comp
+           (partial tab1 active mapatom markers)
+           (partial filter
+                    (fn [m]
+                      (subs/in?
+                       ["Kalimera e. V. Deutsch-Griechische Kulturinitiative"
+                        "Afro Deutsches Akademiker Netzwerk ADAN"
+                        "Schwedischer Schulverein Stuttgart"]
+                       (:name m))))
+           #_(partial take 2))
+          db-vals))}
+      #_{:menuItem "Tab 3" :render
+         (when-let [db-associations
+                    @(re-frame/subscribe [:db-associations])]
+           (fn []
+             ((comp
+               reagent/as-element
+               (partial vector
+                        :div {:class "ui attached segment active tab"})
+               (partial take 4)
+               (partial map (fn [[k v]] [:span {:key k} [:div v]])))
+              db-vals)))}]}]])
+
+;; TODO better transform & translate. E.g. in the class
+(defn translate [name]
+  (or (get
+       {
+        #_"Kalimera e. V. Deutsch-Griechische Kulturinitiative"
+        "Afro Deutsches Akademiker Netzwerk ADAN" 106
+        "Africa Workshop Organisation" 108
+        }
+       name)
+      105))
 
 (defn go [db-vals center-map]
-  ((comp
-    (partial into [:div {:class (styles/wrapper)}]))
-   [[:div {:class [(styles/header)]} #_"header"]
-    #_[:div {:class [(styles/left)]} #_"left"]
-    [:div {:class [(styles/center)]} [center db-vals]]
-    [:div {:class [(styles/right)]}  [right db-vals]]
-    [:div {:class [(styles/footer)]}
-     (str @(re-frame/subscribe [::subs/name]) " v" config/version)]]))
+  (fn [params]
+    (let [
+          active (reagent/atom nil)
+          dn (reagent/atom nil)
+          mapatom (reagent/atom nil)
+          params {:active active
+                  :mapname "my=map"
+                  :latitude 35.99599
+                  :longitude -78.90131
+                  :zoom-level 17
+                  :height 650
+                  :markers (:markers-pta @app-state)}
+          mn (:mapname params)
+          lt (:latitude params)
+          lg (:longitude params)
+          z (:zoom-level params)
+          markers (:markers params)]
+      (reagent/create-class
+       {:component-did-mount
+        (fn [ref] ;; originally ref
+          #_(js/console.log ":component-did-mount" "ref" ref)
+          (let [node-ref       (-> ref rdom/dom-node)
+                node-center    (-> node-ref .-children first)
+                node-map       (-> node-center .-children first)
+                node-map-style (-> node-center .-children first .-style)]
+            (set! (-> node-map-style .-width) (str (.-clientWidth node-center) "px"))
+            (set! (-> node-map-style .-height) (str (.-clientHeight node-ref) "px"))
+            (reset! dn node-map))
+          (let [lmap (js/L.map @dn)
+                mappositioned (-> lmap (.setView (array lt lg) z))
+                tl (-> (js/L.tileLayer
+                        "https://{s}.tile.OpenStreetMap.org/{z}/{x}/{y}.png"))]
+            (.addTo tl mappositioned)
+            (reset! mapatom mappositioned)))
+        :component-did-update
+        (fn [this]
+          #_(js/console.log ":component-did-update" "this" this)
+          (let [newparams (reagent/props this)
+                lmap @mapatom
+                mappositionednew (-> lmap
+                                     (.panTo
+                                      (array
+                                       lt #_(:latitude newparams)
+                                       lg #_(:longitude newparams))
+                                      (:zoom-level newparams)))]
+            (re-leaflet-update-markers active mapatom markers)
+            (reset! mapatom mappositionednew)))
+        :display-name (str "Leaflet Map - " mn)
+        :reagent-render
+        (fn [params]
+          #_(js/console.log "params" params)
+          (when @mapatom
+            (re-leaflet-update-markers active mapatom markers))
+          [:div
+           {:class (styles/wrapper)}
+           #_[:div {:class [(styles/header)]} #_"header"]
+           #_[:div {:class [(styles/left)]} #_"left"]
+           [:div {:class [(styles/center)]}
+            [:div#map {:style {:height 0 :width 0}}]]
+           [:div {:class [(styles/right)]} [right active mapatom markers db-vals]]
+           [:div {:class [(styles/footer)]}
+            (str @(re-frame/subscribe [::subs/name])
+                 " v"
+                 ;; output of `git describe --tags --dirty=-SNAPSHOT`
+                 ;; See :shadow-git-inject/version
+                 config/version)]])}))))
 
 (defn main-panel []
   (when-let [db-associations @(re-frame/subscribe [:db-associations])]
