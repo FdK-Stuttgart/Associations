@@ -8,6 +8,7 @@
    [cmap.react-components :as rc]
    [reagent.core :as reagent]
    [reagent.dom :as rdom]
+   [reagent.dom.server :as rserver]
 
    [reagent.impl.component :as ric]
 
@@ -83,7 +84,9 @@
                              (swap! active-popup (fn [_]
                                                    (if (= (:k @active-popup) k)
                                                      nil
-                                                     prm))))}
+                                                     prm)))
+                             #_(re-leaflet-update-markers  ))
+          }
    [:div {:class (s/join " " ["association-entry" "ng-star-inserted"])}
     [:a
      [:div {:class "icon"}
@@ -242,92 +245,8 @@
                            :target "_blank"
                            :title (get-in social-media [sm-name :title])}
                        [:div {:class "social-media-icon mini-icon"}
-                        [:img (get-in social-media [sm-name :img])]]])]))
-        )
-       (range (count (:ids socialmedia))))]]]]
-  )
-
-;; {{{ React OpenLayers
-;; (defn rlayers-feature [idx state {:keys [addr coords] :as prm}]
-;;   (js/console.log "rlayers-feature state" state)
-;;   [rc/RFeature
-;;    {:geometry (new geom/Point (fromLonLat coords))
-;;     :on-click (fn [e]
-;;                 #_(.log js/console "rc/RFeature on-click" e)
-;;                 #_
-;;                 (let [p (-> js/document
-;;                             (.getElementById (str "p" idx))
-;;                             (.-parentNode)
-;;                             (.-parentNode))
-;;                       c (-> js/window (.getComputedStyle p nil))]
-;;                   (.log js/console "rc/RFeature on-click"
-;;                         c (-> c (.getPropertyValue "-webkit-transform"))
-;;                         (-> c (.getPropertyValue "height")))))}
-;;    [rc/RStyle
-;;     [rc/RIcon
-;;      {#_#_:on-click (fn [e] (.log js/console "rc/RIcon on-click" e))
-;;       :src
-;;       (str "/img/" (if (public-address? addr)
-;;                      "pub-addr.svg" "priv-addr.svg") )
-;;       :anchor [0.5 0.8]}]]
-;;    ;; TODO rc/RPopup toggle - i.e. max one popup can be displayed at the time
-;;    [rc/RPopup state
-;;     [popup idx prm]]])
-
-;; (defn rlayers-map [view set-view state db-vals]
-;;   ((comp
-;;     (partial conj
-;;              [rc/RMap
-;;               {:height "100%" :initial view :view [view set-view]}
-;;               #_(let [this (reagent/current-component)]
-;;                   (js/console.log "this" this))
-;;               [rc/ROSM]])
-;;     (partial into [rc/RLayerVector {:zIndex 10}])
-;;     (partial map-indexed (fn [i v] (rlayers-feature i state v))))
-;;    db-vals))
-;; }}} React OpenLayers
-
-;; {{{ my ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; (defn reagent-render [params]
-;;   (js/console.log "[reagent-render] params" params)
-;;   [:div#map {:style {:height "360px"}}])
-
-;; (defn did-mount "" [ref]
-;;   (js/console.log "[did-mount] ref" ref)
-;;   (let [map (js/L.map "map")
-;;         point #js [51.505 -0.09]]
-;;     (.addTo (js/L.tileLayer "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-;;                         (clj->js
-;;                          {:attribution "&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors"
-;;                           :maxZoom 18}))
-;;             (.setView map point 13))
-;;     (let [point #js [51.507 -0.09]
-;;           marker (js/L.marker point)
-;;           map-with-marker (.addTo marker map)
-;;           map-with-marker-and-popup (.bindPopup map-with-marker
-;;                                                 "A pretty CSS3 popup.<br> Easily customizable.")]
-;;       (.openPopup map-with-marker-and-popup)
-;;       (let [point #js [51.50 -0.09]
-;;             popup (js/L.popup)]
-;;         (.setLatLng popup point)
-;;         (.setContent popup "popups as layers - CSS3 standalone popup.")
-;;         (.openOn popup map)))))
-
-;; (defn did-update "" [this]
-;;   (js/console.log "[did-update] this" this)
-;;   (let [newparams (reagent/props this)]
-;;     (js/console.log "[did-update] newparams" newparams)))
-
-;; (defn re-leaflet [params]
-;;   (js/console.log "[re-leaflet] params" params)
-;;   (reagent/create-class
-;;    {
-;;     :component-did-mount did-mount
-;;     :component-did-update did-update
-;;     :reagent-render reagent-render
-;;     :display-name (str "Leaflet Map - " "abcd")
-;;     }))
-;; }}} my ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                        [:img (get-in social-media [sm-name :img])]]])])))
+       (range (count (:ids socialmedia))))]]]])
 
 (defonce app-state (atom {:markers-pta [{:name "Lucky's Deli"
                                          :lat 35.996834
@@ -397,7 +316,10 @@
                                     :iconAnchor [15 41]
                                     :popupAnchor [0 -31]})))})
          (.addTo markerslayer)
-         (.bindPopup (:name marker)))))
+         (.bindPopup
+          (if @active-popup
+            (rserver/render-to-string [popup @active-popup])
+            (:name marker))))))
     (reset! markers-layer-atom markerslayer)
     (.addTo @markers-layer-atom mapinst)
     (reset! mapatom mapinst)))
@@ -453,16 +375,14 @@
         [:div {:style {:height (:height params)}}])})))
 
 (defn center [db-vals]
-  [:div
-   (when @active-popup [popup @active-popup])
-   [:div#map {:style {:height "360px"}}
-    [re-leaflet
-     {:mapname "my=map"
-      :latitude 35.99599
-      :longitude -78.90131
-      :zoom-level 17
-      :height 650
-      :markers (:markers-pta @app-state)}]]])
+  [:div#map {:style {:height "360px"}}
+   [re-leaflet
+    {:mapname "my=map"
+     :latitude 35.99599
+     :longitude -78.90131
+     :zoom-level 17
+     :height 650
+     :markers (:markers-pta @app-state)}]])
 
 (defn go [db-vals center-map]
   ((comp
