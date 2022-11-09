@@ -39,48 +39,16 @@
 
 (defn fromLonLat [[lon lat]] (.fromLonLat proj (clj->js [lon lat])))
 
-;; primeNgPubAddr           = 'pi pi-map-marker pubAddr';
-;; primeNgNoPubAddr         = 'pi pi-map-marker noPubAddr';
-
-;; primeNgPubAddrSelected   = 'pi pi-map        pubAddr';
-;; primeNgNoPubAddrSelected = 'pi pi-map        noPubAddr';
-
 ;; TODO public-address? computation should be done elsewhere
 (defn public-address? [norm-addr]
   (not (re-find #"(?i).*keine|Postfach.*" norm-addr)))
 
-;; primeNgNoPubAddr          icon-padding" *ngIf="noPubAddrAssocIds.includes(association.id) === true  && association[identifiedByFieldName] !== selectedAssociationField"
-;; primeNgPubAddr            icon-padding" *ngIf="noPubAddrAssocIds.includes(association.id) === false && association[identifiedByFieldName] !== selectedAssociationField"
-;; primeNgNoPubAddrSelected  icon-padding" *ngIf="noPubAddrAssocIds.includes(association.id) === true  && association[identifiedByFieldName] === selectedAssociationField"
-;; primeNgPubAddrSelected    icon-padding" *ngIf="noPubAddrAssocIds.includes(association.id) === false && association[identifiedByFieldName] === selectedAssociationField"
-
-;; (defn full-search []
-;;   (let [[time-color update-time-color] (react/useSatate
-;;                                         ;; #00ff00
-;;                                         "#f34")]
-;;     [:div
-;;      (let [[timer update-time] (react/useState (js/Date.))]
-;;        (react/useEffect
-;;         (fn []
-;;           (let [i (js/setInterval (fn [] (update-time (js/Date.))) 1000)]
-;;             (fn [] (js/clearInterval i)))))
-;;        [:div {:style {:color time-color}} (-> timer
-;;                                               .toTimeString
-;;                                               (s/split " ")
-;;                                               first)])
-;;      [:div.color-input
-;;       [:input {:type "text"
-;;                ;; :value time-color
-;;                :placeholder (de :cmap.lang/search-hint)
-;;                :on-change (comp
-;;                            update-time-color
-;;                            (fn [x] (.-value x))
-;;                            (fn [x] (.-target x)))}]]]))
 
 (defn list-elem
   [{:keys [k name addr coords] :as prm}]
   [:span {:key k :on-click (fn [e]
-                             (js/console.log "list-elem - on-click current:" (:k @active-popup) "clicked:" k)
+                             (js/console.log "list-elem - on-click current:"
+                                             (:k @active-popup) "clicked:" k)
                              (swap! active-popup (fn [_]
                                                    (if (= (:k @active-popup) k)
                                                      nil
@@ -132,11 +100,13 @@
        (fn []
          ((comp
            (partial tab1)
-           (partial filter (fn [m] (subs/in?
-                                    ["Kalimera e. V. Deutsch-Griechische Kulturinitiative"
-                                     "Afro Deutsches Akademiker Netzwerk ADAN"
-                                     "Schwedischer Schulverein Stuttgart"]
-                                    (:name m))))
+           (partial filter
+                    (fn [m]
+                      (subs/in?
+                       ["Kalimera e. V. Deutsch-Griechische Kulturinitiative"
+                        "Afro Deutsches Akademiker Netzwerk ADAN"
+                        "Schwedischer Schulverein Stuttgart"]
+                       (:name m))))
            #_(partial take 2))
           db-vals))}
       #_{:menuItem "Tab 3" :render
