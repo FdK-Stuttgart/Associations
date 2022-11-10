@@ -48,7 +48,7 @@
    {:app {:init-fn cmap.core/init}}
    :compiler-options
    {:closure-defines
-    { cmap.config/version :shadow-git-inject/version}}
+    {cmap.config/version :shadow-git-inject/version}}
    :devtools
    {:preloads []}
    :dev
