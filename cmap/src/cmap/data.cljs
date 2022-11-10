@@ -1,4 +1,149 @@
-(ns cmap.data)
+(ns cmap.data
+  (:require
+   [cmap.lang :refer [de]]
+   ))
+
+(def social-media
+  {"YouTube"   {:title (de :cmap.lang/youtube)
+                :img {:src "assets/youtube.png"
+                      :alt (de :cmap.lang/youtube)}}
+   "LinkedIn" {:title (de :cmap.lang/linkedin)
+               :img {:src "assets/linkedin.png"
+                     :alt (de :cmap.lang/linkedin)}}
+   "Messenger" {:title (de :cmap.lang/messenger)
+                :img {:src "assets/messenger.png"
+                      :alt (de :cmap.lang/messenger)}}
+   "Snapchat" {:title (de :cmap.lang/snapchat)
+               :img {:src "assets/snapchat.png"
+                     :alt (de :cmap.lang/snapchat)}}
+   "Twitter" {:title (de :cmap.lang/twitter)
+              :img {:src "assets/twitter.png"
+                    :alt (de :cmap.lang/twitter)}}
+   "WhatsApp" {:title (de :cmap.lang/whatsapp)
+               :img {:src "assets/whatsapp.png"
+                     :alt (de :cmap.lang/whatsapp)}}
+   "Facebook"  {:title (de :cmap.lang/facebook)
+                :img {:src "assets/facebook.png"
+                      :alt (de :cmap.lang/facebook)}}
+
+   "Instagram" {:title (de :cmap.lang/instagram)
+                :img {:src "assets/instagram.png"
+                      :alt (de :cmap.lang/instagram)}}})
+
+(def leaflet-data
+  {:markers-pta
+    [{:name "Lucky's Deli"
+      :prm {:email "info@abada-capoeira.eu"
+            :goals ""
+            :name "ABADÁ Capoeira"
+            :imageurl nil
+            :districts ["Stuttgart-Bad Cannstatt"]
+            :addr "keine öffentliche Anschrift"
+            :k "f43b9a85-f33d-495d-9d62-42bcd7470c8b"
+            :street ""
+            :postcode-city " "
+            :socialmedia {:ids [] :platforms [] :urls [] :linktexts []}
+            :activities
+            "Sport (Tanz-Kampfsport Sport im Park Functional Fitness)."
+            :links {:url ["https://www.abada-capoeira.eu"] :text [""]}}
+
+      :lat 35.996834
+      :long -78.904467
+      :icon "green"}
+     {:name "Bull City Burgers and Brewery"
+      :prm {:email "G.koeksal@gmx.de"
+            :goals ""
+            :name
+            "ADD Stuttgart – Verein zur Förderung der Ideen Atatürks\r Atatürk Düsünce Dernegi Stuttgart"
+            :imageurl nil
+            :districts ["Stuttgart-Süd"]
+            :addr ""
+            :k "de13059f-0b31-4b03-92c7-4cb78872cca8"
+            :street "Möhringerstraße 56"
+            :postcode-city "70199 Stuttgart"
+            :socialmedia {:ids [] :platforms [] :urls [] :linktexts []}
+            :activities
+            "Bildung (Nachhilfe für Kinder und Jugendliche in Deutsch Englisch und Mathematik Seminare und Kurse für Eltern und Erwachsene im Umgang mit Teenagern und möglichen Problemen für die Gleichberechtigung und Rechte der Frauen) Kultur und Kunst (Konferenzen mit Gastvorträgen in türkischer Sprache Veranstaltungen bei türkischen Nationalfeiertagen)."
+            :links {:url ["http://www.add-stuttgart.de"] :text [""]}}
+      :k "de13059f-0b31-4b03-92c7-4cb78872cca8"
+      :lat 35.995602
+      :long -78.899779
+      :icon "green"}
+     {:name "Béyu Café"
+      :prm {:email "2009ggsa@gmail.com"
+            :goals
+            "Bekanntmachung der afrikanischen Kultur Unterstützung bei der Integration in die Stuttgarter Gesellschaft. Der Verein ist als humanitäre Selbsthilfegruppe und Völkerverständigungsverein seit 1988 in der Region Stuttgart aktiv."
+            :name "Africa Workshop Organisation"
+            :imageurl nil
+            :districts ["Stadt Stuttgart"]
+            :addr ""
+            :k "c7254571-01ce-4465-aa2f-f481c8f32fec"
+            :street "Tübinger Straße 15"
+            :postcode-city "70178 Stuttgart"
+            :socialmedia {:ids [] :platforms [] :urls [] :linktexts []}
+            :activities
+            "Bildung (Zielgruppe Kinder Jugendliche Eltern und Erwachsene) Soziales und Gesundheit (Arbeit mit Senior*innen Menschen mit Behinderung) Entwicklung und Zusammenarbeit (Integrationshilfe) Engagement für Geflüchtete (Zusammenarbeit mit Geflüchteten)."
+            :links
+            {:url
+             ["https://africa-workshop.de"
+              "http://www.afrikaworkshop.de"
+              "http://ggsa.de"]
+             :text ["" "" ""]}}
+      :lat 35.996699
+      :long -78.903862
+      :icon "green"}
+     {:name "M Sushi"
+      :prm {:email "info@afrikafestival-stuttgart.de"
+            :goals
+            "Die Kultur Afrikas den Menschen in Stuttgart und Umgebung näher zu bringen."
+            :name "Afrikafestival Stuttgart"
+            :imageurl
+            "https://house-of-resources-stuttgart.de/wp-content/uploads/2020/11/logo.jpg"
+            :districts ["Stuttgart-Süd"]
+            :addr "keine öffentliche Anschrift"
+            :k "fa7f4588-9bd3-4f37-8451-9e9f1efa7193"
+            :street ""
+            :postcode-city " "
+            :socialmedia
+            {:ids ["ef209583-74d9-434e-8891-7e8a9436f613"]
+             :platforms ["Facebook"]
+             :urls ["https://www.facebook.com/alicetakin"]
+             :linktexts [""]}
+            :activities
+            "Kultur und Kunst (Kunstmarkt offene Bühne mit Konzerten und Tanzdarbietungen Vorträge Filmvorführungen Workshops und Theateraufführungen Deutsch-Afrikanischer Gottesdienst in der Matthäuskirche jährlich am 2. Juliwochenende) Gastronomie (traditionelles Essen) Sport (Tanz)."
+            :links {:url ["https://www.afrikafestival-stuttgart.de/"] :text [""]}}
+      :lat 35.997252
+      :long -78.901172
+      :icon "green"}
+     {:name "M Tempura"
+      :prm {:email "stuttgart@ada-netzwerk.com"
+            :goals
+            "Eine Plattform für die Interaktion zwischen Afrodeutschen AfrikanernInnen und Afrika-Interessierten Personen zu bieten;\r Vielfalt sichtbar zu machen und jungen AfrikanerInnen in der Diaspora Vorbilder aus unterschiedlichen Bereichen zu präsentieren;\r Afrika als Chancenkontinent zu präsentieren um eine nachhaltige Brücke zwischen Afrika und Europa zu kreieren."
+            :name "Afro Deutsches Akademiker Netzwerk ADAN"
+            :imageurl
+            "https://house-of-resources-stuttgart.de/wp-content/uploads/2021/02/ADAN_LOGO-1.png"
+            :districts ["Stuttgart-Mitte"]
+            :addr "keine öffentliche Anschrift"
+            :k "a4be69a3-e758-456c-a6e2-f207c8df1a94"
+            :street ""
+            :postcode-city " "
+            :socialmedia
+            {:ids
+             ["5d3273c8-0ed3-46be-aaf9-75f8278b8f85"
+              "bb595323-3403-44ca-be00-823536fd4e67"]
+             :platforms ["Facebook" "Instagram"]
+             :urls
+             ["https://www.facebook.com/adanetzwerk"
+              "https://www.instagram.com/adanetzwerk/?hl=de"]
+             :linktexts ["" ""]}
+            :activities
+            "Bildung (Beratung von Jugendlichen und Heranwachsenden bei den Themen Schule Studium und Zukunftsplanung)<br/>; Diversity (Vielfalt sichtbar machen und fördern)<br/>; Netzwerk (welches als Plattform für den gegenseitigen Austausch von Deutsch-Afrikanern und<br/>Afrikainteressierten dient und nachhaltige Beziehungen in den Bereichen der Wirtschaft Gesellschaft und Kultur zu entwickeln)"
+            :links
+            {:url ["https://ada-netzwerk.com/" "https://ada-netzwerk.com/"]
+             :text ["" ""]}}
+      :lat 35.996159
+      :long -78.900400
+      :icon "green"}]})
 
 (def districts
 [{:value "d4b4dc39-3aa8-421b-991c-a37e3a05f08f", :label "Stadt Stuttgart", :category nil, :categorylabel nil, :orderindex 1} {:value "d3ea05ed-5dcd-4d47-a2aa-18e4eb6294c0", :label "Stuttgart-Bad Cannstatt", :category "d4b4dc39-3aa8-421b-991c-a37e3a05f08f", :categorylabel "Stadt Stuttgart", :orderindex 1} {:value "5a291e38-df35-4b79-bcd5-c0fef2eb07bb", :label "Stuttgart-Birkach", :category "d4b4dc39-3aa8-421b-991c-a37e3a05f08f", :categorylabel "Stadt Stuttgart", :orderindex 1} {:value "cc397b39-43ee-4d15-9310-746144c207ff", :label "Stuttgart-Botnang", :category "d4b4dc39-3aa8-421b-991c-a37e3a05f08f", :categorylabel "Stadt Stuttgart", :orderindex 1} {:value "a64b2ee7-ca34-427c-9a9c-df8f5f29319e", :label "Stuttgart-Degerloch", :category "d4b4dc39-3aa8-421b-991c-a37e3a05f08f", :categorylabel "Stadt Stuttgart", :orderindex 1} {:value "e0c9c7a7-d317-4662-93e5-28f281df4fd9", :label "Stuttgart-Feuerbach", :category "d4b4dc39-3aa8-421b-991c-a37e3a05f08f", :categorylabel "Stadt Stuttgart", :orderindex 1} {:value "6903278b-dd88-4ae3-b08f-1e3c17aef3da", :label "Stuttgart-Hallschlag", :category "d4b4dc39-3aa8-421b-991c-a37e3a05f08f", :categorylabel "Stadt Stuttgart", :orderindex 1} {:value "4e5d36ad-8387-47c5-9c48-5a5e933e6812", :label "Stuttgart-Hedelfingen", :category "d4b4dc39-3aa8-421b-991c-a37e3a05f08f", :categorylabel "Stadt Stuttgart", :orderindex 1} {:value "77861c3b-3c9c-4ba9-ba03-c6f8832394b2", :label "Stuttgart-Heslach", :category "d4b4dc39-3aa8-421b-991c-a37e3a05f08f", :categorylabel "Stadt Stuttgart", :orderindex 1} {:value "068af935-dc42-40a4-98ef-e59352e9706c", :label "Stuttgart-Mitte", :category "d4b4dc39-3aa8-421b-991c-a37e3a05f08f", :categorylabel "Stadt Stuttgart", :orderindex 1} {:value "6f9350a6-0d94-44f4-86a0-d7e0c8edf9db", :label "Stuttgart-Möhringen", :category "d4b4dc39-3aa8-421b-991c-a37e3a05f08f", :categorylabel "Stadt Stuttgart", :orderindex 1} {:value "6069e093-59e5-45b5-8854-fc1691222472", :label "Stuttgart-Mühlhausen", :category "d4b4dc39-3aa8-421b-991c-a37e3a05f08f", :categorylabel "Stadt Stuttgart", :orderindex 1} {:value "45b57423-e7ea-4e3e-ba37-5e0ec506b1f6", :label "Stuttgart-Münster", :category "d4b4dc39-3aa8-421b-991c-a37e3a05f08f", :categorylabel "Stadt Stuttgart", :orderindex 1} {:value "cc67be51-58de-4109-ae78-2b0c018e27da", :label "Stuttgart-Nord", :category "d4b4dc39-3aa8-421b-991c-a37e3a05f08f", :categorylabel "Stadt Stuttgart", :orderindex 1} {:value "484d4d38-c9e3-4026-833d-69c3190422d9", :label "Stuttgart-Obertürkheim", :category "d4b4dc39-3aa8-421b-991c-a37e3a05f08f", :categorylabel "Stadt Stuttgart", :orderindex 1} {:value "bbf0d197-fcd6-4548-8548-ef1840057018", :label "Stuttgart-Ost", :category "d4b4dc39-3aa8-421b-991c-a37e3a05f08f", :categorylabel "Stadt Stuttgart", :orderindex 1} {:value "f3aa4a7e-5aac-46b9-9bcf-ced8fd0fa7d0", :label "Stuttgart-Plieningen", :category "d4b4dc39-3aa8-421b-991c-a37e3a05f08f", :categorylabel "Stadt Stuttgart", :orderindex 1} {:value "32db5a17-3732-498e-a6c9-1f87f79a7ecb", :label "Stuttgart-Sillenbuch", :category "d4b4dc39-3aa8-421b-991c-a37e3a05f08f", :categorylabel "Stadt Stuttgart", :orderindex 1} {:value "4c2c4518-f53d-409d-9c3c-35dbd7ec5395", :label "Stuttgart-Stammheim", :category "d4b4dc39-3aa8-421b-991c-a37e3a05f08f", :categorylabel "Stadt Stuttgart", :orderindex 1} {:value "03913c8d-c21d-470a-90fc-b3032fc33f4a", :label "Stuttgart-Süd", :category "d4b4dc39-3aa8-421b-991c-a37e3a05f08f", :categorylabel "Stadt Stuttgart", :orderindex 1} {:value "e5c49e46-df39-46aa-af7c-c59c8d9765eb", :label "Stuttgart-Untertürkheim", :category "d4b4dc39-3aa8-421b-991c-a37e3a05f08f", :categorylabel "Stadt Stuttgart", :orderindex 1} {:value "52fc72f5-5b87-4eea-a662-87dc14180f1f", :label "Stuttgart-Vaihingen", :category "d4b4dc39-3aa8-421b-991c-a37e3a05f08f", :categorylabel "Stadt Stuttgart", :orderindex 1} {:value "632866a1-098a-4e0a-8bfe-e786fd6bdb00", :label "Stuttgart-Wangen", :category "d4b4dc39-3aa8-421b-991c-a37e3a05f08f", :categorylabel "Stadt Stuttgart", :orderindex 1} {:value "ff52e1fb-b421-46d4-828b-9e1298a441cf", :label "Stuttgart-Weilimdorf", :category "d4b4dc39-3aa8-421b-991c-a37e3a05f08f", :categorylabel "Stadt Stuttgart", :orderindex 1} {:value "cf4658bb-885d-4937-bfd8-c5a7963a22d0", :label "Stuttgart-West", :category "d4b4dc39-3aa8-421b-991c-a37e3a05f08f", :categorylabel "Stadt Stuttgart", :orderindex 1} {:value "bab504b9-7f1b-42cf-a01e-ce322fe25590", :label "Stuttgart-Zazenhausen", :category "d4b4dc39-3aa8-421b-991c-a37e3a05f08f", :categorylabel "Stadt Stuttgart", :orderindex 1} {:value "1a68b204-3bc7-4ebd-a5a9-effc1b65dcb1", :label "Stuttgart-Zuffenhausen", :category "d4b4dc39-3aa8-421b-991c-a37e3a05f08f", :categorylabel "Stadt Stuttgart", :orderindex 1} {:value "2717c531-6aa6-4d87-80d7-f70141d04c63", :label "Region Stuttgart", :category nil, :categorylabel nil, :orderindex 2} {:value "68c95b21-6d7b-4ef2-8372-a3e53869e52d", :label "Böblingen", :category "2717c531-6aa6-4d87-80d7-f70141d04c63", :categorylabel "Region Stuttgart", :orderindex 2} {:value "6aff7a3e-28be-45dd-90cc-5eaa689f2fd9", :label "Ditzingen", :category "2717c531-6aa6-4d87-80d7-f70141d04c63", :categorylabel "Region Stuttgart", :orderindex 2} {:value "38fb84bd-9bc3-416f-ade8-1d4be4fdb22e", :label "Esslingen am Neckar", :category "2717c531-6aa6-4d87-80d7-f70141d04c63", :categorylabel "Region Stuttgart", :orderindex 2} {:value "ee4de3c1-f202-4b67-a8ee-ee53c95af538", :label "Fellbach", :category "2717c531-6aa6-4d87-80d7-f70141d04c63", :categorylabel "Region Stuttgart", :orderindex 2} {:value "ff6dfb12-0d8d-4f71-94c1-3f92f7314db2", :label "Göppingen", :category "2717c531-6aa6-4d87-80d7-f70141d04c63", :categorylabel "Region Stuttgart", :orderindex 2} {:value "29681fff-3d9a-4d88-b4fa-5984a2f3fbbf", :label "Leonberg", :category "2717c531-6aa6-4d87-80d7-f70141d04c63", :categorylabel "Region Stuttgart", :orderindex 2} {:value "1a04156f-facc-494c-8061-7fc8138adf91", :label "Ludwigsburg", :category "2717c531-6aa6-4d87-80d7-f70141d04c63", :categorylabel "Region Stuttgart", :orderindex 2} {:value "80df1e1c-c4c1-4999-b1ee-a089f9991038", :label "Sindelfingen", :category "2717c531-6aa6-4d87-80d7-f70141d04c63", :categorylabel "Region Stuttgart", :orderindex 2} {:value "b34a153d-bd29-4b97-9814-23f10c5048e8", :label "Waiblingen", :category "2717c531-6aa6-4d87-80d7-f70141d04c63", :categorylabel "Region Stuttgart", :orderindex 2} {:value "0f91a15c-dd80-47c5-915e-b5b596641929", :label "Übergreifend", :category nil, :categorylabel nil, :orderindex 3} {:value "126c225a-cd98-4560-8fae-94cd0ec0bff4", :label "Bundesweit (Deutschland)", :category "0f91a15c-dd80-47c5-915e-b5b596641929", :categorylabel "Übergreifend", :orderindex 3} {:value "845c4868-a060-4f68-861a-f880404bbf11", :label "International", :category "0f91a15c-dd80-47c5-915e-b5b596641929", :categorylabel "Übergreifend", :orderindex 3} {:value "f15af137-6b8b-44f2-927e-5bfc0bb86ca9", :label "Landesweit (Baden-Württemberg)", :category "0f91a15c-dd80-47c5-915e-b5b596641929", :categorylabel "Übergreifend", :orderindex 3} {:value "def5709b-04dd-409e-a3d9-2831186574d7", :label "Stuttgart und Region", :category "0f91a15c-dd80-47c5-915e-b5b596641929", :categorylabel "Übergreifend", :orderindex 3}])
