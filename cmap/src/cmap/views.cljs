@@ -1,7 +1,7 @@
 (ns cmap.views
   (:require
    [re-frame.core :as re-frame]
-   [cmap.styles :as styles]
+   [cmap.styles :as styles :refer [pxu]]
    [cmap.subs :as subs]
    [cmap.data :as data]
    [cmap.lang :refer [de]]
@@ -251,10 +251,16 @@
           #_(js/console.log ":component-did-mount" "ref" ref)
           (let [node-ref       (-> ref rdom/dom-node)
                 node-center    (-> node-ref .-children first)
+                node-footer    (.item (-> node-ref .-children) 2)
                 node-map       (-> node-center .-children first)
                 node-map-style (-> node-center .-children first .-style)]
-            (set! (-> node-map-style .-width) (str (.-clientWidth node-center) "px"))
-            (set! (-> node-map-style .-height) (str (.-clientHeight node-ref) "px"))
+            (set! (-> node-map-style .-width)
+                  (str (.-clientWidth node-center) pxu))
+            (set! (-> node-map-style .-height)
+                  (str (- (.-clientHeight node-ref)
+                          (+ (.-clientHeight node-footer)
+                             ;; '* 2' b/c padding top and bottom is the same
+                             (* 2 styles/padding))) pxu))
             (reset! dn node-map))
           (let [lmap (js/L.map @dn)
                 mappositioned (-> lmap (.setView (array lt lg) z))
