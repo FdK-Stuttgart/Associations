@@ -7,6 +7,9 @@
    [garden.units :refer [deg px]]
    [garden.color :refer [rgba]]))
 
+(def padding 4)
+(def pxu "px")
+
 (defclass wrapper [] {:resize "both"
                       ;; :padding "10mm"
                       :height "100vh"
@@ -27,12 +30,12 @@
                       :text-align "center"
                       ;; :padding "2rem"
                       })
-(defclass left    [] {:grid-column "1 / 2" :background "lightblue" :padding "1mm"})
-(defclass center  [] {:grid-column "2 / 3" :background "coral"     :padding "1mm"
+(defclass left    [] {:grid-column "1 / 2" :background "lightblue" :padding (str padding pxu)})
+(defclass center  [] {:grid-column "2 / 3" :background "coral"     :padding (str padding pxu)
                       ;; :min-height "100vh"
                       ;; :min-height "fit-content"
                       })
-(defclass right   [] {:grid-column "3 / 4" :background "yellow"    :padding "1mm"
+(defclass right   [] {:grid-column "3 / 4" :background "yellow"    :padding (str padding pxu)
                       :overflow-y "auto"
                       })
 (defclass footer  [] {:grid-column "1 / 4" :background "wheat"
