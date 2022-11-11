@@ -24,63 +24,55 @@
 
 (defn popup
   "addr has only 'keine öffentliche Anschrift'"
-  [{:keys [k name addr street postcode-city districts email activities goals
-           imageurl links socialmedia] :as prm}]
-  [:div
-   {:id k
-    :class ["on-top" #_(styles/pos)]
-    #_#_:style {:transform (str "translate(-50%, -" (translate name) "%)")}
-    }
-   [:div {:class "association-container osm-association-container"}
-    [:a {:class "association-container-close-icon" :id "popup-close"}
-     [:i {:class "pi pi-times"}]]
-    [:div {:class "osm-association-inner-container"}
-     [:div {:class "association-title"} [:h2 name]]
-     [:div {:class "association-images"}
-      [:div {:class "association-image"}
-       [:img {:src imageurl :alt ""}]]]
-     [:div {:class "association-address"}
-      [:p {:class "street"} street]
-      [:p {:class "postcode-city"} postcode-city]
-      [:p {:class "name"} [:strong addr]]]
-     [:div {:class "association-contacts"}
-      [:div {:class "association-contact"}
-       [:div {:class "association-contact"}
-        [:div {:class "association-contact-row"}
-         [:div {:class "social-media-icon mini-icon"}
-          [:img {:src "assets/mail.png" :alt ""}]]
-         [:p {:class "mail"}
-          [:a {:href (str "mailto:" email)} email]]]]]]
-     [:div {:class "association-description"}
-      [:h3 (de :cmap.lang/goals)] goals]
-     [:div {:class "association-description"}
-      [:h3 (de :cmap.lang/activities)] activities]
-     [:div {:class "association-active-in"}
-      [:h3 (de :cmap.lang/activity-areas)]
-      [:div {:class "association-chips-container"}
-       (map-indexed (fn [idx elem]
-                      (vector :div (conj {:key idx}
-                                         {:class "association-chips"})
-                              elem))
-                    districts)]]
-     [:div {:class "association-links"}
-      [:h3 (de :cmap.lang/links)]
-      [:ul (map (fn [idx url text]
-                  [:li {:key idx} [:a {:href url :title text :target "_blank"}
-                                   (if (empty? text) url text)]])
-                (range (count (:url links))) (:url links) (:text links))]]
-     [:div {:class "association-social-media"}
-      ((comp
-        (partial map
-                 (fn [idx]
-                   [:div {:key idx :class "social-media-link"}
-                    (let [sm-name (nth (get socialmedia :platforms) idx)]
-                      [:a {:href (nth (get socialmedia :urls) idx)
-                           :target "_blank"
-                           :title (get-in data/social-media [sm-name :title])}
-                       [:div {:class "social-media-icon mini-icon"}
-                        [:img (get-in data/social-media [sm-name :img])]]])])))
-       (range (count (:ids socialmedia))))]]]])
+  [{:keys [name addr street postcode-city districts email activities goals
+           imageurl links socialmedia]}]
+  [:div {:class "osm-association-inner-container"}
+   [:div {:class "association-title"} [:h2 name]]
+   [:div {:class "association-images"}
+    [:div {:class "association-image"}
+     [:img {:src imageurl :alt ""}]]]
+   [:div {:class "association-address"}
+    [:p {:class "street"} street]
+    [:p {:class "postcode-city"} postcode-city]
+    [:p {:class "name"} [:strong addr]]]
+   [:div {:class "association-contacts"}
+    [:div {:class "association-contact"}
+     [:div {:class "association-contact"}
+      [:div {:class "association-contact-row"}
+       [:div {:class "social-media-icon mini-icon"}
+        [:img {:src "assets/mail.png" :alt ""}]]
+       [:p {:class "mail"}
+        [:a {:href (str "mailto:" email)} email]]]]]]
+   [:div {:class "association-description"}
+    [:h3 (de :cmap.lang/goals)] goals]
+   [:div {:class "association-description"}
+    [:h3 (de :cmap.lang/activities)] activities]
+   [:div {:class "association-active-in"}
+    [:h3 (de :cmap.lang/activity-areas)]
+    [:div {:class "association-chips-container"}
+     (map-indexed (fn [idx elem]
+                    (vector :div (conj {:key idx}
+                                       {:class "association-chips"})
+                            elem))
+                  districts)]]
+   [:div {:class "association-links"}
+    [:h3 (de :cmap.lang/links)]
+    [:ul (map (fn [idx url text]
+                [:li {:key idx} [:a {:href url :title text :target "_blank"}
+                                 (if (empty? text) url text)]])
+              (range (count (:url links))) (:url links) (:text links))]]
+   [:div {:class "association-social-media"}
+    ((comp
+      (partial map
+               (fn [idx]
+                 [:div {:key idx :class "social-media-link"}
+                  (let [sm-name (nth (get socialmedia :platforms) idx)]
+                    [:a {:href (nth (get socialmedia :urls) idx)
+                         :target "_blank"
+                         :title (get-in data/social-media [sm-name :title])}
+                     [:div {:class "social-media-icon mini-icon"}
+                      [:img (get-in data/social-media [sm-name :img])]]])])))
+     (range (count (:ids socialmedia))))]])
 
 (def markers-layer-atom (reagent/atom nil))
 
