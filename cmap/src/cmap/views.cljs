@@ -87,6 +87,7 @@
      (for [marker db-vals]
        (do
          (let [[longitude latitude] (:coords marker)
+               k (:k marker)
                ;; No need to recreate the whole map. It's enough to the
                ;; map-with-marker-and-popup as a function parameter and
                ;; call .openPopup / .closePopup
@@ -99,9 +100,11 @@
                                             :iconSize [30 42]
                                             :iconAnchor [15 41]
                                             :popupAnchor [0 -31]}))})
+                   (.on "click" (fn [_]
+                                  (reset! active (if (= @active k) nil k))))
                    (.addTo markers-layer)
                    (.bindPopup (rserver/render-to-string [popup marker])))]
-           (if (= (:k marker) @active)
+           (if (= k @active)
              (.openPopup map-with-marker-and-popup)
              map-with-marker-and-popup)))))
     (reset! markers-layer-atom markers-layer)
@@ -112,14 +115,13 @@
 (defn public-address? [norm-addr]
   (not (re-find #"(?i).*keine|Postfach.*" norm-addr)))
 
-(defn list-elem [active map-atom db-vals {:keys [k name addr coords]}]
+(defn list-elem [active map db-vals pi-icon {:keys [k name addr coords]}]
   [:span {:key k
           :on-click (fn [e]
                       ;; (js/console.log "on-click" "old-active" @active "k" k)
                       (reset! active (if (= @active k) nil k))
                       ;; (js/console.log "on-click" "new-active" @active)
-                      (update-markers active map-atom db-vals)
-                      )}
+                      (update-markers active map db-vals))}
    [:div {:class (s/join " " ["association-entry" "ng-star-inserted"])}
     [:a
      [:div {:class "icon"}
@@ -130,7 +132,7 @@
         (partial s/join " ")
         (fn [c] (conj c (if (public-address? addr)
                           "pubAddr" "noPubAddr"))))
-       ["icon-padding" "pi" "pi-map-marker" "ng-star-inserted"])
+       ["icon-padding" "pi" pi-icon "ng-star-inserted"])
       name]]]])
 
 (defn tab1 [active map-atom db-vals]
@@ -142,7 +144,15 @@
                                   "ui" "attached" "segment" "active" "tab"])})
     #_(partial vector :div {:class "sidebar-content ng-tns-c14-0"})
     #_(partial vector :div {:class "association-entries ng-star-inserted"})
-    (partial map (partial list-elem active map-atom db-vals)))
+    (partial map (partial apply (partial list-elem active map-atom db-vals))
+             #_(fn [[m dbv]] (list-elem active map-atom db-vals m dbv)))
+    doall
+    (partial map (fn [{:keys [k] :as db-val}]
+                   [(if (= @active k)
+                      "pi-map"        ;; the map icon
+                      "pi-map-marker" ;; the pointy-ball icon
+                      )
+                    db-val])))
    db-vals))
 
 (defn right [active map-atom db-vals]
@@ -197,23 +207,21 @@
        name)
       105))
 
-(defn go [db-vals center-map]
-  (fn [params]
-    (let [active (reagent/atom nil)
-          dom-node (reagent/atom nil)
-          map-atom (reagent/atom nil)
-          lat 48.774901
-          lng 9.163174
-          zoom 17]
-      (reagent/create-class
-       {:component-did-mount
-        (fn [ref] ;; originally ref
-          #_(js/console.log ":component-did-mount" "ref" ref)
-          (let [node-ref       (-> ref rdom/dom-node)
-                node-center    (-> node-ref .-children first)
-                node-footer    (.item (-> node-ref .-children) 2)
-                node-map       (-> node-center .-children first)
-                node-map-style (-> node-center .-children first .-style)]
+(defn map-with-list [params db-vals center-map]
+  (let [active (reagent/atom nil)
+        map-atom (reagent/atom nil)
+        [lng lat] center-map
+        zoom 17]
+    (reagent/create-class
+     {:component-did-mount
+      (fn [ref]
+        #_(js/console.log "[: did-mount]" "ref" ref)
+        (let [node-ref       (-> ref rdom/dom-node)
+              node-center    (-> node-ref .-children first)
+              node-footer    (.item (-> node-ref .-children) 2)]
+          ;; TODO the map-size should fill the center-element, that means the
+          ;; size of the center-element must be fixed
+          (let [node-map-style (-> node-center .-children first .-style)]
             (set! (-> node-map-style .-width)
                   (str (.-clientWidth node-center) pxu))
             ;; the height is wrong if there are too few entries in the tab(s)
@@ -221,44 +229,50 @@
                   (str (- (.-clientHeight node-ref)
                           (+ (.-clientHeight node-footer)
                              ;; '* 2' b/c padding top and bottom is the same
-                             (* 2 styles/padding))) pxu))
-            (reset! dom-node node-map))
-          (let [leaflet-map (-> (js/L.map @dom-node)
-                                (.setView (array lat lng) zoom))]
+                             (* 2 styles/padding))) pxu)))
+          (let [leaflet-map (-> node-center .-children first js/L.map)]
+            (reset! map-atom leaflet-map)
+            (.setView leaflet-map (array lat lng) zoom)
+            (.on leaflet-map "click" (fn [_]
+                                       (when @active
+                                         (reset! active nil))))
             (.addTo (js/L.tileLayer
                      "https://{s}.tile.OpenStreetMap.org/{z}/{x}/{y}.png")
-                    leaflet-map)
-            (reset! map-atom leaflet-map)))
-        :component-did-update
-        (fn [this]
-          #_(js/console.log ":component-did-update" "this" this)
-          (let [new-params (reagent/props this)
-                ;; here I may need to get the values from the new-params to
-                ;; reposition the map
-                leaflet-map (-> @map-atom
-                                (.panTo (array lat lng) zoom))]
-            (update-markers active map-atom db-vals)
-            (reset! map-atom leaflet-map)))
-        :display-name "My Leaflet Map"
-        :reagent-render
-        (fn [params]
-          #_(js/console.log "params" params)
-          (when @map-atom
-            (update-markers active map-atom db-vals))
-          [:div
-           {:class (styles/wrapper)}
-           #_[:div {:class [(styles/header)]} #_"header"]
-           #_[:div {:class [(styles/left)]} #_"left"]
-           [:div {:class [(styles/center)]}
-            [:div#map {:style {:height 0 :width 0}}]]
-           [:div {:class [(styles/right)]} [right active map-atom db-vals]]
-           [:div {:class [(styles/footer)]}
-            (str @(re-frame/subscribe [::subs/name])
-                 " v"
-                 ;; output of `git describe --tags --dirty=-SNAPSHOT`
-                 ;; See :shadow-git-inject/version
-                 config/version)]])}))))
+                    leaflet-map))))
+      :component-did-update
+      (fn [this]
+        ;; (js/console.log "[: did-update]"
+        ;;                 "this" this ".-props" (.-props this))
+        #_
+        (let [new-params (.-props this) ;; (reagent/props this) is always {}
+              ;; here I may need to get the values from the new-params to
+              ;; reposition the map
+              leaflet-map (-> @map-atom
+                              (.panTo (array lat lng) zoom))]
+          (update-markers active map-atom db-vals)
+          (reset! map-atom leaflet-map)))
+      :display-name "My Leaflet Map"
+      :reagent-render
+      ;; params is {}; (reagent/props params) throws error;
+      ;; (.-props params) is undefined
+      (fn [params]
+        ;; (js/console.log "[:reagent-render]")
+        (when @map-atom
+          (update-markers active map-atom db-vals))
+        [:div
+         {:class (styles/wrapper)}
+         #_[:div {:class [(styles/header)]} #_"header"]
+         #_[:div {:class [(styles/left)]} #_"left"]
+         [:div {:class [(styles/center)]}
+          [:div#map {:style {:height 0 :width 0}}]]
+         [:div {:class [(styles/right)]} (right active map-atom db-vals)]
+         [:div {:class [(styles/footer)]}
+          (str @(re-frame/subscribe [::subs/name])
+               " v"
+               ;; output of `git describe --tags --dirty=-SNAPSHOT`
+               ;; See :shadow-git-inject/version
+               config/version)]])})))
 
 (defn main-panel []
   (when-let [db-associations @(re-frame/subscribe [:db-associations])]
-    [:f> go db-associations @(re-frame/subscribe [:center-map])]))
+    [map-with-list {} db-associations @(re-frame/subscribe [:center-map])]))
