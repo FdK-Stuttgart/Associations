@@ -1,6 +1,8 @@
 (ns cmap.core
   (:require
    [reagent.dom :as rdom]
+   ;; not in the [reagent "1.1.1"] yet
+   #_[reagent.dom.client :refer [create-root]]
    [re-frame.core :as re-frame]
    [cmap.events :as events]
    [cmap.views :as views]
@@ -11,6 +13,14 @@
 (defn dev-setup []
   (when config/debug?
     (println "dev mode")))
+
+#_
+(defn ^:dev/after-load mount-root []
+  (re-frame/clear-subscription-cache!)
+  (let [root-el (.getElementById js/document "app")
+        root-container (create-root root-el)]
+    (rdom/unmount-component-at-node root-el)
+    (.render root-container [views/main-panel])))
 
 (defn ^:dev/after-load mount-root []
   (re-frame/clear-subscription-cache!)
