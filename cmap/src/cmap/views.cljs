@@ -100,42 +100,35 @@
        (range (count (:ids socialmedia))))]]]])
 
 (def markers-layer-atom (reagent/atom nil))
-;; Reload webpage when changed
-(defonce app-state (atom data/leaflet-data))
 
-(defn re-leaflet-update-markers [active mapatom markers]
-  (let [mapinst @mapatom
-        markerslayer (if (nil? @markers-layer-atom)
-                       (js/L.layerGroup)
-                       @markers-layer-atom)]
-    #_(js/console.log "[re-leaflet-update-markers]" "markerslayer" markerslayer)
-    #_(js/console.log "[re-leaflet-update-markers]" "mapinst" mapinst)
-    #_(js/console.log "[re-leaflet-update-markers]" "markers" markers)
-    #_(.clearLayers markerslayer)
+(defn update-markers [active map-atom db-vals]
+  (let [map-instance @map-atom
+        markers-layer (if (nil? @markers-layer-atom)
+                        (js/L.layerGroup)
+                        @markers-layer-atom)]
+    ;; (js/console.log "[update-markers]")
+    (.clearLayers markers-layer)
     (doall
-     (for [marker markers]
+     (for [marker db-vals]
        (do
-         (let [map-with-marker-and-popup
+         (let [[longitude latitude] (:coords marker)
+               map-with-marker-and-popup
                (-> (js/L.marker
-                    (array (:lat marker) (:long marker))
+                    (array latitude longitude)
                     #js {:icon (js/L.icon (clj->js
                                            {:iconUrl
                                             "/icon/map_markers/green_new.png"
                                             :iconSize [30 42]
                                             :iconAnchor [15 41]
                                             :popupAnchor [0 -31]}))})
-                   (.addTo markerslayer)
-                   (.bindPopup
-                    (rserver/render-to-string [popup (:prm marker)])))]
-           #_
-           (js/console.log "active" @active "open-popup?"
-                           (-> marker :prm :k) (= (-> marker :prm :k) @active))
-           (if (= (-> marker :prm :k) @active)
+                   (.addTo markers-layer)
+                   (.bindPopup (rserver/render-to-string [popup marker])))]
+           (if (= (:k marker) @active)
              (.openPopup map-with-marker-and-popup)
              map-with-marker-and-popup)))))
-    (reset! markers-layer-atom markerslayer)
-    (.addTo @markers-layer-atom mapinst)
-    (reset! mapatom mapinst)))
+    (reset! markers-layer-atom markers-layer)
+    (.addTo @markers-layer-atom map-instance)
+    (reset! map-atom map-instance)))
 
 (defn fromLonLat [[lon lat]] (.fromLonLat proj (clj->js [lon lat])))
 
@@ -143,13 +136,14 @@
 (defn public-address? [norm-addr]
   (not (re-find #"(?i).*keine|Postfach.*" norm-addr)))
 
-(defn list-elem [active mapatom markers {:keys [k name addr coords] :as prm}]
-  [:span {:key k :on-click (fn [e]
-                             (js/console.log "on-click" "old-active" @active "k" k)
-                             (reset! active (if (= @active k) nil k))
-                             (js/console.log "on-click" "new-active" @active)
-                             (re-leaflet-update-markers active mapatom markers)
-                             )}
+(defn list-elem [active map-atom db-vals {:keys [k name addr coords]}]
+  [:span {:key k
+          :on-click (fn [e]
+                      ;; (js/console.log "on-click" "old-active" @active "k" k)
+                      (reset! active (if (= @active k) nil k))
+                      ;; (js/console.log "on-click" "new-active" @active)
+                      (update-markers active map-atom db-vals)
+                      )}
    [:div {:class (s/join " " ["association-entry" "ng-star-inserted"])}
     [:a
      [:div {:class "icon"}
@@ -163,7 +157,7 @@
        ["icon-padding" "pi" "pi-map-marker" "ng-star-inserted"])
       name]]]])
 
-(defn tab1 [active mapatom markers db-vals]
+(defn tab1 [active map-atom db-vals]
   ((comp
     reagent/as-element
     (partial vector :div
@@ -172,10 +166,10 @@
                                   "ui" "attached" "segment" "active" "tab"])})
     #_(partial vector :div {:class "sidebar-content ng-tns-c14-0"})
     #_(partial vector :div {:class "association-entries ng-star-inserted"})
-    (partial map (partial list-elem active mapatom markers)))
+    (partial map (partial list-elem active map-atom db-vals)))
    db-vals))
 
-(defn right [active mapatom markers db-vals]
+(defn right [active map-atom db-vals]
   [:div
    [:div.color-input
     [:input {:type "text"
@@ -190,11 +184,11 @@
     {:id "tab-panes"
      :panes
      [{:menuItem "Tab 1" :render
-       (fn [] (tab1 active mapatom markers db-vals))}
+       (fn [] (tab1 active map-atom db-vals))}
       {:menuItem "Tab 2" :render
        (fn []
          ((comp
-           (partial tab1 active mapatom markers)
+           (partial tab1 active map-atom)
            (partial filter
                     (fn [m]
                       (subs/in?
@@ -229,22 +223,12 @@
 
 (defn go [db-vals center-map]
   (fn [params]
-    (let [
-          active (reagent/atom nil)
-          dn (reagent/atom nil)
-          mapatom (reagent/atom nil)
-          params {:active active
-                  :mapname "my=map"
-                  :latitude 35.99599
-                  :longitude -78.90131
-                  :zoom-level 17
-                  :height 650
-                  :markers (:markers-pta @app-state)}
-          mn (:mapname params)
-          lt (:latitude params)
-          lg (:longitude params)
-          z (:zoom-level params)
-          markers (:markers params)]
+    (let [active (reagent/atom nil)
+          dom-node (reagent/atom nil)
+          map-atom (reagent/atom nil)
+          lat 48.809439
+          lng  9.226132
+          zoom 17]
       (reagent/create-class
        {:component-did-mount
         (fn [ref] ;; originally ref
@@ -256,44 +240,42 @@
                 node-map-style (-> node-center .-children first .-style)]
             (set! (-> node-map-style .-width)
                   (str (.-clientWidth node-center) pxu))
+            ;; the height is wrong if there are too few entries in the tab(s)
             (set! (-> node-map-style .-height)
                   (str (- (.-clientHeight node-ref)
                           (+ (.-clientHeight node-footer)
                              ;; '* 2' b/c padding top and bottom is the same
                              (* 2 styles/padding))) pxu))
-            (reset! dn node-map))
-          (let [lmap (js/L.map @dn)
-                mappositioned (-> lmap (.setView (array lt lg) z))
-                tl (-> (js/L.tileLayer
-                        "https://{s}.tile.OpenStreetMap.org/{z}/{x}/{y}.png"))]
-            (.addTo tl mappositioned)
-            (reset! mapatom mappositioned)))
+            (reset! dom-node node-map))
+          (let [leaflet-map (-> (js/L.map @dom-node)
+                                (.setView (array lat lng) zoom))]
+            (.addTo (js/L.tileLayer
+                     "https://{s}.tile.OpenStreetMap.org/{z}/{x}/{y}.png")
+                    leaflet-map)
+            (reset! map-atom leaflet-map)))
         :component-did-update
         (fn [this]
           #_(js/console.log ":component-did-update" "this" this)
-          (let [newparams (reagent/props this)
-                lmap @mapatom
-                mappositionednew (-> lmap
-                                     (.panTo
-                                      (array
-                                       lt #_(:latitude newparams)
-                                       lg #_(:longitude newparams))
-                                      (:zoom-level newparams)))]
-            (re-leaflet-update-markers active mapatom markers)
-            (reset! mapatom mappositionednew)))
-        :display-name (str "Leaflet Map - " mn)
+          (let [new-params (reagent/props this)
+                ;; here I may need to get the values from the new-params to
+                ;; reposition the map
+                leaflet-map (-> @map-atom
+                                (.panTo (array lat lng) zoom))]
+            (update-markers active map-atom db-vals)
+            (reset! map-atom leaflet-map)))
+        :display-name "My Leaflet Map"
         :reagent-render
         (fn [params]
           #_(js/console.log "params" params)
-          (when @mapatom
-            (re-leaflet-update-markers active mapatom markers))
+          (when @map-atom
+            (update-markers active map-atom db-vals))
           [:div
            {:class (styles/wrapper)}
            #_[:div {:class [(styles/header)]} #_"header"]
            #_[:div {:class [(styles/left)]} #_"left"]
            [:div {:class [(styles/center)]}
             [:div#map {:style {:height 0 :width 0}}]]
-           [:div {:class [(styles/right)]} [right active mapatom markers db-vals]]
+           [:div {:class [(styles/right)]} [right active map-atom db-vals]]
            [:div {:class [(styles/footer)]}
             (str @(re-frame/subscribe [::subs/name])
                  " v"
