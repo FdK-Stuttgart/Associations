@@ -22,16 +22,10 @@
 
 (enable-console-print!)
 
-
 (defn popup
   "addr has only 'keine öffentliche Anschrift'"
   [{:keys [k name addr street postcode-city districts email activities goals
            imageurl links socialmedia] :as prm}]
-  #_
-  (js/console.log
-   (pp/pprint
-    (select-keys prm [:k :name :addr :street :postcode-city :districts :email
-                      :activities :goals :imageurl :links :socialmedia])))
   [:div
    {:id k
     :class ["on-top" #_(styles/pos)]
@@ -101,6 +95,9 @@
      (for [marker db-vals]
        (do
          (let [[longitude latitude] (:coords marker)
+               ;; No need to recreate the whole map. It's enough to the
+               ;; map-with-marker-and-popup as a function parameter and
+               ;; call .openPopup / .closePopup
                map-with-marker-and-popup
                (-> (js/L.marker
                     (array latitude longitude)
