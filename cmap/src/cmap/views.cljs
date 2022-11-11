@@ -176,7 +176,7 @@
            (partial filter
                     (fn [m]
                       (subs/in?
-                       ["Kalimera e. V. Deutsch-Griechische Kulturinitiative"
+                       ["Kalimera Deutsch-Griechische Kulturinitiative"
                         "Afro Deutsches Akademiker Netzwerk ADAN"
                         "Schwedischer Schulverein Stuttgart"]
                        (:name m))))
@@ -198,7 +198,7 @@
 (defn translate [name]
   (or (get
        {
-        #_"Kalimera e. V. Deutsch-Griechische Kulturinitiative"
+        #_"Kalimera Deutsch-Griechische Kulturinitiative"
         "Afro Deutsches Akademiker Netzwerk ADAN" 106
         "Africa Workshop Organisation" 108
         }
@@ -210,8 +210,8 @@
     (let [active (reagent/atom nil)
           dom-node (reagent/atom nil)
           map-atom (reagent/atom nil)
-          lat 48.809439
-          lng  9.226132
+          lat 48.774901
+          lng 9.163174
           zoom 17]
       (reagent/create-class
        {:component-did-mount
