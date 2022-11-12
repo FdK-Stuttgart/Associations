@@ -12,6 +12,8 @@
 
 (defclass wrapper [] {:resize "both"
                       ;; :padding "10mm"
+                      ;; :border-block-color "blue"
+                      ;; :border-style "dotted"
                       :height "100vh"
                       :display "grid"
                       ;; :grid-template "auto 200px auto / auto 1fr auto"

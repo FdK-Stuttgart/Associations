@@ -111,7 +111,7 @@
     (.addTo @markers-layer-atom map-instance)
     (reset! map-atom map-instance)))
 
-;; TODO public-address? computation should be done elsewhere
+;; TODO public-address? computation should be done elsewhere.
 (defn public-address? [norm-addr]
   (not (re-find #"(?i).*keine|Postfach.*" norm-addr)))
 
@@ -217,19 +217,22 @@
       (fn [ref]
         #_(js/console.log "[: did-mount]" "ref" ref)
         (let [node-ref       (-> ref rdom/dom-node)
-              node-center    (-> node-ref .-children first)
+              node-header    (.item (-> node-ref .-children) 0)
+              node-center    (.item (-> node-ref .-children) 1)
               node-footer    (.item (-> node-ref .-children) 2)]
-          ;; TODO the map-size should fill the center-element, that means the
-          ;; size of the center-element must be fixed
           (let [node-map-style (-> node-center .-children first .-style)]
             (set! (-> node-map-style .-width)
                   (str (.-clientWidth node-center) pxu))
-            ;; the height is wrong if there are too few entries in the tab(s)
+            #_
+            (js/console.log "[: did-mount]"
+                            "(.-clientHeight node-ref)" (.-clientHeight node-ref)
+                            "(.-clientHeight node-header)" (.-clientHeight node-header)
+                            "(.-clientHeight node-center)" (.-clientHeight node-center)
+                            "(.-clientHeight node-footer)" (.-clientHeight node-footer))
             (set! (-> node-map-style .-height)
-                  (str (- (.-clientHeight node-ref)
-                          (+ (.-clientHeight node-footer)
-                             ;; '* 2' b/c padding top and bottom is the same
-                             (* 2 styles/padding))) pxu)))
+                  (str (- (.-clientHeight node-center)
+                          ;; '* 2' b/c padding top and bottom is the same
+                          (* 2 styles/padding)) pxu)))
           (let [leaflet-map (-> node-center .-children first js/L.map)]
             (reset! map-atom leaflet-map)
             (.setView leaflet-map (array lat lng) zoom)
@@ -261,9 +264,11 @@
           (update-markers active map-atom db-vals))
         [:div
          {:class (styles/wrapper)}
-         #_[:div {:class [(styles/header)]} #_"header"]
+         ;; 'header' must be displayed so that the ':grid-template-rows ...'
+         ;; kicks in and the height of the 'center' is maximized
+         [:div {:class [(styles/header)]} #_"header"]
          #_[:div {:class [(styles/left)]} #_"left"]
-         [:div {:class [(styles/center)]}
+         [:div {:class [(styles/center)]} #_"center"
           [:div#map {:style {:height 0 :width 0}}]]
          [:div {:class [(styles/right)]} (right active map-atom db-vals)]
          [:div {:class [(styles/footer)]}
