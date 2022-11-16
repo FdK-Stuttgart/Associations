@@ -36,8 +36,8 @@
 
  :reitit.routes/api
  {:base-path "/api"
-  :env #ig/ref :system/env
-  :query-fn #ig/ref :db.sql/query-fn}
+  :env       #ig/ref :system/env
+  :query-fn  #ig/ref :db.sql/query-fn}
 
  :router/routes
  {:routes #ig/refset :reitit/routes}

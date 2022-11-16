@@ -16,8 +16,19 @@
     {:get {:no-doc  true
            :swagger {:info {:title "fdk.cmap API"}}
            :handler (swagger/create-swagger-handler)}}]
+   ;; http://localhost:3000/api/health
    ["/health"
-    {:get health/healthcheck!}]])
+    {:get
+     health/healthcheck!}]
+   ["/db-vals-1-2"
+    ;; http://localhost:3000/api/db-vals-1-2?x=1&y=2
+    {:get
+     {:parameters {:query {:x int? :y int?}}
+      :handler health/read-db}}]
+
+   ;; http://localhost:3000/api/db-vals
+   ["/db-vals" {:get health/read-db}]]
+  )
 
 (defn route-data
   [opts]
