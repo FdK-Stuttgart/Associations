@@ -431,6 +431,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
       filteredResult = this.associations
         .filter((s: Association) => {
           const q: string = queryString ? queryString.toLowerCase() : '';
+          // TODO add districts
           return s.name.toLowerCase().includes(q)
             || s.shortName?.toLowerCase().includes(q)
             || s.street?.toLowerCase().includes(q)
@@ -587,14 +588,14 @@ export class OsmMapComponent implements OnInit, OnDestroy {
   sInactivePrivateArr = this.getMarkerStyle(Marker.InactivePrivate);
 
   mouseOverAssoc(a: Association): void {
-    console.log('mouseOverAssoc');
+    // console.log('mouseOverAssoc');
     if (this.mouseOverAssocId != a.id) {
       this.mouseOverAssocId = a.id;
       this.updateClusterLayerStyle();
     }
   }
   mouseOutAssoc(a: Association): void {
-    console.log('mouseOutAssoc');
+    // console.log('mouseOutAssoc');
     if (this.mouseOverAssocId != '') {
       this.mouseOverAssocId = '';
       this.updateClusterLayerStyle();
@@ -993,6 +994,9 @@ export class OsmMapComponent implements OnInit, OnDestroy {
 
     if (association.links && association.links.length > 0) {
       content += `<div class="association-links"><h3>Links</h3>`;
+      // XXX for e.g. "a4be69a3-e758-456c-a6e2-f207c8df1a94" there should be two
+      // links generated in the popup
+      // console.log('association.links', association.links);
       for (const link of association.links) {
         content += `<ul><li>`;
         content += `<a href="${link.url}" `;

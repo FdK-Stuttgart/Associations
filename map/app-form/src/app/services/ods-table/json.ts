@@ -13,30 +13,6 @@ import {
 } from '../../model/association';
 import {v4 as uuidv4} from 'uuid';
 
-function keywords(thing, options): string[] {
-  if (thing) {
-    const clean = thing
-      .replace(/\((.*?)\)/g, (match: string, token) => {
-        return '';
-      })
-      .replace(/\./g, (match: string, token) => {
-        return '';
-      })
-      .trim();
-    const cleanSplit = clean.split(/, /);
-    return getDistricts(cleanSplit, options);
-  }
-  return [];
-}
-
-function getDistricts(stringParts: string[], options: DropdownOption[]): string[] {
-  return stringParts.map((stringPart: string) => {
-    return options.find(option => {
-      return stringPart === option.label || isSynonym(stringPart, option.label);
-    });
-  }).filter(op => !!op).map((opt: DropdownOption) => opt.value);
-}
-
 function isSynonym(stringPart: string, districtLabel: string): boolean {
   stringPart = stringPart.replace('Bad-Cannstatt', 'Bad Cannstatt').trim();
   if (stringPart === districtLabel) {
@@ -66,6 +42,30 @@ function isSynonym(stringPart: string, districtLabel: string): boolean {
   }
   return districtLabel === 'Stuttgart und Region'
     && (stringPart.includes('Stuttgart und Umgebung') || stringPart.includes('und Region') || stringPart === 'Stuttgart Region');
+}
+
+function getDistricts(stringParts: string[], options: DropdownOption[]): string[] {
+  return stringParts.map((stringPart: string) => {
+    return options.find(option => {
+      return stringPart === option.label || isSynonym(stringPart, option.label);
+    });
+  }).filter(op => !!op).map((opt: DropdownOption) => opt.value);
+}
+
+function keywords(thing, options): string[] {
+  if (thing) {
+    const clean = thing
+      .replace(/\((.*?)\)/g, (match: string, token) => {
+        return '';
+      })
+      .replace(/\./g, (match: string, token) => {
+        return '';
+      })
+      .trim();
+    const cleanSplit = clean.split(/, /);
+    return getDistricts(cleanSplit, options);
+  }
+  return [];
 }
 
 // Thanks to https://stackoverflow.com/a/6234804

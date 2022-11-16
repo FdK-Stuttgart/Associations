@@ -75,20 +75,102 @@ To reload changes:
 (reset)
 ```
 
+Result of the main query `read-associations` is available under
+http://localhost:3000/api/db-vals (need to call `(reset)` when changed)
+
+
+## Build & Deploy
+
+```shell
+# build the app
+clj -Sforce -T:build all
+
+# transfer to Test / Prod system
+remoteShell="ssh -o StrictHostKeyChecking=no -p ..." # define port number
+rsync -av --rsh="$remoteShell" /path/to/cmap-standalone.jar <USER>@<HOST>:<HOST_HOME>/path/to/cmap-standalone.jar
+
+# on the Test / Prod system, define environment variables in the $HOME/.profile
+export CMAP_PORT=8002
+export CMAP_MYSQL_PASSWORD=
+# See https://www.urlencoder.io/ for special chars (=,?,& etc) in the URL
+export CMAP_MYSQL_PASSWORD_ESCAPED=
+export CMAP_MYSQL_USER=
+export CMAP_MYSQL_HOST=...
+export CMAP_MYSQL_PORT=... # typically 3306
+export CMAP_JDBC_URL="mysql://$CMAP_MYSQL_HOST:$CMAP_MYSQL_PORT/associations?user=$CMAP_MYSQL_USER&password=$CMAP_MYSQL_PASSWORD_ESCAPED"
+
+# launch the app from the CLI
+java -jar $HOME/path/to/cmap-standalone.jar
+```
+
+## Run as a SystemD service
+
+```shell
+# On the target machine
+sudo mkdir -p /etc/systemd/system/
+sudo cp etc/systemd/system/cmap-standalone.service /etc/systemd/system/cmap-standalone.service
+
+# Enable the service to start at boot time:
+sudo systemctl enable cmap-standalone
+
+# When editing the cmap-standalone.service, reload the systemd manager
+# configuration:
+sudo systemctl daemon-reload
+
+# (Re)Start the service immediately:
+# sudo systemctl start cmap-standalone
+sudo systemctl restart cmap-standalone
+
+# Check the status of your service:
+sudo systemctl status cmap-standalone
+
+# Inspect / view the log file:
+sudo journalctl -u cmap-standalone -f
+```
+
 ## REPLs
+
+```shell
+# npm install
+npx shadow-cljs watch app
+```
 
 ### Cursive
 
-Configure a [REPL following the Cursive documentation](https://cursive-ide.com/userguide/repl.html). Using the default "Run with IntelliJ project classpath" option will let you select an alias from the ["Clojure deps" aliases selection](https://cursive-ide.com/userguide/deps.html#refreshing-deps-dependencies).
+Configure a [REPL following the Cursive
+documentation](https://cursive-ide.com/userguide/repl.html). Using the default
+"Run with IntelliJ project classpath" option will let you select an alias from
+the ["Clojure deps" aliases
+selection](https://cursive-ide.com/userguide/deps.html#refreshing-deps-dependencies).
 
 ### CIDER
 
-Use the `cider` alias for CIDER nREPL support (run `clj -M:dev:cider`). See the [CIDER docs](https://docs.cider.mx/cider/basics/up_and_running.html) for more help.
+Use the `cider` alias for CIDER nREPL support (run `clj -M:dev:cider`). See the
+[CIDER docs](https://docs.cider.mx/cider/basics/up_and_running.html) for more
+help.
 
-Note that this alias runs nREPL during development. To run nREPL in production (typically when the system starts), use the kit-nrepl library through the +nrepl profile as described in [the documentation](https://kit-clj.github.io/docs/profiles.html#profiles).
+However the `M-x cider-jack-in-clj` doesn't work. The 'com.billpiel/sayid
+{:mvn/version "0.1.0"}' is missing among the dependencies specified by the value
+of -Sdeps.
+
+Note that this alias runs nREPL during development. To run nREPL in production
+(typically when the system starts), use the kit-nrepl library through the +nrepl
+profile as described in [the
+documentation](https://kit-clj.github.io/docs/profiles.html#profiles).
 
 ### Command Line
 
 Run `clj -M:dev:nrepl` or `make repl`.
 
-Note that, just like with [CIDER](#cider), this alias runs nREPL during development. To run nREPL in production (typically when the system starts), use the kit-nrepl library through the +nrepl profile as described in [the documentation](https://kit-clj.github.io/docs/profiles.html#profiles).
+Note that, just like with [CIDER](#cider), this alias runs nREPL during
+development. To run nREPL in production (typically when the system starts), use
+the kit-nrepl library through the +nrepl profile as described in [the
+documentation](https://kit-clj.github.io/docs/profiles.html#profiles).
+
+
+## Database
+
+Export:
+```
+mysqldump -u $USER -p associations > map/database/db-export/associations.sql
+```

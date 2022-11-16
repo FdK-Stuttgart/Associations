@@ -20,10 +20,15 @@
 
 (add-tap (bound-fn* clojure.pprint/pprint))
 
+(defn config-inspect [config]
+  (println "[user=> (config-inspect)]" "config" config)
+  config)
+
 (defn dev-prep!
   []
   (integrant.repl/set-prep! (fn []
                               (-> (fdk.cmap.config/system-config {:profile :dev})
+                                  #_(config-inspect)
                                   (ig/prep)))))
 
 (defn test-prep!
