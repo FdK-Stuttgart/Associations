@@ -63,8 +63,19 @@ fi
 # variables making up the environment are displayed.
 #   guix shell --search-paths
 
+# Make ./persistent-profile a symlink to the `guix shell ...` result, and
+# register it as a garbage collector root, i.e. prevent garbage collection
+# during(!) the `guix shell ...` session:
+#  --root=./persistent-profile \
+#
+
+# Create environment for the package that the '...' EXPR evaluates to.
+# --expression='(list (@ (gnu packages bash) bash) "include")' \
+#
+
 set -x
 guix shell \
+     --root=./persistent-profile \
      --manifest=manifest.scm \
      --container --network \
      --preserve=^fdk \

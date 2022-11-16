@@ -27,3 +27,4 @@ data/*.class
 /.envrc
 
 /map/database/api/environment.php
+/persistent-profile
