@@ -3,31 +3,32 @@
    [cmap.lang :refer [de]]
    ))
 
+(def img-dir "/icon/other")
+
 (def social-media
   {"YouTube"   {:title (de :cmap.lang/youtube)
-                :img {:src "assets/youtube.png"
+                :img {:src (str img-dir "/youtube.png")
                       :alt (de :cmap.lang/youtube)}}
    "LinkedIn" {:title (de :cmap.lang/linkedin)
-               :img {:src "assets/linkedin.png"
+               :img {:src (str img-dir "/linkedin.png")
                      :alt (de :cmap.lang/linkedin)}}
    "Messenger" {:title (de :cmap.lang/messenger)
-                :img {:src "assets/messenger.png"
+                :img {:src (str img-dir "/messenger.png")
                       :alt (de :cmap.lang/messenger)}}
    "Snapchat" {:title (de :cmap.lang/snapchat)
-               :img {:src "assets/snapchat.png"
+               :img {:src (str img-dir "/snapchat.png")
                      :alt (de :cmap.lang/snapchat)}}
    "Twitter" {:title (de :cmap.lang/twitter)
-              :img {:src "assets/twitter.png"
+              :img {:src (str img-dir "/twitter.png")
                     :alt (de :cmap.lang/twitter)}}
    "WhatsApp" {:title (de :cmap.lang/whatsapp)
-               :img {:src "assets/whatsapp.png"
+               :img {:src (str img-dir "/whatsapp.png")
                      :alt (de :cmap.lang/whatsapp)}}
    "Facebook"  {:title (de :cmap.lang/facebook)
-                :img {:src "assets/facebook.png"
+                :img {:src (str img-dir "/facebook.png")
                       :alt (de :cmap.lang/facebook)}}
-
    "Instagram" {:title (de :cmap.lang/instagram)
-                :img {:src "assets/instagram.png"
+                :img {:src (str img-dir "/instagram.png")
                       :alt (de :cmap.lang/instagram)}}})
 
 (def leaflet-data

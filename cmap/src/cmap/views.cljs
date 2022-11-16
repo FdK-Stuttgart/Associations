@@ -26,6 +26,60 @@
   "addr has only 'keine öffentliche Anschrift'"
   [{:keys [name addr street postcode-city districts email activities goals
            imageurl links socialmedia]}]
+  [:div
+   {:class
+         "association-container osm-association-container"
+         #_"association-container"
+         #_"osm-association-container"
+    }
+   [:div {:class "osm-association-inner-container"}
+    [:div {:class "association-title"} [:h2 name]]
+    [:div {:class "association-images"}
+     [:div {:class "association-image"}
+      [:img {:src imageurl :alt ""}]]]
+    [:div {:class "association-address"}
+     [:p {:class "street"} street]
+     [:p {:class "postcode-city"} postcode-city]
+     [:p {:class "name"} [:strong addr]]]
+    [:div {:class "association-contacts"}
+     [:div {:class "association-contact"}
+      [:div {:class "association-contact"}
+       [:div {:class "association-contact-row"}
+        [:div {:class "social-media-icon mini-icon"}
+         [:img {:src "assets/mail.png" :alt ""}]]
+        [:p {:class "mail"}
+         [:a {:href (str "mailto:" email)} email]]]]]]
+    [:div {:class "association-description"}
+     [:h3 (de :cmap.lang/goals)] goals]
+    [:div {:class "association-description"}
+     [:h3 (de :cmap.lang/activities)] activities]
+    [:div {:class "association-active-in"}
+     [:h3 (de :cmap.lang/activity-areas)]
+     [:div {:class "association-chips-container"}
+      (map-indexed (fn [idx elem]
+                     (vector :div (conj {:key idx}
+                                        {:class "association-chips"})
+                             elem))
+                   districts)]]
+    [:div {:class "association-links"}
+     [:h3 (de :cmap.lang/links)]
+     [:ul (map (fn [idx url text]
+                 [:li {:key idx} [:a {:href url :title text :target "_blank"}
+                                  (if (empty? text) url text)]])
+               (range (count (:url links))) (:url links) (:text links))]]
+    [:div {:class "association-social-media"}
+     ((comp
+       (partial map
+                (fn [idx]
+                  [:div {:key idx :class "social-media-link"}
+                   (let [sm-name (nth (get socialmedia :platforms) idx)]
+                     [:a {:href (nth (get socialmedia :urls) idx)
+                          :target "_blank"
+                          :title (get-in data/social-media [sm-name :title])}
+                      [:div {:class "social-media-icon mini-icon"}
+                       [:img (get-in data/social-media [sm-name :img])]]])])))
+      (range (count (:ids socialmedia))))]]]
+#_
   [:div {:class "osm-association-inner-container"}
    [:div {:class "association-title"} [:h2 name]]
    [:div {:class "association-images"}
@@ -76,18 +130,25 @@
 
 (def markers-layer-atom (reagent/atom nil))
 
+(defn public-address?
+  "TODO public-address? computation should be done elsewhere."
+  [norm-addr]
+  (not (re-find #"(?i).*keine|Postfach.*" norm-addr)))
+
 (defn update-markers [active map-atom db-vals]
   (let [map-instance @map-atom
         markers-layer (if (nil? @markers-layer-atom)
                         (js/L.layerGroup)
                         @markers-layer-atom)]
-    ;; (js/console.log "[update-markers]")
+    #_(js/console.log "[update-markers]")
+    (js/console.log "[update-markers]" "(keys (first db-vals))" (keys (first db-vals)))
     (.clearLayers markers-layer)
     (doall
      (for [marker db-vals]
        (do
          (let [[longitude latitude] (:coords marker)
                k (:k marker)
+               addr (:addr marker)
                ;; No need to recreate the whole map. It's enough to the
                ;; map-with-marker-and-popup as a function parameter and
                ;; call .openPopup / .closePopup
@@ -96,7 +157,9 @@
                     (array latitude longitude)
                     #js {:icon (js/L.icon (clj->js
                                            {:iconUrl
-                                            "/icon/map_markers/green_new.png"
+                                            (if (public-address? addr)
+                                              "/icon/map_markers/pinActivePublic.png"
+                                              "/icon/map_markers/pinActivePrivate.png")
                                             :iconSize [30 42]
                                             :iconAnchor [15 41]
                                             :popupAnchor [0 -31]}))})
@@ -110,10 +173,6 @@
     (reset! markers-layer-atom markers-layer)
     (.addTo @markers-layer-atom map-instance)
     (reset! map-atom map-instance)))
-
-;; TODO public-address? computation should be done elsewhere.
-(defn public-address? [norm-addr]
-  (not (re-find #"(?i).*keine|Postfach.*" norm-addr)))
 
 (defn list-elem [active map db-vals pi-icon {:keys [k name addr coords]}]
   [:span {:key k
