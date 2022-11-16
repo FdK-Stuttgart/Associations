@@ -1,6 +1,11 @@
 <?php
 # Fill out the db* vars below and run from the command line:
+# -c <path>|<file>  Look for php.ini file in this directory
+# -f <file>         Parse and execute <file>
+# On Guix:
 #   php -c /usr/etc -f /etc/db-connect-test.php
+# On Ubuntu:
+#   php -c $HOME/dec/fdk/etc -f $HOME/dec/fdk/etc/db-connect-test.php
 
 $php_inipath = php_ini_loaded_file();
 
@@ -10,17 +15,19 @@ $php_inipath = php_ini_loaded_file();
 
 
 if ($php_inipath) {
-    echo "Loaded php.ini: " . $php_inipath . "\n";
+    echo "$php_inipath loaded\n";
 } else {
     die("php.ini file is not loaded");
 }
 
-$dbhost = '';
-$dbuser = $_ENV["USER"];
-$dbpass = '';
-$dbname = 'associations';
+// When developing, use '127.0.0.1' if 'localhost' leads to:
+//   Uncaught mysqli_sql_exception: No such file or directory ...
+$db_host = '127.0.0.1';
+$db_user = $_ENV["USER"];
+$db_pass = '';
+$db_name = 'associations';
 
-echo "Connecting to dbhost: '$dbhost' dbuser: '$dbuser' dbname: '$dbname' ...\n";
+echo "Connecting to db_host: '$db_host' db_user: '$db_user' db_name: '$db_name' ...\n";
 
 /*
   TODO mysqli_connect is deprecated
@@ -31,14 +38,14 @@ echo "Connecting to dbhost: '$dbhost' dbuser: '$dbuser' dbname: '$dbname' ...\n"
  mysqli_connect()
  PDO::__construct()
  */
-$link = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
+$link = mysqli_connect($db_host, $db_user, $db_pass, $db_name);
 if (mysqli_connect_errno()) {
     echo "Failed to connect: " . mysqli_connect_error() . "\n";
     exit();
 }
-mysqli_select_db($link, $dbname) or die("Couldn't connect to '$dbname'\n");
+mysqli_select_db($link, $db_name) or die("Couldn't connect to '$db_name'\n");
 
-$test_query = "SHOW TABLES FROM $dbname";
+$test_query = "SHOW TABLES FROM $db_name";
 $result = mysqli_query($link, $test_query);
 
 $tblCnt = 0;
@@ -47,5 +54,5 @@ while($tbl = mysqli_fetch_array($result)) {
     #echo $tbl[0]."<br />\n";
 }
 
-echo "Database $dbname contains $tblCnt tables.\n";
+echo "Database $db_name contains $tblCnt tables.\n";
 ?>

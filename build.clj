@@ -1,7 +1,17 @@
 (ns build
   (:require [clojure.string :as string]
             [clojure.tools.build.api :as b]
-            [deps-deploy.deps-deploy :as deploy]))
+            [deps-deploy.deps-deploy :as deploy]
+            [babashka.fs :refer [copy-tree]]
+            [babashka.process :refer [shell]]))
+
+ (defn build-cljs []
+   (println "npx shadow-cljs release app...")
+   (let [{:keys [exit], :as s}
+         (shell "npx shadow-cljs release app")]
+     (when-not (zero? exit)
+       (throw (ex-info "could not compile cljs" s)))
+     (copy-tree "target/classes/cljsbuild/public" "target/classes/public")))
 
 (def lib 'fdk/cmap)
 (def main-cls (string/join "." (filter some? [(namespace lib) (name lib) "core"])))
@@ -28,11 +38,12 @@
                :target-dir class-dir}))
 
 (defn uber [_]
-  (println "Compiling Clojure...")
+  (println "Compiling Clojure into directory" class-dir "...")
   (b/compile-clj {:basis basis
                   :src-dirs ["src/clj" "resources" "env/prod/resources" "env/prod/clj"]
                   :class-dir class-dir})
-  (println "Making uberjar...")
+  (build-cljs)
+  (println "Making uberjar file" uber-file "...")
   (b/uber {:class-dir class-dir
            :uber-file uber-file
            :main main-cls

@@ -16,6 +16,14 @@
    ;;     guix shell ... --share=/usr/bin
    #;"busybox"
 
+   ;; see also `guix search clojure'
+   "clojure"
+   ;; "clojure-lsp" ;; needed only for emacs
+
+   ;; CLI tools to start a Clojure repl, use Clojure and Java libraries, and
+   ;; start Clojure programs. See https://clojure.org/releases/tools
+   "clojure-tools" ; adding this makes clojure binary available on the CLI
+
    "coreutils"
    "curl"
    "findutils" ; provides: find, updatedb, xargs
@@ -25,20 +33,29 @@
    "git"
    "gnupg"
    "grep"
-   "iproute2" ; contains ss - socket statistics
+   "iproute2" ; provides `ss' socket statistics
    "jq"
    "leiningen"
    "less"
    "mariadb"
    ;; "mariadb:lib" ; see the 'sed ...'-hack in the .bashrc
+
+   "node"
+
+   ;; https://github.com/dbcli/mycli/issues/534
+   ;; $ mycli --user bost
+   ;; (1698, "Access denied for user 'bost'@'localhost'")
+   ;; $ mycli --user foo # works
    "mycli"
+   "util-linux" ;  provides: dmesg, namei, ...
+
    "ncurses"
    "node"
    "nss-certs"
 
    ;; `guix shell openjdk@<version>:jdk PACKAGES --export-manifest' ignores the
    ;; '@<version>' if it matches the installed version.
-   "openjdk@18:jdk"
+   "openjdk:jdk"
 
    "openssh"
    "pgcli"
@@ -46,6 +63,7 @@
    "ripgrep"
    "rsync"
    "sed"
+   "inetutils" ;; provides hostname, etc.
    "which"
    "zip"
    "unzip"
