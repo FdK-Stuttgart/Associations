@@ -18,6 +18,9 @@
 
    "coreutils"
    "curl"
+   "findutils" ; provides: find, updatedb, xargs
+   "procps"    ; provides: free, pgrep, pidof, pkill, pmap, ps, pwdx, slabtop,
+               ;           tload, top, vmstat, w, watch and sysctl
    "fish"
    "git"
    "gnupg"
@@ -26,6 +29,7 @@
    "leiningen"
    "less"
    "mariadb"
+   ;; "mariadb:lib" ; see the 'sed ...'-hack in the .bashrc
    "mycli"
    "ncurses"
    "node"

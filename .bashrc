@@ -180,7 +180,10 @@ download () {
 }
 
 start_db () {
+    set -x  # Print commands and their arguments as they are executed.
     mysqld_safe 1>/dev/null &
+    # Don't print commands
+    { retval="$?"; set +x; } 2>/dev/null
 }
 
 start_php () {
@@ -466,10 +469,16 @@ EOF
 fi
 
 test_db () {
+    set -x  # Print commands and their arguments as they are executed.
     mysql --user $USER << EOF
 SELECT count(*) as "count-of-activities (should be ~130):"
 FROM associations.activities;
 EOF
+    { retval="$?"; set +x; } 2>/dev/null
+    if [ ! $retval -eq 0 ]; then
+        printf "INF: \`start_db\` executed?\n"
+        return $retval
+    fi
 }
 
 ## Install MariaDB on the first run
@@ -477,8 +486,25 @@ dbd=/var/lib/mysql/data/mysql
 if [ ! -d $dbd ]; then
     # printf "DBG: first run: dbd doesn't exist: %s\n" $dbd
     # printf "DBG: install MariaDB...\n"
-    # Awful hack, required to solve a bug on mariadb guix' package
-    lc_messages_dir=$(find /gnu/store -type d -name english | grep mysql)
+
+    ### The 'sed ...'-hack below, required to solve a bug on mariadb guix'
+    ### package is not needed.
+    ### Regarding locating of a guix package in the store:
+    ### 1. "mariadb:lib" must be present in the manifest.scm
+    ### 2. The guix-daemon is not running, so this doesn't work in the `guix
+    ### shell ...`:
+    ###   guile -c '
+    ###   (use-modules (guix) (gnu packages databases))
+    ###   (define store (open-connection))
+    ###   (format #t
+    ###           (derivation->output-path (package-derivation
+    ###                                     store mariadb #:graft? #f)
+    ###                                    "lib"))'
+    lc_messages_dir=$(readlink \
+                          $(dirname \
+                                $(dirname \
+                                      $(which mariadb)))/share/mysql/english)
+    printf "lc_messages_dir: %s\n" $lc_messages_dir
     sed -i -e "s|#lc_messages_dir#|$lc_messages_dir|" /usr/etc/my.cnf
 
     # TODO if the PAM authentication plugin is needed
@@ -494,12 +520,12 @@ if [ ! -d $dbd ]; then
     # Cannot change ownership of the '/auth_pam_tool_dir' directory
     # to the 'bost' user. Check that you have the necessary permissions and try again.
 
-    mysql_install_db 2>&1 | sed '/^chown: cannot access/,/try again\.$/d'
     set -x
+    mysql_install_db 2>&1 | sed '/^chown: cannot access/,/try again\.$/d'
     mysqld_safe &
-    { retval="$?"; set +x; } 2>/dev/null
     # execution of `mysql_secure_installation` is not needed
     sleep 3
+    # --verbose   show executed SQL commands
     mysql --user $USER << EOF
 DROP DATABASE IF EXISTS associations;
 CREATE DATABASE IF NOT EXISTS associations;
@@ -508,7 +534,7 @@ GRANT ALL PRIVILEGES ON associations.* TO '$USER'@'localhost' WITH GRANT OPTION;
 CREATE USER 'foo'@'localhost' IDENTIFIED BY '';
 GRANT ALL PRIVILEGES ON *.* TO 'foo'@'localhost' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
-SELECT user,password FROM mysql.user;
+SELECT concat(user, '  \'', password, '\'') FROM mysql.user;
 SELECT '-- Loading test data ...' AS '';
 SOURCE map/database/db-export/associations.sql;
 -- SHOW TABLES;
@@ -518,6 +544,7 @@ EOF
 #     printf "DBG: install MariaDB... done\n"
 # else
 #     printf "DBG: first run: dbd exists already: %s\n" $dbd
+    { retval="$?"; set +x; } 2>/dev/null
 fi
 
 guix_prompt () {
