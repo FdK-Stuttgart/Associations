@@ -28,7 +28,7 @@
   []
   (integrant.repl/set-prep! (fn []
                               (-> (fdk.cmap.config/system-config {:profile :dev})
-                                  (config-inspect)
+                                  #_(config-inspect)
                                   (ig/prep)))))
 
 (defn test-prep!
