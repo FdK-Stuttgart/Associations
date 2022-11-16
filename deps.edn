@@ -26,6 +26,8 @@
  io.github.kit-clj/kit-sql-migratus {:mvn/version "1.0.1"}
  org.xerial/sqlite-jdbc {:mvn/version "3.36.0.3"}
            io.github.kit-clj/kit-mysql {:mvn/version "1.0.1"}
+           ;; From https://github.com/kit-clj/kit/blob/master/libs/kit-mysql/deps.edn
+           mysql/mysql-connector-java {:mvn/version "8.0.29"}
  }
  :aliases {:build {:deps {io.github.clojure/tools.build {:git/sha "e3e3532"
                                                          :git/tag "v0.8.0" :git/url "https://github.com/clojure/tools.build.git"}
