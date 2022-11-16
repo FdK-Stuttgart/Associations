@@ -251,6 +251,11 @@ install_node_modules () {
     fi
 }
 
+# TODO integrate cmap:
+#   cd cmap
+#   npm install
+#   npx shadow-cljs watch app
+# See also run.sh: prjd, prj_dirs
 serve_map () {
     # test_php
     create_environment_php
