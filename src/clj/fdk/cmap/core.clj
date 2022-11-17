@@ -6,7 +6,6 @@
     [fdk.cmap.env :refer [defaults]]
 
     ;; Edges
-    [fdk.cmap.db.mysql]
     [kit.edge.server.undertow]
     [fdk.cmap.web.handler]
 
