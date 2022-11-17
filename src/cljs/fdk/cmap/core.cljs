@@ -1,34 +1,32 @@
 (ns fdk.cmap.core
+  "entry point, plus history, routing, etc"
   (:require
-   [reagent.dom :as rdom]
-   ;; not in the [reagent "1.1.1"] yet
-   #_[reagent.dom.client :refer [create-root]]
-   [re-frame.core :as re-frame]
-   [fdk.cmap.events :as events]
-   [fdk.cmap.views :as views]
-   [fdk.cmap.config :as config]
-   ))
+    [day8.re-frame.http-fx]
+    [reagent.dom :as rdom]
+    #_[reagent.dom.client :refer [create-root]]
+    [re-frame.core :as rf]
+    [fdk.cmap.views :as views]
 
-
-(defn dev-setup []
-  (when config/debug?
-    (println "dev mode")))
+    ;; https://day8.github.io/re-frame/App-Structure/#the-gotcha
+    [fdk.cmap.events] ;; must be required
+    [fdk.cmap.subs] ;; must be required
+    ))
 
 #_
-(defn ^:dev/after-load mount-root []
-  (re-frame/clear-subscription-cache!)
+(defn ^:dev/after-load mount-components []
+  (rf/clear-subscription-cache!)
   (let [root-el (.getElementById js/document "app")
         root-container (create-root root-el)]
     (rdom/unmount-component-at-node root-el)
     (.render root-container [views/main-panel])))
 
-(defn ^:dev/after-load mount-root []
-  (re-frame/clear-subscription-cache!)
+(defn ^:dev/after-load mount-components []
+  (rf/clear-subscription-cache!)
   (let [root-el (.getElementById js/document "app")]
     (rdom/unmount-component-at-node root-el)
     (rdom/render [views/main-panel] root-el)))
 
 (defn init []
-  (re-frame/dispatch-sync [::events/initialize-db])
-  (dev-setup)
-  (mount-root))
+  #_(ajax/load-interceptors!)
+  (rf/dispatch [:page/init-db])
+  (mount-components))
