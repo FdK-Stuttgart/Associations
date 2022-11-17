@@ -339,5 +339,4 @@
     (when-let [center-map
                #_[9.177591 48.775471]
                @(re-frame/subscribe [:center-map])]
-      (js/console.log "[main-panel]" "center-map" center-map)
       [map-with-list {} db-vals center-map])))
