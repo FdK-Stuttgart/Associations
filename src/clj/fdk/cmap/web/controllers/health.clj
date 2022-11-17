@@ -19,7 +19,17 @@
 (defn read-db
   [{{{:keys [x y]} :query} :parameters :as request}]
   (let [query-fn (:db.sql/query-fn state/system)]
-    (println "x" x "y" y)      ; appears in the console
-    (log/debug "x" x "y" y)    ; appears in the console & log/fdk.cmap.log
-    (http-response/ok
-     (query-fn :read-associations {}))))
+    ;; (println "x" x "y" y)      ; appears in the console
+    ;; (log/debug "x" x "y" y)    ; appears in the console & log/fdk.cmap.log
+
+    ;; See also
+    ;; (rf/reg-event-fx :fetch-from-db ...
+    ;;   {:http-xhrio {...
+    ;;                 :response-format (ajax/raw-response-format)}})
+    (-> (http-response/ok
+         (let [db-vals (->> (query-fn :read-associations {})
+                            (pr)
+                            (with-out-str))]
+           (log/info "\n$$$$$$$ Response length:" (count db-vals))
+           db-vals))
+        (http-response/header "Content-Type" "text/plain; charset=utf-8"))))

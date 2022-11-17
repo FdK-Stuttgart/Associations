@@ -140,8 +140,6 @@
         markers-layer (if (nil? @markers-layer-atom)
                         (js/L.layerGroup)
                         @markers-layer-atom)]
-    #_(js/console.log "[update-markers]")
-    (js/console.log "[update-markers]" "(keys (first db-vals))" (keys (first db-vals)))
     (.clearLayers markers-layer)
     (doall
      (for [marker db-vals]
@@ -214,46 +212,42 @@
                     db-val])))
    db-vals))
 
-(defn right [active map-atom db-vals]
-  [:div
-   [:div.color-input
-    [:input {:type "text"
-             ;; :value time-color
-             :placeholder (de :fdk.cmap.lang/search-hint)
-             :on-change (comp
-                         (fn [x] (js/console.log
-                                  (gstr/format "new-val: '%s'" x)))
-                         (fn [x] (.-value x))
-                         (fn [x] (.-target x)))}]]
-   [rc/Tab
-    {:id "tab-panes"
-     :panes
-     [{:menuItem "Tab 1" :render
-       (fn [] (tab1 active map-atom db-vals))}
-      {:menuItem "Tab 2" :render
-       (fn []
-         ((comp
-           (partial tab1 active map-atom)
-           (partial filter
-                    (fn [m]
-                      (subs/in?
-                       ["Kalimera Deutsch-Griechische Kulturinitiative"
-                        "Afro Deutsches Akademiker Netzwerk ADAN"
-                        "Schwedischer Schulverein Stuttgart"]
-                       (:name m))))
-           #_(partial take 2))
-          db-vals))}
-      #_{:menuItem "Tab 3" :render
-         (when-let [db-associations
-                    @(re-frame/subscribe [:db-associations])]
-           (fn []
-             ((comp
-               reagent/as-element
-               (partial vector
-                        :div {:class "ui attached segment active tab"})
-               (partial take 4)
-               (partial map (fn [[k v]] [:span {:key k} [:div v]])))
-              db-vals)))}]}]])
+(defn right [active map-atom orig-db-vals]
+  (let [db-vals (if (zero? (count orig-db-vals))
+                  (do
+                    (js/console.warn "Empty orig-db-vals. Repeating"
+                                     "@(re-frame/subscribe [:db-associations])")
+                    @(re-frame/subscribe [:db-associations]))
+                  orig-db-vals)]
+    [:div
+     [:div.color-input
+      [:input {:type "text"
+               ;; :value time-color
+               :placeholder (de :fdk.cmap.lang/search-hint)
+               :on-change (comp
+                           (fn [x] (js/console.log
+                                    (gstr/format "new-val: '%s'" x)))
+                           (fn [x] (.-value x))
+                           (fn [x] (.-target x)))}]]
+     [rc/Tab
+      {:id "tab-panes"
+       :panes
+       [{:menuItem "Tab 1" :render
+         (fn [] (tab1 active map-atom db-vals))}
+        {:menuItem "Tab 2" :render
+         (fn []
+           ((comp
+             (partial tab1 active map-atom)
+             (partial filter
+                      (fn [m]
+                        (subs/in?
+                         ["Kalimera Deutsch-Griechische Kulturinitiative"
+                          "Afro Deutsches Akademiker Netzwerk ADAN"
+                          "Schwedischer Schulverein Stuttgart"]
+                         (:name m))))
+             #_(partial take 2))
+            db-vals))}
+        ]}]]))
 
 ;; TODO better transform & translate. E.g. in the class
 (defn translate [name]
@@ -305,13 +299,14 @@
       (fn [this]
         ;; (js/console.log "[: did-update]"
         ;;                 "this" this ".-props" (.-props this))
-        #_
         (let [new-params (.-props this) ;; (reagent/props this) is always {}
+              new-db-vals (nth (get (js->clj new-params) "argv")
+                               2)
               ;; here I may need to get the values from the new-params to
               ;; reposition the map
               leaflet-map (-> @map-atom
                               (.panTo (array lat lng) zoom))]
-          (update-markers active map-atom db-vals)
+          (update-markers active map-atom new-db-vals)
           (reset! map-atom leaflet-map)))
       :display-name "My Leaflet Map"
       :reagent-render
@@ -329,7 +324,7 @@
          #_[:div {:class [(styles/left)]} #_"left"]
          [:div {:class [(styles/center)]} #_"center"
           [:div#map {:style {:height 0 :width 0}}]]
-         [:div {:class [(styles/right)]} (right active map-atom db-vals)]
+         [:div {:class [(styles/right)]} [right active map-atom db-vals]]
          [:div {:class [(styles/footer)]}
           (str @(re-frame/subscribe [::subs/name])
                " v"
@@ -338,5 +333,11 @@
                config/version)]])})))
 
 (defn main-panel []
-  (when-let [db-associations @(re-frame/subscribe [:db-associations])]
-    [map-with-list {} db-associations @(re-frame/subscribe [:center-map])]))
+  ;; re-frame/subscribe must be called multiple times, otherwise the
+  ;; db-vals is empty
+  (when-let [db-vals @(re-frame/subscribe [:db-associations])]
+    (when-let [center-map
+               #_[9.177591 48.775471]
+               @(re-frame/subscribe [:center-map])]
+      (js/console.log "[main-panel]" "center-map" center-map)
+      [map-with-list {} db-vals center-map])))
