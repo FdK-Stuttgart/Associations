@@ -11,9 +11,9 @@
 
     ;; Routes
     [fdk.cmap.web.routes.api]
-    
-    [kit.edge.db.sql.conman] 
-    [kit.edge.db.sql.migratus] 
+
+    [kit.edge.db.sql.conman]
+    [kit.edge.db.sql.migratus]
     [fdk.cmap.web.routes.pages])
   (:gen-class))
 
