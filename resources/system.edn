@@ -56,4 +56,6 @@
                                     "mysql://localhost:3306/associations?user=foo&password=" ;; works
                                     },
                               :test {:jdbc-url "jdbc:sqlite:cmap_test.db"},
-                              :prod {:jdbc-url #env JDBC_URL}}}
+                              :prod {:jdbc-url #env JDBC_URL}}
+ :reitit.routes/pages {:base-path "",
+                       :env #ig/ref :system/env}}
