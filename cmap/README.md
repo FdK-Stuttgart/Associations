@@ -208,8 +208,8 @@ The `debug?` variable in [`config.cljs`](src/cljs/cmap/config.cljs) defaults to 
 Use `debug?` for logging or other tasks that should run only on `dev` builds:
 
 ```clj
-(ns cmap.example
-  (:require [cmap.config :as config])
+(ns fdk.cmap.example
+  (:require [fdk.cmap.config :as config])
 
 (when config/debug?
   (println "This message will appear in the browser console only on dev builds."))

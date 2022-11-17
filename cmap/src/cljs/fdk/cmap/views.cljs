@@ -1,12 +1,12 @@
-(ns cmap.views
+(ns fdk.cmap.views
   (:require
    [re-frame.core :as re-frame]
-   [cmap.styles :as styles :refer [pxu]]
-   [cmap.subs :as subs]
-   [cmap.data :as data]
-   [cmap.lang :refer [de]]
-   [cmap.config :as config]
-   [cmap.react-components :as rc]
+   [fdk.cmap.styles :as styles :refer [pxu]]
+   [fdk.cmap.subs :as subs]
+   [fdk.cmap.data :as data]
+   [fdk.cmap.lang :refer [de]]
+   [fdk.cmap.config :as config]
+   [fdk.cmap.react-components :as rc]
    [reagent.core :as reagent]
    [reagent.dom :as rdom]
    [reagent.dom.server :as rserver]
@@ -50,11 +50,11 @@
         [:p {:class "mail"}
          [:a {:href (str "mailto:" email)} email]]]]]]
     [:div {:class "association-description"}
-     [:h3 (de :cmap.lang/goals)] goals]
+     [:h3 (de :fdk.cmap.lang/goals)] goals]
     [:div {:class "association-description"}
-     [:h3 (de :cmap.lang/activities)] activities]
+     [:h3 (de :fdk.cmap.lang/activities)] activities]
     [:div {:class "association-active-in"}
-     [:h3 (de :cmap.lang/activity-areas)]
+     [:h3 (de :fdk.cmap.lang/activity-areas)]
      [:div {:class "association-chips-container"}
       (map-indexed (fn [idx elem]
                      (vector :div (conj {:key idx}
@@ -62,7 +62,7 @@
                              elem))
                    districts)]]
     [:div {:class "association-links"}
-     [:h3 (de :cmap.lang/links)]
+     [:h3 (de :fdk.cmap.lang/links)]
      [:ul (map (fn [idx url text]
                  [:li {:key idx} [:a {:href url :title text :target "_blank"}
                                   (if (empty? text) url text)]])
@@ -98,11 +98,11 @@
        [:p {:class "mail"}
         [:a {:href (str "mailto:" email)} email]]]]]]
    [:div {:class "association-description"}
-    [:h3 (de :cmap.lang/goals)] goals]
+    [:h3 (de :fdk.cmap.lang/goals)] goals]
    [:div {:class "association-description"}
-    [:h3 (de :cmap.lang/activities)] activities]
+    [:h3 (de :fdk.cmap.lang/activities)] activities]
    [:div {:class "association-active-in"}
-    [:h3 (de :cmap.lang/activity-areas)]
+    [:h3 (de :fdk.cmap.lang/activity-areas)]
     [:div {:class "association-chips-container"}
      (map-indexed (fn [idx elem]
                     (vector :div (conj {:key idx}
@@ -110,7 +110,7 @@
                             elem))
                   districts)]]
    [:div {:class "association-links"}
-    [:h3 (de :cmap.lang/links)]
+    [:h3 (de :fdk.cmap.lang/links)]
     [:ul (map (fn [idx url text]
                 [:li {:key idx} [:a {:href url :title text :target "_blank"}
                                  (if (empty? text) url text)]])
@@ -219,7 +219,7 @@
    [:div.color-input
     [:input {:type "text"
              ;; :value time-color
-             :placeholder (de :cmap.lang/search-hint)
+             :placeholder (de :fdk.cmap.lang/search-hint)
              :on-change (comp
                          (fn [x] (js/console.log
                                   (gstr/format "new-val: '%s'" x)))

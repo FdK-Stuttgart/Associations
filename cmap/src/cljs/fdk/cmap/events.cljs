@@ -1,7 +1,7 @@
-(ns cmap.events
+(ns fdk.cmap.events
   (:require
    [re-frame.core :as re-frame]
-   [cmap.db :as db]
+   [fdk.cmap.db :as db]
    ))
 
 (re-frame/reg-event-db

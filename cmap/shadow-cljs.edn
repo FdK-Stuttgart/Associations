@@ -45,10 +45,10 @@
    :output-dir "resources/public/js/compiled"
    :asset-path "/js/compiled"
    :modules
-   {:app {:init-fn cmap.core/init}}
+   {:app {:init-fn fdk.cmap.core/init}}
    :compiler-options
    {:closure-defines
-    {cmap.config/version :shadow-git-inject/version}}
+    {fdk.cmap.config/version :shadow-git-inject/version}}
    :devtools
    {:preloads []}
    :dev

@@ -1,12 +1,12 @@
-(ns cmap.core
+(ns fdk.cmap.core
   (:require
    [reagent.dom :as rdom]
    ;; not in the [reagent "1.1.1"] yet
    #_[reagent.dom.client :refer [create-root]]
    [re-frame.core :as re-frame]
-   [cmap.events :as events]
-   [cmap.views :as views]
-   [cmap.config :as config]
+   [fdk.cmap.events :as events]
+   [fdk.cmap.views :as views]
+   [fdk.cmap.config :as config]
    ))
 
 

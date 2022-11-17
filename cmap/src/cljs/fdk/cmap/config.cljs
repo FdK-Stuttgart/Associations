@@ -1,4 +1,4 @@
-(ns cmap.config)
+(ns fdk.cmap.config)
 
 (def debug?
   ^boolean goog.DEBUG)

@@ -1,4 +1,4 @@
-(ns cmap.lang)
+(ns fdk.cmap.lang)
 
 (def labels
   {:de {

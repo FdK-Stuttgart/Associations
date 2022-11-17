@@ -1,4 +1,4 @@
-(ns cmap.styles
+(ns fdk.cmap.styles
   (:require-macros
    [garden.def :refer [defcssfn]])
   (:require

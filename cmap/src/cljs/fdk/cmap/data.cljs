@@ -1,35 +1,35 @@
-(ns cmap.data
+(ns fdk.cmap.data
   (:require
-   [cmap.lang :refer [de]]
+   [fdk.cmap.lang :refer [de]]
    ))
 
 (def img-dir "/icon/other")
 
 (def social-media
-  {"YouTube"   {:title (de :cmap.lang/youtube)
+  {"YouTube"   {:title (de :fdk.cmap.lang/youtube)
                 :img {:src (str img-dir "/youtube.png")
-                      :alt (de :cmap.lang/youtube)}}
-   "LinkedIn" {:title (de :cmap.lang/linkedin)
+                      :alt (de :fdk.cmap.lang/youtube)}}
+   "LinkedIn" {:title (de :fdk.cmap.lang/linkedin)
                :img {:src (str img-dir "/linkedin.png")
-                     :alt (de :cmap.lang/linkedin)}}
-   "Messenger" {:title (de :cmap.lang/messenger)
+                     :alt (de :fdk.cmap.lang/linkedin)}}
+   "Messenger" {:title (de :fdk.cmap.lang/messenger)
                 :img {:src (str img-dir "/messenger.png")
-                      :alt (de :cmap.lang/messenger)}}
-   "Snapchat" {:title (de :cmap.lang/snapchat)
+                      :alt (de :fdk.cmap.lang/messenger)}}
+   "Snapchat" {:title (de :fdk.cmap.lang/snapchat)
                :img {:src (str img-dir "/snapchat.png")
-                     :alt (de :cmap.lang/snapchat)}}
-   "Twitter" {:title (de :cmap.lang/twitter)
+                     :alt (de :fdk.cmap.lang/snapchat)}}
+   "Twitter" {:title (de :fdk.cmap.lang/twitter)
               :img {:src (str img-dir "/twitter.png")
-                    :alt (de :cmap.lang/twitter)}}
-   "WhatsApp" {:title (de :cmap.lang/whatsapp)
+                    :alt (de :fdk.cmap.lang/twitter)}}
+   "WhatsApp" {:title (de :fdk.cmap.lang/whatsapp)
                :img {:src (str img-dir "/whatsapp.png")
-                     :alt (de :cmap.lang/whatsapp)}}
-   "Facebook"  {:title (de :cmap.lang/facebook)
+                     :alt (de :fdk.cmap.lang/whatsapp)}}
+   "Facebook"  {:title (de :fdk.cmap.lang/facebook)
                 :img {:src (str img-dir "/facebook.png")
-                      :alt (de :cmap.lang/facebook)}}
-   "Instagram" {:title (de :cmap.lang/instagram)
+                      :alt (de :fdk.cmap.lang/facebook)}}
+   "Instagram" {:title (de :fdk.cmap.lang/instagram)
                 :img {:src (str img-dir "/instagram.png")
-                      :alt (de :cmap.lang/instagram)}}})
+                      :alt (de :fdk.cmap.lang/instagram)}}})
 
 (def leaflet-data
   {:markers-pta

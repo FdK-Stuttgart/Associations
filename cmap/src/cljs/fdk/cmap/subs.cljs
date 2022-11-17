@@ -1,7 +1,7 @@
-(ns cmap.subs
+(ns fdk.cmap.subs
   (:require
    [re-frame.core :as re-frame]
-   [cmap.data :as data]
+   [fdk.cmap.data :as data]
    [clojure.set :refer [rename-keys]]
    ;; TODO cleanup org.clojars.bost/utils:
    ;; It produce a lot of warnings (probably because of differences clojure vs.

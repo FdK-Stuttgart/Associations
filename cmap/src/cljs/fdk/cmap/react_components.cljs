@@ -1,4 +1,4 @@
-(ns cmap.react-components
+(ns fdk.cmap.react-components
   "Third party react components"
   (:require
    [reagent.core :as reagent]
