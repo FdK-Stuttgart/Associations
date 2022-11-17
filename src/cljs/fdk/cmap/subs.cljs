@@ -1,6 +1,6 @@
 (ns fdk.cmap.subs
   (:require
-   [re-frame.core :as re-frame]
+   [re-frame.core :as rf]
    [fdk.cmap.data :as data]
    [clojure.set :refer [rename-keys]]
    ;; TODO cleanup org.clojars.bost/utils:
@@ -28,6 +28,14 @@
                                 (partial mapv (partial get districts--id-name))
                                 cljs.reader/read-string)))
 
+(defn prepare [db]
+  ((comp
+    (partial map ids-to-names)
+    ;; (fn [_] "load saved data" data/associations)
+    cljs.reader/read-string
+    :db-associations)
+   db))
+
 ;; TODO districts need to be obtained from the db
 (defn districts [db]
   #_data/districts ;; load saved data
@@ -42,7 +50,7 @@
       :db-districts)
      db))
 
-(re-frame/reg-sub ::name (fn [db] (:name db)))
+(rf/reg-sub ::name (fn [db] (:name db)))
 
 (defn adjust-associations [ms]
   ((comp
@@ -121,8 +129,12 @@
 ;; Evidence COEXIST
 ;; FdK Kalimera
 
+;; dispatchers
+;; What is the difference between reg-event-db, reg-event-fx and reg-event-ctx in Re-frame?
+;; https://stackoverflow.com/a/54864938/5151982
+
 ;; TODO the 'e. V.' should appear in the popups but not in the right panel
-(re-frame/reg-sub
+(rf/reg-sub
  :db-associations
  (fn [db _]
    ((comp
@@ -146,20 +158,12 @@
                               #_"Afro Deutsches Akademiker Netzwerk ADAN"
                               "Africa Workshop Organisation"])
                     :name))
-     (partial map ids-to-names)
-     (fn [_] "load saved data" data/associations)
-     #_(comp cljs.reader/read-string
-             #_(fn [d] (->>
-                        #_{:a 1 :b 2 :x "fox"}
-                        d
-                        (println)
-                        d))
-             :db-associations))
+     prepare)
     db)))
 
-;; Docstring doesn't work for re-frame/reg-sub
+;; Docstring doesn't work for rf/reg-sub
 ;; "Center is the location the FdK"
-(re-frame/reg-sub
+(rf/reg-sub
  :center-map
  (fn [db _]
    ((comp
@@ -169,6 +173,5 @@
      (partial filter
               (comp (partial in? s/includes? ["Forum der Kulturen"])
                     :name))
-     (partial map ids-to-names)
-     (fn [_] "load saved data" data/associations))
+     prepare)
     db)))
