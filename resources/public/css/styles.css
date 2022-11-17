@@ -1,0 +1,360 @@
+/* You can add global styles to this file, and also import other style files */
+/* alegreya-sans-300 - latin */
+ @font-face {
+	 font-family: 'Alegreya Sans';
+	 font-style: normal;
+	 font-weight: 300;
+	 src: url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-300.eot');
+	/* IE9 Compat Modes */
+	 src: local(''), url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-300.eot?#iefix') format('embedded-opentype'), url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-300.woff2') format('woff2'), url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-300.woff') format('woff'), url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-300.ttf') format('truetype'), url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-300.svg#AlegreyaSans') format('svg');
+	/* IE6-IE8 */
+	/* Super Modern Browsers */
+	/* Modern Browsers */
+	/* Safari, Android, iOS */
+	/* Legacy iOS */
+}
+/* alegreya-sans-regular - latin */
+ @font-face {
+	 font-family: 'Alegreya Sans';
+	 font-style: normal;
+	 font-weight: 400;
+	 src: url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-regular.eot');
+	/* IE9 Compat Modes */
+	 src: local(''), url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-regular.eot?#iefix') format('embedded-opentype'), url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-regular.woff2') format('woff2'), url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-regular.woff') format('woff'), url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-regular.ttf') format('truetype'), url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-regular.svg#AlegreyaSans') format('svg');
+	/* IE6-IE8 */
+	/* Super Modern Browsers */
+	/* Modern Browsers */
+	/* Safari, Android, iOS */
+	/* Legacy iOS */
+}
+/* alegreya-sans-500 - latin */
+ @font-face {
+	 font-family: 'Alegreya Sans';
+	 font-style: normal;
+	 font-weight: 500;
+	 src: url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-500.eot');
+	/* IE9 Compat Modes */
+	 src: local(''), url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-500.eot?#iefix') format('embedded-opentype'), url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-500.woff2') format('woff2'), url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-500.woff') format('woff'), url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-500.ttf') format('truetype'), url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-500.svg#AlegreyaSans') format('svg');
+	/* IE6-IE8 */
+	/* Super Modern Browsers */
+	/* Modern Browsers */
+	/* Safari, Android, iOS */
+	/* Legacy iOS */
+}
+/* alegreya-sans-700 - latin */
+ @font-face {
+	 font-family: 'Alegreya Sans';
+	 font-style: normal;
+	 font-weight: 700;
+	 src: url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-700.eot');
+	/* IE9 Compat Modes */
+	 src: local(''), url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-700.eot?#iefix') format('embedded-opentype'), url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-700.woff2') format('woff2'), url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-700.woff') format('woff'), url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-700.ttf') format('truetype'), url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-700.svg#AlegreyaSans') format('svg');
+	/* IE6-IE8 */
+	/* Super Modern Browsers */
+	/* Modern Browsers */
+	/* Safari, Android, iOS */
+	/* Legacy iOS */
+}
+/* alegreya-sans-900 - latin */
+ @font-face {
+	 font-family: 'Alegreya Sans';
+	 font-style: normal;
+	 font-weight: 900;
+	 src: url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-900.eot');
+	/* IE9 Compat Modes */
+	 src: local(''), url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-900.eot?#iefix') format('embedded-opentype'), url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-900.woff2') format('woff2'), url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-900.woff') format('woff'), url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-900.ttf') format('truetype'), url('assets/fonts/alegreya-sans/alegreya-sans-v13-latin-900.svg#AlegreyaSans') format('svg');
+	/* IE6-IE8 */
+	/* Super Modern Browsers */
+	/* Modern Browsers */
+	/* Safari, Android, iOS */
+	/* Legacy iOS */
+}
+ body {
+	 margin: 0;
+}
+ body *:not(i):not(.pi) {
+	 font-family: 'Alegreya Sans', sans-serif !important;
+}
+ body *:not(i):not(.pi)::-webkit-scrollbar {
+	 width: 6px;
+	 height: 6px;
+}
+ body *:not(i):not(.pi)::-webkit-scrollbar-thumb {
+	 background: #aaa;
+}
+ body *:not(i):not(.pi)::-webkit-scrollbar-track {
+	 background: #fff;
+}
+ body *:not(i):not(.pi) {
+	 scrollbar-face-color: #aaa;
+	 scrollbar-track-color: #fff;
+}
+ .p-button:not(.p-button-text) {
+	 background-color: #00b4d6 !important;
+	 border-color: #00b4d6 !important;
+	 border-radius: 0;
+}
+ .p-button-text {
+	 color: #00b4d6 !important;
+}
+ .p-button-label {
+	 display: none;
+}
+ .p-sidebar-close-icon:before {
+	 color: #00b4d6;
+	 border-radius: 24px;
+}
+ .p-sidebar-close-icon:before:hover, .p-sidebar-close-icon:before:active {
+	 color: #0089a3;
+}
+ a {
+	 cursor: pointer;
+	 text-decoration: none;
+}
+ a:hover, a:active {
+	 text-decoration: underline !important;
+}
+ .osm-association-container {
+	 font-size: 85%;
+	 background-color: rgba(255, 255, 255, 0.9);
+	 bottom: 40px;
+	 padding-top: 12px;
+	 padding-bottom: 12px;
+	 z-index: 9000;
+	 border-radius: 12px;
+	 box-shadow: 0 0 4px rgba(51, 51, 51, 0.66);
+}
+ .osm-association-container > #popup-close {
+	 position: absolute;
+	 right: 16px;
+	 top: 12px;
+	 padding: 8px;
+	 border-radius: 20px;
+	 width: 32px;
+	 height: 32px;
+	 transition: background-color 0.3s;
+}
+ .osm-association-container > #popup-close:hover, .osm-association-container > #popup-close:active {
+	 background-color: #e9ecef;
+}
+ .osm-association-container > #popup-close:focus, .osm-association-container > #popup-close:active {
+	 box-shadow: 0 0 0 0.2rem #a6d5fa;
+}
+ .osm-association-container .osm-association-inner-container {
+	 padding: 12px;
+	 overflow-y: auto;
+}
+ .association-container, .osm-association-container .osm-association-inner-container {
+	 min-width: 200px;
+   max-width: min(95vw,360px);
+}
+ .association-container p, .osm-association-container .osm-association-inner-container p, .association-container h2, .osm-association-container .osm-association-inner-container h2, .association-container h3, .osm-association-container .osm-association-inner-container h3, .association-container a, .osm-association-container .osm-association-inner-container a, .association-container li, .osm-association-container .osm-association-inner-container li, .association-container div, .osm-association-container .osm-association-inner-container div {
+	 -webkit-touch-callout: default;
+	 -webkit-user-select: text;
+	 -moz-user-select: text;
+	 -ms-user-select: text;
+	 user-select: text;
+}
+ .association-container p, .osm-association-container .osm-association-inner-container p {
+	 margin-top: 6px;
+	 margin-bottom: 6px;
+}
+ .association-container strong, .osm-association-container .osm-association-inner-container strong, .association-container h2, .osm-association-container .osm-association-inner-container h2, .association-container h3, .osm-association-container .osm-association-inner-container h3 {
+	 font-weight: 400;
+}
+ .association-container h2, .osm-association-container .osm-association-inner-container h2 {
+	 margin-top: 32px;
+	 margin-bottom: 0;
+}
+ .association-container h3, .osm-association-container .osm-association-inner-container h3 {
+	 margin-top: 24px;
+	 margin-bottom: 0;
+}
+ .association-container h2 + div > h3, .osm-association-container .osm-association-inner-container h2 + div > h3 {
+	 margin-top: 8px;
+}
+ .association-container ul, .osm-association-container .osm-association-inner-container ul {
+	 margin: 0;
+}
+ .association-title {
+	 font-size: 120%;
+	 font-weight: 600;
+	 text-align: center;
+	 margin-bottom: 10px;
+}
+ .association-chips-container {
+	 width: 100%;
+	 padding-top: 6px;
+}
+ .association-chips-container .association-chips {
+	 display: inline-block;
+	 padding: 2px 2px 0;
+	 border: #aaa 1px solid;
+	 background-color: #fff;
+	 margin-right: 4px;
+	 margin-bottom: 4px;
+	 white-space: nowrap;
+}
+ .association-images {
+	 min-width: 100%;
+	 white-space: nowrap;
+	 overflow-x: auto;
+	 margin-bottom: 10px;
+	 margin-top: 10px;
+	 text-align: center;
+}
+ .association-images .association-image {
+	 text-align: center;
+	 display: inline-block;
+	 margin: auto auto 6px;
+}
+ .association-images .association-image img {
+	 max-height: 200px;
+	 max-width: 100%;
+	 width: auto;
+	 margin: auto;
+}
+ .association-images .association-image + .association-image {
+	 margin-left: 20px !important;
+}
+ .social-media-link, .association-contact-row {
+	 margin-top: 4px;
+	 margin-bottom: 4px;
+}
+ .association-contact-row {
+	 display: flex;
+	 align-items: center;
+}
+ .social-media-link {
+	 float: left;
+}
+ .social-media-link a {
+	 padding-top: 3px;
+}
+ .association-contact a, .association-links a, .social-media-link a {
+	 color: #00b4d6;
+}
+ .association-links ul {
+	 padding-inline-start: 26px;
+}
+ .association-links ul li {
+	 margin-top: 4px;
+	 margin-bottom: 4px;
+}
+ .mini-icon {
+	 width: 20px;
+	 height: 20px;
+	 margin-right: 6px;
+	 display: inline-block;
+	 flex-shrink: 0;
+	 flex-basis: 20px;
+}
+ .mini-icon img {
+	 width: 100%;
+}
+ .mini {
+	 font-size: 85%;
+}
+ .mini-button {
+	 cursor: pointer;
+	 font-size: 85% !important;
+}
+ .p-sidebar {
+	 overflow-y: auto;
+}
+ .full-width {
+	 width: 100%;
+}
+ .half-width {
+	 width: 50%;
+	 display: inline-block;
+}
+ .sidebar-input-full-width {
+	 width: 288px !important;
+}
+ .input-margin-bottom {
+	 margin-bottom: 16px;
+}
+ p-autoComplete {
+	 margin-right: 6px;
+}
+ p-autoComplete .p-autocomplete-input {
+	 width: 228px;
+}
+ p-autoComplete .pi.pi-spinner {
+	 display: none;
+}
+ .on-top {
+	 z-index: 9000;
+}
+ .grouped-multiselect-panel {
+	 min-height: 300px;
+}
+ .grouped-multiselect-panel .p-multiselect-items-wrapper {
+	 min-height: 300px;
+}
+ .filter-chips {
+	 margin-top: 6px;
+}
+ .filter-chips .filter-chip {
+	 display: inline-block;
+	 padding: 4px 8px 2px;
+	 background-color: #00b4d6;
+	 color: #fff;
+	 margin-right: 4px;
+	 margin-bottom: 4px;
+	 white-space: nowrap;
+	 font-size: 85%;
+	 text-align: center;
+}
+ .filter-chips .filter-chip:last-child {
+	 margin-right: 0 !important;
+}
+ hr {
+	 border: 0;
+	 border-bottom: 1px solid #dedede;
+	 margin-top: 24px;
+	 margin-bottom: 24px;
+}
+ p-toast .p-toast {
+	 z-index: 19000 !important;
+}
+ p-blockUI .p-blockui-document {
+	 z-index: 30000;
+	 background-color: rgba(0, 0, 0, 0.67) !important;
+}
+ .block-ui-text {
+	 color: white;
+	 font-size: 200%;
+}
+ app-simple-map-with-single-marker .ol-overlay-container.ol-selectable {
+	 pointer-events: none !important;
+}
+ .sidebar-trigger-button {
+	 position: fixed;
+	 top: 45%;
+	 right: 0;
+	 z-index: 10000;
+	 transition: transform 0.3s;
+}
+ @media (min-width: 360px) {
+	 .sidebar-trigger-button.expanded {
+		 transform: translateX(-320px);
+	}
+}
+ .sidebar-content {
+	 padding-bottom: 60px;
+	 color: black;
+}
+ .sidebar-content .clear-button {
+	 text-align: center;
+	 margin-top: 20px;
+}
+ .overflow-x {
+	 width: 100% !important;
+	 overflow-x: auto;
+}
+ .yellow {
+	 color: #f7b92a;
+}
+ 
