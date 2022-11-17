@@ -30,8 +30,8 @@
 
 ;; TODO districts need to be obtained from the db
 (defn districts [db]
-  data/districts ;; load saved data
-  #_((comp
+  #_data/districts ;; load saved data
+  ((comp
       cljs.reader/read-string
       #_(fn [d]
           (->>
