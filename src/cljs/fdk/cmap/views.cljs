@@ -130,12 +130,15 @@
 
 (def markers-layer-atom (reagent/atom nil))
 
+(def zoom 17)
+
 (defn public-address?
   "TODO public-address? computation should be done elsewhere."
   [norm-addr]
   (not (re-find #"(?i).*keine|Postfach.*" norm-addr)))
 
-(defn update-markers [active map-atom db-vals]
+(defn update-markers "This function gets executed 3 times"
+  [re-zoom active map-atom db-vals]
   (let [map-instance @map-atom
         markers-layer (if (nil? @markers-layer-atom)
                         (js/L.layerGroup)
@@ -165,9 +168,13 @@
                                   (reset! active (if (= @active k) nil k))))
                    (.addTo markers-layer)
                    (.bindPopup (rserver/render-to-string [popup marker])))]
-           (if (= k @active)
-             (.openPopup map-with-marker-and-popup)
-             map-with-marker-and-popup)))))
+           (when (= k @active)
+             ;; (println "latitude longitude" latitude longitude)
+             (if re-zoom
+               (.setView map-instance (array latitude longitude) zoom)
+               (.setView map-instance (array latitude longitude)))
+             (.openPopup map-with-marker-and-popup))))))
+
     (reset! markers-layer-atom markers-layer)
     (.addTo @markers-layer-atom map-instance)
     (reset! map-atom map-instance)))
@@ -175,10 +182,13 @@
 (defn list-elem [active map db-vals pi-icon {:keys [k name addr coords]}]
   [:span {:key k
           :on-click (fn [e]
-                      ;; (js/console.log "on-click" "old-active" @active "k" k)
-                      (reset! active (if (= @active k) nil k))
-                      ;; (js/console.log "on-click" "new-active" @active)
-                      (update-markers active map db-vals))}
+                      (let [old-active @active]
+                        #_(js/console.log "on-click" "old-active" old-active "k" k)
+                        (reset! active (if (= @active k) nil k))
+                        #_(println "on-click" "new-active" @active)
+                        (let [re-zoom (and @active (not= old-active @active))]
+                          #_(println "on-click" "re-zoom" re-zoom)
+                          (update-markers re-zoom active map db-vals))))}
    [:div {:class (s/join " " ["association-entry" "ng-star-inserted"])}
     [:a
      [:div {:class "icon"}
@@ -264,11 +274,11 @@
   (let [active (reagent/atom nil)
         map-atom (reagent/atom nil)
         [lng lat] center-map
-        zoom 17]
+        re-zoom false]
     (reagent/create-class
      {:component-did-mount
       (fn [ref]
-        #_(js/console.log "[: did-mount]" "ref" ref)
+        #_(js/console.log "[:component-did-mount]" "ref" ref)
         (let [node-ref       (-> ref rdom/dom-node)
               node-header    (.item (-> node-ref .-children) 0)
               node-center    (.item (-> node-ref .-children) 1)
@@ -288,7 +298,7 @@
                           (* 2 styles/padding)) pxu)))
           (let [leaflet-map (-> node-center .-children first js/L.map)]
             (reset! map-atom leaflet-map)
-            (.setView leaflet-map (array lat lng) zoom)
+            (.setView leaflet-map (array lat lng) zoom) ;; initial zoom needed
             (.on leaflet-map "click" (fn [_]
                                        (when @active
                                          (reset! active nil))))
@@ -296,18 +306,14 @@
                      "https://{s}.tile.OpenStreetMap.org/{z}/{x}/{y}.png")
                     leaflet-map))))
       :component-did-update
-      (fn [this]
-        ;; (js/console.log "[: did-update]"
-        ;;                 "this" this ".-props" (.-props this))
-        (let [new-params (.-props this) ;; (reagent/props this) is always {}
-              new-db-vals (nth (get (js->clj new-params) "argv")
-                               2)
-              ;; here I may need to get the values from the new-params to
-              ;; reposition the map
-              leaflet-map (-> @map-atom
-                              (.panTo (array lat lng) zoom))]
-          (update-markers active map-atom new-db-vals)
-          (reset! map-atom leaflet-map)))
+      (comp
+       (partial update-markers re-zoom active map-atom)
+       (fn [v] (nth v 2))
+       (fn [v] (get v "argv"))
+       js->clj
+       (fn [v] (.-props v))
+       #_(fn [v] (println ":component-did-update") v))
+
       :display-name "My Leaflet Map"
       :reagent-render
       ;; params is {}; (reagent/props params) throws error;
@@ -315,7 +321,7 @@
       (fn [params]
         ;; (js/console.log "[:reagent-render]")
         (when @map-atom
-          (update-markers active map-atom db-vals))
+          (update-markers re-zoom active map-atom db-vals))
         [:div
          {:class (styles/wrapper)}
          ;; 'header' must be displayed so that the ':grid-template-rows ...'

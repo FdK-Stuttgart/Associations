@@ -77,6 +77,10 @@ To reload changes:
 
 ## REPLs
 
+```shell
+npx shadow-cljs watch app
+```
+
 ### Cursive
 
 Configure a [REPL following the Cursive documentation](https://cursive-ide.com/userguide/repl.html). Using the default "Run with IntelliJ project classpath" option will let you select an alias from the ["Clojure deps" aliases selection](https://cursive-ide.com/userguide/deps.html#refreshing-deps-dependencies).
