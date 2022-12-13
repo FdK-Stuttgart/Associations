@@ -431,6 +431,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
       filteredResult = this.associations
         .filter((s: Association) => {
           const q: string = queryString ? queryString.toLowerCase() : '';
+          // TODO add districts
           return s.name.toLowerCase().includes(q)
             || s.shortName?.toLowerCase().includes(q)
             || s.street?.toLowerCase().includes(q)
