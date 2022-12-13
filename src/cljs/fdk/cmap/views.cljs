@@ -129,6 +129,10 @@
      (range (count (:ids socialmedia))))]])
 
 (def markers-layer-atom (reagent/atom nil))
+(def db-vals-atom (reagent/atom nil))
+(def db-vals-init-atom (reagent/atom nil))
+(def map-atom (reagent/atom nil))
+(def active-atom (reagent/atom nil))
 
 (def zoom 17)
 
@@ -138,57 +142,58 @@
   (not (re-find #"(?i).*keine|Postfach.*" norm-addr)))
 
 (defn update-markers "This function gets executed 3 times"
-  [re-zoom active map-atom db-vals]
-  (let [map-instance @map-atom
+  [re-zoom]
+  (let [active @active-atom
+        map-instance @map-atom
         markers-layer (if (nil? @markers-layer-atom)
                         (js/L.layerGroup)
-                        @markers-layer-atom)]
+                        @markers-layer-atom)
+        db-vals @db-vals-atom]
     (.clearLayers markers-layer)
     (doall
      (for [marker db-vals]
-       (do
-         (let [[longitude latitude] (:coords marker)
-               k (:k marker)
-               addr (:addr marker)
-               ;; No need to recreate the whole map. It's enough to the
-               ;; map-with-marker-and-popup as a function parameter and
-               ;; call .openPopup / .closePopup
-               map-with-marker-and-popup
-               (-> (js/L.marker
-                    (array latitude longitude)
-                    #js {:icon (js/L.icon (clj->js
-                                           {:iconUrl
-                                            (if (public-address? addr)
-                                              "/icon/map_markers/pinActivePublic.png"
-                                              "/icon/map_markers/pinActivePrivate.png")
-                                            :iconSize [30 42]
-                                            :iconAnchor [15 41]
-                                            :popupAnchor [0 -31]}))})
-                   (.on "click" (fn [_]
-                                  (reset! active (if (= @active k) nil k))))
-                   (.addTo markers-layer)
-                   (.bindPopup (rserver/render-to-string [popup marker])))]
-           (when (= k @active)
-             ;; (println "latitude longitude" latitude longitude)
-             (if re-zoom
-               (.setView map-instance (array latitude longitude) zoom)
-               (.setView map-instance (array latitude longitude)))
-             (.openPopup map-with-marker-and-popup))))))
+       (let [[longitude latitude] (:coords marker)
+             k (:k marker)
+             addr (:addr marker)
+             ;; No need to recreate the whole map. It's enough to the
+             ;; map-with-marker-and-popup as a function parameter and
+             ;; call .openPopup / .closePopup
+             map-with-marker-and-popup
+             (-> (js/L.marker
+                  (array latitude longitude)
+                  #js {:icon (js/L.icon (clj->js
+                                         {:iconUrl
+                                          (if (public-address? addr)
+                                            "/icon/map_markers/pinActivePublic.png"
+                                            "/icon/map_markers/pinActivePrivate.png")
+                                          :iconSize [30 42]
+                                          :iconAnchor [15 41]
+                                          :popupAnchor [0 -31]}))})
+                 (.on "click" (fn [_]
+                                (reset! active-atom (if (= active k) nil k))))
+                 (.addTo markers-layer)
+                 (.bindPopup (rserver/render-to-string [popup marker])))]
+         (when (= k active)
+           ;; (println "latitude longitude" latitude longitude)
+           (if re-zoom
+             (.setView map-instance (array latitude longitude) zoom)
+             (.setView map-instance (array latitude longitude)))
+           (.openPopup map-with-marker-and-popup)))))
 
     (reset! markers-layer-atom markers-layer)
     (.addTo @markers-layer-atom map-instance)
     (reset! map-atom map-instance)))
 
-(defn list-elem [active map db-vals pi-icon {:keys [k name addr coords]}]
+(defn list-elem [pi-icon {:keys [k name addr coords]}]
   [:span {:key k
           :on-click (fn [e]
-                      (let [old-active @active]
+                      (let [old-active @active-atom]
                         #_(js/console.log "on-click" "old-active" old-active "k" k)
-                        (reset! active (if (= @active k) nil k))
-                        #_(println "on-click" "new-active" @active)
-                        (let [re-zoom (and @active (not= old-active @active))]
+                        (reset! active-atom (if (= old-active k) nil k))
+                        #_(println "on-click" "new-active" @active-atom)
+                        (let [re-zoom (and @active-atom (not= old-active @active-atom))]
                           #_(println "on-click" "re-zoom" re-zoom)
-                          (update-markers re-zoom active map db-vals))))}
+                          (update-markers re-zoom))))}
    [:div {:class (s/join " " ["association-entry" "ng-star-inserted"])}
     [:a
      [:div {:class "icon"}
@@ -202,108 +207,111 @@
        ["icon-padding" "pi" pi-icon "ng-star-inserted"])
       name]]]])
 
-(defn tab1 [active map-atom db-vals]
-  ((comp
-    reagent/as-element
-    (partial vector :div
-             {:id "tab1-content"
-              :class (s/join " " [(styles/tab-content)
-                                  "ui" "attached" "segment" "active" "tab"])})
-    #_(partial vector :div {:class "sidebar-content ng-tns-c14-0"})
-    #_(partial vector :div {:class "association-entries ng-star-inserted"})
-    (partial map (partial apply (partial list-elem active map-atom db-vals))
-             #_(fn [[m dbv]] (list-elem active map-atom db-vals m dbv)))
-    doall
-    (partial map (fn [{:keys [k] :as db-val}]
-                   [(if (= @active k)
-                      "pi-map"        ;; the map icon
-                      "pi-map-marker" ;; the pointy-ball icon
-                      )
-                    db-val])))
-   db-vals))
+(defn tab1 [db-vals]
+  (let [active @active-atom]
+    ((comp
+      reagent/as-element
+      (partial vector :div
+               {:id "tab1-content"
+                :class (s/join " " [(styles/tab-content)
+                                    "ui" "attached" "segment" "active" "tab"])})
+      #_(partial vector :div {:class "sidebar-content ng-tns-c14-0"})
+      #_(partial vector :div {:class "association-entries ng-star-inserted"})
+      (partial map (partial apply (partial list-elem)))
+      doall
+      (partial map (fn [{:keys [k] :as db-val}]
+                     [(if (= active k)
+                        "pi-map"        ;; the map icon
+                        "pi-map-marker" ;; the pointy-ball icon
+                        )
+                      db-val])))
+     db-vals)))
 
-(defn on-change [db-vals pattern]
-  ((comp
-    (partial remove empty?)
-    (partial
-     map
-     (fn [m]
-       ((comp
-         (partial remove nil?)
-         (fn [r] (when r m))
-         (partial some (fn [v] (s/includes? v pattern)))
-         (partial remove empty?)
-         (partial map s/trim)
-         (partial remove nil?)
-         vals
-         (fn [v]
-           (select-keys v
-                        [
-                         :name
-                         ;; :shortName
+(defn filter-db-vals
+  "Return a list of pattern-filtered db-vals."
+  [pattern]
+  (let [match-indexes
+        ((comp
+          (partial
+           map
+           (fn [db-val]
+             ((comp
+               (fn [r] (when r true)) ;; (when r db-val)
+               (partial some (fn [v] (s/includes? v pattern)))
+               (partial map (comp s/lower-case s/trim))
+               (partial remove s/blank?)
+               vals
+               (fn [v]
+                 (select-keys v
+                              [
+                               :name
+                               ;; :shortName
 
-                         ;; :addr
-                         :street
-                         :postcode-city
-                         :city
-                         :country
+                               ;; :addr
+                               :street
+                               :postcode-city
+                               :city
+                               :country
 
-                         :goals
-                         :activities
+                               :goals
+                               :activities
 
-                         ;; :contacts    ;; :name :pobox :phone :fax :email
-                         :email
+                               ;; :contacts    ;; :name :pobox :phone :fax :email
+                               :email
 
-                         ;; :imageurl    ;; :url :alttext
-                         ;; :links       ;; :url :linkText
-                         ;; :socialmedia ;; :url :linkText :platform
+                               ;; :imageurl    ;; :url :alttext
+                               ;; :links       ;; :url :linkText
+                               ;; :socialmedia ;; :url :linkText :platform
 
-                         ;; :districts   ;; TODO
-                         ])))
-        m))))
-   db-vals))
+                               ;; :districts   ;; TODO
+                               ])))
+              db-val))))
+         @db-vals-init-atom)]
+;;; `match-indexes` contains e.g. `[nil nil true nil nil]`. I.e. if an element
+;;; is true it means a corresponding element `@db-vals-atom` should belong to
+;;; the result. This filtering can't be done above. `(when r db-val)` doesn't
+;;; work. I guess the value of `db-val` gets somehow altered.
+    ((comp
+      (partial remove nil?)
+      (partial map (fn [m v] (when m v))))
+     match-indexes @db-vals-init-atom)))
 
-(defn right [active map-atom orig-db-vals]
-  (let [db-vals (if (zero? (count orig-db-vals))
-                  (do
-                    (js/console.warn "Empty orig-db-vals. Repeating"
-                                     "@(re-frame/subscribe [:db-associations])")
-                    @(re-frame/subscribe [:db-associations]))
-                  orig-db-vals)]
-    [:div
-     [:div.color-input
-      [:input {:type "text"
-               ;; :value time-color
-               :placeholder (de :fdk.cmap.lang/search-hint)
-               :on-change
-               (fn [x]
-                 (let [pattern ((comp
-                                 (fn [x] (.-value x))
-                                 (fn [x] (.-target x)))
-                                x)]
-                   (when (>= (count pattern) 3)
-                     (let [new-db-vals (on-change db-vals pattern)]
-                       (js/console.log "new-db-vals" new-db-vals)
-                       #_[right active map-atom new-db-vals]))))}]]
-     [rc/Tab
-      {:id "tab-panes"
-       :panes
-       [{:menuItem "Tab 1" :render
-         (fn [] (tab1 active map-atom db-vals))}
-        {:menuItem "Tab 2" :render
-         (fn []
-           ((comp
-             (partial tab1 active map-atom)
-             (partial filter
-                      (fn [m]
-                        (subs/in?
-                         ["Kalimera Deutsch-Griechische Kulturinitiative"
-                          "Afro Deutsches Akademiker Netzwerk ADAN"
-                          "Schwedischer Schulverein Stuttgart"]
-                         (:name m))))
-             #_(partial take 2))
-            db-vals))}
-        ]}]]))
+(defn tab-panes [db-vals]
+  (js/console.log "[tab-panes] (type db-vals)" (type db-vals))
+  [rc/Tab
+   {:id "tab-panes"
+    :panes
+    [{:menuItem "Tab 1" :render
+      (fn [] (tab1 db-vals))}
+     {:menuItem "Tab 2" :render
+      (fn []
+        ((comp
+          (partial tab1)
+          (partial filter
+                   (fn [m]
+                     (subs/in?
+                      ["Kalimera Deutsch-Griechische Kulturinitiative"
+                       #_"Afro Deutsches Akademiker Netzwerk ADAN"
+                       "Schwedischer Schulverein Stuttgart"]
+                      (:name m))))
+          #_(partial take 2))
+         db-vals))}]}])
+
+(defn right []
+  [:div
+   [:div.color-input
+    [:input {:type "text"
+             ;; :value time-color
+             :placeholder (de :fdk.cmap.lang/search-hint)
+             :on-change (comp
+                         (partial reset! db-vals-atom)
+                         (fn [pattern] (if (>= (count pattern) 3)
+                                         (filter-db-vals pattern)
+                                         @db-vals-init-atom))
+                         s/lower-case
+                         (fn [x] (.-value x))
+                         (fn [x] (.-target x)))}]]
+   [tab-panes @db-vals-atom]])
 
 ;; TODO better transform & translate. E.g. in the class
 (defn translate [name]
@@ -316,11 +324,8 @@
        name)
       105))
 
-(defn map-with-list [params db-vals center-map]
-  (let [active (reagent/atom nil)
-        map-atom (reagent/atom nil)
-        [lng lat] center-map
-        re-zoom false]
+(defn map-with-list [params center-map]
+  (let [re-zoom false]
     (reagent/create-class
      {:component-did-mount
       (fn [ref]
@@ -344,16 +349,17 @@
                           (* 2 styles/padding)) pxu)))
           (let [leaflet-map (-> node-center .-children first js/L.map)]
             (reset! map-atom leaflet-map)
-            (.setView leaflet-map (array lat lng) zoom) ;; initial zoom needed
+            (.setView leaflet-map (let [[lng lat] center-map]
+                                    (array lat lng)) zoom) ;; initial zoom needed
             (.on leaflet-map "click" (fn [_]
-                                       (when @active
-                                         (reset! active nil))))
+                                       (when @active-atom
+                                         (reset! active-atom nil))))
             (.addTo (js/L.tileLayer
                      "https://{s}.tile.OpenStreetMap.org/{z}/{x}/{y}.png")
                     leaflet-map))))
       :component-did-update
       (comp
-       (partial update-markers re-zoom active map-atom)
+       (partial update-markers re-zoom)
        (fn [v] (nth v 2))
        (fn [v] (get v "argv"))
        js->clj
@@ -361,13 +367,14 @@
        #_(fn [v] (println ":component-did-update") v))
 
       :display-name "My Leaflet Map"
+
       :reagent-render
       ;; params is {}; (reagent/props params) throws error;
       ;; (.-props params) is undefined
       (fn [params]
         ;; (js/console.log "[:reagent-render]")
         (when @map-atom
-          (update-markers re-zoom active map-atom db-vals))
+          (update-markers re-zoom))
         [:div
          {:class (styles/wrapper)}
          ;; 'header' must be displayed so that the ':grid-template-rows ...'
@@ -376,7 +383,7 @@
          #_[:div {:class [(styles/left)]} #_"left"]
          [:div {:class [(styles/center)]} #_"center"
           [:div#map {:style {:height 0 :width 0}}]]
-         [:div {:class [(styles/right)]} (right active map-atom db-vals)]
+         [:div {:class [(styles/right)]} (right)]
          [:div {:class [(styles/footer)]}
           (str @(re-frame/subscribe [::subs/name])
                " v"
@@ -388,7 +395,9 @@
   ;; re-frame/subscribe must be called multiple times, otherwise the
   ;; db-vals is empty
   (when-let [db-vals @(re-frame/subscribe [:db-associations])]
+    (reset! db-vals-atom      db-vals)
+    (reset! db-vals-init-atom db-vals)
     (when-let [center-map
                #_[9.177591 48.775471]
                @(re-frame/subscribe [:center-map])]
-      [map-with-list {} db-vals center-map])))
+      [map-with-list {} center-map])))
