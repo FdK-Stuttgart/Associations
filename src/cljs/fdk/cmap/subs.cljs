@@ -138,7 +138,6 @@
  :db-associations
  (fn [db _]
    ((comp
-     (fn [m] (def as m) m)
      (partial sort-by :name)
      (partial map adjust-associations)
      vals
@@ -152,11 +151,13 @@
               (comp (partial in?
                              s/includes?
                              [
+                              "ABADÁ Capoeira"
+                              "Capoeira Stuttgart"
                               #_"Evidence"
                               "Forum der Kulturen"
                               #_"Kalimera"
                               #_"Afro Deutsches Akademiker Netzwerk ADAN"
-                              "Africa Workshop Organisation"])
+                              #_"Africa Workshop Organisation"])
                     :name))
      prepare)
     db)))
