@@ -222,6 +222,47 @@
                     db-val])))
    db-vals))
 
+(defn on-change [db-vals pattern]
+  ((comp
+    (partial remove empty?)
+    (partial
+     map
+     (fn [m]
+       ((comp
+         (partial remove nil?)
+         (fn [r] (when r m))
+         (partial some (fn [v] (s/includes? v pattern)))
+         (partial remove empty?)
+         (partial map s/trim)
+         (partial remove nil?)
+         vals
+         (fn [v]
+           (select-keys v
+                        [
+                         :name
+                         ;; :shortName
+
+                         ;; :addr
+                         :street
+                         :postcode-city
+                         :city
+                         :country
+
+                         :goals
+                         :activities
+
+                         ;; :contacts    ;; :name :pobox :phone :fax :email
+                         :email
+
+                         ;; :imageurl    ;; :url :alttext
+                         ;; :links       ;; :url :linkText
+                         ;; :socialmedia ;; :url :linkText :platform
+
+                         ;; :districts   ;; TODO
+                         ])))
+        m))))
+   db-vals))
+
 (defn right [active map-atom orig-db-vals]
   (let [db-vals (if (zero? (count orig-db-vals))
                   (do
@@ -234,11 +275,16 @@
       [:input {:type "text"
                ;; :value time-color
                :placeholder (de :fdk.cmap.lang/search-hint)
-               :on-change (comp
-                           (fn [x] (js/console.log
-                                    (gstr/format "new-val: '%s'" x)))
-                           (fn [x] (.-value x))
-                           (fn [x] (.-target x)))}]]
+               :on-change
+               (fn [x]
+                 (let [pattern ((comp
+                                 (fn [x] (.-value x))
+                                 (fn [x] (.-target x)))
+                                x)]
+                   (when (>= (count pattern) 3)
+                     (let [new-db-vals (on-change db-vals pattern)]
+                       (js/console.log "new-db-vals" new-db-vals)
+                       #_[right active map-atom new-db-vals]))))}]]
      [rc/Tab
       {:id "tab-panes"
        :panes
