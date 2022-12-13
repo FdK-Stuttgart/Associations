@@ -281,21 +281,43 @@
   [rc/Tab
    {:id "tab-panes"
     :panes
-    [{:menuItem "Tab 1" :render
-      (fn [] (tab1 db-vals))}
-     {:menuItem "Tab 2" :render
-      (fn []
-        ((comp
-          (partial tab1)
-          (partial filter
-                   (fn [m]
-                     (subs/in?
-                      ["Kalimera Deutsch-Griechische Kulturinitiative"
-                       #_"Afro Deutsches Akademiker Netzwerk ADAN"
-                       "Schwedischer Schulverein Stuttgart"]
-                      (:name m))))
-          #_(partial take 2))
-         db-vals))}]}])
+    [
+     (let [tab-items      db-vals
+           tab-items-init @db-vals-init-atom]
+       {:menuItem
+        (str "Tab 1"
+             (let [count-vals      (count tab-items)
+                   count-vals-init (count tab-items-init)]
+               (when-not (= count-vals count-vals-init)
+                 (gstr/format " (%s/%s)" count-vals count-vals-init))))
+        :render (fn [] (tab1 db-vals))})
+
+     (let [tab-items
+           ((comp
+             (partial filter
+                      (fn [m]
+                        (subs/in?
+                         ["Kalimera Deutsch-Griechische Kulturinitiative"
+                          #_"Afro Deutsches Akademiker Netzwerk ADAN"
+                          "Schwedischer Schulverein Stuttgart"]
+                         (:name m))))
+             #_(partial take 2))
+            db-vals)
+
+           tab-items-init tab-items
+           ]
+       {:menuItem
+        (str "Tab 2"
+             (let [count-vals      (count tab-items)
+                   count-vals-init (count tab-items-init)]
+               (when-not (= count-vals count-vals-init)
+                 (gstr/format " (%s/%s)" count-vals count-vals-init))))
+        :render
+        (fn []
+          ((comp
+            (partial tab1)
+            #_(partial take 2))
+           tab-items))})]}])
 
 (defn right []
   [:div
