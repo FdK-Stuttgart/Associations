@@ -22,6 +22,30 @@
 
 (enable-console-print!)
 
+(def markers-layer-atom (reagent/atom nil))
+(def db-vals-atom (reagent/atom nil))
+(def db-vals-init-atom (reagent/atom nil))
+(def map-atom (reagent/atom nil))
+(def active-atom (reagent/atom nil))
+(def pattern-atom (reagent/atom nil))
+
+(def zoom 17)
+
+(defn mark-string [s]
+  (if-let [pattern-orig @pattern-atom]
+    (let [pattern (s/lower-case pattern-orig)]
+      ((comp
+        (partial remove empty?)
+        (partial map (fn [el] (if (= (s/lower-case el) pattern)
+                                [:mark el]
+                                el)))
+        (partial s/split s)
+        ;; i - case insensitive, u - unicode
+        (fn [regex] (js/RegExp. regex "iu"))
+        (partial gstr/format "(%s)"))
+       pattern))
+    s))
+
 (defn popup
   "addr has only 'keine öffentliche Anschrift'"
   [{:keys [name addr street postcode-city districts email activities goals
@@ -33,7 +57,7 @@
          #_"osm-association-container"
     }
    [:div {:class "osm-association-inner-container"}
-    [:div {:class "association-title"} [:h2 name]]
+    [:div {:class "association-title"} (into [:h2] (mark-string name))]
     [:div {:class "association-images"}
      [:div {:class "association-image"}
       [:img {:src imageurl :alt ""}]]]
@@ -127,14 +151,6 @@
                      [:div {:class "social-media-icon mini-icon"}
                       [:img (get-in data/social-media [sm-name :img])]]])])))
      (range (count (:ids socialmedia))))]])
-
-(def markers-layer-atom (reagent/atom nil))
-(def db-vals-atom (reagent/atom nil))
-(def db-vals-init-atom (reagent/atom nil))
-(def map-atom (reagent/atom nil))
-(def active-atom (reagent/atom nil))
-
-(def zoom 17)
 
 (defn public-address?
   "TODO public-address? computation should be done elsewhere."
@@ -277,7 +293,6 @@
      match-indexes @db-vals-init-atom)))
 
 (defn tab-panes [db-vals]
-  (js/console.log "[tab-panes] (type db-vals)" (type db-vals))
   [rc/Tab
    {:id "tab-panes"
     :panes
@@ -328,8 +343,12 @@
              :on-change (comp
                          (partial reset! db-vals-atom)
                          (fn [pattern] (if (>= (count pattern) 3)
-                                         (filter-db-vals pattern)
-                                         @db-vals-init-atom))
+                                         (do
+                                           (reset! pattern-atom pattern)
+                                           (filter-db-vals pattern))
+                                         (do
+                                           (reset! pattern-atom nil)
+                                           @db-vals-init-atom)))
                          s/lower-case
                          (fn [x] (.-value x))
                          (fn [x] (.-target x)))}]]
