@@ -63,6 +63,43 @@
    }
   )
 
+(defclass c []
+  {
+   :width "100%"
+   :height "100%"
+   })
+
+(defclass l []
+  {
+   :position "absolute"
+   :left "40px"
+   :top "40px"
+   :bottom "40px"
+   :right "400px"
+   :background "grey"
+   })
+(defclass r []
+  {
+   :position "absolute"
+   :right "0px"
+   :top "20px"
+   :bottom "60px"
+   :width "400px"
+   :color "#fff"
+   :background "black"
+   })
+
+(defclass d []
+  {
+   :background "red"
+   :position "absolute"
+   :left "-4px"
+   :top "0"
+   :bottom "0"
+   :width "8px"
+   :cursor "w-resize"
+   })
+
 ;; .example-map p, .jumbotron p {
 ;;     margin: 0;
 ;;     padding: 0;

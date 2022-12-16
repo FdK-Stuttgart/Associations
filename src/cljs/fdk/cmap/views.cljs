@@ -365,6 +365,36 @@
        name)
       105))
 
+(def isResizing (atom false))
+
+(do
+  (defn on-mouse-move [e]
+    (when @isResizing
+      (let [c (.getElementById js/document "c")
+            l (.getElementById js/document "l")
+            r (.getElementById js/document "r")]
+        (let [ro (- (+ (.-offsetLeft r) #_1147
+                       (.-offsetWidth r) #_400)
+                    (.-clientX e))]
+          (set! (-> l .-style .-right) (str ro "px"))
+          (set! (-> r .-style .-width) (str ro "px"))))))
+
+;;; from https://stackoverflow.com/questions/26233180/resize-a-div-on-border-drag-and-drop-without-adding-extra-markup
+  (defn resizable []
+    [:div#c {:class [(styles/c)]}
+     [:div#l {:class [(styles/l)]
+              :on-mouse-move on-mouse-move } "left"]
+     [:div#r {:class [(styles/r)]
+              :on-mouse-move on-mouse-move}
+      [:div#d {:class [(styles/d)]
+               :on-mouse-down (fn [e]
+                                (js/console.log "start")
+                                (reset! isResizing true))
+               :on-mouse-up   (fn [e]
+                                (js/console.log "stop")
+                                (reset! isResizing false))}]
+      "right"]]))
+
 (defn map-with-list [params center-map]
   (let [re-zoom false]
     (reagent/create-class
