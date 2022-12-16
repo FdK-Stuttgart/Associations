@@ -84,7 +84,7 @@ done
 #     fi
 # fi
 
-alias ng='node $HOME/node_modules/\@angular/cli/bin/ng'
+alias ng='node ./node_modules/\@angular/cli/bin/ng.js'
 # node_bin=`which node`
 # ng_bin=$HOME/node_modules/\@angular/cli/bin/ng
 #  serve_map_cmd="$node_bin $ng_bin serve --port 4021"
@@ -252,6 +252,7 @@ install_node_modules () {
 }
 
 serve_map () {
+    set -x  # Print commands and their arguments as they are executed.
     # test_php
     create_environment_php
     cd $prjd/map/app-map/ && install_node_modules
@@ -259,6 +260,8 @@ serve_map () {
     printf "See %s\n" $logfile
     # ng serve --port $port_map &>$logfile &
     ng serve --port $port_map
+    # Don't print commands
+    { retval="$?"; set +x; } 2>/dev/null
     # cd -
 #     xfce4-terminal \
 #         --working-directory="$prjd/map/app-map/" \
