@@ -32,7 +32,14 @@
    ;; "mariadb:lib" ; see the 'sed ...'-hack in the .bashrc
    "mycli"
    "ncurses"
-   "node"
+
+;;; AngularJS requires >=node@14.20.0 which doesn't compile however. And the
+;;; local node-installation $HOME/dev/node-v14.20.0/node doesn't work if the gcc
+;;; is not present. The error is 'libstdc++.so.6 ... No such file or directory'.
+;;; See also "alias ng='...'" in the .bashrc
+   ;; "node@14.19.3"
+   "gcc"
+
    "nss-certs"
 
    ;; `guix shell openjdk@<version>:jdk PACKAGES --export-manifest' ignores the

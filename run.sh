@@ -80,6 +80,7 @@ guix shell \
      --container --network \
      --preserve=^fdk \
      --share=/usr/bin \
+     --share=$HOME/dev/node-v14.20.0=$HOME/dev/node-v14.20.0 \
      --share=$HOME/.bash_history=$HOME/.bash_history \
      --share=$HOME/.config/fish=$HOME/.config/fish \
      --share=$HOME/.gitconfig=$HOME/.gitconfig \

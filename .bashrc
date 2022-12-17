@@ -84,7 +84,8 @@ done
 #     fi
 # fi
 
-alias ng='node ./node_modules/\@angular/cli/bin/ng.js'
+alias ng='$HOME/dev/node-v14.20.0/out/Release/node ./node_modules/\@angular/cli/bin/ng.js'
+# alias ng='node ./node_modules/\@angular/cli/bin/ng.js'
 # node_bin=`which node`
 # ng_bin=$HOME/node_modules/\@angular/cli/bin/ng
 #  serve_map_cmd="$node_bin $ng_bin serve --port 4021"
@@ -243,12 +244,16 @@ create_environment_php () {
 }
 
 install_node_modules () {
-    # test if the directory is empty
+    set -x  # Print commands and their arguments as they are executed. test if
+    # Test if node_modules/ is empty. The test won't work correctly if it contains just a
+    # temporary .staging/ directory or some packages are missing.
     if [ -z "$(ls -A ./node_modules)" ]; then
-        # do not ask 'Would you like to share anonymous usage data'
-        ng analytics off
+        # Do not ask 'Would you like to share anonymous usage data'. It doesn't
+        # work if angular hasn't been installed yet.
+        # ng analytics off
         npm install
     fi
+    { retval="$?"; set +x; } 2>/dev/null
 }
 
 serve_map () {
