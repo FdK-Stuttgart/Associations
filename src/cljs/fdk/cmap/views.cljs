@@ -15,6 +15,7 @@
    [goog.string :as gstr]
    [cljs.pprint :as pp]
    ["react-leaflet" :as rle]
+   ["leaflet.markercluster"]
    ;; TODO use import instead of <link rel="stylesheet" ...>
    ;; ["semantic-ui-css/components/tab" :as csu]
    ;; ["react" :as react]
@@ -157,24 +158,34 @@
   [norm-addr]
   (not (re-find #"(?i).*keine|Postfach.*" norm-addr)))
 
+(def cluster-icon
+  #js {:iconCreateFunction
+       (fn [cluster]
+         (js/L.divIcon
+          #js
+          {:html (rserver/render-to-string [:b (.getChildCount cluster)])
+           :className "marker-cluster-small"
+           :iconSize (new js/L.Point 40 40)}))})
+
 (defn update-markers "This function gets executed 3 times"
   [re-zoom]
   (let [active @active-atom
         map-instance @map-atom
-        markers-layer (if (nil? @markers-layer-atom)
-                        (js/L.layerGroup)
-                        @markers-layer-atom)
-        db-vals @db-vals-atom]
+        db-vals @db-vals-atom
+        markers-layer (or @markers-layer-atom
+                          (js/L.markerClusterGroup #_cluster-icon))]
+    ;; .clearLayers can't be done right before .addLayer
     (.clearLayers markers-layer)
     (doall
-     (for [marker db-vals]
-       (let [[longitude latitude] (:coords marker)
-             k (:k marker)
-             addr (:addr marker)
+     (for [marker-data db-vals]
+       (let [[longitude latitude] (:coords marker-data)
+             name (:name marker-data)
+             k (:k marker-data)
+             addr (:addr marker-data)
              ;; No need to recreate the whole map. It's enough to the
-             ;; map-with-marker-and-popup as a function parameter and
+             ;; marker as a function parameter and
              ;; call .openPopup / .closePopup
-             map-with-marker-and-popup
+             marker
              (-> (js/L.marker
                   (array latitude longitude)
                   #js {:icon (js/L.icon (clj->js
@@ -187,14 +198,14 @@
                                           :popupAnchor [0 -31]}))})
                  (.on "click" (fn [_]
                                 (reset! active-atom (if (= active k) nil k))))
-                 (.addTo markers-layer)
-                 (.bindPopup (rserver/render-to-string [popup marker])))]
+                 (.bindPopup (rserver/render-to-string [popup marker-data])))]
          (when (= k active)
            ;; (println "latitude longitude" latitude longitude)
            (if re-zoom
              (.setView map-instance (array latitude longitude) zoom)
              (.setView map-instance (array latitude longitude)))
-           (.openPopup map-with-marker-and-popup)))))
+           (.openPopup marker))
+         (.addLayer markers-layer marker))))
 
     (reset! markers-layer-atom markers-layer)
     (.addTo @markers-layer-atom map-instance)
