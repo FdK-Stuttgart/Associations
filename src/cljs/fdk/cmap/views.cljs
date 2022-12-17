@@ -158,8 +158,11 @@
   [norm-addr]
   (not (re-find #"(?i).*keine|Postfach.*" norm-addr)))
 
-(def cluster-icon
-  #js {:iconCreateFunction
+(def cluster-config
+  #js {
+       :disableClusteringAtZoom 17
+       #_#_
+       :iconCreateFunction
        (fn [cluster]
          (js/L.divIcon
           #js
@@ -173,42 +176,53 @@
         map-instance @map-atom
         db-vals @db-vals-atom
         markers-layer (or @markers-layer-atom
-                          (js/L.markerClusterGroup #_cluster-icon))]
+                          (js/L.markerClusterGroup cluster-config))]
     ;; .clearLayers can't be done right before .addLayer
     (.clearLayers markers-layer)
+    #_
+    (.on markers-layer "clusterclick"
+         (fn [c]
+           (js/console.log "clusterclick"
+                           (-> c .-layer .getAllChildMarkers .-length))))
     (doall
      (for [marker-data db-vals]
        (let [[longitude latitude] (:coords marker-data)
-             name (:name marker-data)
-             k (:k marker-data)
-             addr (:addr marker-data)
-             ;; No need to recreate the whole map. It's enough to the
-             ;; marker as a function parameter and
-             ;; call .openPopup / .closePopup
-             marker
-             (-> (js/L.marker
-                  (array latitude longitude)
-                  #js {:title name
-                       :icon
-                       (js/L.icon
-                        (clj->js
-                         {:iconUrl
-                          (if (public-address? addr)
-                            "/icon/map_markers/pinActivePublic.png"
-                            "/icon/map_markers/pinActivePrivate.png")
-                          :iconSize [30 42]
-                          :iconAnchor [15 41]
-                          :popupAnchor [0 -31]}))})
-                 (.on "click" (fn [_]
-                                (reset! active-atom (if (= active k) nil k))))
-                 (.bindPopup (rserver/render-to-string [popup marker-data])))]
+             k (:k marker-data)]
          (when (= k active)
-           ;; (println "latitude longitude" latitude longitude)
-           (if re-zoom
+           ;; (js/console.log "list-clicked" (:name marker-data))
+           (.setView map-instance (array latitude longitude) zoom)
+           #_(if re-zoom
              (.setView map-instance (array latitude longitude) zoom)
-             (.setView map-instance (array latitude longitude)))
-           (.openPopup marker))
-         (.addLayer markers-layer marker))))
+             (.setView map-instance (array latitude longitude))))
+         (let [marker
+;;; No need to recreate the whole map. It's enough to the marker as a function
+;;; parameter and call .openPopup / .closePopup
+               (-> (js/L.marker
+                    (array latitude longitude)
+                    #js {:title (:name marker-data)
+                         :icon
+                         (js/L.icon
+                          (clj->js
+                           {:iconUrl
+                            (if (public-address? (:addr marker-data))
+                              "/icon/map_markers/pinActivePublic.png"
+                              "/icon/map_markers/pinActivePrivate.png")
+                            :iconSize [30 42]
+                            :iconAnchor [15 41]
+                            :popupAnchor [0 -31]}))})
+                   (.addTo markers-layer)
+                   #_
+                   (.on "click" (fn [c]
+                                  (js/console.log "markers-layer" "click"
+                                                  "active" @active-atom)))
+                   (.bindPopup (rserver/render-to-string [popup marker-data])))
+               ]
+           (when (= "38e4c9d7-9a1e-4151-992c-65f5935f35fe" k)
+             (js/console.log "active" active "openPopup" (= k active)))
+           (when (= k active)
+             (.openPopup marker)
+             (.openPopup marker)))
+         #_(.addLayer markers-layer marker))))
 
     (reset! markers-layer-atom markers-layer)
     (.addTo @markers-layer-atom map-instance)
@@ -220,7 +234,7 @@
           (fn [_]
             (let [old-active @active-atom]
               #_(js/console.log "on-click" "old-active" old-active "k" k)
-              (reset! active-atom (if (= old-active k) nil k))
+              (reset! active-atom k)
               #_(println "on-click" "new-active" @active-atom)
               (let [re-zoom (and @active-atom (not= old-active @active-atom))]
                 #_(println "on-click" "re-zoom" re-zoom)
