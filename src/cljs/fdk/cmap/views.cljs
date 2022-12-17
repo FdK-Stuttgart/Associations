@@ -188,14 +188,17 @@
              marker
              (-> (js/L.marker
                   (array latitude longitude)
-                  #js {:icon (js/L.icon (clj->js
-                                         {:iconUrl
-                                          (if (public-address? addr)
-                                            "/icon/map_markers/pinActivePublic.png"
-                                            "/icon/map_markers/pinActivePrivate.png")
-                                          :iconSize [30 42]
-                                          :iconAnchor [15 41]
-                                          :popupAnchor [0 -31]}))})
+                  #js {:title name
+                       :icon
+                       (js/L.icon
+                        (clj->js
+                         {:iconUrl
+                          (if (public-address? addr)
+                            "/icon/map_markers/pinActivePublic.png"
+                            "/icon/map_markers/pinActivePrivate.png")
+                          :iconSize [30 42]
+                          :iconAnchor [15 41]
+                          :popupAnchor [0 -31]}))})
                  (.on "click" (fn [_]
                                 (reset! active-atom (if (= active k) nil k))))
                  (.bindPopup (rserver/render-to-string [popup marker-data])))]
@@ -213,14 +216,15 @@
 
 (defn list-elem [pi-icon {:keys [k name addr coords]}]
   [:span {:key k
-          :on-click (fn [e]
-                      (let [old-active @active-atom]
-                        #_(js/console.log "on-click" "old-active" old-active "k" k)
-                        (reset! active-atom (if (= old-active k) nil k))
-                        #_(println "on-click" "new-active" @active-atom)
-                        (let [re-zoom (and @active-atom (not= old-active @active-atom))]
-                          #_(println "on-click" "re-zoom" re-zoom)
-                          (update-markers re-zoom))))}
+          :on-click
+          (fn [_]
+            (let [old-active @active-atom]
+              #_(js/console.log "on-click" "old-active" old-active "k" k)
+              (reset! active-atom (if (= old-active k) nil k))
+              #_(println "on-click" "new-active" @active-atom)
+              (let [re-zoom (and @active-atom (not= old-active @active-atom))]
+                #_(println "on-click" "re-zoom" re-zoom)
+                (update-markers re-zoom))))}
    [:div {:class (s/join " " ["association-entry" "ng-star-inserted"])}
     [:a
      [:div {:class "icon"}
@@ -420,24 +424,32 @@
             (set! (-> node-map-style .-width)
                   (str (.-clientWidth node-center) pxu))
             #_
-            (js/console.log "[: did-mount]"
-                            "(.-clientHeight node-ref)" (.-clientHeight node-ref)
-                            "(.-clientHeight node-header)" (.-clientHeight node-header)
-                            "(.-clientHeight node-center)" (.-clientHeight node-center)
-                            "(.-clientHeight node-footer)" (.-clientHeight node-footer))
+            (js/console.log
+             "[: did-mount]"
+             "(.-clientHeight node-ref)" (.-clientHeight node-ref)
+             "(.-clientHeight node-header)" (.-clientHeight node-header)
+             "(.-clientHeight node-center)" (.-clientHeight node-center)
+             "(.-clientHeight node-footer)" (.-clientHeight node-footer))
             (set! (-> node-map-style .-height)
                   (str (- (.-clientHeight node-center)
                           ;; '* 2' b/c padding top and bottom is the same
                           (* 2 styles/padding)) pxu)))
           (let [leaflet-map (-> node-center .-children first js/L.map)]
             (reset! map-atom leaflet-map)
-            (.setView leaflet-map (let [[lng lat] center-map]
-                                    (array lat lng)) zoom) ;; initial zoom needed
+            (.setView leaflet-map (let [[longitude latitude] center-map]
+                                    ;; initial zoom needed
+                                    (array latitude longitude)) zoom)
             (.on leaflet-map "click" (fn [_]
                                        (when @active-atom
                                          (reset! active-atom nil))))
             (.addTo (js/L.tileLayer
-                     "https://{s}.tile.OpenStreetMap.org/{z}/{x}/{y}.png")
+                     "https://{s}.tile.OpenStreetMap.org/{z}/{x}/{y}.png"
+                     ;; #js {:attribution
+                     ;;      (gstr/format
+                     ;;       "&copy; <a href=\"%s\">%s</a> contributors"
+                     ;;       "http://osm.org/copyright"
+                     ;;       "OpenStreetMap")}
+                     )
                     leaflet-map))))
       :component-did-update
       (comp
