@@ -324,7 +324,7 @@
          #_[:div {:class [(styles/left)]} #_"left"]
          [:div {:class [(styles/center)]} #_"center"
           [:div#map {:style {:height 0 :width 0}}]]
-         [:div {:class [(styles/right)]} [right active map-atom db-vals]]
+         [:div {:class [(styles/right)]} (right active map-atom db-vals)]
          [:div {:class [(styles/footer)]}
           (str @(re-frame/subscribe [::subs/name])
                " v"
