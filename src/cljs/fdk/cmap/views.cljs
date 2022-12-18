@@ -311,7 +311,7 @@
                          s/lower-case
                          (fn [x] (.-value x))
                          (fn [x] (.-target x)))}]]
-   [tab-panes @db-vals-atom]])
+   (tab-panes @db-vals-atom)])
 
 ;; TODO better transform & translate. E.g. in the class
 (defn translate [name]
