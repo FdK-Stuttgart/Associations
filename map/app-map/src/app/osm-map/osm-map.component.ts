@@ -9,7 +9,6 @@ import {Size} from 'ol/size';
 import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer';
 import {fromLonLat} from 'ol/proj';
 import OSM from 'ol/source/OSM';
-import OverlayPositioning from 'ol/OverlayPositioning';
 import {ResizeObserver} from 'resize-observer';
 import {DropdownOption, getAllOptions, getSubOptions
        } from '../model/dropdown-option';
@@ -711,7 +710,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
 
     return new Overlay({
       position: coordinates,
-      positioning: OverlayPositioning.BOTTOM_CENTER,
+      positioning: 'bottom-center',
       // -56px to show the popup above its marker (marker is 48px high)
       offset: [0, -56],
       element: popupElement,
