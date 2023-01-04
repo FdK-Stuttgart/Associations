@@ -17,10 +17,9 @@
 
 (defn read-db
   [{{:strs [x y]} :form-params :as request}]
+  ;; (println "x" x "y" y)      ; appears in the console
+  ;; (log/debug "x" x "y" y)    ; appears in the console & log/fdk.cmap.log
   (let [{:keys [query-fn]} (utils/route-data request)]
-    ;; (println "x" x "y" y)      ; appears in the console
-    ;; (log/debug "x" x "y" y)    ; appears in the console & log/fdk.cmap.log
-
     ;; See also
     ;; (rf/reg-event-fx :fetch-from-db ...
     ;;   {:http-xhrio {...
@@ -29,6 +28,6 @@
          (let [db-vals (->> (query-fn :read-associations {})
                             (pr)
                             (with-out-str))]
-           (log/info "\n$$$$$$$ Response length:" (count db-vals))
+           (log/info "\n$$$ Response length:" (count db-vals))
            db-vals))
         (http-response/header "Content-Type" "text/plain; charset=utf-8"))))
