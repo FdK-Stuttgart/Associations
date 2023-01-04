@@ -2,6 +2,8 @@
 
 (def labels
   {:de {
+        ::rooms-tab-name "Raumliste" ;; "Räume"
+        ::associations-tab-name "Vereine"
         ::search-hint "Vereinsdaten durchsuchen..."
         ::no-pub-addr "keine öffentliche Anschrift"
 
