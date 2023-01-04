@@ -25,7 +25,7 @@ function connect()
 
   return $connect;
 }
-
+# For connection test see etc/db-connect-test.php
 $con = connect();
 
 ?>

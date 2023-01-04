@@ -1,5 +1,7 @@
 <?php
-/* fill in database connection params */
+// Fill-in database connection parameters.
+// When developing, use '127.0.0.1' if 'localhost' leads to:
+//   Uncaught mysqli_sql_exception: No such file or directory ...
 define('DB_HOST', '');
 define('DB_NAME', '');
 define('DB_USER', '');

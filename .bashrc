@@ -5,18 +5,41 @@
 # honor it and otherwise use /bin/sh.
 export SHELL
 
-# /run is not automatically created by guix
-[ ! -d /run ] && mkdir /run
+if [ $(uname) != "Linux" ]; then
+    # /run is not automatically created by guix
+    if [ ! -d /run]; then
+        mkdir /run
+    fi
 
-# Quick access to $GUIX_ENVIRONMENT, for usage on config files
-# (currently only /etc/nginx/nginx.conf)
-[ ! -L /env ] && ln -s $GUIX_ENVIRONMENT /env
+    # Quick access to $GUIX_ENVIRONMENT, for usage on config files
+    # (currently only /etc/nginx/nginx.conf)
+    [ ! -L /env ] && ln -s $GUIX_ENVIRONMENT /env
 
-# Link every file in /usr/etc on /etc
-ls -1d /usr/etc/* | while read filepath; do
-    bname=/etc/$(basename $filepath)
-    [ ! -L $bname ] && ln -s $filepath $bname
-done
+    # Link every file in /usr/etc on /etc
+    ls -1d /usr/etc/* | while read filepath; do
+        bname=/etc/$(basename $filepath)
+        [ ! -L $bname ] && ln -s $filepath $bname
+    done
+else
+    wd=$(pwd) # WD=$(dirname "$0") # working directory, i.e. path to this file
+
+    # Recreate the dirs destroyed by `git clean --force -dx`. See also run.sh
+    for extraDirs in \
+            $wd/node_modules \
+            $wd/map/app-map/node_modules \
+            $wd/map/app-form/node_modules \
+            $wd/var/log \
+            $wd/var/lib/mysql/data \
+        ;
+    do
+        # printf "extraDirs: $extraDirs\n"
+        if [ ! -d $extraDirs ]; then
+            set -x  # Print commands and their arguments as they are executed.
+            mkdir --parent $extraDirs
+            { retval="$?"; set +x; } 2>/dev/null
+        fi
+    done
+fi
 
 alias ng='node ./node_modules/\@angular/cli/bin/ng.js'
 # node_bin=`which node`
@@ -24,7 +47,7 @@ alias ng='node ./node_modules/\@angular/cli/bin/ng.js'
 #  serve_map_cmd="$node_bin $ng_bin serve --port 4021"
 # serve_form_cmd="$node_bin $ng_bin serve --port 4022"
 
-prjd=~/dec/fdk
+prjd=$HOME/dec/fdk
 port_map=4201
 port_form=4202
 port_php=4200
@@ -35,12 +58,18 @@ p2=$prjd/map/app-form/package.json
 p22=$prjd/map/app-form/package-lock.json
 
 test_php () {
-    url=http://localhost:$port_php/api/associations/read-associations.php
-    printf "Testing php WebServer... \n"
-    set -x  # Print commands and their arguments as they are executed.
-    cnt_chars=$(curl --silent --request GET $url | wc -c)
-    { retval="$?"; set +x; } 2>/dev/null
-    printf "... %s chars received\n" $cnt_chars
+    if [ "$(ss -tulpn | grep $port_php)" ]; then
+        printf "INF: PHP port %s opened.\n" $port_php
+        url=http://localhost:$port_php/api/associations/read-associations.php
+        printf "DBG: Testing php WebServer... \n"
+        set -x  # Print commands and their arguments as they are executed.
+        cnt_chars=$(curl --silent --request GET $url | wc -c)
+        { retval="$?"; set +x; } 2>/dev/null
+        printf "    ... %s chars received\n" $cnt_chars
+    else
+        printf "ERR: PHP port %s NOT opened.\n" $port_php
+        printf "INF: Try to run: start_php\n"
+    fi
 }
 
 data () {
@@ -107,24 +136,28 @@ download () {
     # Don't print commands
     { retval="$?"; set +x; } 2>/dev/null
     printf "Open:\n"
-    printf "  http://localhost:%s/wordpress/wp-admin/install.php\n" $port_php
-    printf "  http://localhost:%s/phpMyAdmin-5.1.3-all-languages/index.php\n" $port_php
-    printf "  http://localhost:%s/wordpress/index.php?rest_route=/\n" $port_php
-    printf "  http://localhost:%s/wordpress/index.php?rest_route=/jwt-auth/v1\n" $port_php
-    printf "  http://localhost:%s/wordpress/index.php?rest_route=/jwt-auth/v1/token\n" $port_php
+    printf "      http://localhost:$port_php/wordpress/wp-admin/install.php\n"
+    printf "      http://localhost:$port_php/phpMyAdmin-5.1.3-all-languages/index.php\n"
+    printf "      http://localhost:$port_php/wordpress/index.php?rest_route=/\n"
+    printf "      http://localhost:$port_php/wordpress/index.php?rest_route=/jwt-auth/v1\n"
+    printf "      http://localhost:$port_php/wordpress/index.php?rest_route=/jwt-auth/v1/token\n"
 }
 
 start_db () {
-    set -x  # Print commands and their arguments as they are executed.
-    mysqld_safe 1>/dev/null &
-    # Don't print commands
-    { retval="$?"; set +x; } 2>/dev/null
+    if [ $(uname) != "Linux" ]; then
+        set -x  # Print commands and their arguments as they are executed.
+        mysqld_safe 1>/dev/null &
+        # Don't print commands
+        { retval="$?"; set +x; } 2>/dev/null
+    # else
+    # on Linux mysql is probably running already. See `systemctl status mysql`
+    fi
 }
 
 start_php () {
     start_db
     # phpApi paths
-    sed -i -e "s|localhost/AssociationMap|localhost:4200|" \
+    sed -i -e "s|localhost/AssociationMap|localhost:$port_php|" \
         $prjd/map/app-map/src/environments/environment.ts \
         $prjd/map/app-form/src/environments/environment.ts
 
@@ -134,11 +167,18 @@ start_php () {
     # -c <path>|<file>  Look for php.ini file in this directory
     # -t <docroot>      Specify document root <docroot> for built-in web server.
     # redirection '... 1>/var/log/php_stdout.log &' doesn't work
+    if [ $(uname) != "Linux" ]; then
+        phpIniDir=/usr/etc
+        phpStdoutLog=/var/log/php_stdout.log
+    else
+        phpIniDir=/usr/etc
+        phpStdoutLog=$prjd/log/php_stdout.log
+    fi
     set -x  # Print commands and their arguments as they are executed.
-    php -q -c /usr/etc \
+    php -q -c $phpIniDir \
         -S localhost:$port_php \
         -t $prjd/map/database/ \
-        &>/var/log/php_stdout.log &
+        &>$phpStdoutLog &
     # Don't print commands
     { retval="$?"; set +x; } 2>/dev/null
 
@@ -152,7 +192,7 @@ start_php () {
 #         --title="php" \
 #         --command='env PROMPT_COMMAND="unset PROMPT_COMMAND
 # # php -c /usr/etc -f /usr/etc/db-connect-test.php
-# php -c /usr/etc -S localhost:4200 -t $prjd/map/database/ 1>/dev/null &
+# php -c /usr/etc -S localhost:$port_php -t $prjd/map/database/ 1>/dev/null &
 # " bash'
 }
 
@@ -202,7 +242,7 @@ serve_map () {
 #         --working-directory="$prjd/map/app-map/" \
 #         --title="app-map" \
 #         --command='env PROMPT_COMMAND="unset PROMPT_COMMAND
-# curl --request GET http://localhost:4200/api/associations/read-associations.php
+# curl --request GET http://localhost:$port_php/api/associations/read-associations.php
 # ng serve --port 4201
 # " bash'
 }
@@ -220,7 +260,7 @@ serve_form () {
 #         --working-directory="$prjd/map/app-form/" \
 #         --title="app-form" \
 #         --command='env PROMPT_COMMAND="unset PROMPT_COMMAND
-# curl --request GET http://localhost:4200/api/associations/read-associations.php
+# curl --request GET http://localhost:$port_php/api/associations/read-associations.php
 # ng serve --port $port_form
 # " bash'
 }
@@ -475,9 +515,50 @@ EOF
     fi
 }
 
+populate_db () {
+    set -x  # Print commands and their arguments as they are executed.
+    # --verbose   show executed SQL commands
+    if [ $(uname) != "Linux" ]; then
+    mysql --user $USER << EOF
+DROP DATABASE IF EXISTS associations;
+CREATE DATABASE IF NOT EXISTS associations;
+DELETE FROM mysql.user WHERE User='';
+GRANT ALL PRIVILEGES ON associations.* TO '$USER'@'localhost' WITH GRANT OPTION;
+CREATE USER IF NOT EXISTS 'foo'@'localhost' IDENTIFIED BY '';
+GRANT ALL PRIVILEGES ON *.* TO 'foo'@'localhost' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+SELECT concat(user, '  \'', password, '\'') FROM mysql.user;
+SELECT '-- Loading test data ...' AS '';
+SOURCE map/database/db-export/associations.sql;
+-- SHOW TABLES;
+-- SHOW COLUMNS IN activities;
+EOF
+    else
+        sudo mysql --verbose -u root << EOF
+DROP DATABASE IF EXISTS associations;
+CREATE DATABASE IF NOT EXISTS associations;
+-- SHOW DATABASES;
+USE mysql;
+DELETE FROM mysql.user WHERE User='';
+-- SELECT User FROM mysql.user;
+CREATE USER IF NOT EXISTS '$USER'@'localhost' IDENTIFIED BY '';
+GRANT ALL PRIVILEGES ON associations.* TO '$USER'@'localhost' WITH GRANT OPTION;
+CREATE USER IF NOT EXISTS 'foo'@'localhost' IDENTIFIED BY '';
+GRANT ALL PRIVILEGES ON *.* TO 'foo'@'localhost' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+SELECT concat(user, '  \'', password, '\'') FROM mysql.user;
+SELECT '-- Loading test data ...' AS '';
+SOURCE map/database/db-export/associations.sql;
+-- SHOW TABLES;
+-- SHOW COLUMNS IN activities;
+EOF
+    fi
+    { retval="$?"; set +x; } 2>/dev/null
+}
+
 ## Install MariaDB on the first run
 dbd=/var/lib/mysql/data/mysql
-if [ ! -d $dbd ]; then
+if [ ! -d $dbd ] && [ $(uname) != "Linux" ]; then
     # printf "DBG: first run: dbd doesn't exist: %s\n" $dbd
     # printf "DBG: install MariaDB...\n"
 
@@ -519,21 +600,7 @@ if [ ! -d $dbd ]; then
     mysqld_safe &
     # execution of `mysql_secure_installation` is not needed
     sleep 3
-    # --verbose   show executed SQL commands
-    mysql --user $USER << EOF
-DROP DATABASE IF EXISTS associations;
-CREATE DATABASE IF NOT EXISTS associations;
-DELETE FROM mysql.user WHERE User='';
-GRANT ALL PRIVILEGES ON associations.* TO '$USER'@'localhost' WITH GRANT OPTION;
-CREATE USER 'foo'@'localhost' IDENTIFIED BY '';
-GRANT ALL PRIVILEGES ON *.* TO 'foo'@'localhost' WITH GRANT OPTION;
-FLUSH PRIVILEGES;
-SELECT concat(user, '  \'', password, '\'') FROM mysql.user;
-SELECT '-- Loading test data ...' AS '';
-SOURCE map/database/db-export/associations.sql;
--- SHOW TABLES;
--- SHOW COLUMNS IN activities;
-EOF
+    populate_db
     mysqladmin --user $USER shutdown
 #     printf "DBG: install MariaDB... done\n"
 # else
@@ -541,8 +608,17 @@ EOF
     { retval="$?"; set +x; } 2>/dev/null
 fi
 
+available_commands () {
+    cat << "EOF"
+Available commands:
+  version, build, deploy_dev, deploy_test, deploy_prod
+  populate_db, start_php, serve_map, serve_form
+  test_db, test_php, test_wp_dev, test_basic_auth
+EOF
+}
+
 # see https://meatfighter.com/ascii-silhouettify/color-gallery.html
-project_logo () {
+guix_prompt () {
     cat << "EOF"
     ░░░                                     ░░░
     ░░▒▒░░░░░░░░░               ░░░░░░░░░▒▒░░
@@ -562,10 +638,7 @@ project_logo () {
    | |  __|  \| | |  | | | |  __ _   _ ___  __
    | | |_ | . ' | |  | | | | |_ | | | | \ \/ /
    | |__| | |\  | |__| | | |__| | |_| | |>  <
-    \_____|_| \_|\____/   \_____|\____|_/_/\_\
-
-Available commands:
-  start_php, serve_map, serve_form, version, build, deploy_test, deploy_prod
+    \_____|_| \_|\____/   \_____|\__,_|_/_/\_\
 EOF
 }
 
@@ -592,7 +665,14 @@ alias tphp=test_php
 # alias twt=wp_auth_test
 # alias twd=test_wp_dev
 
-project_logo
+if [ $(uname) != "Linux" ]; then
+    guix_prompt
+else
+    # sudo apt install --yes neofetch
+    neofetch --logo
+fi
+
+available_commands
 
 # Adjust the prompt depending on whether we're in 'guix environment'.
 if [ -n "$GUIX_ENVIRONMENT" ]
