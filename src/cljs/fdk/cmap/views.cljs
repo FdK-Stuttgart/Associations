@@ -329,7 +329,7 @@
      (let [tab-items      db-vals
            tab-items-init @db-vals-init-atom]
        {:menuItem
-        (str "Tab 1"
+        (str (de :fdk.cmap.lang/associations-tab-name)
              (let [count-vals      (count tab-items)
                    count-vals-init (count tab-items-init)]
                (when-not (= count-vals count-vals-init)
@@ -351,7 +351,7 @@
            tab-items-init tab-items
            ]
        {:menuItem
-        (str "Tab 2"
+        (str (de :fdk.cmap.lang/rooms-tab-name)
              (let [count-vals      (count tab-items)
                    count-vals-init (count tab-items-init)]
                (when-not (= count-vals count-vals-init)

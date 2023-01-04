@@ -118,8 +118,8 @@
 	 font-size: 85%;
 	 background-color: rgba(255, 255, 255, 0.9);
 	 bottom: 40px;
-	 padding-top: 12px;
-	 padding-bottom: 12px;
+	 padding-top: 0px;
+	 padding-bottom: 0px;
 	 z-index: 9000;
 	 border-radius: 12px;
 	 box-shadow: 0 0 4px rgba(51, 51, 51, 0.66);
@@ -141,7 +141,10 @@
 	 box-shadow: 0 0 0 0.2rem #a6d5fa;
 }
  .osm-association-container .osm-association-inner-container {
-	 padding: 12px;
+   padding-top: 0px;
+   padding-bottom: 0px;
+   padding-left: 12px;
+   padding-right: 12px;
 	 overflow-y: auto;
 }
  .association-container, .osm-association-container .osm-association-inner-container {
