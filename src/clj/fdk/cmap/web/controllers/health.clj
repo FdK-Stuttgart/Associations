@@ -1,7 +1,6 @@
 (ns fdk.cmap.web.controllers.health
   (:require
     [ring.util.http-response :as http-response]
-    [integrant.repl.state :as state]
     [fdk.cmap.web.routes.utils :as utils]
     [clojure.tools.logging :as log]
     )
@@ -17,8 +16,8 @@
                 :message ""}}))
 
 (defn read-db
-  [{{{:keys [x y]} :query} :parameters :as request}]
-  (let [query-fn (:db.sql/query-fn state/system)]
+  [{{:strs [x y]} :form-params :as request}]
+  (let [{:keys [query-fn]} (utils/route-data request)]
     ;; (println "x" x "y" y)      ; appears in the console
     ;; (log/debug "x" x "y" y)    ; appears in the console & log/fdk.cmap.log
 
