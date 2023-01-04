@@ -75,6 +75,17 @@ To reload changes:
 (reset)
 ```
 
+## Build & Deploy
+
+```shell
+clj -Sforce -T:build all
+
+# specify a custom port you need to set the $PORT environment variable, eg:
+export PORT=8001
+export JDBC_URL=...
+java -jar <app>.jar
+```
+
 ## REPLs
 
 ```shell
