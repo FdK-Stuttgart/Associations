@@ -2,13 +2,13 @@
 #
 # Reproducible Development Environment
 
-wd=$(pwd) # WD=$(dirname "$0") # i.e. path to this file
+wd=$(pwd) # WD=$(dirname "$0") # working directory, i.e. path to this file
 
 # MariaDB
 sed -i -e "s|#mysql_user#|$(whoami)|" $wd/etc/my.cnf
 
-# Recreate the dirs destroyed by `git clean --force -dx`:
-for prjd in \
+# Recreate the dirs destroyed by `git clean --force -dx`. See also .bashrc
+for extraDirs in \
         $wd/node_modules \
         $wd/map/app-map/node_modules \
         $wd/map/app-form/node_modules \
@@ -16,24 +16,10 @@ for prjd in \
         $wd/var/lib/mysql/data \
         ;
     do
-    # printf "prjd: $prjd\n"
-    if [ ! -d $prjd ]; then
-        mkdir --parent $prjd
-    fi
-done
-
-prj_dirs=(
-    $wd/node_modules
-    $wd/map/app-map/node_modules
-    $wd/map/app-form/node_modules
-    $wd/var/log
-)
-
-# `git clean --force -dx` destroys the prj_dirs. Recreate it:
-for prjd in ${prj_dirs[@]}; do
-    if [ ! -d $prjd ]; then
+    # printf "extraDirs: $extraDirs\n"
+    if [ ! -d $extraDirs ]; then
         set -x  # Print commands and their arguments as they are executed.
-        mkdir --parent $prjd
+        mkdir --parent $extraDirs
         { retval="$?"; set +x; } 2>/dev/null
     fi
 done

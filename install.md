@@ -3,21 +3,21 @@ Note:
 Error under ungoogled-chromium: "... has been blocked by CORS policy ..."
 The problem doesn't exits in firefox
 
-1. start the PHP server and optionally test the database access:
+1. Start the PHP server and optionally test the database access:
    ```shell
    ./run.sh
    start_php
-   # optionally test database access:
-   curl --request GET http://localhost:4200/api/associations/read-associations.php
+   # test database access:
+   curl --silent http://localhost:4200/api/associations/read-associations.php
    ```
 
-1. In a new terminal start the app-map
+1. In a new terminal start the app-map:
    ```shell
    ./run.sh
    serve_map
    ```
 
-1. In a new terminal start the app-form
+1. In a new terminal start the app-form:
    ```shell
    ./run.sh
    serve_form
@@ -95,8 +95,8 @@ upload the sql file.
    will be copied to the right location when deploying the apps. **The file will
    NOT be committed to the Git repository.**
 
-   When developing, in case of "mysqli_connect(): (HY000/2002): No such file or
-   directory" use `127.0.0.1` instead of `localhost`:
+   When developing, use `127.0.0.1` if `localhost` leads to:
+     Uncaught mysqli_sql_exception: No such file or directory ...
    ```php
    define('DB_HOST', '127.0.0.1');
    ```
@@ -116,7 +116,7 @@ upload the sql file.
    ```
    Test database access:
    ```shell
-   curl http://localhost:4201/api/districts-options/read-districts-options.php
+   curl --silent http://localhost:4200/api/districts-options/read-districts-options.php
    ```
 
 ### Setup Wordpress Development Environment
