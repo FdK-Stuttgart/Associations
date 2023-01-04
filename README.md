@@ -78,6 +78,7 @@ To reload changes:
 ## REPLs
 
 ```shell
+# npm install
 npx shadow-cljs watch app
 ```
 
