@@ -46,6 +46,7 @@
    "ripgrep"
    "rsync"
    "sed"
+   "inetutils" ;; provides hostname, etc.
    "which"
    "zip"
    "unzip"
