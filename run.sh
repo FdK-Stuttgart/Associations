@@ -28,7 +28,7 @@ done
 # (the ng) itself. Both app-map and app-form have their node_modules-directories
 
 cmd=guix
-# [[ ! $(command -v $cmd) ]] - '[[' is a bashishm
+# [[ ! $(command -v $cmd) ]] - using double brackets '[[' / ']]' is a bashishm
 if [ ! "$(command -v $cmd)" ]; then
     printf "ERR: Command not available: %s\n" $cmd
     exit 1;
@@ -59,6 +59,10 @@ fi
 # --expression='(list (@ (gnu packages bash) bash) "include")' \
 #
 
+# Expose the symlink, in case the script is started from fdk.kit or similar.
+# Warning: hardcoded path! See also .bashrc
+# --share=$HOME/dec/fdk=$HOME/dec/fdk \
+
 set -x
 guix shell \
      --root=./persistent-profile \
@@ -72,6 +76,7 @@ guix shell \
      --share=$HOME/.gitconfig=$HOME/.gitconfig \
      --share=$HOME/.m2/=$HOME/.m2/ \
      --share=$HOME/.ssh/=$HOME/.ssh/ \
+     --share=$HOME/dec/fdk=$HOME/dec/fdk \
      --share=$wd/.bash_profile=$HOME/.bash_profile \
      --share=$wd/.bashrc=$HOME/.bashrc \
      --share=$wd/.envrc=$HOME/.envrc \

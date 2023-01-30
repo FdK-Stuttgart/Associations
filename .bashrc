@@ -4,10 +4,15 @@
 # Export 'SHELL' to child processes.  Programs such as 'screen'
 # honor it and otherwise use /bin/sh.
 export SHELL
+set -u # Treat unset variables as an error when substituting.
+set -e # Exit immediately if a command exits with a non-zero status.
 
-if [ $(uname) != "Linux" ]; then
+hostName=$(hostname)
+ecke="ecke"
+
+if [ $hostName == $ecke ]; then
     # /run is not automatically created by guix
-    if [ ! -d /run]; then
+    if [ ! -d /run ]; then
         mkdir /run
     fi
 
@@ -45,7 +50,7 @@ fi
 # node --version 2>/dev/null | grep "$nodejsVer"
 # { retval="$?"; set +x; } 2>/dev/null
 # if [ ! $retval -eq 0 ]; then
-#     # printf "DBG: command not available in required version.\n"
+#     # printf "[DBG] command not available in required version.\n"
 
 #     VERSION=$nodejsVer
 #     DISTRO=linux-x64
@@ -92,7 +97,7 @@ fi
 #         tar xfJ $nodeArchive -C $HOME/.local/lib/nodejs
 #         export PATH=$HOME/.local/lib/nodejs/node-$VERSION-$DISTRO/bin:$PATH
 #     else
-#         printf "ERR: Bad signature\n"
+#         printf "[ERR] Bad signature\n"
 #         exit 1
 #     fi
 #     # source ~/.bashrc
@@ -102,19 +107,18 @@ fi
 #     { retval="$?"; set +x; } 2>/dev/null
 #     if [ ! $retval -eq 0 ]; then
 #         file=$(command -v node)
-#         printf "ERR: couldn't properly install: %s %s\n" $(basename $file) $nodejsVer
+#         printf "[ERR] couldn't properly install: %s %s\n" $(basename $file) $nodejsVer
 #         exit $retval
 #     fi
 # fi
 
-alias ng='$HOME/dev/node-v14.20.0/out/Release/node ./node_modules/\@angular/cli/bin/ng.js'
-# alias ng='node ./node_modules/\@angular/cli/bin/ng.js'
+alias ng='node ./node_modules/\@angular/cli/bin/ng.js'
 # node_bin=`which node`
 # ng_bin=$HOME/node_modules/\@angular/cli/bin/ng
 #  serve_map_cmd="$node_bin $ng_bin serve --port 4021"
 # serve_form_cmd="$node_bin $ng_bin serve --port 4022"
 
-prjd=$HOME/dec/fdk
+prjd=$HOME/dec/fdk  # Warning: hardcoded path! See also run.sh
 port_map=4201
 port_form=4202
 port_php=4200
@@ -128,13 +132,13 @@ test_php () {
     if [ "$(ss -tulpn | grep $port_php)" ]; then
         printf "INF: PHP port %s opened.\n" $port_php
         url=http://localhost:$port_php/api/associations/read-associations.php
-        printf "DBG: Testing php WebServer... \n"
+        printf "[DBG] Testing php WebServer... \n"
         set -x  # Print commands and their arguments as they are executed.
         cnt_chars=$(curl --silent --request GET $url | wc -c)
         { retval="$?"; set +x; } 2>/dev/null
         printf "    ... %s chars received\n" $cnt_chars
     else
-        printf "ERR: PHP port %s NOT opened.\n" $port_php
+        printf "[ERR] PHP port %s NOT opened.\n" $port_php
         printf "INF: Try to run: start_php\n"
     fi
 }
@@ -211,13 +215,14 @@ download () {
 }
 
 start_db () {
-    if [ $(uname) != "Linux" ]; then
+    if [ $hostName == $ecke ]; then
         set -x  # Print commands and their arguments as they are executed.
         mysqld_safe 1>/dev/null &
         # Don't print commands
         { retval="$?"; set +x; } 2>/dev/null
-    # else
-    # on Linux mysql is probably running already. See `systemctl status mysql`
+    else
+        # on ecke mysql is probably running already. See `systemctl status mysql`
+        printf "hostname: %s\n" $hostName
     fi
 }
 
@@ -234,7 +239,7 @@ start_php () {
     # -c <path>|<file>  Look for php.ini file in this directory
     # -t <docroot>      Specify document root <docroot> for built-in web server.
     # redirection '... 1>/var/log/php_stdout.log &' doesn't work
-    if [ $(uname) != "Linux" ]; then
+    if [ $hostName == $ecke ]; then
         phpIniDir=/usr/etc
         phpStdoutLog=/var/log/php_stdout.log
     else
@@ -277,7 +282,7 @@ kill_all () {
 
 create_environment_php () {
     local env_php=$prjd/map/database/api/environment.php
-    if [[ ! -f $env_php ]]; then
+    if [ ! -f $env_php ]; then
         cp $(dirname $env_php)/_$(basename $env_php) $env_php
         sed -i -e "s|'DB_NAME',.*''|'DB_NAME', 'associations'|" $env_php
         sed -i -e "s|'DB_USER',.*''|'DB_USER', '$USER'|" $env_php
@@ -434,7 +439,7 @@ deploy () {
     local fdk_server=$2
     local fdk_home=$3
     if [[ -z "$fdk_login" || -z "$fdk_server" || -z "$fdk_home" ]]; then
-        printf "ERR: undefined variable(s):\n"
+        printf "[ERR] undefined variable(s):\n"
         printf "    fdk_login:  '%s'\n" $fdk_login
         printf "    fdk_server: '%s'\n" $fdk_server
         printf "    fdk_home:   '%s'\n" $fdk_home
@@ -449,7 +454,7 @@ deploy () {
         echo "    find $AMO -not -name environment.php -delete" >> /tmp/script.sh
         echo "    find $AMO -empty -type d -delete"                                                                    >> /tmp/script.sh
         echo "else"                                                                                                    >> /tmp/script.sh
-        echo "    printf \"ERR: Directory doesn't exist: $AMO\\n\""                                                    >> /tmp/script.sh
+        echo "    printf \"[ERR] Directory doesn't exist: $AMO\\n\""                                                    >> /tmp/script.sh
         echo "fi"                                                                                                      >> /tmp/script.sh
         set -x  # Print commands and their arguments as they are executed.
         ssh -t $fdk_login@$fdk_server < /tmp/script.sh
@@ -469,7 +474,7 @@ deploy_test () {
     if [[   -z "$fdk_test_login"
          || -z "$fdk_test_server"
          || -z "$fdk_test_home" ]]; then
-        printf "ERR: undefined variable(s):\n"
+        printf "[ERR] undefined variable(s):\n"
         printf "    fdk_test_login:  '%s'\n" $fdk_test_login
         printf "    fdk_test_server: '%s'\n" $fdk_test_server
         printf "    fdk_test_home:   '%s'\n" $fdk_test_home
@@ -482,7 +487,7 @@ deploy_prod () {
     if [[   -z "$fdk_prod_login"
          || -z "$fdk_prod_server"
          || -z "$fdk_prod_home" ]]; then
-        printf "ERR: undefined variable(s):\n"
+        printf "[ERR] undefined variable(s):\n"
         printf "    fdk_prod_login:  '%s'\n" $fdk_prod_login
         printf "    fdk_prod_server: '%s'\n" $fdk_prod_server
         printf "    fdk_prod_home:   '%s'\n" $fdk_prod_home
@@ -497,11 +502,16 @@ randpw () {
     head /dev/urandom | tr -dc '_?!#A-Za-z0-9' | head -c $1 ; echo ''
 }
 
-## Install nodejs packages on the first run
+set -x # Print commands and their arguments as they are executed.
+# `npm list` terminates with non-zero exit code. We need ignore it:
+set +e # Don't exit immediately if a command exits with a non-zero status.
 cntMatches=$(npm list @angular/cli 2>/dev/null | grep -c "UNMET DEPENDENCY")
+{ retval="$?"; set -e; set +x;} 2>/dev/null
+
+## Install nodejs packages on the first run
 if [ $cntMatches -eq 1 ]; then
-    # printf "DBG: first run: cntMatches: %s\n" $cntMatches
-    # printf "DBG: install nodejs packages...\n"
+    # printf "[DBG] first run: cntMatches: %s\n" $cntMatches
+    # printf "[DBG] install nodejs packages...\n"
     wd=$(pwd)
     set -x  # Print commands and their arguments as they are executed.
     npm install @angular/cli << EOF
@@ -512,9 +522,9 @@ EOF
     cd $wd
     # Don't print commands
     { retval="$?"; set +x; } 2>/dev/null
-    # printf "DBG: install nodejs packages... done\n"
+    # printf "[DBG] install nodejs packages... done\n"
 # else
-#     printf "DBG: consecutive run: cntMatches: %s\n" $cntMatches
+#     printf "[DBG] consecutive run: cntMatches: %s\n" $cntMatches
 fi
 
 test_db () {
@@ -533,8 +543,8 @@ EOF
 populate_db () {
     set -x  # Print commands and their arguments as they are executed.
     # --verbose   show executed SQL commands
-    if [ $(uname) != "Linux" ]; then
-    mysql --user $USER << EOF
+    if [ $hostName == $ecke ]; then
+        mysql --user $USER << EOF
 DROP DATABASE IF EXISTS associations;
 CREATE DATABASE IF NOT EXISTS associations;
 DELETE FROM mysql.user WHERE User='';
@@ -571,57 +581,63 @@ EOF
     { retval="$?"; set +x; } 2>/dev/null
 }
 
+set +e # Don't exit immediately if a command exits with a non-zero status.
 ## Install MariaDB on the first run
-dbd=/var/lib/mysql/data/mysql
-if [ ! -d $dbd ] && [ $(uname) != "Linux" ]; then
-    # printf "DBG: first run: dbd doesn't exist: %s\n" $dbd
-    # printf "DBG: install MariaDB...\n"
+dbaseDir=/var/lib/mysql/data/mysql
+if [ ! -d $dbaseDir ]; then
+    if [ $hostName == $ecke ]; then
+        # printf "DBG: first run: dbaseDir doesn't exist: %s\n" $dbaseDir
+        # printf "DBG: install MariaDB...\n"
 
-    ### The 'sed ...'-hack below, required to solve a bug on mariadb guix'
-    ### package is not needed.
-    ### Regarding locating of a guix package in the store:
-    ### 1. "mariadb:lib" must be present in the manifest.scm
-    ### 2. The guix-daemon is not running, so this doesn't work in the `guix
-    ### shell ...`:
-    ###   guile -c '
-    ###   (use-modules (guix) (gnu packages databases))
-    ###   (define store (open-connection))
-    ###   (format #t
-    ###           (derivation->output-path (package-derivation
-    ###                                     store mariadb #:graft? #f)
-    ###                                    "lib"))'
-    lc_messages_dir=$(readlink \
-                          $(dirname \
-                                $(dirname \
-                                      $(which mariadb)))/share/mysql/english)
-    printf "lc_messages_dir: %s\n" $lc_messages_dir
-    sed -i -e "s|#lc_messages_dir#|$lc_messages_dir|" /usr/etc/my.cnf
+        ### The 'sed ...'-hack below, required to solve a bug on mariadb guix'
+        ### package is not needed.
+        ### Regarding locating of a guix package in the store:
+        ### 1. "mariadb:lib" must be present in the manifest.scm
+        ### 2. The guix-daemon is not running, so this doesn't work in the `guix
+        ### shell ...`:
+        ###   guile -c '
+        ###   (use-modules (guix) (gnu packages databases))
+        ###   (define store (open-connection))
+        ###   (format #t
+        ###           (derivation->output-path (package-derivation
+        ###                                     store mariadb #:graft? #f)
+        ###                                    "lib"))'
+        lc_messages_dir=$(readlink \
+                              $(dirname \
+                                    $(dirname \
+                                          $(which mariadb)))/share/mysql/english)
+        printf "lc_messages_dir: %s\n" $lc_messages_dir
+        sed -i -e "s|#lc_messages_dir#|$lc_messages_dir|" /usr/etc/my.cnf
 
-    # TODO if the PAM authentication plugin is needed
-    # guix_plugind=$(find /gnu/store/ -name auth_pam.so -type f | xargs dirname)
-    # cp -r $guix_plugind /var/lib/mysql
+        # TODO if the PAM authentication plugin is needed
+        # guix_plugind=$(find /gnu/store/ -name auth_pam.so -type f | xargs dirname)
+        # cp -r $guix_plugind /var/lib/mysql
 
-    ## ignore the text:
-    # chown: cannot access '/auth_pam_tool_dir/auth_pam_tool': No such file or directory
-    # Couldn't set an owner to '/auth_pam_tool_dir/auth_pam_tool'.
-    # It must be root, the PAM authentication plugin doesn't work otherwise..
-    #
-    # chown: cannot access '/auth_pam_tool_dir': No such file or directory
-    # Cannot change ownership of the '/auth_pam_tool_dir' directory
-    # to the 'bost' user. Check that you have the necessary permissions and try again.
+        ## ignore the text:
+        # chown: cannot access '/auth_pam_tool_dir/auth_pam_tool': No such file or directory
+        # Couldn't set an owner to '/auth_pam_tool_dir/auth_pam_tool'.
+        # It must be root, the PAM authentication plugin doesn't work otherwise..
+        #
+        # chown: cannot access '/auth_pam_tool_dir': No such file or directory
+        # Cannot change ownership of the '/auth_pam_tool_dir' directory
+        # to the 'bost' user. Check that you have the necessary permissions and try again.
 
-    set -x
-    mysql_install_db 2>&1 | sed '/^chown: cannot access/,/try again\.$/d'
-    mysqld_safe &
-    # execution of `mysql_secure_installation` is not needed
-    sleep 3
-    populate_db
-    mysqladmin --user $USER shutdown
-#     printf "DBG: install MariaDB... done\n"
-# else
-#     printf "DBG: first run: dbd exists already: %s\n" $dbd
+        set -x
+        mysql_install_db 2>&1 | sed '/^chown: cannot access/,/try again\.$/d'
+        mysqld_safe &
+        # execution of `mysql_secure_installation` is not needed
+        sleep 3
+        populate_db
+        mysqladmin --user $USER shutdown
+        # printf "[DBG] install MariaDB... done\n"
+    else
+        printf "TODO: not on guix-ecke machine, but on: \n" $hostName
+    fi
+else
+    printf "[DBG] first run: dbaseDir exists already: %s\n" $dbaseDir
     { retval="$?"; set +x; } 2>/dev/null
 fi
+set -e # Exit immediately if a command exits with a non-zero status.
 
 available_commands () {
     cat << "EOF"
@@ -656,8 +672,7 @@ guix_prompt () {
 EOF
 }
 
-if [[ $- != *i* ]]
-then
+if [[ $- != *i* ]]; then
     # We are being invoked from a non-interactive shell.  If this
     # is an SSH session (as in "ssh host command"), source
     # /etc/profile so we get PATH and other essential variables.
@@ -679,7 +694,7 @@ alias mb='mysql --user bost'
 alias mf='mysql --user foo'
 alias tp=test_php
 
-if [ $(uname) != "Linux" ]; then
+if [ $hostName == $ecke ]; then
     guix_prompt
 else
     # sudo apt install --yes neofetch
@@ -699,3 +714,6 @@ alias ls='ls -p --color=auto'
 alias ll='ls -l'
 alias grep='grep --color=auto'
 alias clear="printf '\e[2J\e[H'"
+
+# Don't exit on error in during the further execution, i.e. on the CLI
+set +e
