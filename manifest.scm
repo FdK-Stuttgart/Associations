@@ -16,6 +16,10 @@
    ;;     guix shell ... --share=/usr/bin
    #;"busybox"
 
+   ;; see also `guix search clojure'
+   "clojure"
+   "clojure-tools" ; adding this makes clojure binary available on the CLI
+
    "coreutils"
    "curl"
    "findutils" ; provides: find, updatedb, xargs
@@ -38,7 +42,7 @@
 
    ;; `guix shell openjdk@<version>:jdk PACKAGES --export-manifest' ignores the
    ;; '@<version>' if it matches the installed version.
-   "openjdk@18:jdk"
+   "openjdk:jdk"
 
    "openssh"
    "pgcli"
