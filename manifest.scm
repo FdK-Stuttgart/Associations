@@ -34,7 +34,14 @@
    "less"
    "mariadb"
    ;; "mariadb:lib" ; see the 'sed ...'-hack in the .bashrc
+
+   ;; https://github.com/dbcli/mycli/issues/534
+   ;; $ mycli --user bost
+   ;; (1698, "Access denied for user 'bost'@'localhost'")
+   ;; $ mycli --user foo # works
    "mycli"
+   "util-linux" ;  provides: dmesg, namei, ...
+
    "ncurses"
 
 ;;; AngularJS requires >=node@14.20.0 which doesn't compile however. And the
