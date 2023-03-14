@@ -35,7 +35,14 @@
    "less"
    "mariadb"
    ;; "mariadb:lib" ; see the 'sed ...'-hack in the .bashrc
+
+   ;; https://github.com/dbcli/mycli/issues/534
+   ;; $ mycli --user bost
+   ;; (1698, "Access denied for user 'bost'@'localhost'")
+   ;; $ mycli --user foo # works
    "mycli"
+   "util-linux" ;  provides: dmesg, namei, ...
+
    "ncurses"
    "node"
    "nss-certs"
