@@ -34,6 +34,9 @@
  {
   :build {:deps {io.github.clojure/tools.build {:git/sha "e3e3532"
                                                 :git/tag "v0.8.0"
+  :outdated {;; Note that it is `:deps`, not `:extra-deps`
+             :deps {com.github.liquidz/antq {:mvn/version "RELEASE"}}
+             :main-opts ["-m" "antq.core"]}
                                                 :git/url "https://github.com/clojure/tools.build.git"}
                  slipset/deps-deploy {:mvn/version "0.2.0"}
                  weavejester/dependency {:mvn/version "0.2.1"}
