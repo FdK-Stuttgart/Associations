@@ -4,75 +4,75 @@
  :deps    {org.clojure/clojure {:mvn/version "1.11.1"}
 
            ;; Routing
- metosin/reitit {:mvn/version "0.5.18"}
+ metosin/reitit {:mvn/version "0.6.0"}
 
            ;; Ring
  metosin/ring-http-response {:mvn/version "0.9.3"}
- ring/ring-core {:mvn/version "1.9.5"}
- ring/ring-defaults {:mvn/version "0.3.3"}
+ ring/ring-core {:mvn/version "1.10.0"}
+ ring/ring-defaults {:mvn/version "0.3.4"}
 
            ;; Logging
- ch.qos.logback/logback-classic {:mvn/version "1.4.4"}
+ ch.qos.logback/logback-classic {:mvn/version "1.4.7"}
 
            ;; Data coercion
- luminus-transit/luminus-transit {:mvn/version "0.1.5"
+ luminus-transit/luminus-transit {:mvn/version "0.1.6"
                                   :exclusions [com.cognitect/transit-clj]}
  metosin/muuntaja {:mvn/version "0.6.8"}
 
            ;; kit Libs
- io.github.kit-clj/kit-core {:mvn/version "1.0.2"}
- io.github.kit-clj/kit-undertow {:mvn/version "1.0.3"}
- io.github.kit-clj/kit-sql-conman {:mvn/version "1.0.3"}
- io.github.kit-clj/kit-sql-migratus {:mvn/version "1.0.1"}
- org.xerial/sqlite-jdbc {:mvn/version "3.36.0.3"}
- io.github.kit-clj/kit-mysql {:mvn/version "1.0.1"}
+ io.github.kit-clj/kit-core {:mvn/version "1.0.3"}
+ io.github.kit-clj/kit-undertow {:mvn/version "1.0.4"}
+ io.github.kit-clj/kit-sql-conman {:mvn/version "1.0.7"}
+ io.github.kit-clj/kit-sql-migratus {:mvn/version "1.0.3"}
+ org.xerial/sqlite-jdbc {:mvn/version "3.41.2.1"}
+ io.github.kit-clj/kit-mysql {:mvn/version "1.0.3"}
            ;; From https://github.com/kit-clj/kit/blob/master/libs/kit-mysql/deps.edn
- mysql/mysql-connector-java {:mvn/version "8.0.29"}
- selmer/selmer {:mvn/version "1.12.50"}
+ mysql/mysql-connector-java {:mvn/version "8.0.33"}
+ selmer/selmer {:mvn/version "1.12.58"}
  luminus/ring-ttl-session {:mvn/version "0.3.3"}}
  :aliases
  {
-  :build {:deps {io.github.clojure/tools.build {:git/sha "e3e3532"
-                                                :git/tag "v0.8.0"
   :outdated {;; Note that it is `:deps`, not `:extra-deps`
              :deps {com.github.liquidz/antq {:mvn/version "RELEASE"}}
              :main-opts ["-m" "antq.core"]}
+  :build {:deps {io.github.clojure/tools.build {:git/sha "76b78fe"
+                                                :git/tag "v0.9.4"
                                                 :git/url "https://github.com/clojure/tools.build.git"}
-                 slipset/deps-deploy {:mvn/version "0.2.0"}
+                 slipset/deps-deploy {:mvn/version "0.2.1"}
                  weavejester/dependency {:mvn/version "0.2.1"}
-                 babashka/fs {:mvn/version "0.1.11"}
-                 babashka/process {:mvn/version "0.3.11"}}
+                 babashka/fs {:mvn/version "0.3.17"}
+                 babashka/process {:mvn/version "0.4.16"}}
           :ns-default build}
 
 
-  :dev  {:extra-deps  {com.lambdaisland/classpath      {:mvn/version "0.0.27"}
+  :dev  {:extra-deps  {com.lambdaisland/classpath      {:mvn/version "0.4.44"}
                        criterium/criterium             {:mvn/version "0.4.6"}
                        expound/expound                 {:mvn/version "0.9.0"}
                        integrant/repl                  {:mvn/version "0.3.2"}
                        pjstadig/humane-test-output     {:mvn/version "0.11.0"}
-                       ring/ring-devel                 {:mvn/version "1.9.5"}
+                       ring/ring-devel                 {:mvn/version "1.10.0"}
                        ring/ring-mock                  {:mvn/version "0.4.0"}
-                       io.github.kit-clj/kit-generator {:mvn/version "0.1.6"}
-                       org.clojure/tools.namespace     {:mvn/version "1.2.0"}
+                       io.github.kit-clj/kit-generator {:mvn/version "0.1.8"}
+                       org.clojure/tools.namespace     {:mvn/version "1.4.4"}
                        }
          :extra-paths ["env/dev/clj" "env/dev/resources" "test/clj" "target/classes/cljsbuild"]}
-  :nrepl {:extra-deps {nrepl/nrepl {:mvn/version "0.9.0"}}
+  :nrepl {:extra-deps {nrepl/nrepl {:mvn/version "1.0.0"}}
           :main-opts  ["-m" "nrepl.cmdline" "-i"]}
-  :cider {:extra-deps {nrepl/nrepl       {:mvn/version "0.9.0"}
-                       cider/cider-nrepl {:mvn/version "0.28.3"}}
+  :cider {:extra-deps {nrepl/nrepl       {:mvn/version "1.0.0"}
+                       cider/cider-nrepl {:mvn/version "0.30.0"}}
           :main-opts  ["-m" "nrepl.cmdline" "--middleware" "[cider.nrepl/cider-middleware]" "-i"]}
 
   :test {:extra-deps  {criterium/criterium                  {:mvn/version "0.4.6"}
                        expound/expound                      {:mvn/version "0.9.0"}
                        integrant/repl                       {:mvn/version "0.3.2"}
-                       io.github.cognitect-labs/test-runner {:git/tag "v0.5.0"
-                                                             :git/sha "b3fd0d2"}
+                       io.github.cognitect-labs/test-runner {:git/tag "v0.5.1"
+                                                             :git/sha "dfb30dd"}
                        pjstadig/humane-test-output          {:mvn/version "0.11.0"}
-                       ring/ring-devel                      {:mvn/version "1.9.5"}
+                       ring/ring-devel                      {:mvn/version "1.10.0"}
                        ring/ring-mock                       {:mvn/version "0.4.0"}
-                       io.github.kit-clj/kit-generator      {:mvn/version "0.1.6"}
-                       org.clojure/tools.namespace          {:mvn/version "1.2.0"}
-                       com.lambdaisland/classpath           {:mvn/version "0.0.27"}}
+                       io.github.kit-clj/kit-generator      {:mvn/version "0.1.8"}
+                       org.clojure/tools.namespace          {:mvn/version "1.4.4"}
+                       com.lambdaisland/classpath           {:mvn/version "0.4.44"}}
          :exect-fn    cognitect.test-runner.api/test
          :extra-paths ["env/dev/clj" "env/dev/resources" "env/test/resources" "test/clj"]
          :main-opts   ["-e" "(require 'pjstadig.humane-test-output) (pjstadig.humane-test-output/activate!)"
