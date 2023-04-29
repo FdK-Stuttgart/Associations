@@ -64,6 +64,9 @@ fi
 # Warning: hardcoded path! See also .bashrc
 # --share=$HOME/dec/fdk=$HOME/dec/fdk \
 
+# set up my local time
+# --share=/etc/localtime=/etc/localtime
+
 set -x
 guix shell \
      --root=./persistent-profile \
@@ -71,6 +74,7 @@ guix shell \
      --container --network \
      --preserve=^fdk \
      --share=/usr/bin \
+     --share=/etc/localtime=/etc/localtime \
      --share=$HOME/.bash_history=$HOME/.bash_history \
      --share=$HOME/.config/fish=$HOME/.config/fish \
      --share=$HOME/.gitconfig=$HOME/.gitconfig \

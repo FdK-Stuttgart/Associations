@@ -36,6 +36,8 @@
    "mariadb"
    ;; "mariadb:lib" ; see the 'sed ...'-hack in the .bashrc
 
+   "node@18.16.0"
+
    ;; https://github.com/dbcli/mycli/issues/534
    ;; $ mycli --user bost
    ;; (1698, "Access denied for user 'bost'@'localhost'")
