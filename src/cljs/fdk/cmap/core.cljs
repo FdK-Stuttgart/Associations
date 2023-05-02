@@ -1,32 +1,39 @@
 (ns fdk.cmap.core
   "entry point, plus history, routing, etc"
   (:require
-    [day8.re-frame.http-fx]
-    [reagent.dom :as rdom]
-    #_[reagent.dom.client :refer [create-root]]
-    [re-frame.core :as rf]
-    [fdk.cmap.views :as views]
+   ["react-dom/client" :refer [createRoot]]
+   ["react" :as react]
+   [goog.dom :as gdom]
+   [reagent.core :as r]
 
-    ;; https://day8.github.io/re-frame/App-Structure/#the-gotcha
-    [fdk.cmap.events] ;; must be required
-    [fdk.cmap.subs] ;; must be required
-    ))
+   [day8.re-frame.http-fx]
+   [re-frame.core :as rf]
+   [fdk.cmap.views :as views]
+   ;; https://day8.github.io/re-frame/App-Structure/#the-gotcha
+   [fdk.cmap.events] ;; must be required
+   [fdk.cmap.subs] ;; must be required
+   ))
 
-#_
-(defn ^:dev/after-load mount-components []
-  (rf/clear-subscription-cache!)
-  (let [root-el (.getElementById js/document "app")
-        root-container (create-root root-el)]
-    (rdom/unmount-component-at-node root-el)
-    (.render root-container [views/main-panel])))
-
-(defn ^:dev/after-load mount-components []
-  (rf/clear-subscription-cache!)
-  (let [root-el (.getElementById js/document "app")]
-    (rdom/unmount-component-at-node root-el)
-    (rdom/render [views/main-panel] root-el)))
+(defonce root (createRoot (gdom/getElement "app")))
 
 (defn init []
   #_(ajax/load-interceptors!)
   (rf/dispatch [:page/init-db])
-  (mount-components))
+  ((comp
+    ;; Strict Mode enables extra development-only checks for the entire
+    ;; component tree inside the <StrictMode> component. These checks help you
+    ;; find common bugs in your components early in the development process.
+    ;;
+    ;; We recommend wrapping your entire app in Strict Mode, especially for
+    ;; newly created apps.
+    ;; https://react.dev/reference/react/StrictMode#enabling-strict-mode-for-entire-app
+    (fn [v]
+      #_(js/console.log "[init]" "react/StrictMode")
+      [:> react/StrictMode {} v]))
+   (.render root (r/as-element [views/main-panel]))))
+
+(defn ^:dev/after-load mount-components []
+  ;; The `:dev/after-load` metadata causes this function to be called
+  ;; after shadow-cljs hot-reloads code.
+  ;; This function is called implicitly by its annotation.
+  (init))
