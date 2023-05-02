@@ -18,7 +18,7 @@
    ["leaflet.markercluster"]
    ;; TODO use import instead of <link rel="stylesheet" ...>
    ;; ["semantic-ui-css/components/tab" :as csu]
-   ;; ["react" :as react]
+   ["react" :as react]
    ))
 
 (enable-console-print!)
@@ -425,12 +425,16 @@
       "right"]]))
 
 (defn map-with-list [params center-map]
-  (let [re-zoom false]
+  (let [
+        ref (react/createRef)
+        re-zoom false]
     (reagent/create-class
      {:component-did-mount
-      (fn [ref]
-        #_(js/console.log "[:component-did-mount]" "ref" ref)
-        (let [node-ref       (-> ref rdom/dom-node)
+      (fn [_this]
+        ;; (js/console.log "[:component-did-mount]" "ref" ref)
+        ;; (js/console.log "[:component-did-mount]" "_this" _this)
+        (let [
+              node-ref       (.-current ref)
               node-header    (.item (-> node-ref .-children) 0)
               node-center    (.item (-> node-ref .-children) 1)
               node-footer    (.item (-> node-ref .-children) 2)]
@@ -466,25 +470,34 @@
                      )
                     leaflet-map))))
       :component-did-update
-      (comp
-       (partial update-markers re-zoom)
-       (fn [v] (nth v 2))
-       (fn [v] (get v "argv"))
-       js->clj
-       (fn [v] (.-props v))
-       #_(fn [v] (println ":component-did-update") v))
+      (fn [_this _old-argv _old-state _snapshot]
+        ;; (js/console.log "[:component-did-update]" "_this" _this)
+        ;; (js/console.log "[:component-did-update]" "_old-argv" _old-argv)
+        ;; (js/console.log "[:component-did-update]" "_old-state" _old-state)
+        ;; (js/console.log "[:component-did-update]" "_snapshot" _snapshot)
+        ((comp
+          #_(fn [v] (js/console.log "[:component-did-update]" "v" v) v)
+          (partial update-markers re-zoom)
+          (fn [v] (nth v 2))
+          (fn [v] (get v "argv"))
+          js->clj
+          (fn [v] (.-props v))
+          #_(fn [v] (js/console.log "[:component-did-update]" "v" v) v))
+         _this))
 
       :display-name "My Leaflet Map"
 
       :reagent-render
       ;; params is {}; (reagent/props params) throws error;
       ;; (.-props params) is undefined
-      (fn [params]
-        ;; (js/console.log "[:reagent-render]")
+      (fn [params center-map]
+        (js/console.log "[:reagent-render]" "params" params)
+        (js/console.log "[:reagent-render]" "center-map" center-map)
         (when @map-atom
           (update-markers re-zoom))
         [:div
-         {:class (styles/wrapper)}
+         {:ref ref
+          :class (styles/wrapper)}
          ;; 'header' must be displayed so that the ':grid-template-rows ...'
          ;; kicks in and the height of the 'center' is maximized
          [:div {:class [(styles/header)]} #_"header"]
