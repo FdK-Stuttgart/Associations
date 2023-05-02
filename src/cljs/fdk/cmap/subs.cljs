@@ -7,6 +7,7 @@
    ;; It produce a lot of warnings (probably because of differences clojure vs.
    ;; clojurescript)
    #_[utils.core :refer [in?]]
+   [cljs.reader :refer [read-string]]
    [clojure.string :as s]))
 
 (def districts--id-name
@@ -26,13 +27,13 @@
 (defn ids-to-names [m]
   (update-in m [:districtlist] (comp
                                 (partial mapv (partial get districts--id-name))
-                                cljs.reader/read-string)))
+                                read-string)))
 
 (defn prepare [db]
   ((comp
     (partial map ids-to-names)
     ;; (fn [_] "load saved data" data/associations)
-    cljs.reader/read-string
+    read-string
     :db-associations)
    db))
 
@@ -40,7 +41,7 @@
 (defn districts [db]
   #_data/districts ;; load saved data
   ((comp
-      cljs.reader/read-string
+      read-string
       #_(fn [d]
           (->>
            #_{:a 1 :b 2 :x "fox"}
