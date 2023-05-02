@@ -47,7 +47,7 @@
        pattern))
     s))
 
-(defn popup
+(defn popup-content
   "addr has only 'keine öffentliche Anschrift'"
   [{:keys [name addr street postcode-city districts email activities goals
            imageurl links socialmedia]}]
@@ -170,7 +170,8 @@
            :className "marker-cluster-small"
            :iconSize (new js/L.Point 40 40)}))})
 
-(defn update-markers "This function gets executed 3 times"
+(defn update-markers
+  "Executed 2x with react/StrictMode and 3x w/o react/StrictMode"
   [re-zoom]
   (let [active @active-atom
         map-instance @map-atom
@@ -194,34 +195,41 @@
            #_(if re-zoom
              (.setView map-instance (array latitude longitude) zoom)
              (.setView map-instance (array latitude longitude))))
-         (let [marker
+         (let [content (rserver/render-to-string [popup-content marker-data])
+               popup (-> (js/L.popup
+                          (array latitude longitude)
+                          #js {:content content}))]
+           (let [marker
 ;;; No need to recreate the whole map. It's enough to the marker as a function
 ;;; parameter and call .openPopup / .closePopup
-               (-> (js/L.marker
-                    (array latitude longitude)
-                    #js {:title (:name marker-data)
-                         :icon
-                         (js/L.icon
-                          (clj->js
-                           {:iconUrl
-                            (if (public-address? (:addr marker-data))
-                              "/icon/map_markers/pinActivePublic.png"
-                              "/icon/map_markers/pinActivePrivate.png")
-                            :iconSize [30 42]
-                            :iconAnchor [15 41]
-                            :popupAnchor [0 -31]}))})
-                   (.addTo markers-layer)
-                   #_
-                   (.on "click" (fn [c]
-                                  (js/console.log "markers-layer" "click"
-                                                  "active" @active-atom)))
-                   (.bindPopup (rserver/render-to-string [popup marker-data])))
-               ]
-           (when (= "38e4c9d7-9a1e-4151-992c-65f5935f35fe" k)
-             (js/console.log "active" active "openPopup" (= k active)))
-           (when (= k active)
-             (.openPopup marker)
-             (.openPopup marker)))
+                 (-> (js/L.marker
+                      (array latitude longitude)
+                      #js {:title (:name marker-data)
+                           :icon
+                           (js/L.icon
+                            (clj->js
+                             {:iconUrl
+                              (if (public-address? (:addr marker-data))
+                                "/icon/map_markers/pinActivePublic.png"
+                                "/icon/map_markers/pinActivePrivate.png")
+                              :iconSize [30 42]
+                              :iconAnchor [15 41]
+                              :popupAnchor [0 -31]}))})
+                     (.addTo markers-layer)
+                     (.on "click" (fn [c]
+                                    (js/console.log "markers-layer" "click"
+                                                    "active" @active-atom)))
+                     (.bindPopup popup))
+                 ]
+             #_
+             (when (=
+                    ;; "38e4c9d7-9a1e-4151-992c-65f5935f35fe"
+                    ;; Deutsch-Türkisches Forum Stuttgart
+                    "85e9a6f1-1688-490d-abd8-e5310b351df6"
+                    k)
+               (js/console.log "active" active "openPopup" (= k active)))
+             (when (= k active)
+               (.openPopup marker))))
          #_(.addLayer markers-layer marker))))
 
     (reset! markers-layer-atom markers-layer)
@@ -424,6 +432,33 @@
                                 (reset! isResizing false))}]
       "right"]]))
 
+(defonce chromium? (boolean (.match js/navigator.userAgent
+                                    (js/RegExp. "chrome|chromium|crios" "i"))))
+
+(defn on-popup-open-event-fn [map]
+  (fn [event]
+    ;; (js/console.log "[on-popup-open-event-fn]" "event" event)
+    (let [
+          ;; pixel location on the map where the popup anchor is
+          position (.project map (.-_latlng (.-_popup (.-target event))))
+          old-pos-y (-> position .-y)
+          ;; height of the popup container, divide by 2, subtract from the Y
+          ;; axis of marker location
+          full-popup-height
+          (-> event .-popup .-_container .-clientHeight)
+          ;; (-> event .-target .-_container .-clientHeight)
+          ;; (-> event .-sourceTarget .-_container .-clientHeight)
+          popup-height (/ full-popup-height 2)
+          ]
+      ;; (js/console.log "full-eopup-height" full-popup-height)
+
+      ;; XXX: Leaflet bug: full-popup-height is not the same on every browser
+      ;; and moreover on the first call it's value is bigger then on the
+      ;; consequent calls
+      (let [new-pos-y (- old-pos-y popup-height (if chromium? 76 0))]
+        (set! (-> position .-y) new-pos-y)
+        (.panTo map (.unproject map position) #js {:animate true})))))
+
 (defn map-with-list [params center-map]
   (let [
         ref (react/createRef)
@@ -460,6 +495,9 @@
             (.on leaflet-map "click" (fn [_]
                                        (when @active-atom
                                          (reset! active-atom nil))))
+            (.on leaflet-map "popupopen"
+                 (on-popup-open-event-fn leaflet-map))
+
             (.addTo (js/L.tileLayer
                      "https://{s}.tile.OpenStreetMap.org/{z}/{x}/{y}.png"
                      ;; #js {:attribution
@@ -491,8 +529,8 @@
       ;; params is {}; (reagent/props params) throws error;
       ;; (.-props params) is undefined
       (fn [params center-map]
-        (js/console.log "[:reagent-render]" "params" params)
-        (js/console.log "[:reagent-render]" "center-map" center-map)
+        ;; (js/console.log "[:reagent-render]" "params" params)
+        ;; (js/console.log "[:reagent-render]" "center-map" center-map)
         (when @map-atom
           (update-markers re-zoom))
         [:div
