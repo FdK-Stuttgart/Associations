@@ -192,8 +192,6 @@
         db-vals @db-vals-atom
         markers-layer (or @markers-layer-atom
                           (js/L.markerClusterGroup cluster-config))]
-    ;; .clearLayers can't be done right before .addLayer
-    ;; (.clearLayers markers-layer)
     #_
     (.on markers-layer "clusterclick"
          (fn [c]
@@ -234,12 +232,10 @@
            (.bindPopup marker (js/L.popup
                                #js {:content (rserver/render-to-string
                                               [popup-content marker-data])}))
-           (.openPopup marker))
-         #_(.addLayer markers-layer marker))))
+           (.openPopup marker)))))
 
     (reset! markers-layer-atom markers-layer)
-    (.addTo @markers-layer-atom map-instance)
-    #_(reset! map-atom map-instance)))
+    (.addTo @markers-layer-atom map-instance)))
 
 (defn click-on-association [k]
   (fn [_]
