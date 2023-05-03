@@ -31,6 +31,7 @@
 (def db-vals-init-atom (reagent/atom nil))
 (def map-atom (reagent/atom nil))
 (def active-atom (reagent/atom nil))
+(def old-active-atom (reagent/atom nil))
 (def pattern-atom (reagent/atom nil))
 
 (def zoom 17)
@@ -228,7 +229,12 @@
                 k)
            (js/console.log "active" active "openPopup" (= k active)))
          (when (= k active)
-           (.setView map-instance (array latitude longitude) zoom)
+           ;; completely removing the (.setView ...) fixes jumpy marker but it
+           ;; causes causes among others the 'ABADÁ Capoeira' popup not to get
+           ;; displayed
+           (when-not (= @old-active-atom active)
+             (.setView map-instance (array latitude longitude) zoom)
+             (reset! old-active-atom k))
            (.bindPopup marker (js/L.popup
                                #js {:content (rserver/render-to-string
                                               [popup-content marker-data])}))
