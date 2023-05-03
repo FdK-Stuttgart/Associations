@@ -23,6 +23,9 @@
 
 (enable-console-print!)
 
+(declare update-markers)
+(declare click-on-association)
+
 (def markers-layer-atom (reagent/atom nil))
 (def db-vals-atom (reagent/atom nil))
 (def db-vals-init-atom (reagent/atom nil))
@@ -48,9 +51,18 @@
     s))
 
 (defn popup-content
-  "addr has only 'keine öffentliche Anschrift'"
-  [{:keys [name addr street postcode-city districts email activities goals
-           imageurl links socialmedia]}]
+  "addr has only 'keine öffentliche Anschrift'
+  (popup-content prm)
+  "
+  [{:keys [k name addr street postcode-city districts email activities goals
+           imageurl links socialmedia] :as prm}]
+  (when (=
+         ;; Deutsch-Türkisches Forum Stuttgart
+         ;; "85e9a6f1-1688-490d-abd8-e5310b351df6"
+         ;; "Afro Deutsches Akademiker Netzwerk ADAN"
+         "a4be69a3-e758-456c-a6e2-f207c8df1a94"
+         k)
+    #_(.log js/console "links" links))
   [:div
    {:class
          "association-container osm-association-container"
@@ -170,6 +182,8 @@
            :className "marker-cluster-small"
            :iconSize (new js/L.Point 40 40)}))})
 
+;; TODO keep the popup opened when zooming out
+;; TODO popup 'Afro Deutsches Akademiker Netzwerk ADAN': repeating links
 (defn update-markers
   "Executed 2x with react/StrictMode and 3x w/o react/StrictMode"
   [re-zoom]
@@ -179,7 +193,7 @@
         markers-layer (or @markers-layer-atom
                           (js/L.markerClusterGroup cluster-config))]
     ;; .clearLayers can't be done right before .addLayer
-    (.clearLayers markers-layer)
+    ;; (.clearLayers markers-layer)
     #_
     (.on markers-layer "clusterclick"
          (fn [c]
@@ -188,65 +202,58 @@
     (doall
      (for [marker-data db-vals]
        (let [[longitude latitude] (:coords marker-data)
-             k (:k marker-data)]
+             k (:k marker-data)
+             click-on-association-k (click-on-association k)
+             marker
+;;; No need to recreate the whole map. It's enough to call the marker as a
+;;; function parameter and call .openPopup / .closePopup
+             (-> (js/L.marker
+                  (array latitude longitude)
+                  #js {:title (:name marker-data)
+                       :icon
+                       (js/L.icon
+                        (clj->js
+                         {:iconUrl
+                          (if (public-address? (:addr marker-data))
+                            "/icon/map_markers/pinActivePublic.png"
+                            "/icon/map_markers/pinActivePrivate.png")
+                          :iconSize [30 42]
+                          :iconAnchor [15 41]
+                          :popupAnchor [0 -31]}))})
+                 (.addTo markers-layer)
+                 (.on "click" click-on-association-k))]
+         (when (=
+                ;; Deutsch-Türkisches Forum Stuttgart
+                ;; "85e9a6f1-1688-490d-abd8-e5310b351df6"
+                ;; "Afro Deutsches Akademiker Netzwerk ADAN"
+                "a4be69a3-e758-456c-a6e2-f207c8df1a94"
+                k)
+           (js/console.log "active" active "openPopup" (= k active)))
          (when (= k active)
-           ;; (js/console.log "list-clicked" (:name marker-data))
            (.setView map-instance (array latitude longitude) zoom)
-           #_(if re-zoom
-             (.setView map-instance (array latitude longitude) zoom)
-             (.setView map-instance (array latitude longitude))))
-         (let [content (rserver/render-to-string [popup-content marker-data])
-               popup (-> (js/L.popup
-                          (array latitude longitude)
-                          #js {:content content}))]
-           (let [marker
-;;; No need to recreate the whole map. It's enough to the marker as a function
-;;; parameter and call .openPopup / .closePopup
-                 (-> (js/L.marker
-                      (array latitude longitude)
-                      #js {:title (:name marker-data)
-                           :icon
-                           (js/L.icon
-                            (clj->js
-                             {:iconUrl
-                              (if (public-address? (:addr marker-data))
-                                "/icon/map_markers/pinActivePublic.png"
-                                "/icon/map_markers/pinActivePrivate.png")
-                              :iconSize [30 42]
-                              :iconAnchor [15 41]
-                              :popupAnchor [0 -31]}))})
-                     (.addTo markers-layer)
-                     (.on "click" (fn [c]
-                                    (js/console.log "markers-layer" "click"
-                                                    "active" @active-atom)))
-                     (.bindPopup popup))
-                 ]
-             #_
-             (when (=
-                    ;; "38e4c9d7-9a1e-4151-992c-65f5935f35fe"
-                    ;; Deutsch-Türkisches Forum Stuttgart
-                    "85e9a6f1-1688-490d-abd8-e5310b351df6"
-                    k)
-               (js/console.log "active" active "openPopup" (= k active)))
-             (when (= k active)
-               (.openPopup marker))))
+           (.bindPopup marker (js/L.popup
+                               #js {:content (rserver/render-to-string
+                                              [popup-content marker-data])}))
+           (.openPopup marker))
          #_(.addLayer markers-layer marker))))
 
     (reset! markers-layer-atom markers-layer)
     (.addTo @markers-layer-atom map-instance)
-    (reset! map-atom map-instance)))
+    #_(reset! map-atom map-instance)))
+
+(defn click-on-association [k]
+  (fn [_]
+    (let [old-active @active-atom]
+      #_(js/console.log "on-click" "old-active" old-active "k" k)
+      (js/console.log "markers-layer" "click" "active" @active-atom)
+      (reset! active-atom k)
+      #_(println "on-click" "new-active" @active-atom)
+      (let [re-zoom (and @active-atom (not= old-active @active-atom))]
+        #_(println "on-click" "re-zoom" re-zoom)
+        (update-markers re-zoom)))))
 
 (defn list-elem [pi-icon {:keys [k name addr coords]}]
-  [:span {:key k
-          :on-click
-          (fn [_]
-            (let [old-active @active-atom]
-              #_(js/console.log "on-click" "old-active" old-active "k" k)
-              (reset! active-atom k)
-              #_(println "on-click" "new-active" @active-atom)
-              (let [re-zoom (and @active-atom (not= old-active @active-atom))]
-                #_(println "on-click" "re-zoom" re-zoom)
-                (update-markers re-zoom))))}
+  [:span {:key k :on-click (click-on-association k)}
    [:div {:class (s/join " " ["association-entry" "ng-star-inserted"])}
     [:a
      [:div {:class "icon"}
@@ -404,34 +411,6 @@
 
 (def isResizing (atom false))
 
-(do
-  (defn on-mouse-move [e]
-    (when @isResizing
-      (let [c (.getElementById js/document "c")
-            l (.getElementById js/document "l")
-            r (.getElementById js/document "r")]
-        (let [ro (- (+ (.-offsetLeft r) #_1147
-                       (.-offsetWidth r) #_400)
-                    (.-clientX e))]
-          (set! (-> l .-style .-right) (str ro "px"))
-          (set! (-> r .-style .-width) (str ro "px"))))))
-
-;;; from https://stackoverflow.com/questions/26233180/resize-a-div-on-border-drag-and-drop-without-adding-extra-markup
-  (defn resizable []
-    [:div#c {:class [(styles/c)]}
-     [:div#l {:class [(styles/l)]
-              :on-mouse-move on-mouse-move } "left"]
-     [:div#r {:class [(styles/r)]
-              :on-mouse-move on-mouse-move}
-      [:div#d {:class [(styles/d)]
-               :on-mouse-down (fn [e]
-                                (js/console.log "start")
-                                (reset! isResizing true))
-               :on-mouse-up   (fn [e]
-                                (js/console.log "stop")
-                                (reset! isResizing false))}]
-      "right"]]))
-
 (defonce chromium? (boolean (.match js/navigator.userAgent
                                     (js/RegExp. "chrome|chromium|crios" "i"))))
 
@@ -459,9 +438,118 @@
         (set! (-> position .-y) new-pos-y)
         (.panTo map (.unproject map position) #js {:animate true})))))
 
+(defn on-mouse-move [e]
+  (when @isResizing
+    (let [
+          ;; c (.getElementById js/document "c")
+          l (.getElementById js/document "l")
+          r (.getElementById js/document "r")]
+      (let [ro (str (- (+ (.-offsetLeft r) #_1147
+                          (.-offsetWidth r) #_400)
+                       (.-clientX e))
+                    "px")]
+        (set! (-> l .-style .-right) ro)
+        (set! (-> r .-style .-width) ro)))))
+
+;;; from https://stackoverflow.com/questions/26233180/resize-a-div-on-border-drag-and-drop-without-adding-extra-markup
+(defn resizable [params center-map]
+  (let [ref (react/createRef)
+        re-zoom false]
+    (reagent/create-class
+     {
+      :component-did-mount
+      (fn [_this]
+        ;; (js/console.log "[:component-did-mount]" "ref" ref)
+        ;; (js/console.log "[:component-did-mount]" "_this" _this)
+        (let [
+              node-ref       (.-current ref)
+              ;; TODO find header, center, footer
+              node-header    (.item (-> node-ref .-children) 0)
+              node-center    (.item (-> node-ref .-children) 1)
+              node-footer    (.item (-> node-ref .-children) 3)
+              ]
+          (let [node-map-style (-> node-center .-style)]
+            (set! (-> node-map-style .-width)
+                  (str (.-clientWidth node-center) pxu))
+            #_
+            (js/console.log
+             "[: did-mount]"
+             "(.-clientHeight node-ref)" (.-clientHeight node-ref)
+             "(.-clientHeight node-header)" (.-clientHeight node-header)
+             "(.-clientHeight node-center)" (.-clientHeight node-center)
+             "(.-clientHeight node-footer)" (.-clientHeight node-footer))
+            (set! (-> node-map-style .-height)
+                  (str (- (.-clientHeight node-center)
+                          ;; '* 2' b/c padding top and bottom is the same
+                          (* 2 styles/padding)) pxu)))
+          (let [leaflet-map (-> node-center js/L.map)]
+            (reset! map-atom leaflet-map)
+            (.setView leaflet-map (let [[longitude latitude] center-map]
+                                    ;; initial zoom needed
+                                    (array latitude longitude)) zoom)
+            (.on leaflet-map "click" (fn [_]
+                                       (when @active-atom
+                                         (reset! active-atom nil))))
+            (.on leaflet-map "popupopen"
+                 (on-popup-open-event-fn leaflet-map))
+
+            (.addTo (js/L.tileLayer
+                     "https://{s}.tile.OpenStreetMap.org/{z}/{x}/{y}.png"
+                     ;; #js {:attribution
+                     ;;      (gstr/format
+                     ;;       "&copy; <a href=\"%s\">%s</a> contributors"
+                     ;;       "http://osm.org/copyright"
+                     ;;       "OpenStreetMap")}
+                     )
+                    leaflet-map))))
+
+      :component-did-update
+      (fn [_this _old-argv _old-state _snapshot]
+        ;; (js/console.log "[:component-did-update]" "_this" _this)
+        ;; (js/console.log "[:component-did-update]" "_old-argv" _old-argv)
+        ;; (js/console.log "[:component-did-update]" "_old-state" _old-state)
+        ;; (js/console.log "[:component-did-update]" "_snapshot" _snapshot)
+        ((comp
+          #_(fn [v] (js/console.log "[:component-did-update]" "v" v) v)
+          (partial update-markers re-zoom)
+          (fn [v] (nth v 2))
+          (fn [v] (get v "argv"))
+          js->clj
+          (fn [v] (.-props v))
+          #_(fn [v] (js/console.log "[:component-did-update]" "v" v) v))
+         _this)
+        )
+
+      :display-name "My Leaflet Map"
+
+      :reagent-render
+      (fn [params center-map]
+        (when @map-atom
+          (update-markers re-zoom))
+        [:div#c {:ref ref
+                 :class [(styles/c)]}
+         [:div {:class [(styles/header)]} #_"header"]
+         [:div#l {:class [(styles/l) (styles/center)]
+                  :on-mouse-move on-mouse-move} #_"left"]
+         [:div#r {:class [(styles/r) (styles/right)]
+                  :on-mouse-move on-mouse-move}
+          [:div#d {:class [(styles/d)]
+                   :on-mouse-down (fn [e]
+                                    (js/console.log "start")
+                                    (reset! isResizing true))
+                   :on-mouse-up   (fn [e]
+                                    (js/console.log "stop")
+                                    (reset! isResizing false))}]
+          (right)]
+         [:div {:class [(styles/footer)]}
+          (str @(re-frame/subscribe [::subs/name])
+               " v"
+               ;; output of `git describe --tags --dirty=-SNAPSHOT`
+               ;; See :shadow-git-inject/version
+               config/version)]])})))
+
 (defn map-with-list [params center-map]
-  (let [
-        ref (react/createRef)
+  (let [ref (react/createRef)
         re-zoom false]
     (reagent/create-class
      {:component-did-mount
@@ -473,6 +561,7 @@
               node-header    (.item (-> node-ref .-children) 0)
               node-center    (.item (-> node-ref .-children) 1)
               node-footer    (.item (-> node-ref .-children) 2)]
+          (js/console.log "[:component-did-mount]" "node-ref" node-ref)
           (let [node-map-style (-> node-center .-children first .-style)]
             (set! (-> node-map-style .-width)
                   (str (.-clientWidth node-center) pxu))
@@ -513,9 +602,10 @@
         ;; (js/console.log "[:component-did-update]" "_old-argv" _old-argv)
         ;; (js/console.log "[:component-did-update]" "_old-state" _old-state)
         ;; (js/console.log "[:component-did-update]" "_snapshot" _snapshot)
+        #_
         ((comp
           #_(fn [v] (js/console.log "[:component-did-update]" "v" v) v)
-          (partial update-markers re-zoom)
+          #_(partial update-markers re-zoom)
           (fn [v] (nth v 2))
           (fn [v] (get v "argv"))
           js->clj
@@ -559,4 +649,5 @@
     (when-let [center-map
                #_[9.177591 48.775471]
                @(re-frame/subscribe [:center-map])]
+      #_[resizable {} center-map]
       [map-with-list {} center-map])))
