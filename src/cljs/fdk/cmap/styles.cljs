@@ -101,12 +101,13 @@
 (defclass d []
   {
    :background "red"
-   :position "absolute"
-   :left "-4px"
-   :top "0"
-   :bottom "0"
-   :width "8px"
-   :cursor "w-resize"
+   ;; :position "absolute"
+   ;; :left "-4px"
+   ;; :top "0"
+   ;; :bottom "0"
+   ;; :width "8px"
+   ;; :cursor "w-resize"
+   ;; :padding "4px"
    })
 
 ;; .example-map p, .jumbotron p {
