@@ -19,8 +19,8 @@
    ;; TODO use import instead of <link rel="stylesheet" ...>
    ;; ["semantic-ui-css/components/tab" :as csu]
    ["react" :as react]
-   [fdk.cmap.viewso :as v]
-   #_[fdk.cmap.viewsn :as v]
+   #_[fdk.cmap.viewso :as v]
+   [fdk.cmap.viewsn :as v]
    ))
 
 (enable-console-print!)
@@ -130,12 +130,7 @@
     (reset! v/db-vals-atom      db-vals)
     (reset! v/db-vals-init-atom db-vals)
     #_(js/console.log "0 [main-panel]" (count db-vals))
-    (let [
-          ;; markers are removed from the map when the 'Vereinsdaten
-          ;; durchsuchen' filter is applied
-
-          markers (v/create-markers db-vals)
-          ]
+    (let [markers (v/create-markers db-vals)]
       (when-let [center-map
                  #_[9.177591 48.775471]
                  @(re-frame/subscribe [:center-map])]
