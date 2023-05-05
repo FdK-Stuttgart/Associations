@@ -67,11 +67,15 @@ fi
 # set up my local time
 # --share=/etc/localtime=/etc/localtime
 
+# for rlwrap called via `clj -M:dev:nrepl`
+# --preserve=^TERM$
+
 set -x
 guix shell \
      --root=./persistent-profile \
      --manifest=manifest.scm \
      --container --network \
+     --preserve=^TERM$ \
      --preserve=^fdk \
      --share=/usr/bin \
      --share=/etc/localtime=/etc/localtime \
