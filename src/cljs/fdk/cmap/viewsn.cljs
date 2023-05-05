@@ -252,19 +252,66 @@
          db-vals)
     (.addLayer @map-atom markers-group)))
 
-(defn click-on-association [k]
+
+(defonce chromium? (boolean (.match js/navigator.userAgent
+                                    (js/RegExp. "chrome|chromium|crios" "i"))))
+
+(defn on-popup-open-event-fn [map]
+  (fn [event]
+    ;; (js/console.log "[on-popup-open-event-fn]" "event" event)
+    (let [
+          ;; pixel location on the map where the popup anchor is
+          position (.project map (.-_latlng (.-_popup (.-target event))))
+          old-pos-y (-> position .-y)
+          ;; height of the popup container, divide by 2, subtract from the Y
+          ;; axis of marker location
+          full-popup-height
+          (-> event .-popup .-_container .-clientHeight)
+          ;; (-> event .-target .-_container .-clientHeight)
+          ;; (-> event .-sourceTarget .-_container .-clientHeight)
+          popup-height (/ full-popup-height 2)
+          ]
+      ;; (js/console.log "full-eopup-height" full-popup-height)
+
+      ;; XXX: Leaflet bug: full-popup-height is not the same on every browser
+      ;; and moreover on the first call it's value is bigger then on the
+      ;; consequent calls
+      (let [new-pos-y (- old-pos-y popup-height (if chromium? 76 0))]
+        (set! (-> position .-y) new-pos-y)
+        (.panTo map (.unproject map position) #js {:animate true})))))
+
+(defn center-leaflet-map-on-marker [marker]
+  (let [lat-lngs #js [(.getLatLng marker)]]
+    (js/console.log "[center-leaflet-map-on-marker]" "lat-lngs" lat-lngs)
+    (let [marker-bounds (js/L.latLngBounds lat-lngs)]
+      (js/console.log "[center-leaflet-map-on-marker]" "marker-bounds" marker-bounds)
+      (.flyTo @map-atom (.getLatLng marker)
+              ;; zoom options
+              )
+      #_(.fitBounds @map-atom marker-bounds))))
+
+(defn click-on-association [leaflet-marker k]
   (fn [_]
     (let [old-active @active-atom]
-      #_(js/console.log "on-click" "old-active" old-active "k" k)
-      (js/console.log "markers-layer" "click" "active" @active-atom)
+      #_(js/console.log "[click-on-association]" "old-active" old-active "k" k "active" @active-atom)
       (reset! active-atom k)
-      #_(println "on-click" "new-active" @active-atom)
+      #_(js/console.log "[click-on-association]" "new-active" @active-atom)
       (let [re-zoom (and @active-atom (not= old-active @active-atom))]
-        (println "on-click" "re-zoom" re-zoom)
-        #_(update-markers re-zoom)))))
+        #_(js/console.log "[click-on-association]" "re-zoom" re-zoom)
+        (js/console.log "[click-on-association]" "leaflet-marker" leaflet-marker)
+        (when-not (= @old-active-atom k)
+          ;; .flyTo prevents popup from opening
+          ;; (.flyTo @map-atom (.getLatLng leaflet-marker))
 
-(defn list-elem [markers pi-icon {:keys [k name addr coords]}]
-  [:span {:key k :on-click (click-on-association k)}
+          ;; both panTo, and setView work fine in Firefox, but are buggy in
+          ;; Chrome
+          #_(.panTo @map-atom (.getLatLng leaflet-marker))
+          (.setView @map-atom (.getLatLng leaflet-marker) zoom)
+          (reset! old-active-atom k))
+        (.openPopup leaflet-marker)))))
+
+(defn list-elem [marker pi-icon {:keys [k name addr coords]}]
+  [:span {:key k :on-click (click-on-association marker k)}
    [:div {:class (s/join " " ["association-entry" "ng-star-inserted"])}
     [:a
      [:div {:class "icon"}
@@ -402,7 +449,7 @@
              :placeholder (de :fdk.cmap.lang/search-hint)
              :on-change (comp
                          (fn [new-db-vals]
-                           (js/console.log "[right]" "(count @db-vals-atom)" (count @db-vals-atom))
+                           #_(js/console.log "[right]" "(count @db-vals-atom)" (count @db-vals-atom))
                            new-db-vals)
                          ;; (partial reset! db-vals-atom)
                          (fn [new-db-vals]
@@ -443,33 +490,6 @@
 
 (def isResizing (atom false))
 
-(defonce chromium? (boolean (.match js/navigator.userAgent
-                                    (js/RegExp. "chrome|chromium|crios" "i"))))
-
-(defn on-popup-open-event-fn [map]
-  (fn [event]
-    ;; (js/console.log "[on-popup-open-event-fn]" "event" event)
-    (let [
-          ;; pixel location on the map where the popup anchor is
-          position (.project map (.-_latlng (.-_popup (.-target event))))
-          old-pos-y (-> position .-y)
-          ;; height of the popup container, divide by 2, subtract from the Y
-          ;; axis of marker location
-          full-popup-height
-          (-> event .-popup .-_container .-clientHeight)
-          ;; (-> event .-target .-_container .-clientHeight)
-          ;; (-> event .-sourceTarget .-_container .-clientHeight)
-          popup-height (/ full-popup-height 2)
-          ]
-      ;; (js/console.log "full-eopup-height" full-popup-height)
-
-      ;; XXX: Leaflet bug: full-popup-height is not the same on every browser
-      ;; and moreover on the first call it's value is bigger then on the
-      ;; consequent calls
-      (let [new-pos-y (- old-pos-y popup-height (if chromium? 76 0))]
-        (set! (-> position .-y) new-pos-y)
-        (.panTo map (.unproject map position) #js {:animate true})))))
-
 (defn on-mouse-move [e]
   (when @isResizing
     (let [
@@ -490,20 +510,21 @@
     (fn [v] (js/console.log "1 [create-markers]" v) v)
     (partial
      map (fn [marker-data]
-           (let [k (:k marker-data)
-                 marker (js/L.marker
-                         ;; latitude longitude
-                         (apply array (reverse (:coords marker-data)))
-                         #js {:title (:name marker-data)
-                              :icon (if (public-address? (:addr marker-data))
-                                      active-public
-                                      active-private)})
+           (let [k (get marker-data :k)
+                 leaflet-marker
+                 (js/L.marker
+                  ;; latitude longitude
+                  (apply array (reverse (:coords marker-data)))
+                  #js {:title (:name marker-data)
+                       :icon (if (public-address? (:addr marker-data))
+                               active-public
+                               active-private)})
                  marker-with-popup
-                 (-> marker
+                 (-> leaflet-marker
                      (.bindPopup (js/L.popup
                                   #js {:content (rserver/render-to-string
                                                  [popup-content marker-data])}))
-                     (.on "click" (click-on-association k)))]
+                     (.on "click" (click-on-association leaflet-marker k)))]
              (hash-map k marker-with-popup))))
     (fn [v] (js/console.log "0 [create-markers]" v) v)
     )
@@ -553,8 +574,10 @@
                          (.setView (let [[longitude latitude] center-map]
                                      ;; initial zoom needed
                                      (array latitude longitude)) zoom)
-                         #_(.on "click" (fn [_] (when @active-atom (reset! active-atom nil))))
-                         #_(.on "popupopen" (on-popup-open-event-fn leaflet-map))))))))
+                         (.on "click" (fn [_] (when @active-atom (reset! active-atom nil))))
+                         ;; This moves the map a bit to the bottom so that the
+                         ;; popup is displayed more in the center
+                         (.on "popupopen" (on-popup-open-event-fn leaflet-map))))))))
       :component-did-update
       (fn [_this _old-argv _old-state _snapshot]
         ;; (js/console.log "[:component-did-update]" "_this" _this)
