@@ -22,6 +22,9 @@
    ["react" :as react]
    ))
 
+;; German map see
+;; https://kau-boys.de/4664/webentwicklung/cluster-markers-by-state-on-a-leaflet-map
+
 (enable-console-print!)
 
 (declare update-markers)
