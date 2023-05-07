@@ -516,6 +516,7 @@
    db-vals))
 
 (def map-size-x-atom (reagent/atom nil))
+(def map-size-y-atom (reagent/atom nil))
 (defn create-map [map-elem center-map]
   (let [leaflet-map (-> map-elem
                         (.setView (let [[longitude latitude] center-map]
@@ -561,20 +562,48 @@
       (let [store-map-size-x-fn
             (fn [_]
               (reset! map-size-x-atom (-> map-elem .getSize .-x)))
-            resize-r-fn
+            store-map-size-y-fn
+            (fn [_]
+              (reset! map-size-y-atom (-> map-elem .getSize .-y)))
+
+
+            resize-r-x-fn
             (fn [_]
               (let [r (.getElementById js/document "r")
                     diff-x (- (-> map-elem .getSize .-x)
                               @map-size-x-atom)]
-                #_(js/console.log "dragend" "r" (-> r .-style))
+                #_
+                (js/console.log "x"
+                                "(-> r .-clientWidth)" (-> r .-clientWidth)
+                                "diff-x" diff-x)
                 (set! (-> r .-style .-width)
                       (str (+ (-> r .-offsetWidth #_.-clientWidth)
-                              (- diff-x)) "px"))))]
-        (js/L.DomEvent.on south-east "down"    store-map-size-x-fn)
-        (js/L.DomEvent.on south-east "dragend" resize-r-fn)
+                              (- diff-x)) "px"))))
+            resize-r-y-fn
+            (fn [_]
+              (let [r (.getElementById js/document "r")
+                    diff-y (- (-> map-elem .getSize .-y)
+                              @map-size-y-atom)]
+                #_
+                (js/console.log "y"
+                                "(-> r .-clientHeight)" (-> r .-clientHeight)
+                                "diff-y" diff-y)
+                (set! (-> r .-style .-height)
+                      (str (+ (-> r .-offsetHeight #_.-clientHeight)
+                              (+ diff-y)) "px"))))]
+        (js/L.DomEvent.on south-east "down"    (fn [e]
+                                                 (store-map-size-x-fn e)
+                                                 (store-map-size-y-fn e)))
+        (js/L.DomEvent.on south-east "dragend" (fn [e]
+                                                 (resize-r-x-fn e)
+                                                 (resize-r-y-fn e)))
 
-        (js/L.DomEvent.on east       "down"    store-map-size-x-fn)
-        (js/L.DomEvent.on east       "dragend" resize-r-fn)))
+        (js/L.DomEvent.on east  "down"    store-map-size-x-fn)
+        (js/L.DomEvent.on east  "dragend" resize-r-x-fn)
+
+        (js/L.DomEvent.on south "down"    store-map-size-y-fn)
+        (js/L.DomEvent.on south "dragend" resize-r-y-fn)
+        ))
     (reset! map-atom leaflet-map)))
 
 (defn map-with-list [params markers center-map]
