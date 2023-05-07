@@ -96,6 +96,16 @@ LEFT JOIN(
     SELECT * FROM contacts WHERE contacts.current = 1
 ) AS contacts ON contacts.associationId = associations.id
 WHERE associations.current = 1
+  -- When the select is changed evaluate `(reset)` in the REPL of clj
+  -- -M:dev:nrepl
+-- AND
+--       (
+--         0 = 1
+--       -- The map is focused on 'Forum der Kulturen Stuttgart' so it must by always
+--       -- selected, otherwise the map won't work.
+--         OR associations.id in ('293b0f91-f109-4b74-ab91-a265834e0897')
+--         OR associations.name like 'Afro%'
+--       )
 ORDER BY associationId
 
 
