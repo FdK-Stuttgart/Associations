@@ -75,6 +75,10 @@ To reload changes:
 (reset)
 ```
 
+Result of the main query `read-associations` is available under
+http://localhost:3000/api/db-vals (need to call `(reset)` when changed)
+
+
 ## Build & Deploy
 
 ```shell
