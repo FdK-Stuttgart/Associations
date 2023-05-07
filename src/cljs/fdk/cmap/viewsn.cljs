@@ -591,7 +591,9 @@
               node-center    (.item (-> node-ref .-children) 1)
               #_#_
               node-footer    (.item (-> node-ref .-children) 2)]
-          (create-map (-> node-center js/L.map) center-map)))
+          (create-map (-> node-center js/L.map) center-map)
+          (update-markers markers @db-vals-atom re-zoom)
+          ))
 
       :component-did-update
       (fn [_this _old-argv _old-state _snapshot]
@@ -599,6 +601,7 @@
         ;; (js/console.log "[:component-did-update]" "_old-argv" _old-argv)
         ;; (js/console.log "[:component-did-update]" "_old-state" _old-state)
         ;; (js/console.log "[:component-did-update]" "_snapshot" _snapshot)
+        #_
         ((comp
           #_(fn [v] (js/console.log "[:component-did-update]" "v" v) v)
           (fn [v] (nth v 2))
