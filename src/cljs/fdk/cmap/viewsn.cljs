@@ -492,21 +492,6 @@
        name)
       105))
 
-(def isResizing (atom false))
-
-(defn on-mouse-move [e]
-  (when @isResizing
-    (let [
-          ;; c (.getElementById js/document "c")
-          l (.getElementById js/document "l")
-          r (.getElementById js/document "r")]
-      (let [ro (str (- (+ (.-offsetLeft r) #_1147
-                          (.-offsetWidth r) #_400)
-                       (.-clientX e))
-                    "px")]
-        (set! (-> l .-style .-right) ro)
-        (set! (-> r .-style .-width) ro)))))
-
 (defn create-markers [db-vals]
   ((comp
     (partial reduce into {})
@@ -530,8 +515,9 @@
              (hash-map k marker-with-popup)))))
    db-vals))
 
-(defn create-map [leaflet-map-elem center-map]
-  (let [leaflet-map (-> leaflet-map-elem
+(def map-size-x-atom (reagent/atom nil))
+(defn create-map [map-elem center-map]
+  (let [leaflet-map (-> map-elem
                         (.setView (let [[longitude latitude] center-map]
                                     ;; initial zoom needed
                                     (array latitude longitude)) zoom)
@@ -539,7 +525,7 @@
                                                (reset! active-atom nil))))
                         ;; This moves the map a bit to the bottom so that the
                         ;; popup is displayed more in the center
-                        (.on "popupopen" (popupopen-fn leaflet-map-elem)))]
+                        (.on "popupopen" (popupopen-fn map-elem)))]
     (.addTo (js/L.tileLayer
              "https://{s}.tile.OpenStreetMap.org/{z}/{x}/{y}.png"
              #_
@@ -559,17 +545,36 @@
           south (.addTo (js/L.control.resizer #js {:direction "s"
                                                    :pan true})
                         leaflet-map)
-          _     (.addTo (js/L.control.resizer #js {:direction "se"
+          south-east (.addTo (js/L.control.resizer #js {:direction "se"
                                                    :pan true
                                                    #_#_
                                                    :onlyOnHover false})
                         leaflet-map)]
       #_
       (js/setTimeout (fn [] (.fakeHover east 1000)) 1000)
-      #_
-      (js/L.DomEvent.on south "down dragstart predrag drag dragend"
-                        (fn [east]
-                          (js/console.log (.-type east) east))))
+;;; down       Event         Fired when a drag is about to start.
+;;; dragstart  Event         Fired when a drag starts
+;;; predrag    Event         Fired continuously during dragging before each corresponding update of the element's position.
+;;; drag       Event         Fired continuously during dragging.
+;;; dragend    DragEndEvent  Fired when the drag ends .
+;;; #_
+      (let [store-map-size-x-fn
+            (fn [_]
+              (reset! map-size-x-atom (-> map-elem .getSize .-x)))
+            resize-r-fn
+            (fn [_]
+              (let [r (.getElementById js/document "r")
+                    diff-x (- (-> map-elem .getSize .-x)
+                              @map-size-x-atom)]
+                #_(js/console.log "dragend" "r" (-> r .-style))
+                (set! (-> r .-style .-width)
+                      (str (+ (-> r .-offsetWidth #_.-clientWidth)
+                              (- diff-x)) "px"))))]
+        (js/L.DomEvent.on south-east "down"    store-map-size-x-fn)
+        (js/L.DomEvent.on south-east "dragend" resize-r-fn)
+
+        (js/L.DomEvent.on east       "down"    store-map-size-x-fn)
+        (js/L.DomEvent.on east       "dragend" resize-r-fn)))
     (reset! map-atom leaflet-map)))
 
 (defn map-with-list [params markers center-map]
@@ -613,33 +618,11 @@
         ;; (js/console.log "[:reagent-render]" "center-map" center-map)
         (when @map-atom
           (update-markers markers @db-vals-atom re-zoom))
-        [:div#c {:ref ref
-                 :class [(styles/c)]}
+        [:div#c {:ref ref :class [(styles/c)]}
          [:div {:class [(styles/header)]} #_"header"]
-         [:div#l {:class [(styles/l) (styles/center)]
-                  :on-mouse-move on-mouse-move} #_"left"]
-         [:div#r {:class [(styles/r) (styles/right)]
-                  :on-mouse-move on-mouse-move}
-          [:div#d {:class [(styles/d) (styles/fill)]
-;;; from
-;;; https://stackoverflow.com/questions/26233180/resize-a-div-on-border-drag-and-drop-without-adding-extra-markup
-                   :on-mouse-down
-                   (fn [_]
-                     (js/console.log "start")
-                     (reset! isResizing true))
-                   :on-mouse-up
-                   (fn [_]
-                     (js/console.log "stop")
-                     (reset! isResizing false)
-                     ;; this is not needed when using the
-                     ;; Leaflet.Control.Resizer plugin
-                     #_
-                     (js/window.setTimeout
-                      (fn []
-                        (.invalidateSize @map-atom)
-                        (js/console.log ".invalidateSize"))
-                      200))}
-           (right markers)]]
+         [:div#l {:class [(styles/l) (styles/center)]} #_"left"]
+         [:div#r {:class [(styles/r) (styles/right)]}
+          [:div#d {:class [(styles/d) (styles/fill)]} (right markers)]]
          [:div {:class [(styles/footer)]}
           (str @(re-frame/subscribe [::subs/name])
                " v"
