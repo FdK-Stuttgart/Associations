@@ -117,6 +117,7 @@
                    districts)]]
     [:div {:class "association-links"}
      [:h3 (de :fdk.cmap.lang/links)]
+     ;; TODO popup 'Afro Deutsches Akademiker Netzwerk ADAN': repeating links
      [:ul (map (fn [idx url text]
                  [:li {:key idx} [:a {:href url :title text :target "_blank"}
                                   (if (empty? text) url text)]])
@@ -224,7 +225,6 @@
      :popupAnchor [0 -31]})))
 
 ;; TODO keep the popup opened when zooming out
-;; TODO popup 'Afro Deutsches Akademiker Netzwerk ADAN': repeating links
 (defn update-markers
   "Executed 2x with react/StrictMode and 3x w/o react/StrictMode"
   [markers db-vals re-zoom]

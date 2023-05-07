@@ -94,6 +94,8 @@ $sql = "SELECT
             `contacts`.`associationId` = `associations`.`id`
         WHERE
             associations.current = 1
+        -- AND associations.name like 'Some name %'
+        -- AND associations.id in ('aaa' 'bbb')
         ORDER BY
             associationId";
 
