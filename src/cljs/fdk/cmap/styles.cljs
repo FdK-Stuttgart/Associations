@@ -63,6 +63,9 @@
    }
   )
 
+(def top "0px")
+(def bottom "40px") ;; 10px
+
 (defclass c []
   {
    :width "100%"
@@ -72,9 +75,9 @@
 (defclass l []
   {
    :position "absolute"
-   :left "40px"
-   :top "40px"
-   :bottom "40px"
+   :left "0px"
+   :top top
+   :bottom bottom
    :right "400px"
    :background "grey"
    })
@@ -91,8 +94,8 @@
   {
    :position "absolute"
    :right "0px"
-   :top "20px"
-   :bottom "60px"
+   :top top
+   :bottom bottom
    :width "400px"
    :color "#fff"
    :background "black"
@@ -100,7 +103,7 @@
 
 (defclass d []
   {
-   :background "red"
+   ;; :background "red"
    ;; :position "absolute"
    ;; :left "-4px"
    ;; :top "0"
