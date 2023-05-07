@@ -40,3 +40,4 @@
                  @(re-frame/subscribe [:center-map])]
         #_[resizable {} center-map]
         [v/map-with-list {} markers center-map]))))
+
