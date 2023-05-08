@@ -61,17 +61,6 @@
   "
   [{:keys [k name addr street postcode-city districts email activities goals
            imageurl links socialmedia] :as prm}]
-  (when (=
-         ;; Deutsch-Türkisches Forum Stuttgart
-         ;; "85e9a6f1-1688-490d-abd8-e5310b351df6"
-         ;; "Afro Deutsches Akademiker Netzwerk ADAN"
-         "a4be69a3-e758-456c-a6e2-f207c8df1a94"
-         k)
-    (doall
-     (map-indexed (fn [idx link]
-                    (js/console.log "link" idx link))
-                  links)
-     ))
   [:div
    {:class
          "association-container osm-association-container"
@@ -117,25 +106,30 @@
                    districts)]]
     [:div {:class "association-links"}
      [:h3 (de :fdk.cmap.lang/links)]
-     ;; TODO popup 'Afro Deutsches Akademiker Netzwerk ADAN': repeating links
-     [:ul (map (fn [idx url text]
-                 [:li {:key idx} [:a {:href url :title text :target "_blank"}
-                                  (if (empty? text) url text)]])
-               (range (count (:url links)))
-               (:url links)
-               (:text links))]]
+     [:ul
+      ((comp
+        (partial map-indexed
+                 (fn [idx [url text]]
+                   [:li {:key idx} [:a {:href url :title text :target "_blank"}
+                                    (if (empty? text) url text)]]))
+        dedupe
+        (partial apply mapv vector) ;; transpose
+        (juxt :url :text))
+       links)]]
     [:div {:class "association-social-media"}
      ((comp
-       (partial map
-                (fn [idx]
+       (partial map-indexed
+                (fn [idx [platform url]]
                   [:div {:key idx :class "social-media-link"}
-                   (let [sm-name (nth (get socialmedia :platforms) idx)]
-                     [:a {:href (nth (get socialmedia :urls) idx)
-                          :target "_blank"
-                          :title (get-in data/social-media [sm-name :title])}
-                      [:div {:class "social-media-icon mini-icon"}
-                       [:img (get-in data/social-media [sm-name :img])]]])])))
-      (range (count (:ids socialmedia))))]]]
+                   [:a {:href url
+                        :target "_blank"
+                        :title (get-in data/social-media [platform :title])}
+                    [:div {:class "social-media-icon mini-icon"}
+                     [:img (get-in data/social-media [platform :img])]]]]))
+       dedupe
+       (partial apply mapv vector) ;; transpose
+       (juxt :platforms :urls))
+      socialmedia)]]]
 #_
   [:div {:class "osm-association-inner-container"}
    [:div {:class "association-title"} [:h2 name]]
