@@ -6,6 +6,7 @@
    [fdk.cmap.data :as data]
    [fdk.cmap.lang :refer [de]]
    [fdk.cmap.config :as config]
+   [fdk.cmap.popup :as popup]
    [fdk.cmap.react-components :as rc]
    [reagent.core :as reagent]
    [reagent.dom :as rdom]
@@ -36,148 +37,8 @@
 (def map-atom (reagent/atom nil))
 (def active-atom (reagent/atom nil))
 (def old-active-atom (reagent/atom nil))
-(def pattern-atom (reagent/atom nil))
 
 (def zoom 17)
-
-(defn mark-string [s]
-  (if-let [pattern-orig @pattern-atom]
-    (let [pattern (s/lower-case pattern-orig)]
-      ((comp
-        (partial remove empty?)
-        (partial map (fn [el] (if (= (s/lower-case el) pattern)
-                                [:mark el]
-                                el)))
-        (partial s/split s)
-        ;; i - case insensitive, u - unicode
-        (fn [regex] (js/RegExp. regex "iu"))
-        (partial gstr/format "(%s)"))
-       pattern))
-    s))
-
-(defn popup-content
-  "addr has only 'keine öffentliche Anschrift'
-  (popup-content prm)
-  "
-  [{:keys [k name addr street postcode-city districts email activities goals
-           imageurl links socialmedia] :as prm}]
-  [:div
-   {:class
-         "association-container osm-association-container"
-         #_"association-container"
-         #_"osm-association-container"
-    }
-   [:div {:class "osm-association-inner-container"}
-    [:div {:class "association-title"}
-     (into [:h2]
-           ;; (mark-string name) ;; doesn't work
-
-           ;; [mark-string name] ;; Produces:
-           ;; Warning: Functions are not valid as a React child. This may happen
-           ;; if you return a Component instead of <Component /
-
-           (:f> mark-string name))]
-    [:div {:class "association-images"}
-     [:div {:class "association-image"}
-      [:img {:src imageurl :alt ""}]]]
-    [:div {:class "association-address"}
-     [:p {:class "street"} street]
-     [:p {:class "postcode-city"} postcode-city]
-     [:p {:class "name"} [:strong addr]]]
-    [:div {:class "association-contacts"}
-     [:div {:class "association-contact"}
-      [:div {:class "association-contact"}
-       [:div {:class "association-contact-row"}
-        [:div {:class "social-media-icon mini-icon"}
-         [:img {:src "assets/mail.png" :alt ""}]]
-        [:p {:class "mail"}
-         [:a {:href (str "mailto:" email)} email]]]]]]
-    [:div {:class "association-description"}
-     [:h3 (de :fdk.cmap.lang/goals)] goals]
-    [:div {:class "association-description"}
-     [:h3 (de :fdk.cmap.lang/activities)] activities]
-    [:div {:class "association-active-in"}
-     [:h3 (de :fdk.cmap.lang/activity-areas)]
-     [:div {:class "association-chips-container"}
-      (map-indexed (fn [idx elem]
-                     (vector :div (conj {:key idx}
-                                        {:class "association-chips"})
-                             elem))
-                   districts)]]
-    [:div {:class "association-links"}
-     [:h3 (de :fdk.cmap.lang/links)]
-     [:ul
-      ((comp
-        (partial map-indexed
-                 (fn [idx [url text]]
-                   [:li {:key idx} [:a {:href url :title text :target "_blank"}
-                                    (if (empty? text) url text)]]))
-        dedupe
-        (partial apply mapv vector) ;; transpose
-        (juxt :url :text))
-       links)]]
-    [:div {:class "association-social-media"}
-     ((comp
-       (partial map-indexed
-                (fn [idx [platform url]]
-                  [:div {:key idx :class "social-media-link"}
-                   [:a {:href url
-                        :target "_blank"
-                        :title (get-in data/social-media [platform :title])}
-                    [:div {:class "social-media-icon mini-icon"}
-                     [:img (get-in data/social-media [platform :img])]]]]))
-       dedupe
-       (partial apply mapv vector) ;; transpose
-       (juxt :platforms :urls))
-      socialmedia)]]]
-#_
-  [:div {:class "osm-association-inner-container"}
-   [:div {:class "association-title"} [:h2 name]]
-   [:div {:class "association-images"}
-    [:div {:class "association-image"}
-     [:img {:src imageurl :alt ""}]]]
-   [:div {:class "association-address"}
-    [:p {:class "street"} street]
-    [:p {:class "postcode-city"} postcode-city]
-    [:p {:class "name"} [:strong addr]]]
-   [:div {:class "association-contacts"}
-    [:div {:class "association-contact"}
-     [:div {:class "association-contact"}
-      [:div {:class "association-contact-row"}
-       [:div {:class "social-media-icon mini-icon"}
-        [:img {:src "assets/mail.png" :alt ""}]]
-       [:p {:class "mail"}
-        [:a {:href (str "mailto:" email)} email]]]]]]
-   [:div {:class "association-description"}
-    [:h3 (de :fdk.cmap.lang/goals)] goals]
-   [:div {:class "association-description"}
-    [:h3 (de :fdk.cmap.lang/activities)] activities]
-   [:div {:class "association-active-in"}
-    [:h3 (de :fdk.cmap.lang/activity-areas)]
-    [:div {:class "association-chips-container"}
-     (map-indexed (fn [idx elem]
-                    (vector :div (conj {:key idx}
-                                       {:class "association-chips"})
-                            elem))
-                  districts)]]
-   [:div {:class "association-links"}
-    [:h3 (de :fdk.cmap.lang/links)]
-    [:ul (map (fn [idx url text]
-                [:li {:key idx} [:a {:href url :title text :target "_blank"}
-                                 (if (empty? text) url text)]])
-              (range (count (:url links))) (:url links) (:text links))]]
-   [:div {:class "association-social-media"}
-    ((comp
-      (partial map
-               (fn [idx]
-                 [:div {:key idx :class "social-media-link"}
-                  (let [sm-name (nth (get socialmedia :platforms) idx)]
-                    [:a {:href (nth (get socialmedia :urls) idx)
-                         :target "_blank"
-                         :title (get-in data/social-media [sm-name :title])}
-                     [:div {:class "social-media-icon mini-icon"}
-                      [:img (get-in data/social-media [sm-name :img])]]])])))
-     (range (count (:ids socialmedia))))]])
 
 (defn public-address?
   "TODO public-address? computation should be done elsewhere."
@@ -425,7 +286,9 @@
                                :goals
                                :activities
 
-                               ;; :contacts    ;; :name :pobox :phone :fax :email
+                               ;; :contacts
+                               :pobox :phone :fax
+
                                :email
 
                                ;; :imageurl    ;; :url :alttext
@@ -471,10 +334,10 @@
                            new-db-vals)
                          (fn [pattern] (if (>= (count pattern) 3)
                                          (do
-                                           (reset! pattern-atom pattern)
+                                           (reset! popup/pattern-atom pattern)
                                            (filter-db-vals pattern))
                                          (do
-                                           (reset! pattern-atom nil)
+                                           (reset! popup/pattern-atom nil)
                                            @db-vals-init-atom)))
                          s/lower-case
                          (fn [x] (.-value x))
@@ -510,7 +373,7 @@
                  (-> leaflet-marker
                      (.bindPopup (js/L.popup
                                   #js {:content (rserver/render-to-string
-                                                 [popup-content marker-data])}))
+                                                 [popup/popup-content marker-data])}))
                      (.on "click" (click-on-association leaflet-marker k)))]
              (hash-map k marker-with-popup)))))
    db-vals))
