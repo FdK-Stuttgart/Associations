@@ -101,9 +101,6 @@
   ((comp
     (fn [m] (assoc m
                    :postcode-city (str (:postcode m) " " (:city m))
-                   ;; TODO keep only distinct links and :socialmedia
-                   ;; i.e. for :links group by :url
-                   ;; i.e. for :socialmedia group by :socialmediaid
                    :links
                    {
                     :url  (keep :linkurl ms)
