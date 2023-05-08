@@ -78,7 +78,11 @@
                             :lat
                             :imageurl
                             :links
-                            :socialmedia]))
+                            :socialmedia
+
+                            ;; :contacts
+                            :pobox :phone :fax
+                            ]))
     first)
    ms))
 
@@ -125,10 +129,6 @@
                            :linkurl
                            ))))
    ms))
-
-;; TODO overlapping associations:
-;; Evidence COEXIST
-;; FdK Kalimera
 
 ;; dispatchers
 ;; What is the difference between reg-event-db, reg-event-fx and reg-event-ctx in Re-frame?
