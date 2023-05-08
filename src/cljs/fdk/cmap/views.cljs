@@ -155,31 +155,33 @@
               )
       #_(.fitBounds @map-atom marker-bounds))))
 
-(defn click-on-association [leaflet-marker k]
+(defn click-on-association [marker marker-data k]
   (fn [_]
     (let [old-active @active-atom]
-      (js/console.log "[click-on-association]"
-                      "old-active" old-active "k" k "active" @active-atom)
       (reset! active-atom k)
       #_(js/console.log "[click-on-association]" "new-active" @active-atom)
       (let [re-zoom (and @active-atom (not= old-active @active-atom))]
         #_(js/console.log "[click-on-association]" "re-zoom" re-zoom)
-        #_
-        (js/console.log "[click-on-association]"
-                        "leaflet-marker" leaflet-marker)
+        #_(js/console.log "[click-on-association]" "marker-data" marker-data)
         (when-not (= @old-active-atom k)
           ;; .flyTo prevents popup from opening
-          ;; (.flyTo @map-atom (.getLatLng leaflet-marker))
+          ;; (.flyTo @map-atom (.getLatLng marker))
 
           ;; both panTo, and setView work fine in Firefox, but are buggy in
           ;; Chrome
-          #_(.panTo @map-atom (.getLatLng leaflet-marker))
-          (.setView @map-atom (.getLatLng leaflet-marker) zoom)
+          (let [coords (apply array (reverse (:coords marker-data)))]
+            #_(.panTo @map-atom coords)
+            (.setView @map-atom coords zoom))
           (reset! old-active-atom k))
-        (.openPopup leaflet-marker)))))
+        (-> marker
+            (.bindPopup (js/L.popup
+                         #js {:content
+                              (rserver/render-to-string
+                               (popup/popup-content-with-marks marker-data))}))
+            (.openPopup))))))
 
-(defn list-elem [marker pi-icon {:keys [k name addr coords]}]
-  [:span {:key k :on-click (click-on-association marker k)}
+(defn list-elem [marker pi-icon {:keys [k name addr coords] :as marker-data}]
+  [:span {:key k :on-click (click-on-association marker marker-data k)}
    [:div {:class (s/join " " ["association-entry" "ng-star-inserted"])}
     [:a
      [:div {:class "icon"}
@@ -273,32 +275,7 @@
                (partial map (comp s/lower-case s/trim))
                (partial remove s/blank?)
                vals
-               (fn [v]
-                 (select-keys v
-                              [
-                               :name
-                               ;; :shortName
-
-                               ;; :addr
-                               :street
-                               :postcode-city
-                               :city
-                               :country
-
-                               :goals
-                               :activities
-
-                               ;; :contacts
-                               :pobox :phone :fax
-
-                               :email
-
-                               ;; :imageurl    ;; :url :alttext
-                               ;; :links       ;; :url :linkText
-                               ;; :socialmedia ;; :url :linkText :platform
-
-                               ;; :districts   ;; TODO
-                               ])))
+               (fn [v] (select-keys v popup/filter-keys)))
               db-val))))
          @db-vals-init-atom)]
 ;;; `match-indexes` contains e.g. `[nil nil true nil nil]`. I.e. if an element
@@ -312,9 +289,6 @@
 
 (defn on-change-fn [markers]
   (comp
-   (fn [new-db-vals]
-     (js/console.log "[right]" "(count @db-vals-atom)" (count @db-vals-atom))
-     new-db-vals)
    ;; (partial reset! db-vals-atom)
    (fn [new-db-vals]
      (reset! db-vals-atom new-db-vals)
@@ -366,22 +340,16 @@
     (partial
      map (fn [marker-data]
            (let [k (get marker-data :k)
-                 leaflet-marker
+                 marker
                  (js/L.marker
                   ;; latitude longitude
                   (apply array (reverse (:coords marker-data)))
                   #js {:title (:name marker-data)
                        :icon (if (public-address? (:addr marker-data))
                                active-public
-                               active-private)})
-                 marker-with-popup
-                 (-> leaflet-marker
-                     (.bindPopup (js/L.popup
-                                  #js {:content
-                                       (rserver/render-to-string
-                                        [popup/popup-content marker-data])}))
-                     (.on "click" (click-on-association leaflet-marker k)))]
-             (hash-map k marker-with-popup)))))
+                               active-private)})]
+             (.on marker "click" (click-on-association marker marker-data k))
+             (hash-map k marker)))))
    db-vals))
 
 (def map-size-x-atom (reagent/atom nil))
