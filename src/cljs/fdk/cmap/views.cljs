@@ -103,10 +103,9 @@
                     k)
                (js/console.log "active" active "openPopup" (= k active)))
              (when (= k active)
-               ;; completely removing the (.setView ...) fixes jumpy marker but it
-               ;; causes causes among others the 'ABADÁ Capoeira' popup not to get
-               ;; displayed
-               ;; doesn't work
+               ;; completely removing the (.setView ...) fixes jumpy marker but
+               ;; it causes causes among others the 'ABADÁ Capoeira' popup not
+               ;; to get displayed. Doesn't work
                (when-not (= @old-active-atom active)
                  (.setView @map-atom
                            (apply array (reverse (:coords marker-data)))
@@ -149,7 +148,8 @@
   (let [lat-lngs #js [(.getLatLng marker)]]
     (js/console.log "[center-leaflet-map-on-marker]" "lat-lngs" lat-lngs)
     (let [marker-bounds (js/L.latLngBounds lat-lngs)]
-      (js/console.log "[center-leaflet-map-on-marker]" "marker-bounds" marker-bounds)
+      (js/console.log "[center-leaflet-map-on-marker]"
+                      "marker-bounds" marker-bounds)
       (.flyTo @map-atom (.getLatLng marker)
               ;; zoom options
               )
@@ -158,12 +158,15 @@
 (defn click-on-association [leaflet-marker k]
   (fn [_]
     (let [old-active @active-atom]
-      #_(js/console.log "[click-on-association]" "old-active" old-active "k" k "active" @active-atom)
+      (js/console.log "[click-on-association]"
+                      "old-active" old-active "k" k "active" @active-atom)
       (reset! active-atom k)
       #_(js/console.log "[click-on-association]" "new-active" @active-atom)
       (let [re-zoom (and @active-atom (not= old-active @active-atom))]
         #_(js/console.log "[click-on-association]" "re-zoom" re-zoom)
-        (js/console.log "[click-on-association]" "leaflet-marker" leaflet-marker)
+        #_
+        (js/console.log "[click-on-association]"
+                        "leaflet-marker" leaflet-marker)
         (when-not (= @old-active-atom k)
           ;; .flyTo prevents popup from opening
           ;; (.flyTo @map-atom (.getLatLng leaflet-marker))
@@ -212,10 +215,9 @@
      db-vals)))
 
 (defn tab-panes [markers]
-  ;; the change of the value @db-vals-atom doesn't get propagated to this invocation
+  ;; the change of the value @db-vals-atom doesn't get propagated to this
+  ;; invocation
   (let [db-vals @db-vals-atom]
-    ;; (js/console.log "[tab-panes]" "(count db-vals)" (count db-vals))
-    ;; (js/console.log "[tab-panes]" "(count @db-vals-atom)" (count @db-vals-atom))
     [rc/Tab
      {:id "tab-panes"
       :panes
@@ -308,40 +310,43 @@
       (partial map (fn [m v] (when m v))))
      match-indexes @db-vals-init-atom)))
 
+(defn on-change-fn [markers]
+  (comp
+   (fn [new-db-vals]
+     (js/console.log "[right]" "(count @db-vals-atom)" (count @db-vals-atom))
+     new-db-vals)
+   ;; (partial reset! db-vals-atom)
+   (fn [new-db-vals]
+     (reset! db-vals-atom new-db-vals)
+     new-db-vals)
+   (fn [new-db-vals]
+     (run! (comp
+            (fn [marker]
+              (.setIcon marker inactive-private))
+            (partial get markers)
+            :k)
+           ((comp
+             (partial reduce clojure.set/difference)
+             (partial map set))
+            [@db-vals-init-atom new-db-vals]))
+     new-db-vals)
+   (fn [pattern] (if (>= (count pattern) 3)
+                   (do
+                     (reset! popup/pattern-atom pattern)
+                     (filter-db-vals pattern))
+                   (do
+                     (reset! popup/pattern-atom nil)
+                     @db-vals-init-atom)))
+   s/lower-case
+   (fn [x] (.-value x))
+   (fn [x] (.-target x))))
+
 (defn right [markers]
   [:div
    [:div.color-input
     [:input {:type "text"
-             ;; :value time-color
              :placeholder (de :fdk.cmap.lang/search-hint)
-             :on-change (comp
-                         (fn [new-db-vals]
-                           #_(js/console.log "[right]" "(count @db-vals-atom)" (count @db-vals-atom))
-                           new-db-vals)
-                         ;; (partial reset! db-vals-atom)
-                         (fn [new-db-vals]
-                           (reset! db-vals-atom new-db-vals)
-                           new-db-vals)
-                         (fn [new-db-vals]
-                           (run! (comp
-                                  (fn [marker] (.setIcon marker inactive-private))
-                                  (partial get markers)
-                                  :k)
-                                 ((comp
-                                   (partial reduce clojure.set/difference)
-                                   (partial map set))
-                                  [@db-vals-init-atom new-db-vals]))
-                           new-db-vals)
-                         (fn [pattern] (if (>= (count pattern) 3)
-                                         (do
-                                           (reset! popup/pattern-atom pattern)
-                                           (filter-db-vals pattern))
-                                         (do
-                                           (reset! popup/pattern-atom nil)
-                                           @db-vals-init-atom)))
-                         s/lower-case
-                         (fn [x] (.-value x))
-                         (fn [x] (.-target x)))}]]
+             :on-change (on-change-fn markers)}]]
    (tab-panes markers)])
 
 ;; TODO better transform & translate. E.g. in the class
@@ -372,8 +377,9 @@
                  marker-with-popup
                  (-> leaflet-marker
                      (.bindPopup (js/L.popup
-                                  #js {:content (rserver/render-to-string
-                                                 [popup/popup-content marker-data])}))
+                                  #js {:content
+                                       (rserver/render-to-string
+                                        [popup/popup-content marker-data])}))
                      (.on "click" (click-on-association leaflet-marker k)))]
              (hash-map k marker-with-popup)))))
    db-vals))
