@@ -22,9 +22,6 @@
    ;; ["react" :as react]
    ))
 
-;; German map see
-;; https://kau-boys.de/4664/webentwicklung/cluster-markers-by-state-on-a-leaflet-map
-
 (enable-console-print!)
 
 (def filter-keys
@@ -72,7 +69,8 @@
     s))
 
 (defn- popup-content
-  "addr has only 'keine öffentliche Anschrift'
+  "addr has only 'keine öffentliche Anschrift'.
+  Test marker-data, display filter-data
   (popup-content marker-data filter-data)
   "
   [{:keys [k name addr street postcode-city districts email activities goals
