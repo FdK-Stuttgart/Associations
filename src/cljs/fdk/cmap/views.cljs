@@ -323,7 +323,15 @@
    [:div.color-input
     [:input {:type "text"
              :placeholder (de :fdk.cmap.lang/search-hint)
-             :on-change (on-change-fn markers)}]]
+             :on-change (on-change-fn markers)
+             ;; TODO move the style to a css-file
+             :style {
+                     :padding ".5rem"
+                     :border "1px solid"
+                     :border-radius "3px"
+                     ;; :width "282px"
+                     }
+             }]]
    (tab-panes markers)])
 
 ;; TODO better transform & translate. E.g. in the class
