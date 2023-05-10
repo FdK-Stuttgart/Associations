@@ -23,8 +23,11 @@
    ["react" :as react]
    ))
 
-;; German map see
-;; https://kau-boys.de/4664/webentwicklung/cluster-markers-by-state-on-a-leaflet-map
+;; German map:
+;; https://www.amcharts.com/svg-maps/?map=germany
+;; Simpler maps:
+;; https://leaflet-extras.github.io/leaflet-providers/preview/
+;; commercial services also offer free plans: mapbox, MapQuest, etc.
 
 (enable-console-print!)
 
@@ -355,7 +358,7 @@
 (def map-size-x-atom (reagent/atom nil))
 (def map-size-y-atom (reagent/atom nil))
 (defn create-map [map-elem center-map]
-  (let [leaflet-map (-> map-elem
+  (let [map (-> map-elem
                         (.setView (let [[longitude latitude] center-map]
                                     ;; initial zoom needed
                                     (array latitude longitude)) zoom)
@@ -363,31 +366,53 @@
                                                (reset! active-atom nil))))
                         ;; This moves the map a bit to the bottom so that the
                         ;; popup is displayed more in the center
-                        (.on "popupopen" (popupopen-fn map-elem)))]
-    (.addTo (js/L.tileLayer
-             "https://{s}.tile.OpenStreetMap.org/{z}/{x}/{y}.png"
-             #_
-             #js {:attribution
-                  (gstr/format
-                   "&copy; <a href=\"%s\">%s</a> contributors"
-                   "http://osm.org/copyright"
-                   "OpenStreetMap")})
-            leaflet-map)
+                        (.on "popupopen" (popupopen-fn map-elem)))
+
+        basemaps
+        {
+         :OpenStreetMap.Mapnik
+         (js/L.tileLayer
+          "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+          #js {:maxZoom 19
+               :attribution "&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors"})
+
+         :OpenStreetMap.DE
+         (js/L.tileLayer
+          "https://{s}.tile.openstreetmap.de/{z}/{x}/{y}.png"
+          #js {:maxZoom 18
+               :attribution "&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors"})
+
+         :stadiamaps
+         (js/L.tileLayer
+          "https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png"
+          #js {:maxZoom 20
+               :attribution
+               (str "&copy; <a href=\"https://stadiamaps.com/\">Stadia Maps</a>"
+                    ", &copy; <a href=\"https://openmaptiles.org/\">OpenMapTiles</a>"
+                    " &copy; <a href=\"http://openstreetmap.org\">OpenStreetMap</a> contributors")})}
+        ;; The js/L.control.layers doesn't work
+        ;; layers (js/L.control.layers basemaps)
+
+        layer (:OpenStreetMap.DE basemaps)]
+    ;; (js/console.log "layers" layers)
+    ;; (js/console.log "layer" layer)
+    #_(.addTo layers map)
+    (.addTo layer map)
     ;; defining `east` and `south` as a local bindings enables local to
     ;; differentiate using the js/L.DomEvent.on
     (let [east  (.addTo (js/L.control.resizer #js {:direction "e"
                                                    :pan true
                                                    #_#_
                                                    :onlyOnHover true})
-                        leaflet-map)
+                        map)
           south (.addTo (js/L.control.resizer #js {:direction "s"
                                                    :pan true})
-                        leaflet-map)
+                        map)
           south-east (.addTo (js/L.control.resizer #js {:direction "se"
                                                    :pan true
                                                    #_#_
                                                    :onlyOnHover false})
-                        leaflet-map)]
+                        map)]
       #_
       (js/setTimeout (fn [] (.fakeHover east 1000)) 1000)
 ;;; down       Event         Fired when a drag is about to start.
@@ -441,7 +466,7 @@
         (js/L.DomEvent.on south "down"    store-map-size-y-fn)
         (js/L.DomEvent.on south "dragend" resize-r-y-fn)
         ))
-    (reset! map-atom leaflet-map)))
+    (reset! map-atom map)))
 
 (defn map-with-list [params markers center-map]
   (let [ref (react/createRef)
