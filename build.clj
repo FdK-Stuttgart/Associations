@@ -1,9 +1,9 @@
 (ns build
   (:require [clojure.string :as string]
             [clojure.tools.build.api :as b]
-            [deps-deploy.deps-deploy :as deploy] 
-    [babashka.fs :refer [copy-tree]] 
-    [babashka.process :refer [shell]])) 
+            [deps-deploy.deps-deploy :as deploy]
+            [babashka.fs :refer [copy-tree]]
+            [babashka.process :refer [shell]]))
 
  (defn build-cljs []
    (println "npx shadow-cljs release app...")
@@ -38,12 +38,12 @@
                :target-dir class-dir}))
 
 (defn uber [_]
-  (println "Compiling Clojure...")
+  (println "Compiling Clojure into directory" class-dir "...")
   (b/compile-clj {:basis basis
                   :src-dirs ["src/clj" "resources" "env/prod/resources" "env/prod/clj"]
-                  :class-dir class-dir}) 
+                  :class-dir class-dir})
   (build-cljs)
-  (println "Making uberjar...")
+  (println "Making uberjar file" uber-file "...")
   (b/uber {:class-dir class-dir
            :uber-file uber-file
            :main main-cls
