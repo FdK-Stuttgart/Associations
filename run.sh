@@ -77,6 +77,7 @@ guix shell \
      --container --network \
      --preserve=^TERM$ \
      --preserve=^fdk \
+     --preserve=^CMAP \
      --share=/usr/bin \
      --share=/etc/localtime=/etc/localtime \
      --share=$HOME/.bash_history=$HOME/.bash_history \
