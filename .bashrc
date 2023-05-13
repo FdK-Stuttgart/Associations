@@ -45,73 +45,6 @@ else
     done
 fi
 
-# nodejsVer=v16.15.0 # LTS version
-# # set -x  # Print commands and their arguments as they are executed.
-# node --version 2>/dev/null | grep "$nodejsVer"
-# { retval="$?"; set +x; } 2>/dev/null
-# if [ ! $retval -eq 0 ]; then
-#     # printf "[DBG] command not available in required version.\n"
-
-#     VERSION=$nodejsVer
-#     DISTRO=linux-x64
-#     nodeArchive=node-$VERSION-$DISTRO.tar.xz
-
-#     ks=hkp://keyserver.ubuntu.com:80
-#     # ks=hkps://keys.openpgp.org
-#     for key in  \
-#         4ED778F539E3634C779C87C6D7062848A1AB005C \
-#             141F07595B7B3FFE74309A937405533BE57C7D57 \
-#             94AE36675C464D64BAFA68DD7434390BDBE9B9C5 \
-#             74F12602B6F1C4E913FAA37AD3A89613643B6201 \
-#             71DCFD284A79C3B38668286BC97EC7A07EDE3FC1 \
-#             8FCCA13FEF1D0C2E91008E09770F7A9A5AE15600 \
-#             C4F0DFFF4E8C1A8236409D08E73BC641CC11F4C8 \
-#             C82FA3AE1CBEDC6BE46B9360C43CEC45C17AB93C \
-#             DD8F2338BAE7501E3DD5AC78C273792F7D83545D \
-#             A48C2BEE680E841632CD4E44F07496B3EB3C1762 \
-#             108F52B48DB57BB0CC439B2997B01419BD92F80A \
-#             B9E2F5981AA6E0CD28160D9FF13993A75599653C \
-#         ;
-#     do
-#         gpg --quiet --keyserver $ks --recv-keys $key
-#     done
-
-#     if [ ! -e $nodeArchive ]; then
-#         wget https://nodejs.org/dist/$nodejsVer/$nodeArchive
-#     fi
-#     if [ ! -e SHASUMS256.txt ]; then
-#         curl -O https://nodejs.org/dist/$nodejsVer/SHASUMS256.txt
-#     fi
-#     if [ ! -e SHASUMS256.txt.sig ]; then
-#         curl -O https://nodejs.org/dist/$nodejsVer/SHASUMS256.txt.sig
-#     fi
-#     set -x  # Print commands and their arguments as they are executed.
-#     grep $nodeArchive SHASUMS256.txt | sha256sum -c -
-#     { retval="$?"; set +x; } 2>/dev/null
-
-#     set -x  # Print commands and their arguments as they are executed.
-#     gpg --verify SHASUMS256.txt.sig SHASUMS256.txt 2>&1 | grep "Good signature"
-#     { retval="$?"; set +x; } 2>/dev/null
-#     if [ $retval -eq 0 ]; then
-#         mkdir -p $HOME/.local/lib/nodejs
-#         tar xfJ $nodeArchive -C $HOME/.local/lib/nodejs
-#         export PATH=$HOME/.local/lib/nodejs/node-$VERSION-$DISTRO/bin:$PATH
-#     else
-#         printf "[ERR] Bad signature\n"
-#         exit 1
-#     fi
-#     # source ~/.bashrc
-
-#     set -x  # Print commands and their arguments as they are executed.
-#     node --version 2>/dev/null | grep "$nodejsVer"
-#     { retval="$?"; set +x; } 2>/dev/null
-#     if [ ! $retval -eq 0 ]; then
-#         file=$(command -v node)
-#         printf "[ERR] couldn't properly install: %s %s\n" $(basename $file) $nodejsVer
-#         exit $retval
-#     fi
-# fi
-
 alias ng='node ./node_modules/\@angular/cli/bin/ng.js'
 # node_bin=`which node`
 # ng_bin=$HOME/node_modules/\@angular/cli/bin/ng
@@ -447,15 +380,15 @@ deploy () {
         local AMO=$fdk_test_home/AssociationMap
         local AMB=$AMO.backup-$(date '+%F_%T')
         echo "" > /tmp/script.sh
-        echo "set -v"                                                                                                  >> /tmp/script.sh
-        echo "if [ -d $AMO ]; then"                                                                                    >> /tmp/script.sh
-        echo "    cp -r $AMO $AMB"                                                                                     >> /tmp/script.sh
-        echo "    chmod -R -w $AMB"                                                                                    >> /tmp/script.sh
-        echo "    find $AMO -not -name environment.php -delete" >> /tmp/script.sh
-        echo "    find $AMO -empty -type d -delete"                                                                    >> /tmp/script.sh
-        echo "else"                                                                                                    >> /tmp/script.sh
-        echo "    printf \"[ERR] Directory doesn't exist: $AMO\\n\""                                                    >> /tmp/script.sh
-        echo "fi"                                                                                                      >> /tmp/script.sh
+        echo "set -v"                                                >> /tmp/script.sh
+        echo "if [ -d $AMO ]; then"                                  >> /tmp/script.sh
+        echo "    cp -r $AMO $AMB"                                   >> /tmp/script.sh
+        echo "    chmod -R -w $AMB"                                  >> /tmp/script.sh
+        echo "    find $AMO -not -name environment.php -delete"      >> /tmp/script.sh
+        echo "    find $AMO -empty -type d -delete"                  >> /tmp/script.sh
+        echo "else"                                                  >> /tmp/script.sh
+        echo "    printf \"[ERR] Directory doesn't exist: $AMO\\n\"" >> /tmp/script.sh
+        echo "fi"                                                    >> /tmp/script.sh
         set -x  # Print commands and their arguments as they are executed.
         ssh -t $fdk_login@$fdk_server < /tmp/script.sh
         cd $prjd
@@ -529,10 +462,23 @@ fi
 
 test_db () {
     set -x  # Print commands and their arguments as they are executed.
-    mysql --user $USER << EOF
+    # mysql --user $USER << EOF
+    if [ $hostName == $ecke ]; then
+        mysql --user $CMAP_MYSQL_USER \
+              << EOF
 SELECT count(*) as "count-of-activities (should be ~130):"
 FROM associations.activities;
 EOF
+    else
+        mysql --verbose \
+              --user=$CMAP_MYSQL_USER --password=$CMAP_MYSQL_PASSWORD \
+              --host=$CMAP_MYSQL_HOST --port=$CMAP_MYSQL_PORT \
+              --database=associations \
+              << EOF
+SELECT count(*) as "count-of-activities (should be ~130):"
+FROM associations.activities;
+EOF
+    fi
     { retval="$?"; set +x; } 2>/dev/null
     if [ ! $retval -eq 0 ]; then
         printf "INF: \`start_db\` executed?\n"
@@ -544,7 +490,7 @@ populate_db () {
     set -x  # Print commands and their arguments as they are executed.
     # --verbose   show executed SQL commands
     if [ $hostName == $ecke ]; then
-        mysql --user $USER << EOF
+        mysql --user $CMAP_MYSQL_USER << EOF
 DROP DATABASE IF EXISTS associations;
 CREATE DATABASE IF NOT EXISTS associations;
 DELETE FROM mysql.user WHERE User='';
@@ -559,19 +505,22 @@ SOURCE map/database/db-export/associations.sql;
 -- SHOW COLUMNS IN activities;
 EOF
     else
-        sudo mysql --verbose -u root << EOF
+        mysql --verbose \
+              --user=$CMAP_MYSQL_USER --password=$CMAP_MYSQL_PASSWORD \
+              --host=$CMAP_MYSQL_HOST --port=$CMAP_MYSQL_PORT \
+              --database=associations << EOF
 DROP DATABASE IF EXISTS associations;
 CREATE DATABASE IF NOT EXISTS associations;
 -- SHOW DATABASES;
-USE mysql;
-DELETE FROM mysql.user WHERE User='';
--- SELECT User FROM mysql.user;
-CREATE USER IF NOT EXISTS '$USER'@'localhost' IDENTIFIED BY '';
-GRANT ALL PRIVILEGES ON associations.* TO '$USER'@'localhost' WITH GRANT OPTION;
-CREATE USER IF NOT EXISTS 'foo'@'localhost' IDENTIFIED BY '';
-GRANT ALL PRIVILEGES ON *.* TO 'foo'@'localhost' WITH GRANT OPTION;
-FLUSH PRIVILEGES;
-SELECT concat(user, '  \'', password, '\'') FROM mysql.user;
+---- USE mysql;
+---- DELETE FROM mysql.user WHERE User='';
+---- -- SELECT User FROM mysql.user;
+---- CREATE USER IF NOT EXISTS '$USER'@'localhost' IDENTIFIED BY '';
+---- GRANT ALL PRIVILEGES ON associations.* TO '$USER'@'localhost' WITH GRANT OPTION;
+---- CREATE USER IF NOT EXISTS 'foo'@'localhost' IDENTIFIED BY '';
+---- GRANT ALL PRIVILEGES ON *.* TO 'foo'@'localhost' WITH GRANT OPTION;
+---- FLUSH PRIVILEGES;
+---- SELECT concat(user, '  \'', password, '\'') FROM mysql.user;
 SELECT '-- Loading test data ...' AS '';
 SOURCE map/database/db-export/associations.sql;
 -- SHOW TABLES;
@@ -583,9 +532,9 @@ EOF
 
 set +e # Don't exit immediately if a command exits with a non-zero status.
 ## Install MariaDB on the first run
-dbaseDir=/var/lib/mysql/data/mysql
-if [ ! -d $dbaseDir ]; then
-    if [ $hostName == $ecke ]; then
+if [ $hostName == $ecke ]; then
+    dbaseDir=/var/lib/mysql/data/mysql
+    if [ ! -d $dbaseDir ]; then
         # printf "DBG: first run: dbaseDir doesn't exist: %s\n" $dbaseDir
         # printf "DBG: install MariaDB...\n"
 
@@ -631,22 +580,30 @@ if [ ! -d $dbaseDir ]; then
         mysqladmin --user $USER shutdown
         # printf "[DBG] install MariaDB... done\n"
     else
-        printf "TODO: not on guix-ecke machine, but on: \n" $hostName
+        printf "[DBG] first run: dbaseDir exists already: %s\n" $dbaseDir
+        { retval="$?"; set +x; } 2>/dev/null
     fi
 else
-    printf "[DBG] first run: dbaseDir exists already: %s\n" $dbaseDir
+    printf "Running on machine: %s\n" $hostName
+    set -x  # Print commands and their arguments as they are executed.
+    # mysql --user $USER << EOF
+    mysql --verbose \
+          --user=$CMAP_MYSQL_USER --password=$CMAP_MYSQL_PASSWORD \
+          --host=$CMAP_MYSQL_HOST --port=$CMAP_MYSQL_PORT \
+          --database=associations << EOF
+SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA
+    WHERE SCHEMA_NAME = 'associations';
+EOF
     { retval="$?"; set +x; } 2>/dev/null
+    if [ ! $retval -eq 0 ]; then
+        # printf "INF: DBase doesn't exist\n"
+        populate_db
+    else
+        test_db
+    fi
+
 fi
 set -e # Exit immediately if a command exits with a non-zero status.
-
-available_commands () {
-    cat << "EOF"
-Available commands:
-  version, build, deploy_dev, deploy_test, deploy_prod
-  populate_db, start_php, serve_map, serve_form
-  test_db, test_php, test_wp_dev, test_basic_auth
-EOF
-}
 
 guix_prompt () {
     cat << "EOF"
@@ -701,7 +658,16 @@ else
     neofetch --logo
 fi
 
-available_commands
+cat << "EOF"
+Available commands:
+  version, build, deploy_dev, deploy_test, deploy_prod
+  populate_db, start_php, serve_map, serve_form
+  test_db, test_php, test_wp_dev, test_basic_auth
+EOF
+
+# $GUIX_ENVIRONMENT may not be defined in PROD or TEST environemnt
+# Don't exit on error during the further execution, i.e. on the CLI
+set +e
 
 # Adjust the prompt depending on whether we're in 'guix environment'.
 if [ -n "$GUIX_ENVIRONMENT" ]
@@ -714,6 +680,3 @@ alias ls='ls -p --color=auto'
 alias ll='ls -l'
 alias grep='grep --color=auto'
 alias clear="printf '\e[2J\e[H'"
-
-# Don't exit on error in during the further execution, i.e. on the CLI
-set +e

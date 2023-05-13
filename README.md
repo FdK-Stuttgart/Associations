@@ -82,12 +82,25 @@ http://localhost:3000/api/db-vals (need to call `(reset)` when changed)
 ## Build & Deploy
 
 ```shell
+# build the app
 clj -Sforce -T:build all
 
-# specify a custom port you need to set the $PORT environment variable, eg:
-export PORT=8001
-export JDBC_URL=...
-java -jar <app>.jar
+# transfer to Test / Prod system
+remoteShell="ssh -o StrictHostKeyChecking=no -p ..." # define port number
+sync -av --rsh="$remoteShell" /path/to/cmap-standalone.jar <USER>@<HOST>:<HOST_HOME>/path/to/cmap-standalone.jar
+
+# on the Test / Prod system, define environment variables in the $HOME/.profile
+export CMAP_PORT=8002
+export CMAP_MYSQL_PASSWORD=
+# See https://www.urlencoder.io/ for special chars (=,?,& etc) in the URL
+export CMAP_MYSQL_PASSWORD_ESCAPED=
+export CMAP_MYSQL_USER=
+export CMAP_MYSQL_HOST=...
+export CMAP_MYSQL_PORT=... # typically 3306
+export CMAP_JDBC_URL="mysql://$CMAP_MYSQL_HOST:$CMAP_MYSQL_PORT/associations?user=$CMAP_MYSQL_USER&password=$CMAP_MYSQL_PASSWORD_ESCAPED"
+
+# launch the app
+java -jar $HOME/path/to/cmap-standalone.jar
 ```
 
 ## REPLs
