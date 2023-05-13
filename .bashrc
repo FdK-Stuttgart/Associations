@@ -475,10 +475,23 @@ fi
 
 test_db () {
     set -x  # Print commands and their arguments as they are executed.
-    mysql --user $USER << EOF
+    # mysql --user $USER << EOF
+    if [ $hostName == $ecke ]; then
+        mysql --user $CMAP_MYSQL_USER \
+              << EOF
 SELECT count(*) as "count-of-activities (should be ~130):"
 FROM associations.activities;
 EOF
+    else
+        mysql --verbose \
+              --user=$CMAP_MYSQL_USER --password=$CMAP_MYSQL_PASSWORD \
+              --host=$CMAP_MYSQL_HOST --port=$CMAP_MYSQL_PORT \
+              --database=associations \
+              << EOF
+SELECT count(*) as "count-of-activities (should be ~130):"
+FROM associations.activities;
+EOF
+    fi
     { retval="$?"; set +x; } 2>/dev/null
     if [ ! $retval -eq 0 ]; then
         printf "INF: \`start_db\` executed?\n"
@@ -490,7 +503,7 @@ populate_db () {
     set -x  # Print commands and their arguments as they are executed.
     # --verbose   show executed SQL commands
     if [ $hostName == $ecke ]; then
-        mysql --user $USER << EOF
+        mysql --user $CMAP_MYSQL_USER << EOF
 DROP DATABASE IF EXISTS associations;
 CREATE DATABASE IF NOT EXISTS associations;
 DELETE FROM mysql.user WHERE User='';
@@ -505,19 +518,22 @@ SOURCE map/database/db-export/associations.sql;
 -- SHOW COLUMNS IN activities;
 EOF
     else
-        sudo mysql --verbose -u root << EOF
+        mysql --verbose \
+              --user=$CMAP_MYSQL_USER --password=$CMAP_MYSQL_PASSWORD \
+              --host=$CMAP_MYSQL_HOST --port=$CMAP_MYSQL_PORT \
+              --database=associations << EOF
 DROP DATABASE IF EXISTS associations;
 CREATE DATABASE IF NOT EXISTS associations;
 -- SHOW DATABASES;
-USE mysql;
-DELETE FROM mysql.user WHERE User='';
--- SELECT User FROM mysql.user;
-CREATE USER IF NOT EXISTS '$USER'@'localhost' IDENTIFIED BY '';
-GRANT ALL PRIVILEGES ON associations.* TO '$USER'@'localhost' WITH GRANT OPTION;
-CREATE USER IF NOT EXISTS 'foo'@'localhost' IDENTIFIED BY '';
-GRANT ALL PRIVILEGES ON *.* TO 'foo'@'localhost' WITH GRANT OPTION;
-FLUSH PRIVILEGES;
-SELECT concat(user, '  \'', password, '\'') FROM mysql.user;
+---- USE mysql;
+---- DELETE FROM mysql.user WHERE User='';
+---- -- SELECT User FROM mysql.user;
+---- CREATE USER IF NOT EXISTS '$USER'@'localhost' IDENTIFIED BY '';
+---- GRANT ALL PRIVILEGES ON associations.* TO '$USER'@'localhost' WITH GRANT OPTION;
+---- CREATE USER IF NOT EXISTS 'foo'@'localhost' IDENTIFIED BY '';
+---- GRANT ALL PRIVILEGES ON *.* TO 'foo'@'localhost' WITH GRANT OPTION;
+---- FLUSH PRIVILEGES;
+---- SELECT concat(user, '  \'', password, '\'') FROM mysql.user;
 SELECT '-- Loading test data ...' AS '';
 SOURCE map/database/db-export/associations.sql;
 -- SHOW TABLES;
@@ -529,9 +545,9 @@ EOF
 
 set +e # Don't exit immediately if a command exits with a non-zero status.
 ## Install MariaDB on the first run
-dbaseDir=/var/lib/mysql/data/mysql
-if [ ! -d $dbaseDir ]; then
-    if [ $hostName == $ecke ]; then
+if [ $hostName == $ecke ]; then
+    dbaseDir=/var/lib/mysql/data/mysql
+    if [ ! -d $dbaseDir ]; then
         # printf "DBG: first run: dbaseDir doesn't exist: %s\n" $dbaseDir
         # printf "DBG: install MariaDB...\n"
 
@@ -577,22 +593,30 @@ if [ ! -d $dbaseDir ]; then
         mysqladmin --user $USER shutdown
         # printf "[DBG] install MariaDB... done\n"
     else
-        printf "TODO: not on guix-ecke machine, but on: \n" $hostName
+        printf "[DBG] first run: dbaseDir exists already: %s\n" $dbaseDir
+        { retval="$?"; set +x; } 2>/dev/null
     fi
 else
-    printf "[DBG] first run: dbaseDir exists already: %s\n" $dbaseDir
+    printf "Running on machine: %s\n" $hostName
+    set -x  # Print commands and their arguments as they are executed.
+    # mysql --user $USER << EOF
+    mysql --verbose \
+          --user=$CMAP_MYSQL_USER --password=$CMAP_MYSQL_PASSWORD \
+          --host=$CMAP_MYSQL_HOST --port=$CMAP_MYSQL_PORT \
+          --database=associations << EOF
+SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA
+    WHERE SCHEMA_NAME = 'associations';
+EOF
     { retval="$?"; set +x; } 2>/dev/null
+    if [ ! $retval -eq 0 ]; then
+        # printf "INF: DBase doesn't exist\n"
+        populate_db
+    else
+        test_db
+    fi
+
 fi
 set -e # Exit immediately if a command exits with a non-zero status.
-
-available_commands () {
-    cat << "EOF"
-Available commands:
-  version, build, deploy_dev, deploy_test, deploy_prod
-  populate_db, start_php, serve_map, serve_form
-  test_db, test_php, test_wp_dev, test_basic_auth
-EOF
-}
 
 # see https://meatfighter.com/ascii-silhouettify/color-gallery.html
 guix_prompt () {
@@ -648,7 +672,16 @@ else
     neofetch --logo
 fi
 
-available_commands
+cat << "EOF"
+Available commands:
+  version, build, deploy_dev, deploy_test, deploy_prod
+  populate_db, start_php, serve_map, serve_form
+  test_db, test_php, test_wp_dev, test_basic_auth
+EOF
+
+# $GUIX_ENVIRONMENT may not be defined in PROD or TEST environemnt
+# Don't exit on error during the further execution, i.e. on the CLI
+set +e
 
 # Adjust the prompt depending on whether we're in 'guix environment'.
 if [ -n "$GUIX_ENVIRONMENT" ]
@@ -661,6 +694,3 @@ alias ls='ls -p --color=auto'
 alias ll='ls -l'
 alias grep='grep --color=auto'
 alias clear="printf '\e[2J\e[H'"
-
-# Don't exit on error in during the further execution, i.e. on the CLI
-set +e
