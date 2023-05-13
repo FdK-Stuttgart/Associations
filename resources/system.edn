@@ -4,15 +4,16 @@
            :prod :prod}
 
  :server/http
- {:port #long #or [#env PORT 3000]
-  :host #or [#env HTTP_HOST "0.0.0.0"]
+ {:port #long #or [#env CMAP_PORT 3000]
+  :host #or [#env CMAP_HTTP_HOST "0.0.0.0"]
   :handler #ig/ref :handler/ring}
 
  :handler/ring
  {:router #ig/ref :router/core
   :api-path "/api"
-  :cookie-secret #or [#env COOKIE_SECRET "SJJHAIYDWIAELTKH"]
-  ;; from ring.middleware.defaults. anti-forgery `false` by default because services may not require it
+  :cookie-secret #or [#env CMAP_COOKIE_SECRET "SJJHAIYDWIAELTKH"]
+  ;; from ring.middleware.defaults. anti-forgery `false` by default because
+  ;; services may not require it
   :site-defaults-config {:params {:urlencoded true
                                   :multipart true
                                   :nested true
@@ -50,12 +51,21 @@
  :db.sql/migrations {:store :database,
                      :db {:datasource #ig/ref :db.sql/connection},
                      :migrate-on-init? true}
- :db.sql/connection #profile {:dev {:jdbc-url
-                                    ;; "jdbc:qlite:cmap_dev.db"
-                                    ;; "mysql://localhost:3306/associations?user=bost&password=" ;; doesn't work
-                                    "mysql://localhost:3306/associations?user=foo&password=" ;; works
-                                    },
-                              :test {:jdbc-url "jdbc:sqlite:cmap_test.db"},
-                              :prod {:jdbc-url #env JDBC_URL}}
+ :db.sql/connection
+ #profile
+ {:dev {:jdbc-url
+        ;; "jdbc:qlite:cmap_dev.db"
+
+        ;; doesn't work:
+        ;; "mysql://localhost:3306/associations?user=bost&password="
+
+        ;; works:
+        "mysql://localhost:3306/associations?user=foo&password="
+        },
+  :test {:jdbc-url "jdbc:sqlite:cmap_test.db"},
+  ;; https://www.urlencoder.io/ for special chars like '=', '?', '&' in the URL
+  ;; export CMAP_PORT=8002
+  ;; cd ~/dec/fdk/ && java -jar target/cmap-standalone.jar
+  :prod {:jdbc-url #env CMAP_JDBC_URL}}
  :reitit.routes/pages {:base-path "",
                        :env #ig/ref :system/env}}
