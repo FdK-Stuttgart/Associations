@@ -87,7 +87,7 @@ clj -Sforce -T:build all
 
 # transfer to Test / Prod system
 remoteShell="ssh -o StrictHostKeyChecking=no -p ..." # define port number
-sync -av --rsh="$remoteShell" /path/to/cmap-standalone.jar <USER>@<HOST>:<HOST_HOME>/path/to/cmap-standalone.jar
+rsync -av --rsh="$remoteShell" /path/to/cmap-standalone.jar <USER>@<HOST>:<HOST_HOME>/path/to/cmap-standalone.jar
 
 # on the Test / Prod system, define environment variables in the $HOME/.profile
 export CMAP_PORT=8002
