@@ -18,12 +18,15 @@
 
 ;; Routes
 (defn page-routes [_opts]
-  [["/" {:get home}]])
+  [
+   ;; http://localhost:3000/
+   ["/" {:get home}]
+   ])
 
 (defn route-data [opts]
   (merge
    opts
-   {:middleware 
+   {:middleware
     [;; Default middleware for pages
      (wrap-page-defaults)
      ;; query-params & form-params
@@ -41,4 +44,3 @@
       :as   opts}]
   (layout/init-selmer!)
   [base-path (route-data opts) (page-routes opts)])
-
