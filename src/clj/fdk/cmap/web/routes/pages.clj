@@ -23,6 +23,9 @@
   [
    ;; http://localhost:3000/
    ["/" {:get home}]
+
+   ;; http://localhost:3000/import
+   ["/import" {:get home :import true}]
    ])
 
 (defn route-data [opts]
