@@ -113,3 +113,136 @@ ORDER BY associationId
 -- :doc restart `lein run` to see changes; select * from activities where label in ('Ausstellungen', 'Turniere')
 select * from activities row limit 3
 
+-- ########################################################################################
+-- See map/database/api/associations/create-all-associations.php
+-- ########################################################################################
+
+-- :name insert-association :! :n
+-- :doc create a new association
+INSERT INTO associations SET
+    id = :id,
+    name = :name,
+    shortName = :shortName,
+    lat = :lat,
+    lng = :lng,
+    addressLine1 = :addressLine1,
+    addressLine2 = :addressLine2,
+    addressLine3 = :addressLine3,
+    street = :street,
+    postcode = :postcode,
+    city = :city,
+    country = :country,
+    goals_format = :goals_format,
+    goals_text = :goals_text,
+    activities_format = :activities_format,
+    activities_text = :activities_text,
+    districtList = :districtList,
+    activityList = :activityList,
+    current = 1
+ON DUPLICATE KEY UPDATE
+    name = :name,
+    shortName = :shortName,
+    lat = :lat,
+    lng = :lng,
+    addressLine1 = :addressLine1,
+    addressLine2 = :addressLine2,
+    addressLine3 = :addressLine3,
+    street = :street,
+    postcode = :postcode,
+    city = :city,
+    country = :country,
+    goals_format = :goals_format,
+    goals_text = :goals_text,
+    activities_format = :activities_format,
+    activities_text = :activities_text,
+    districtList = :districtList,
+    activityList = :activityList,
+    current = 1
+
+
+-- :name update-contact :! :n
+-- :doc update contact
+UPDATE contacts SET current = 0 WHERE associationId = :id
+
+
+-- :name insert-contact :! :n
+-- :doc insert a new contact
+INSERT INTO contacts SET id = :contactId,
+    name = :contactName,
+    poBox = :poBox,
+    phone = :phone,
+    mail = :mail,
+    fax = :fax,
+    associationId = :id,
+    orderIndex = :index,
+    current = 1
+ON DUPLICATE KEY UPDATE
+    name = :contactName,
+    poBox = :poBox,
+    phone = :phone,
+    mail = :mail,
+    fax = :fax,
+    associationId = :id,
+    orderIndex = :index,
+    current = 1
+
+-- :name update-image :! :n
+-- :doc update image
+UPDATE images SET current = 0 WHERE associationId = :id
+
+-- :name insert-image :! :n
+-- :doc insert a new image
+INSERT INTO images SET id = :imageId,
+    url = :url,
+    altText = :altText,
+    associationId = :id,
+    orderIndex = :index,
+    current = 1
+ON DUPLICATE KEY UPDATE
+    url = :url,
+    altText = :altText,
+    associationId = :id,
+    orderIndex = :index,
+    current = 1
+
+-- :name update-link :! :n
+-- :doc update link
+UPDATE links SET current = 0 WHERE associationId = :id
+
+
+-- :name insert-link :! :n
+-- :doc insert a new link
+INSERT INTO links SET id = :linkId,
+    url = :url,
+    linkText = :linkText,
+    associationId = :id,
+    orderIndex = :index,
+    current = 1
+ON DUPLICATE KEY UPDATE
+    url = :url,
+    linkText = :linkText,
+    associationId = :id,
+    orderIndex = :index,
+    current = 1
+
+-- :name update-socialmedia :! :n
+-- :doc update socialmedia
+UPDATE socialmedia SET current = 0 WHERE associationId = :id
+
+
+-- :name insert-socialmedia :! :n
+-- :doc insert a new socialmedia
+INSERT INTO socialmedia SET id = :socialMediaId,
+    platform = :platform,
+    url = :url,
+    linkText = :linkText,
+    associationId = :id,
+    orderIndex = :index,
+    current = 1
+ON DUPLICATE KEY UPDATE
+    platform = :platform,
+    url = :url,
+    linkText = :linkText,
+    associationId = :id,
+    orderIndex = :index,
+    current = 1
