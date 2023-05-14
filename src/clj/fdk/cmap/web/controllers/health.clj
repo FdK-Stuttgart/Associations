@@ -11,9 +11,11 @@
   [req]
   (http-response/ok
     {:time     (str (Date. (System/currentTimeMillis)))
-     :up-since (str (Date. (.getStartTime (java.lang.management.ManagementFactory/getRuntimeMXBean))))
-     :app      {:status  "up"
-                :message ""}}))
+     :up-since ((comp str
+                      (fn [v] (Date. v))
+                      (fn [v] (.getStartTime v)))
+                (java.lang.management.ManagementFactory/getRuntimeMXBean))
+     :app      {:status  "up" :message ""}}))
 
 (defn read-db
   [{{:strs [x y]} :form-params :as request}]

@@ -28,6 +28,8 @@
  io.github.kit-clj/kit-mysql {:mvn/version "1.0.3"}
            ;; From https://github.com/kit-clj/kit/blob/master/libs/kit-mysql/deps.edn
  mysql/mysql-connector-java {:mvn/version "8.0.30"}
+
+           ;; Django inspired template system in Clojure
  selmer/selmer {:mvn/version "1.12.58"}
  luminus/ring-ttl-session {:mvn/version "0.3.3"}}
  :aliases
