@@ -12,7 +12,7 @@
  ring/ring-defaults {:mvn/version "0.3.4"}
 
            ;; Logging
- ch.qos.logback/logback-classic {:mvn/version "1.4.7"}
+ ch.qos.logback/logback-classic {:mvn/version "1.4.8"}
 
            ;; Data coercion
  luminus-transit/luminus-transit {:mvn/version "0.1.6"
@@ -21,10 +21,10 @@
 
            ;; kit Libs
  io.github.kit-clj/kit-core {:mvn/version "1.0.3"}
- io.github.kit-clj/kit-undertow {:mvn/version "1.0.4"}
+ io.github.kit-clj/kit-undertow {:mvn/version "1.0.5"}
  io.github.kit-clj/kit-sql-conman {:mvn/version "1.0.7"}
  io.github.kit-clj/kit-sql-migratus {:mvn/version "1.0.3"}
- org.xerial/sqlite-jdbc {:mvn/version "3.41.2.1"}
+ org.xerial/sqlite-jdbc {:mvn/version "3.42.0.0"}
  io.github.kit-clj/kit-mysql {:mvn/version "1.0.3"}
            ;; From https://github.com/kit-clj/kit/blob/master/libs/kit-mysql/deps.edn
  mysql/mysql-connector-java {:mvn/version "8.0.30"}
@@ -42,8 +42,8 @@
                                                 :git/url "https://github.com/clojure/tools.build.git"}
                  slipset/deps-deploy {:mvn/version "0.2.1"}
                  weavejester/dependency {:mvn/version "0.2.1"}
-                 babashka/fs {:mvn/version "0.3.17"}
-                 babashka/process {:mvn/version "0.4.16"}}
+                 babashka/fs {:mvn/version "0.4.19"}
+                 babashka/process {:mvn/version "0.5.21"}}
           :ns-default build}
 
 
@@ -61,7 +61,7 @@
   :nrepl {:extra-deps {nrepl/nrepl {:mvn/version "1.0.0"}}
           :main-opts  ["-m" "nrepl.cmdline" "-i"]}
   :cider {:extra-deps {nrepl/nrepl       {:mvn/version "1.0.0"}
-                       cider/cider-nrepl {:mvn/version "0.30.0"}}
+                       cider/cider-nrepl {:mvn/version "0.31.0"}}
           :main-opts  ["-m" "nrepl.cmdline" "--middleware" "[cider.nrepl/cider-middleware]" "-i"]}
 
   :test {:extra-deps  {criterium/criterium                  {:mvn/version "0.4.6"}
