@@ -235,10 +235,11 @@
                      count-vals-init (count tab-items-init)]
                  (when-not (= count-vals count-vals-init)
                    (gstr/format " (%s/%s)" count-vals count-vals-init))))
-          :render (fn [] (tab1 markers db-vals))})
+          :render (fn [] (tab1 markers tab-items))})
 
        (let [tab-items
              ((comp
+               #_
                (partial filter
                         (fn [m]
                           (subs/in?
@@ -257,12 +258,7 @@
                      count-vals-init (count tab-items-init)]
                  (when-not (= count-vals count-vals-init)
                    (gstr/format " (%s/%s)" count-vals count-vals-init))))
-          :render
-          (fn []
-            ((comp
-              (partial tab1)
-              #_(partial take 2))
-             tab-items))})]}]))
+          :render (fn [] (tab1 markers tab-items))})]}]))
 
 (defn filter-db-vals
   "Return a list of pattern-filtered db-vals."
