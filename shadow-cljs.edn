@@ -31,7 +31,6 @@
  :build-defaults
  {:build-hooks [(shadow-git-inject.core/hook)]}
 
-
  :builds       {:app {:target     :browser
                       :output-dir "target/classes/cljsbuild/public/js"
                       :asset-path "/js"
