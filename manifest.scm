@@ -18,6 +18,10 @@
 
    ;; see also `guix search clojure'
    "clojure"
+   ;; "clojure-lsp" ;; needed only for emacs
+
+   ;; CLI tools to start a Clojure repl, use Clojure and Java libraries, and
+   ;; start Clojure programs. See https://clojure.org/releases/tools
    "clojure-tools" ; adding this makes clojure binary available on the CLI
 
    "coreutils"
@@ -36,7 +40,7 @@
    "mariadb"
    ;; "mariadb:lib" ; see the 'sed ...'-hack in the .bashrc
 
-   "node@18.16.0"
+   "node"
 
    ;; https://github.com/dbcli/mycli/issues/534
    ;; $ mycli --user bost
