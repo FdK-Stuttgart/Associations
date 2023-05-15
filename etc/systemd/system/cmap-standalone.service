@@ -1,0 +1,22 @@
+[Unit]
+Description=CMAP Standalone Service
+After=network.target
+
+[Service]
+# User, WorkingDirectory may not be needed.
+# See https://kit-clj.github.io/docs/deployment.html
+User=bostino
+WorkingDirectory=/home/bostino/dec/fdk/target
+## Defining environment variables using 'Environment=...' doesn't work. The error is
+##   Failed to resolve specifiers in CMAP_JDBC_URL="...", ignoring: Invalid slot
+# Environment="CMAP_PORT=..."
+# Environment="CMAP_JDBC_URL=\"...\""
+EnvironmentFile=/etc/cmap-standalone.env
+ExecStart=/usr/bin/java -jar /home/bostino/dec/fdk/target/cmap-standalone.jar
+SuccessExitStatus=143
+TimeoutStopSec=10
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

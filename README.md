@@ -99,8 +99,33 @@ export CMAP_MYSQL_HOST=...
 export CMAP_MYSQL_PORT=... # typically 3306
 export CMAP_JDBC_URL="mysql://$CMAP_MYSQL_HOST:$CMAP_MYSQL_PORT/associations?user=$CMAP_MYSQL_USER&password=$CMAP_MYSQL_PASSWORD_ESCAPED"
 
-# launch the app
+# launch the app from the CLI
 java -jar $HOME/path/to/cmap-standalone.jar
+```
+
+## Run as a SystemD service
+
+```shell
+# On the target machine
+sudo mkdir -p /etc/systemd/system/
+sudo cp etc/systemd/system/cmap-standalone.service /etc/systemd/system/cmap-standalone.service
+
+# Enable the service to start at boot time:
+sudo systemctl enable cmap-standalone
+
+# When editing the cmap-standalone.service, reload the systemd manager
+# configuration:
+sudo systemctl daemon-reload
+
+# (Re)Start the service immediately:
+# sudo systemctl start cmap-standalone
+sudo systemctl restart cmap-standalone
+
+# Check the status of your service:
+sudo systemctl status cmap-standalone
+
+# Inspect / view the log file:
+sudo journalctl -u cmap-standalone -f
 ```
 
 ## REPLs
