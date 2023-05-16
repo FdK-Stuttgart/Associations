@@ -14,10 +14,12 @@
   )
 
 (defn wrap-page-defaults []
-  (let [error-page (layout/error-page
-                     {:status 403
-                      :title "Invalid anti-forgery token"})]
-    #(wrap-anti-forgery % {:error-response error-page})))
+  ;; See https://clojureverse.org/t/anti-forgery-token-error-when-calling-a-clojure-function-in-luminus/7965/6
+  ;; (let [error-page (layout/error-page
+  ;;                    {:status 403
+  ;;                     :title "Invalid anti-forgery token"})]
+  ;;   #(wrap-anti-forgery % {:error-response error-page}))
+  )
 
 (defn home [request]
   (layout/render request "home.html"))
