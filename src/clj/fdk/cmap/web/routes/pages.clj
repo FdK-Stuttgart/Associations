@@ -8,6 +8,8 @@
     [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]))
 
 (defn wrap-page-defaults []
+  ;; See https://clojureverse.org/t/anti-forgery-token-error-when-calling-a-clojure-function-in-luminus/7965/6
+  #_
   (let [error-page (layout/error-page
                      {:status 403
                       :title "Invalid anti-forgery token"})]
