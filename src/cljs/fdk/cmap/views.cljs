@@ -314,9 +314,73 @@
    (fn [x] (.-value x))
    (fn [x] (.-target x))))
 
+(defn handle-upload [e]
+;;; for (const file of event.files) {
+;;;   this.uploadedFiles.push(file);
+;;;   const reader: FileReader = new FileReader();
+;;;   const bs = reader.readAsBinaryString(file);
+;;;   reader.onload = (e) => {
+;;;     const binaryResult = reader.result;
+;;;     const wb: XLSX.WorkBook = XLSX.read(binaryResult, {type: 'binary'});
+;;;     const wsname: string = wb.SheetNames[0];
+;;;     const ws: XLSX.WorkSheet = wb.Sheets[wsname];
+;;;     const assocs: Association[] = getAssociations(this.districtOptions, ws);
+;;;   };
+;;; }
+  (let [file
+        ;; get the file from the event
+        ;; two dots: clojurescript interop
+        (.. e -target -files (item 0))
+        ;; (-> e .-target .-files (.item 0))
+
+        reader (js/FileReader.)]
+    ;; (.readAsText reader file)
+    (.readAsBinaryString reader file)
+    (.addEventListener reader "load"
+                       (fn [load-event]
+                         (let [file-contents
+                               ;; get the result from the reader, not the event
+                               ;; (-> e .-target .-result)
+                               (.-result reader)]
+                           #_(js/console.log "file-contents" file-contents))))))
+
+;; #+BEGIN_SRC bash :results output :exports both
+;; # evaluate: ~C-c C-C~
+;; rg --no-ignore-vcs -g '*.{clj,cljs}' "POST" $dec
+;; #+END_SRC
+
+;; #+RESULTS:
+;; #+begin_example
+;; /home/bost/dec/corona_cases/src/corona/web/core.clj:  (cjc/POST
+;; /home/bost/dec/corona_cases/src/corona/web/core.clj:               ;; (POST "..." {body :body} ...)
+;; /home/bost/dec/covid-survey/src/shouter/controllers/shouts.clj:  (:require [compojure.core :refer [defroutes GET POST]]
+;; /home/bost/dec/covid-survey/src/shouter/controllers/shouts.clj:  (POST "/survey/beec7b5ea3f0fdbc95d0dd47f3c5bc27" [shout] (hello-user {:name ""})))
+;; /home/bost/dec/maps/reagent-openlayers/out/clojure/browser/repl.cljs:  (net/transmit connection url "POST" data nil 0))
+;; /home/bost/dec/maps/reagent-openlayers/out/clojure/browser/repl.cljs:     (net/transmit conn url "POST" data nil 0))))
+;; /home/bost/dec/maps/openlayers-lipas/webapp/src/clj/lipas/backend/middleware.clj:(def allow-methods "GET, PUT, PATCH, POST, DELETE, OPTIONS")
+;; /home/bost/dec/ufo/src/clj/ufo/server.clj:  (POST "/"    [] "Create something")
+;; #+end_example
+
+
+(defn file-upload []
+  (fn []
+    [:div {:style {:color "black"}}
+     "Select an ODS file: "
+     [:form {:action "/api/import" :enc-type "multipart/form-data" :method "POST"}
+      #_(anti-forgery-field)
+      [:input {:id "file"
+               :name "file"
+               :type "file"
+               :accept ".ods"
+               :title "some-title"
+               :on-change handle-upload
+               }]
+      [:input {:type "submit" :value "upload"}]]]))
+
 (defn right [markers]
   [:div
    [:div.color-input
+    [file-upload]
     [:input {:type "text"
              :placeholder (de :fdk.cmap.lang/search-hint)
              :on-change (on-change-fn markers)
