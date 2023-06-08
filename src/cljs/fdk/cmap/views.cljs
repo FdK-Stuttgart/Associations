@@ -345,6 +345,9 @@
        name)
       105))
 
+(defn max-size-x [map-elem] (-> map-elem .getSize .-x))
+(defn max-size-y [map-elem] (-> map-elem .getSize .-y))
+
 (defn create-markers [db-vals]
   ((comp
     (partial reduce into {})
@@ -365,6 +368,7 @@
 
 (def map-size-x-atom (reagent/atom nil))
 (def map-size-y-atom (reagent/atom nil))
+
 (defn create-map [map-elem center-map]
   (let [map (-> map-elem
                         (.setView (let [[longitude latitude] center-map]
@@ -429,38 +433,46 @@
 ;;; drag       Event         Fired continuously during dragging.
 ;;; dragend    DragEndEvent  Fired when the drag ends .
 ;;; #_
-      (let [store-map-size-x-fn
-            (fn [_]
-              (reset! map-size-x-atom (-> map-elem .getSize .-x)))
-            store-map-size-y-fn
-            (fn [_]
-              (reset! map-size-y-atom (-> map-elem .getSize .-y)))
+      (let [r (.getElementById js/document "r")
 
+            store-map-size-x-fn
+            (fn [_] (reset! map-size-x-atom (max-size-x map-elem)))
+            store-map-size-y-fn
+            (fn [_] (reset! map-size-y-atom (max-size-y map-elem)))
 
             resize-r-x-fn
             (fn [_]
-              (let [r (.getElementById js/document "r")
-                    diff-x (- (-> map-elem .getSize .-x)
-                              @map-size-x-atom)]
+              (let [diff-x (- (max-size-x map-elem)
+                              @map-size-x-atom)
+
+                    nvx ((comp
+                          #_(fn [v] (- v 16))
+                          #_(fn [v] (js/console.log "1" v) v))
+                          (+ (-> r .-offsetWidth #_.-clientWidth)
+                             (- diff-x)))]
                 #_
                 (js/console.log "x"
                                 "(-> r .-clientWidth)" (-> r .-clientWidth)
-                                "diff-x" diff-x)
-                (set! (-> r .-style .-width)
-                      (str (+ (-> r .-offsetWidth #_.-clientWidth)
-                              (- diff-x)) "px"))))
+                                "diff-x" diff-x
+                                "nvx" nvx)
+                (set! (-> r .-style .-width) (str nvx "px"))))
+
             resize-r-y-fn
             (fn [_]
-              (let [r (.getElementById js/document "r")
-                    diff-y (- (-> map-elem .getSize .-y)
-                              @map-size-y-atom)]
+              (let [diff-y (- (max-size-y map-elem)
+                              @map-size-y-atom)
+                    nvy ((comp
+                          #_(fn [v] (min (.-innerHeight js/window) v))
+                          #_(fn [v] (js/console.log "1" v) v))
+                         (+ (-> r .-offsetHeight #_.-clientHeight)
+                            (+ diff-y)))
+                    ]
                 #_
                 (js/console.log "y"
                                 "(-> r .-clientHeight)" (-> r .-clientHeight)
-                                "diff-y" diff-y)
-                (set! (-> r .-style .-height)
-                      (str (+ (-> r .-offsetHeight #_.-clientHeight)
-                              (+ diff-y)) "px"))))]
+                                "diff-y" diff-y
+                                "nvy" nvy)
+                (set! (-> r .-style .-height) (str nvy "px"))))]
         (js/L.DomEvent.on south-east "down"    (fn [e]
                                                  (store-map-size-x-fn e)
                                                  (store-map-size-y-fn e)))
