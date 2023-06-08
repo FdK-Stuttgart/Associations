@@ -28,7 +28,9 @@
     ;; newly created apps.
     ;; https://react.dev/reference/react/StrictMode#enabling-strict-mode-for-entire-app
     (fn [v]
-      #_(js/console.log "[init]" "react/StrictMode")
+      ;; (js/console.log "[init]" "react/StrictMode")
+      ;; (js/console.log "[init]" "(.-innerWidth js/window)"
+      ;;                 (.-innerWidth js/window))
       [:> react/StrictMode {} v]))
    (.render root (r/as-element [views/main-panel]))))
 

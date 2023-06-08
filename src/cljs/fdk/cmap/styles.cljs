@@ -66,6 +66,9 @@
 (def top "0px")
 (def bottom "40px") ;; 10px
 
+;; vw Relative to 1% of the width of the viewport*
+(def assoc-list-width "15vw")
+
 (defclass c []
   {
    :width "100%"
@@ -78,8 +81,13 @@
    :left "0px"
    :top top
    :bottom bottom
-   :right "400px"
+   :right assoc-list-width
    :background "grey"
+   ;; max-width max-height 99.5 - i.e don't drag the mouse out of the screen
+   ;; :max-width "99vw" :max-height "99vh"
+   :max-width "99.5vw" :max-height "99.5vh"
+   ;; :max-width "100vw" :max-height "100vh"
+   ;; :max-width "100%" :max-height "100%"
    })
 
 (defclass fill []
@@ -93,10 +101,11 @@
 (defclass r []
   {
    :position "absolute"
-   :right "0px"
+   :right (str 0 "px")
+   ;; :padding (str padding "px")
    :top top
    :bottom bottom
-   :width "400px"
+   :width assoc-list-width
    :color "#fff"
    :background "black"
    })
