@@ -24,4 +24,6 @@
                  :response-format (ajax/raw-response-format)
                  :on-success      [:set-db-associations]}}))
 
-(rf/reg-event-fx :page/init-db     (fn [_ _] {:dispatch [:fetch-from-db]}))
+;; (rf/reg-event-fx
+;;  :page/init-db
+;;  (fn [_ _] {:dispatch [:fetch-from-db]}))
