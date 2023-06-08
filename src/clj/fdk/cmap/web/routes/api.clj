@@ -8,7 +8,10 @@
     [reitit.ring.coercion :as coercion]
     [reitit.ring.middleware.muuntaja :as muuntaja]
     [reitit.ring.middleware.parameters :as parameters]
-    [reitit.swagger :as swagger]))
+    [reitit.swagger :as swagger]
+    [clojure.tools.logging :as log]
+    )
+  )
 
 ;; Routes
 (defn api-routes [_opts]
@@ -31,7 +34,13 @@
       :handler health/read-db}}]
 
    ;; http://localhost:3000/api/db-vals
-   ["/db-vals" {:get health/read-db}]]
+   ["/db-vals" {:get health/read-db}]
+
+   ["/import" {:post
+               {
+                :handler health/write-db}
+               }]
+   ]
   )
 
 (defn route-data

@@ -5,7 +5,7 @@
 wd=$(pwd) # WD=$(dirname "$0") # working directory, i.e. path to this file
 
 # MariaDB
-sed -i -e "s|#mysql_user#|$(whoami)|" $wd/etc/my.cnf
+sed -i -e "s|#mysql_user#|$(whoami)|" $wd/usr/etc/my.cnf
 
 # Recreate the dirs destroyed by `git clean --force -dx`. See also .bashrc
 for extraDirs in \
@@ -41,6 +41,8 @@ fi
 # Following is needed by clojure.inspector:
 # --preserve=^DISPLAY$ --preserve=^XAUTHORITY$ \
 # --share=/run/user/1000/gdm/Xauthority=/run/user/1000/gdm/Xauthority \
+# or, when the GDM is not used, try:
+# --share=/run/user/1000/ICEauthority=/run/user/1000/ICEauthority \
 
 # No shell is started when the '--search-paths' parameter is used. Only the
 # variables making up the environment are displayed.
@@ -64,7 +66,10 @@ fi
 # for rlwrap called via `clj -M:dev:nrepl`
 # --preserve=^TERM$
 
-set -x
+# ~/.gnupg can't be just 'exposed', it must be shared due to
+# gpg: failed to create temporary file '...': Read-only file system
+
+set -x # Print commands and their arguments as they are executed.
 guix shell \
      --root=./persistent-profile \
      --manifest=manifest.scm \
@@ -72,20 +77,23 @@ guix shell \
      --preserve=^TERM$ \
      --preserve=^fdk \
      --preserve=^CMAP \
+     --preserve=^GPG_TTY$ --preserve=^DIRENV_LOG_FORMAT$ \
      --preserve=^DISPLAY$ --preserve=^XAUTHORITY$ \
-     --share=/run/user/1000/gdm/Xauthority=/run/user/1000/gdm/Xauthority \
+     --share=/run/user/1000/ICEauthority=/run/user/1000/ICEauthority \
      --share=/usr/bin \
      --share=/etc/localtime=/etc/localtime \
      --share=$HOME/.bash_history=$HOME/.bash_history \
      --share=$HOME/.config/fish=$HOME/.config/fish \
      --share=$HOME/.gitconfig=$HOME/.gitconfig \
      --share=$HOME/.m2/=$HOME/.m2/ \
-     --share=$HOME/.ssh/=$HOME/.ssh/ \
+     --expose=$HOME/.ssh \
+     --share=$HOME/.gnupg=$HOME/.gnupg \
      --share=$HOME/dec/fdk=$HOME/dec/fdk \
      --share=$wd/.bash_profile=$HOME/.bash_profile \
      --share=$wd/.bashrc=$HOME/.bashrc \
-     --share=$wd/.envrc=$HOME/.envrc \
-     --share=$wd/etc=/usr/etc \
+     --share=$HOME/.local/share/direnv=$HOME/.local/share/direnv \
+     --share=$HOME/.envrc=$HOME/.envrc \
+     --share=$wd/usr/etc=/usr/etc \
      --share=$wd/map/app-form/node_modules=$HOME/node_modules/map/app-form/ \
      --share=$wd/map/app-map/node_modules=$HOME/node_modules/map/app-map/ \
      --share=$wd/node_modules=$HOME/node_modules \

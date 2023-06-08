@@ -235,10 +235,11 @@
                      count-vals-init (count tab-items-init)]
                  (when-not (= count-vals count-vals-init)
                    (gstr/format " (%s/%s)" count-vals count-vals-init))))
-          :render (fn [] (tab1 markers db-vals))})
+          :render (fn [] (tab1 markers tab-items))})
 
        (let [tab-items
              ((comp
+               #_
                (partial filter
                         (fn [m]
                           (subs/in?
@@ -257,12 +258,7 @@
                      count-vals-init (count tab-items-init)]
                  (when-not (= count-vals count-vals-init)
                    (gstr/format " (%s/%s)" count-vals count-vals-init))))
-          :render
-          (fn []
-            ((comp
-              (partial tab1)
-              #_(partial take 2))
-             tab-items))})]}]))
+          :render (fn [] (tab1 markers tab-items))})]}]))
 
 (defn filter-db-vals
   "Return a list of pattern-filtered db-vals."
@@ -318,9 +314,75 @@
    (fn [x] (.-value x))
    (fn [x] (.-target x))))
 
+(defn handle-upload [e]
+;;; for (const file of event.files) {
+;;;   this.uploadedFiles.push(file);
+;;;   const reader: FileReader = new FileReader();
+;;;   const bs = reader.readAsBinaryString(file);
+;;;   reader.onload = (e) => {
+;;;     const binaryResult = reader.result;
+;;;     const wb: XLSX.WorkBook = XLSX.read(binaryResult, {type: 'binary'});
+;;;     const wsname: string = wb.SheetNames[0];
+;;;     const ws: XLSX.WorkSheet = wb.Sheets[wsname];
+;;;     const assocs: Association[] = getAssociations(this.districtOptions, ws);
+;;;   };
+;;; }
+  (let [file
+        ;; get the file from the event
+        ;; two dots: clojurescript interop
+        (.. e -target -files (item 0))
+        ;; (-> e .-target .-files (.item 0))
+
+        reader (js/FileReader.)]
+    ;; (.readAsText reader file)
+    (.readAsBinaryString reader file)
+    (.addEventListener reader "load"
+                       (fn [load-event]
+                         (let [file-contents
+                               ;; get the result from the reader, not the event
+                               ;; (-> e .-target .-result)
+                               (.-result reader)]
+                           #_(js/console.log "file-contents" file-contents))))))
+
+;; #+BEGIN_SRC bash :results output :exports both
+;; # evaluate: ~C-c C-C~
+;; rg --no-ignore-vcs -g '*.{clj,cljs}' "POST" $dec
+;; #+END_SRC
+
+;; #+RESULTS:
+;; #+begin_example
+;; /home/bost/dec/corona_cases/src/corona/web/core.clj:  (cjc/POST
+;; /home/bost/dec/corona_cases/src/corona/web/core.clj:               ;; (POST "..." {body :body} ...)
+;; /home/bost/dec/covid-survey/src/shouter/controllers/shouts.clj:  (:require [compojure.core :refer [defroutes GET POST]]
+;; /home/bost/dec/covid-survey/src/shouter/controllers/shouts.clj:  (POST "/survey/beec7b5ea3f0fdbc95d0dd47f3c5bc27" [shout] (hello-user {:name ""})))
+;; /home/bost/dec/maps/reagent-openlayers/out/clojure/browser/repl.cljs:  (net/transmit connection url "POST" data nil 0))
+;; /home/bost/dec/maps/reagent-openlayers/out/clojure/browser/repl.cljs:     (net/transmit conn url "POST" data nil 0))))
+;; /home/bost/dec/maps/openlayers-lipas/webapp/src/clj/lipas/backend/middleware.clj:(def allow-methods "GET, PUT, PATCH, POST, DELETE, OPTIONS")
+;; /home/bost/dec/ufo/src/clj/ufo/server.clj:  (POST "/"    [] "Create something")
+;; #+end_example
+
+
+(defn file-upload []
+  (fn []
+    [:div {:style {:color "black"}}
+     "Select an ODS file: "
+     [:form {:action "/api/import" :enc-type "multipart/form-data" :method "POST"}
+      #_(anti-forgery-field)
+      [:input {:id "file"
+               :name "file"
+               :type "file"
+               :accept ".ods"
+               :title "some-title"
+               :on-change handle-upload
+               ;; The only way to set the value of a file input is by the user to select a file.
+               ;; :value "/home/bost/Downloads/Vereinsinformationen_öffentlich_Stadtteilkarte.ods"
+               }]
+      [:input {:type "submit" :value "upload"}]]]))
+
 (defn right [markers]
   [:div
    [:div.color-input
+    [file-upload]
     [:input {:type "text"
              :placeholder (de :fdk.cmap.lang/search-hint)
              :on-change (on-change-fn markers)
@@ -345,6 +407,9 @@
        name)
       105))
 
+(defn max-size-x [map-elem] (-> map-elem .getSize .-x))
+(defn max-size-y [map-elem] (-> map-elem .getSize .-y))
+
 (defn create-markers [db-vals]
   ((comp
     (partial reduce into {})
@@ -365,6 +430,12 @@
 
 (def map-size-x-atom (reagent/atom nil))
 (def map-size-y-atom (reagent/atom nil))
+
+(def copyright-osm
+  (gstr/format "&copy; <a href=\"%s\">%s</a> contributors"
+               "https://www.openstreetmap.org/copyright"
+               "OpenStreetMap"))
+
 (defn create-map [map-elem center-map]
   (let [map (-> map-elem
                         (.setView (let [[longitude latitude] center-map]
@@ -378,30 +449,53 @@
 
         basemaps
         {
-         :OpenStreetMap.Mapnik
-         (js/L.tileLayer
-          "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-          #js {:maxZoom 19
-               :attribution "&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors"})
-
-         :OpenStreetMap.DE
-         (js/L.tileLayer
-          "https://{s}.tile.openstreetmap.de/{z}/{x}/{y}.png"
-          #js {:maxZoom 18
-               :attribution "&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors"})
-
-         :stadiamaps
+         :stadiamaps.OSMBright
          (js/L.tileLayer
           "https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png"
           #js {:maxZoom 20
+	             :attribution
+               (gstr/format
+                "%s, %s, %s"
+                "&copy; <a href=\"https://stadiamaps.com/\">Stadia Maps</a>"
+                "&copy; <a href=\"https://openmaptiles.org/\">OpenMapTiles</a>"
+                copyright-osm)})
+          :USGS_USTopo
+         (js/L.tileLayer
+          "https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}"
+          #js {:maxZoom 20 :attribution
+               (gstr/format "Tiles courtesy of the <a href=\"%s\">%s</a>"
+                            "https://usgs.gov/"
+                            "U.S. Geological Survey")})
+
+         :OpenStreetMap.Mapnik
+         (js/L.tileLayer "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+                         #js {:maxZoom 19 :attribution copyright-osm})
+
+         :OpenStreetMap.DE
+         (js/L.tileLayer "https://{s}.tile.openstreetmap.de/{z}/{x}/{y}.png"
+                         #js {:maxZoom 18 :attribution copyright-osm})
+
+         :stadiamaps.Alidade_Smooth
+         (js/L.tileLayer
+          "https://tiles-eu.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png"
+          #js {:minZoom 00
+               :maxZoom 20
+               :ext "png"
                :attribution
-               (str "&copy; <a href=\"https://stadiamaps.com/\">Stadia Maps</a>"
-                    ", &copy; <a href=\"https://openmaptiles.org/\">OpenMapTiles</a>"
-                    " &copy; <a href=\"http://openstreetmap.org\">OpenStreetMap</a> contributors")})}
+               (gstr/format "%s, %s, %s"
+                            "&copy; <a href=\"https://stadiamaps.com/\" target=\"_blank\">Stadia Maps</a>"
+                            "&copy; <a href=\"https://openmaptiles.org/\" target=\"_blank\">OpenMapTiles</a>"
+                            "&copy; <a href=\"https://www.openstreetmap.org/about\" target=\"_blank\">OpenStreetMap</a> contributors")})
+         }
         ;; The js/L.control.layers doesn't work
         ;; layers (js/L.control.layers basemaps)
 
-        layer (:OpenStreetMap.DE basemaps)]
+        layer (
+               :stadiamaps.Alidade_Smooth
+               ;; :stadiamaps.OSMBright
+               ;; :USGS_USTopo
+               ;; :OpenStreetMap.DE
+               basemaps)]
     ;; (js/console.log "layers" layers)
     ;; (js/console.log "layer" layer)
     #_(.addTo layers map)
@@ -429,38 +523,46 @@
 ;;; drag       Event         Fired continuously during dragging.
 ;;; dragend    DragEndEvent  Fired when the drag ends .
 ;;; #_
-      (let [store-map-size-x-fn
-            (fn [_]
-              (reset! map-size-x-atom (-> map-elem .getSize .-x)))
-            store-map-size-y-fn
-            (fn [_]
-              (reset! map-size-y-atom (-> map-elem .getSize .-y)))
+      (let [r (.getElementById js/document "r")
 
+            store-map-size-x-fn
+            (fn [_] (reset! map-size-x-atom (max-size-x map-elem)))
+            store-map-size-y-fn
+            (fn [_] (reset! map-size-y-atom (max-size-y map-elem)))
 
             resize-r-x-fn
             (fn [_]
-              (let [r (.getElementById js/document "r")
-                    diff-x (- (-> map-elem .getSize .-x)
-                              @map-size-x-atom)]
+              (let [diff-x (- (max-size-x map-elem)
+                              @map-size-x-atom)
+
+                    nvx ((comp
+                          #_(fn [v] (- v 16))
+                          #_(fn [v] (js/console.log "1" v) v))
+                          (+ (-> r .-offsetWidth #_.-clientWidth)
+                             (- diff-x)))]
                 #_
                 (js/console.log "x"
                                 "(-> r .-clientWidth)" (-> r .-clientWidth)
-                                "diff-x" diff-x)
-                (set! (-> r .-style .-width)
-                      (str (+ (-> r .-offsetWidth #_.-clientWidth)
-                              (- diff-x)) "px"))))
+                                "diff-x" diff-x
+                                "nvx" nvx)
+                (set! (-> r .-style .-width) (str nvx "px"))))
+
             resize-r-y-fn
             (fn [_]
-              (let [r (.getElementById js/document "r")
-                    diff-y (- (-> map-elem .getSize .-y)
-                              @map-size-y-atom)]
+              (let [diff-y (- (max-size-y map-elem)
+                              @map-size-y-atom)
+                    nvy ((comp
+                          #_(fn [v] (min (.-innerHeight js/window) v))
+                          #_(fn [v] (js/console.log "1" v) v))
+                         (+ (-> r .-offsetHeight #_.-clientHeight)
+                            (+ diff-y)))
+                    ]
                 #_
                 (js/console.log "y"
                                 "(-> r .-clientHeight)" (-> r .-clientHeight)
-                                "diff-y" diff-y)
-                (set! (-> r .-style .-height)
-                      (str (+ (-> r .-offsetHeight #_.-clientHeight)
-                              (+ diff-y)) "px"))))]
+                                "diff-y" diff-y
+                                "nvy" nvy)
+                (set! (-> r .-style .-height) (str nvy "px"))))]
         (js/L.DomEvent.on south-east "down"    (fn [e]
                                                  (store-map-size-x-fn e)
                                                  (store-map-size-y-fn e)))

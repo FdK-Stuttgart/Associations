@@ -18,7 +18,10 @@
 
 (defn init []
   #_(ajax/load-interceptors!)
-  (rf/dispatch [:page/init-db])
+  (rf/dispatch [
+                :fetch-from-db
+                ;; :page/init-db
+                ])
   ((comp
     ;; Strict Mode enables extra development-only checks for the entire
     ;; component tree inside the <StrictMode> component. These checks help you
@@ -28,7 +31,9 @@
     ;; newly created apps.
     ;; https://react.dev/reference/react/StrictMode#enabling-strict-mode-for-entire-app
     (fn [v]
-      #_(js/console.log "[init]" "react/StrictMode")
+      ;; (js/console.log "[init]" "react/StrictMode")
+      ;; (js/console.log "[init]" "(.-innerWidth js/window)"
+      ;;                 (.-innerWidth js/window))
       [:> react/StrictMode {} v]))
    (.render root (r/as-element [views/main-panel]))))
 
