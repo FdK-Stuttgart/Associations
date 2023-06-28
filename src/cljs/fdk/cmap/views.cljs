@@ -429,6 +429,11 @@
 (def map-size-x-atom (reagent/atom nil))
 (def map-size-y-atom (reagent/atom nil))
 
+(def copyright-osm
+  (gstr/format "&copy; <a href=\"%s\">%s</a> contributors"
+               "https://www.openstreetmap.org/copyright"
+               "OpenStreetMap"))
+
 (defn create-map [map-elem center-map]
   (let [map (-> map-elem
                         (.setView (let [[longitude latitude] center-map]
@@ -442,30 +447,37 @@
 
         basemaps
         {
-         :OpenStreetMap.Mapnik
+         :USGS_USTopo
          (js/L.tileLayer
-          "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-          #js {:maxZoom 19
-               :attribution "&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors"})
+          "https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}"
+          #js {:maxZoom 20 :attribution
+               (gstr/format "Tiles courtesy of the <a href=\"%s\">%s</a>"
+                            "https://usgs.gov/"
+                            "U.S. Geological Survey")})
+
+         :OpenStreetMap.Mapnik
+         (js/L.tileLayer "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+                         #js {:maxZoom 19 :attribution copyright-osm})
 
          :OpenStreetMap.DE
-         (js/L.tileLayer
-          "https://{s}.tile.openstreetmap.de/{z}/{x}/{y}.png"
-          #js {:maxZoom 18
-               :attribution "&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors"})
+         (js/L.tileLayer "https://{s}.tile.openstreetmap.de/{z}/{x}/{y}.png"
+                         #js {:maxZoom 18 :attribution copyright-osm})
 
          :stadiamaps
-         (js/L.tileLayer
-          "https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png"
+         (js/L.tileLayer "https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png"
           #js {:maxZoom 20
                :attribution
-               (str "&copy; <a href=\"https://stadiamaps.com/\">Stadia Maps</a>"
-                    ", &copy; <a href=\"https://openmaptiles.org/\">OpenMapTiles</a>"
-                    " &copy; <a href=\"http://openstreetmap.org\">OpenStreetMap</a> contributors")})}
+               (gstr/format "%s, %s, %s"
+                "&copy; <a href=\"https://stadiamaps.com/\">Stadia Maps</a>"
+                "&copy; <a href=\"https://openmaptiles.org/\">OpenMapTiles</a>"
+                copyright-osm)})}
         ;; The js/L.control.layers doesn't work
         ;; layers (js/L.control.layers basemaps)
 
-        layer (:OpenStreetMap.DE basemaps)]
+        layer (
+               :USGS_USTopo
+               ;; :OpenStreetMap.DE
+               basemaps)]
     ;; (js/console.log "layers" layers)
     ;; (js/console.log "layer" layer)
     #_(.addTo layers map)
