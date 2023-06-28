@@ -1,7 +1,16 @@
 {:paths   ["src/clj"
            "resources" "src/cljs"]
 
- :deps    {org.clojure/clojure {:mvn/version "1.11.1"}
+ :deps
+ {
+ org.clojure/clojure {:mvn/version "1.11.1"}
+
+ ;; character utility functions: https://github.com/daveyarwood/djy
+ ;; Character range from A to Z
+ djy/djy {:mvn/version "0.2.1"}
+
+ ;; https://mvnrepository.com/artifact/org.odftoolkit/simple-odf
+ org.odftoolkit/simple-odf     {:mvn/version "0.9.0"}
 
            ;; Routing
  metosin/reitit {:mvn/version "0.6.0"}
