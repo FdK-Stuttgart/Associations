@@ -447,7 +447,17 @@
 
         basemaps
         {
-         :USGS_USTopo
+         :stadiamaps.OSMBright
+         (js/L.tileLayer
+          "https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png"
+          #js {:maxZoom 20
+	             :attribution
+               (gstr/format
+                "%s, %s, %s"
+                "&copy; <a href=\"https://stadiamaps.com/\">Stadia Maps</a>"
+                "&copy; <a href=\"https://openmaptiles.org/\">OpenMapTiles</a>"
+                copyright-osm)})
+          :USGS_USTopo
          (js/L.tileLayer
           "https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}"
           #js {:maxZoom 20 :attribution
@@ -463,19 +473,25 @@
          (js/L.tileLayer "https://{s}.tile.openstreetmap.de/{z}/{x}/{y}.png"
                          #js {:maxZoom 18 :attribution copyright-osm})
 
-         :stadiamaps
-         (js/L.tileLayer "https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png"
-          #js {:maxZoom 20
+         :stadiamaps.Alidade_Smooth
+         (js/L.tileLayer
+          "https://tiles-eu.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png"
+          #js {:minZoom 00
+               :maxZoom 20
+               :ext "png"
                :attribution
                (gstr/format "%s, %s, %s"
-                "&copy; <a href=\"https://stadiamaps.com/\">Stadia Maps</a>"
-                "&copy; <a href=\"https://openmaptiles.org/\">OpenMapTiles</a>"
-                copyright-osm)})}
+                            "&copy; <a href=\"https://stadiamaps.com/\" target=\"_blank\">Stadia Maps</a>"
+                            "&copy; <a href=\"https://openmaptiles.org/\" target=\"_blank\">OpenMapTiles</a>"
+                            "&copy; <a href=\"https://www.openstreetmap.org/about\" target=\"_blank\">OpenStreetMap</a> contributors")})
+         }
         ;; The js/L.control.layers doesn't work
         ;; layers (js/L.control.layers basemaps)
 
         layer (
-               :USGS_USTopo
+               :stadiamaps.Alidade_Smooth
+               ;; :stadiamaps.OSMBright
+               ;; :USGS_USTopo
                ;; :OpenStreetMap.DE
                basemaps)]
     ;; (js/console.log "layers" layers)
