@@ -17,6 +17,10 @@
    #;"busybox"
 
    ;; see also `guix search clojure'
+   ;;
+   ;; https://issues.guix.gnu.org/53765#164
+   ;; * gnu/packages/clojure.scm (clojure-tools) [inputs]: Add dependency on slf4j to silence logging warnings.
+   ;;
    "clojure"
    ;; "clojure-lsp" ;; needed only for emacs
 
