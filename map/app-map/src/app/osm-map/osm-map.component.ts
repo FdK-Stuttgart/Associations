@@ -46,7 +46,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
   sidebarExpanded = true;
   sidebarAnimationDuration = 300;
 
-  zoomDefault = 14;
+  zoomDefault = 6.7;      // when roughly centered make whole Germany visible
   zoomViewDetails = 14.5;
 
   blocked = true;
@@ -174,7 +174,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
       // controls
       layers: [rasterLayer, this.clusterLayer],
       view: new View({
-        center: fromLonLat([9.179747886339912, 48.77860400126555]),
+        center: fromLonLat([7.97607, 51.35437]), // roughly center on Kassel
         zoom: this.zoomDefault
       })
     });
