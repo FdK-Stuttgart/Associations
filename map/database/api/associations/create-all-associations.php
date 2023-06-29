@@ -15,41 +15,41 @@ $postdata = file_get_contents("php://input");
 if (isset($postdata) && !empty($postdata)) {
     $associations = json_decode($postdata);
     lg("INF: Inserting ".count($associations)." associations...");
-    foreach ($associations as $request) {
+    foreach ($associations as $association) {
         // Validate.
-        if (trim($request->id) == null
-            || strlen(trim($request->id)) != 36
-            || trim($request->name) == ''
-            || $request->name == null
-            || $request->lat == null
-            || $request->lng == null) {
+        if (trim($association->id) == null
+            || strlen(trim($association->id)) != 36
+            || trim($association->name) == ''
+            || $association->name == null
+            || $association->lat == null
+            || $association->lng == null) {
             return http_response_code(400);
         }
 
         // Sanitize.
-        $id = mysqli_real_escape_string($con, trim($request->id));
-        $name = mysqli_real_escape_string($con, trim($request->name));
-        $shortName = mysqli_real_escape_string($con, trim($request->shortName));
-        $lat = mysqli_real_escape_string($con, trim($request->lat));
-        $lng = mysqli_real_escape_string($con, trim($request->lng));
-        $addressLine1 = mysqli_real_escape_string($con, trim($request->addressLine1));
-        $addressLine2 = mysqli_real_escape_string($con, trim($request->addressLine2));
-        $addressLine3 = mysqli_real_escape_string($con, trim($request->addressLine3));
-        $street = mysqli_real_escape_string($con, trim($request->street));
-        $postcode = mysqli_real_escape_string($con, trim($request->postcode));
-        $city = mysqli_real_escape_string($con, trim($request->city));
-        $country = mysqli_real_escape_string($con, trim($request->country));
-        $goals_format = mysqli_real_escape_string($con, trim($request->goals->format));
-        $goals_text = mysqli_real_escape_string($con, trim($request->goals->text));
-        $activities_format = mysqli_real_escape_string($con, trim($request->activities->format));
-        $activities_text = mysqli_real_escape_string($con, trim($request->activities->text));
-        $activityList = json_encode($request->activityList, JSON_UNESCAPED_UNICODE);
-        $districtList = json_encode($request->districtList, JSON_UNESCAPED_UNICODE);
+        $id = mysqli_real_escape_string($con, trim($association->id));
+        $name = mysqli_real_escape_string($con, trim($association->name));
+        $shortName = mysqli_real_escape_string($con, trim($association->shortName));
+        $lat = mysqli_real_escape_string($con, trim($association->lat));
+        $lng = mysqli_real_escape_string($con, trim($association->lng));
+        $addressLine1 = mysqli_real_escape_string($con, trim($association->addressLine1));
+        $addressLine2 = mysqli_real_escape_string($con, trim($association->addressLine2));
+        $addressLine3 = mysqli_real_escape_string($con, trim($association->addressLine3));
+        $street = mysqli_real_escape_string($con, trim($association->street));
+        $postcode = mysqli_real_escape_string($con, trim($association->postcode));
+        $city = mysqli_real_escape_string($con, trim($association->city));
+        $country = mysqli_real_escape_string($con, trim($association->country));
+        $goals_format = mysqli_real_escape_string($con, trim($association->goals->format));
+        $goals_text = mysqli_real_escape_string($con, trim($association->goals->text));
+        $activities_format = mysqli_real_escape_string($con, trim($association->activities->format));
+        $activities_text = mysqli_real_escape_string($con, trim($association->activities->text));
+        $activityList = json_encode($association->activityList, JSON_UNESCAPED_UNICODE);
+        $districtList = json_encode($association->districtList, JSON_UNESCAPED_UNICODE);
 
-        $contacts = $request->contacts;
-        $links = $request->links;
-        $socialMedia = $request->socialMedia;
-        $images = $request->images;
+        $contacts = $association->contacts;
+        $links = $association->links;
+        $socialMedia = $association->socialMedia;
+        $images = $association->images;
 
         // Update.
         $sql = "INSERT INTO associations SET id = '$id',
@@ -230,5 +230,4 @@ if (isset($postdata) && !empty($postdata)) {
         }
     }
     lg("DBG: Importing ".$associations." associations... done");
-
 }
