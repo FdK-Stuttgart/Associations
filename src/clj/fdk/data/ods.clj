@@ -66,7 +66,7 @@
        (map (comp
              (fn [a] (cstr/replace a "\n" ", "))
              cleanup
-             (fn [row] (address sheet row))))
+             (partial address sheet)))
        (map-indexed (fn [i s] {:idx (row-nr i) :address s}))))
 
 (defn addresses [sheet]
@@ -88,7 +88,7 @@
        (map (comp
              (fn [a] (cstr/replace a "\n" " "))
              cleanup
-             (fn [row] (association sheet row))))
+             (partial association sheet)))
        (map-indexed (fn [i s] {:idx (row-nr i) :name s}))))
 
 (defn associations [sheet]
@@ -109,7 +109,7 @@
        (sheet-rows)
        (map (comp
              cleanup
-             (fn [row] (city-district sheet row))))
+             (partial city-district sheet)))
        (map-indexed (fn [i s] {:idx (row-nr i) :city-district s}))))
 
 (defn city-districts [sheet]
@@ -130,7 +130,7 @@
        (sheet-rows)
        (map (comp
              cleanup
-             (fn [row] (table-coordinates sheet row))))
+             (partial table-coordinates sheet)))
        (map-indexed (fn [i s] {:idx (row-nr i) :coordinates s}))))
 
 (defn coordinates [sheet]
@@ -151,7 +151,7 @@
        (sheet-rows)
        (map (comp
              cleanup
-             (fn [row] (contact sheet row))))
+             (partial contact sheet)))
        (map-indexed (fn [i s] {:idx (row-nr i) :contact s}))))
 
 (defn contacts [sheet]
@@ -177,7 +177,7 @@
                #_(println "(cstr/split-lines urls)" (cstr/split-lines urls))
                (cstr/split-lines urls))
              cleanup
-             (fn [row] (logo sheet row))))
+             (partial logo sheet)))
        (map-indexed (fn [i a] {:idx (row-nr i) :logos a}))))
 
 (defn logos [sheet]
@@ -198,7 +198,7 @@
        (sheet-rows)
        (map (comp
              cleanup
-             (fn [row] (web-page sheet row))))
+             (partial web-page sheet)))
        (map-indexed (fn [i a] {:idx (row-nr i) :web-page a}))))
 
 (defn web-pages [sheet]
@@ -226,7 +226,7 @@
        (sheet-rows)
        (map (comp
              cleanup
-             (fn [row] (goal sheet row))))
+             (partial goal sheet)))
        (map-indexed (fn [i s] {:idx (row-nr i) :goal s}))))
 
 (defn goals [sheet]
@@ -253,7 +253,7 @@
        (sheet-rows)
        (map (comp
              cleanup
-             (fn [row] (activity sheet row))))
+             (partial activity sheet)))
        (map-indexed (fn [i s] {:idx (row-nr i) :activity s}))))
 
 (defn activities [sheet]
