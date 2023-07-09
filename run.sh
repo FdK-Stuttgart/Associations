@@ -38,13 +38,9 @@ fi
 # --preserve=REGEX
 #   preserve environment variables matching REGEX
 #
-# The $DISPLAY is needed by clojure.inspector, however the
-#   --preserve=^DISPLAY
-# leads to an error in the REPL:
-#   Authorization required, but no authorization protocol specified
-# and:
-#   error in process filter: cljr--maybe-nses-in-bad-state: \
-#   Some namespaces are in a bad state: ...
+# Following is needed by clojure.inspector:
+# --preserve=^DISPLAY$ --preserve=^XAUTHORITY$ \
+# --share=/run/user/1000/gdm/Xauthority=/run/user/1000/gdm/Xauthority \
 
 # No shell is started when the '--search-paths' parameter is used. Only the
 # variables making up the environment are displayed.
@@ -53,12 +49,10 @@ fi
 # Make ./persistent-profile a symlink to the `guix shell ...` result, and
 # register it as a garbage collector root, i.e. prevent garbage collection
 # during(!) the `guix shell ...` session:
-#  --root=./persistent-profile \
-#
+# --root=./persistent-profile \
 
 # Create environment for the package that the '...' EXPR evaluates to.
 # --expression='(list (@ (gnu packages bash) bash) "include")' \
-#
 
 # Expose the symlink, in case the script is started from fdk.kit or similar.
 # Warning: hardcoded path! See also .bashrc
@@ -78,6 +72,8 @@ guix shell \
      --preserve=^TERM$ \
      --preserve=^fdk \
      --preserve=^CMAP \
+     --preserve=^DISPLAY$ --preserve=^XAUTHORITY$ \
+     --share=/run/user/1000/gdm/Xauthority=/run/user/1000/gdm/Xauthority \
      --share=/usr/bin \
      --share=/etc/localtime=/etc/localtime \
      --share=$HOME/.bash_history=$HOME/.bash_history \
