@@ -16,7 +16,7 @@
                 [garden "1.3.10"]
 
                 ;; css
-                [net.dhleong/spade "1.1.1"]
+                [net.dhleong/spade "1.1.2"]
 
                 ;; A Chrome DevTools fork for ClojureScript developers
                 #_[binaryage/dirac "1.7.2"]
