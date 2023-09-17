@@ -374,6 +374,8 @@
                :accept ".ods"
                :title "some-title"
                :on-change handle-upload
+               ;; The only way to set the value of a file input is by the user to select a file.
+               ;; :value "/home/bost/Downloads/Vereinsinformationen_öffentlich_Stadtteilkarte.ods"
                }]
       [:input {:type "submit" :value "upload"}]]]))
 
