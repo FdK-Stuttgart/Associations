@@ -7,7 +7,7 @@
 
 (specifications->manifest
   (list
-   "bash"
+   "bash" ;; see also "bash-minimal"
 
    ;; 1. The `ls' from busybox is causing problems. However it is overshadowed
    ;; when this list is reversed. (Using Guile or even on the command line.)
