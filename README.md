@@ -149,6 +149,10 @@ Use the `cider` alias for CIDER nREPL support (run `clj -M:dev:cider`). See the
 [CIDER docs](https://docs.cider.mx/cider/basics/up_and_running.html) for more
 help.
 
+However the `M-x cider-jack-in-clj` doesn't work. The 'com.billpiel/sayid
+{:mvn/version "0.1.0"}' is missing among the dependencies specified by the value
+of -Sdeps.
+
 Note that this alias runs nREPL during development. To run nREPL in production
 (typically when the system starts), use the kit-nrepl library through the +nrepl
 profile as described in [the
