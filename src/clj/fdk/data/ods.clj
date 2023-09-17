@@ -1,5 +1,7 @@
 (ns fdk.data.ods
   (:require
+   [clojure.tools.logging :refer :all]
+   [fdk.data.utils :refer :all]
    [clojure.string :as cstr]
    [djy.char :as djy]
    ;; [clojure.inspector :refer :all]
@@ -147,12 +149,15 @@
     {:idx 1 :contact \"...\"}
     {:idx 2 :contact \"...\"})"
   [sheet]
-  (->> sheet
-       (sheet-rows)
-       (map (comp
-             cleanup
-             (partial contact sheet)))
-       (map-indexed (fn [i s] {:idx (row-nr i) :contact s}))))
+  ((comp
+    #_(fn [s] (println "1" s) s)
+    (partial map-indexed (fn [i s] {:idx (row-nr i) :contact s}))
+    (partial map (comp
+                  cleanup
+                  #_(fn [s] (println "0" s) s)
+                  (partial contact sheet)))
+    sheet-rows)
+   sheet))
 
 (defn contacts [sheet]
   (let [ks [:contacts]]
@@ -281,6 +286,7 @@
                      goals
                      cdistricts
                      {:desc (cstr/trim (cstr/join "\n\n" [contact web-page]))}
+                     contacts
                      activities
                      coordinates
                      logos)))
@@ -295,7 +301,12 @@
           (logos s0))))
 
 (defn read-table [fname]
-  (let [ks [:table]]
+  (let [fname (new java.io.File
+                   "./resources/karte.ods"
+                   ;; The ö is not properly encoded
+                   ;; "./resources/Vereinsinformationen_öffentlich_Stadtteilkarte.ods"
+                   )
+        ks [:table]]
     (if-let [v (get-in @cache ks)]
       v
       (cache! (fn [] (calc-read-table fname)) ks))))
@@ -303,7 +314,7 @@
 (def default-category "Sonstiges")
 
 (defn reset-cache!
-  "(fdk.datasrc.ods/reset-cache! \"resources/Vereinsinformationen_öffentlich_Stadtteilkarte.ods\")"
+  "(fdk.data.ods/reset-cache! \"resources/Vereinsinformationen_öffentlich_Stadtteilkarte.ods\")"
   [fname]
   (swap! cache (fn [_] {}))
   (let [tbeg (System/currentTimeMillis)]
@@ -312,3 +323,60 @@
      (calc-read-table fname))
     (printf "%s chars cached in %s ms"
             (count (str @cache)) (- (System/currentTimeMillis) tbeg))))
+
+(defn process-table-row [districts
+                              ;; : DropdownOption[]
+                              row
+                              ]
+
+  ;; (println "[process-table-row]" "row" row)
+  ;; (println "[process-table-row]" "(keys row)" (keys row))
+  (let [association-id (str (java.util.UUID/randomUUID))]
+    ;; (println "[process-table-row]" "association-id" association-id)
+    ((comp
+      ;; (fn [m] (println "[process-table-row]" "m" m) m)
+      ;; (fn [m] (println "" m) m)
+      ;; (fn [m] (println "9" m) m)
+      (fn [m] (assoc m :id association-id))
+      ;; (fn [m] (println "8" m) m)
+      (fn [m] (assoc m :name (-> row :name)))
+      ;; shortName addr_recv ;; not uses
+      ;; (fn [m] (println "7" m) m)
+      (fn [m] (assoc m :goals
+                     {:format "plain" ;; "plain" | "html"
+                      :text (-> row :goal escape-html-with-null)}))
+      ;; (fn [m] (println "6" m) m)
+      (fn [m] (assoc m :activities
+                     {:format "plain" ;; "plain" | "html"
+                      :text (-> row :activity escape-html-with-null)}))
+      ;; (fn [m] (println "5" m) m)
+      (fn [m] (assoc m :contacts
+                     ((comp
+                       (partial process-contact association-id)
+                       :desc)
+                      row)))
+      ;; (fn [m] (println "4" m) m)
+      (partial conj
+               ((comp
+                 ;; (fn [m] (println "31" m) m)
+                 (partial process-socialMedia-links association-id)
+                 ;; (fn [m] (println "30" m) m)
+                 :links)
+                row))
+      ;; (fn [m] (println "3" m) m)
+      (fn [m] (assoc m :images
+                     ((comp
+                       ;; (fn [m] (println "21" m) m)
+                       (partial process-images association-id)
+                       ;; (fn [m] (println "20" m) m)
+                       :logos)
+                      row)))
+      ;; (fn [m] (println "2" m) m)
+      (fn [m] (assoc m :districts
+                     (keywords (:cityDistrict row) districts)))
+      ;; (fn [m] (println "1" m) m)
+      (partial conj (convert-address (-> row :address normalize-address))) ;; outputAddress
+      ;; (fn [m] (println "0" m) m)
+      (partial conj (-> row :coordinates parse-lat-lon))
+      )
+     {})))
