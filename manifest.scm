@@ -5,70 +5,82 @@
 ;; This file was initially created by
 ;;     guix shell PACKAGES --export-manifest
 
-(specifications->manifest
-  (list
-   "bash" ;; see also "bash-minimal"
+(use-modules
+ (guix profiles)
+ ((bost packages clojure) #:prefix bstc:))
 
-   ;; 1. The `ls' from busybox is causing problems. However it is overshadowed
-   ;; when this list is reversed. (Using Guile or even on the command line.)
-   ;;
-   ;; 2. It seems like busybox is not needed if invoked with:
-   ;;     guix shell ... --share=/usr/bin
-   #;"busybox"
+(define project-manifest
+  (specifications->manifest
+   (list
+    "bash" ;; see also "bash-minimal"
 
-   ;; see also `guix search clojure'
-   ;;
-   ;; https://issues.guix.gnu.org/53765#164
-   ;; * gnu/packages/clojure.scm (clojure-tools) [inputs]: Add dependency on slf4j to silence logging warnings.
-   ;;
-   "clojure"
-   ;; "clojure-lsp" ;; needed only for emacs
+    ;; 1. The `ls' from busybox is causing problems. However it is overshadowed
+    ;; when this list is reversed. (Using Guile or even on the command line.)
+    ;;
+    ;; 2. It seems like busybox is not needed if invoked with:
+    ;;     guix shell ... --share=/usr/bin
+    #;"busybox"
 
-   ;; CLI tools to start a Clojure repl, use Clojure and Java libraries, and
-   ;; start Clojure programs. See https://clojure.org/releases/tools
-   "clojure-tools" ; adding this makes clojure binary available on the CLI
+    ;; see also `guix search clojure'
+    ;;
+    ;; https://issues.guix.gnu.org/53765#164
+    ;; * gnu/packages/clojure.scm (clojure-tools) [inputs]: Add dependency on slf4j to silence logging warnings.
+    ;;
+    ;; "clojure"
+    ;; "clojure-lsp" ;; needed only for emacs
 
-   "coreutils"
-   "curl"
-   "findutils" ; provides: find, updatedb, xargs
-   "procps"    ; provides: free, pgrep, pidof, pkill, pmap, ps, pwdx, slabtop,
-               ;           tload, top, vmstat, w, watch and sysctl
-   "fish"
-   "git"
-   "gnupg"
-   "grep"
-   "iproute2" ; provides `ss' socket statistics
-   "jq"
-   "leiningen"
-   "less"
-   "mariadb"
-   ;; "mariadb:lib" ; see the 'sed ...'-hack in the .bashrc
+    ;; CLI tools to start a Clojure repl, use Clojure and Java libraries, and
+    ;; start Clojure programs. See https://clojure.org/releases/tools
+    ;; "clojure-tools" ; adding this makes clojure binary available on the CLI
 
-   "node"
+    "coreutils"
+    "curl"
+    "findutils" ; provides: find, updatedb, xargs
+    "procps"    ; provides: free, pgrep, pidof, pkill, pmap, ps, pwdx, slabtop,
+                                        ;           tload, top, vmstat, w, watch and sysctl
+    "fish"
+    "git"
+    "gnupg"
+    "grep"
+    "iproute2" ; provides `ss' socket statistics
+    "jq"
+    "leiningen"
+    "less"
+    "mariadb"
+    ;; "mariadb:lib" ; see the 'sed ...'-hack in the .bashrc
 
-   ;; https://github.com/dbcli/mycli/issues/534
-   ;; $ mycli --user bost
-   ;; (1698, "Access denied for user 'bost'@'localhost'")
-   ;; $ mycli --user foo # works
-   "mycli"
-   "util-linux" ;  provides: dmesg, namei, ...
+    "node"
 
-   "ncurses"
-   "node"
-   "nss-certs"
+    ;; https://github.com/dbcli/mycli/issues/534
+    ;; $ mycli --user bost
+    ;; (1698, "Access denied for user 'bost'@'localhost'")
+    ;; $ mycli --user foo # works
+    "mycli"
+    "util-linux" ;  provides: dmesg, namei, ...
 
-   ;; `guix shell openjdk@<version>:jdk PACKAGES --export-manifest' ignores the
-   ;; '@<version>' if it matches the installed version.
-   "openjdk:jdk"
+    "ncurses"
+    "node"
+    "nss-certs"
 
-   "openssh"
-   "pgcli"
-   "php"
-   "ripgrep"
-   "rsync"
-   "sed"
-   "inetutils" ;; provides hostname, etc.
-   "which"
-   "zip"
-   "unzip"
-   ))
+    ;; `guix shell openjdk@<version>:jdk PACKAGES --export-manifest' ignores the
+    ;; '@<version>' if it matches the installed version.
+    "openjdk:jdk"
+
+    "openssh"
+    "pgcli"
+    "php"
+    "ripgrep"
+    "rsync"
+    "sed"
+    "inetutils" ;; provides hostname, etc.
+    "which"
+    "zip"
+    "unzip"
+    )))
+
+(concatenate-manifests
+ (list project-manifest
+       (manifest
+        (list
+         (package->manifest-entry bstc:clojure)
+         (package->manifest-entry bstc:clojure-tools)))))
