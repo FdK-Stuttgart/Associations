@@ -51,10 +51,10 @@
   "uploads a file to the target folder
    when :create-path? flag is set to true then the target path will be created"
   [path {:keys [tempfile size filename] :as prm-file}]
-  ;; (println "\n########### [health read-ods-table] size: " size)
-  ;; (println "\n########### [health read-ods-table] prm-file " prm-file)
+  ;; (println "\n[health read-ods-table] size: " size)
+  ;; (println "\n[health read-ods-table] prm-file " prm-file)
   (let [ods-table (ods/read-table tempfile)]
-    (println "\n########### [health read-ods-table] (count ods-table)" (count ods-table))
+    (println "[health read-ods-table] (count ods-table)" (count ods-table))
     ods-table
     #_
     (try
@@ -123,27 +123,29 @@
     (let [db-vals (->> (query-fn :insert-association vals)
                        (pr)
                        (with-out-str))]
-      (println "\n$$$ :insert-association response length:" (count db-vals))
-      ;; (println "\n$$$ :insert-association response:" db-vals)
+      ;; (println ":insert-association response length:" (count db-vals))
+      (println "[:insert-association] response db-vals:" db-vals)
+      (println "[:insert-association] (:id row):" (:id row))
       db-vals)))
 
 (defn insert-contact [query-fn row]
-  (println "(keys row)" (keys row))
+  ;; (println "[insert-contact] (keys row)" (keys row))
   (let [
-        contactId "00811481-cbb1-4124-be6f-67c418dea1c5"
-        [phone-raw mail _] ((comp
-                             (fn [s] (println "1" s) s)
-                             (fn [s] (s/split s #"\n"))
-                             (fn [s] (println "0" s) s)
-                             :contacts)
-                            row)
+        contactId (:id row) ;; "00811481-cbb1-4124-be6f-67c418dea1c5"
+        [phone-raw mail _] [(:phone row) (:mail row)]
+        #_
+        ((comp
+          (fn [s] (println "1 [insert-contact]" s) s)
+          (fn [s] (s/split s #"\n"))
+          (fn [s] (println "0 [insert-contact]" s) s)
+          )
+         row)
         ]
-    (println "[phone-raw mail]" [phone-raw mail])
+    ;; (println "[phone-raw mail]" [phone-raw mail])
     (let [
-          ;; [phone-raw mail] (-> row :desc (s/split #"\n"))
           [_ phone] (s/split phone-raw #"Tel. ")
-          associationId "7f1b41a8-7ae1-4457-81cb-985993bbb354" ;; :id        ;;
-          orderIndex 1 ;; :index     ;;
+          associationId (:associationId row)  ;; "7f1b41a8-7ae1-4457-81cb-985993bbb354"
+          orderIndex 1
 
           vals
           (zipmap [:contactId ;; :id
@@ -165,13 +167,12 @@
                    orderIndex
                    ;; 1 ;; current
                    ])]
-      ;; (println "\n$$$ row" row)
-      (println "\n$$$ vals" vals)
+      ;; (println "vals" vals)
       (let [db-vals (->> (query-fn :insert-contact vals)
                          (pr)
                          (with-out-str))]
         ;; (println "\n$$$ :insert-contact response length:" (count db-vals))
-        (println "\n$$$ :insert-contact response:" db-vals)
+        (println "[:insert-contact] response db-vals:" db-vals)
         db-vals))))
 
 (defn update-contact [query-fn row]
@@ -179,8 +180,8 @@
     (let [db-vals (->> (query-fn :update-contact vals)
                        (pr)
                        (with-out-str))]
-      ;; (println "\n$$$ :update-contact response length:" (count db-vals))
-      (println "\n$$$ :update-contact response:" db-vals)
+      ;; (println "[:update-contact] response length:" (count db-vals))
+      (println "[:update-contact] response db-vals:" db-vals)
       db-vals)))
 
 (defn update-image [query-fn row]
@@ -291,11 +292,12 @@
             ((comp
               (fn [r] (dissoc r
                               :activityList
-                              :socialMediaLinks :links :images :contacts
+                              :socialMediaLinks :links :images
+                              ;; :contacts
                               :shortName :country
                               :goals_format :activities_format
                               :addressLine1 :addressLine2 :addressLine3))
-              (fn [r] (println "(keys r)" (keys r)) r)
+              ;; (fn [r] (println "(keys r)" (keys r)) r)
               (fn [r] (clojure.set/rename-keys r {:idx :id :lng :lon}))
               first
               (partial map (partial ods/process-table-row districts)))
@@ -313,10 +315,12 @@
 
         ;; $associations = json_decode($postdata);
         (insert-association query-fn row)
+        (def row row)
+        (println "[write-file] (count (:contacts row)):" (count (:contacts row)))
         (update-contact query-fn row)
-
-        ;; ;; $contacts = $request->contacts;
-        (insert-contact query-fn row)
+        (println "[write-file] (boolean (seq (:contacts row))):" (boolean (seq (:contacts row))))
+        (when (seq (:contacts row)) ;; ie when not empy
+          (map (partial insert-contact query-fn) (:contacts row)))
 
         ;; (update-image query-fn row)
         ;; ;; $images = $request->images;
