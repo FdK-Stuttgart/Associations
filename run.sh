@@ -40,6 +40,8 @@ fi
 # Following is needed by clojure.inspector:
 # --preserve=^DISPLAY$ --preserve=^XAUTHORITY$ \
 # --share=/run/user/1000/gdm/Xauthority=/run/user/1000/gdm/Xauthority \
+# or, when the GDM is not used, try:
+# --share=/run/user/1000/ICEauthority=/run/user/1000/ICEauthority \
 
 # No shell is started when the '--search-paths' parameter is used. Only the
 # variables making up the environment are displayed.
@@ -72,7 +74,7 @@ guix shell \
      --preserve=^fdk \
      --preserve=^CMAP \
      --preserve=^DISPLAY$ --preserve=^XAUTHORITY$ \
-     --share=/run/user/1000/gdm/Xauthority=/run/user/1000/gdm/Xauthority \
+     --share=/run/user/1000/ICEauthority=/run/user/1000/ICEauthority \
      --share=/usr/bin \
      --share=/etc/localtime=/etc/localtime \
      --share=$HOME/.bash_history=$HOME/.bash_history \
