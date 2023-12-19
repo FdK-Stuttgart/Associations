@@ -22,6 +22,7 @@
 
     "coreutils"
     "curl"
+    "direnv"
     "findutils" ; provides: find, updatedb, xargs
     "procps"    ; provides: free, pgrep, pidof, pkill, pmap, ps, pwdx, slabtop,
                                         ;           tload, top, vmstat, w, watch and sysctl
@@ -61,6 +62,7 @@
     "which"
     "zip"
     "unzip"
+    "pinentry"
     ))
 
 (define clojure-packages

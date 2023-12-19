@@ -1,3 +1,9 @@
+# This file must be pressent otherwise the guix shell doesn't start, however the
+# The `echo` and `printf` commands do not output anything on the CLI. WTF?
+
+# echo "echo \"### .bash_profile\""
+# printf "printf \"### .bash_profile\""
+
 # Setups system and user profiles and related variables
 # /etc/profile will be sourced by bash automatically
 # Setups home environment profile

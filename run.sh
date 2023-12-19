@@ -66,6 +66,9 @@ fi
 # for rlwrap called via `clj -M:dev:nrepl`
 # --preserve=^TERM$
 
+# ~/.gnupg can't be just 'exposed', it must be shared due to
+# gpg: failed to create temporary file '...': Read-only file system
+
 set -x # Print commands and their arguments as they are executed.
 guix shell \
      --root=./persistent-profile \
@@ -74,6 +77,7 @@ guix shell \
      --preserve=^TERM$ \
      --preserve=^fdk \
      --preserve=^CMAP \
+     --preserve=^GPG_TTY$ --preserve=^DIRENV_LOG_FORMAT$ \
      --preserve=^DISPLAY$ --preserve=^XAUTHORITY$ \
      --share=/run/user/1000/ICEauthority=/run/user/1000/ICEauthority \
      --share=/usr/bin \
@@ -82,11 +86,13 @@ guix shell \
      --share=$HOME/.config/fish=$HOME/.config/fish \
      --share=$HOME/.gitconfig=$HOME/.gitconfig \
      --share=$HOME/.m2/=$HOME/.m2/ \
-     --share=$HOME/.ssh/=$HOME/.ssh/ \
+     --expose=$HOME/.ssh \
+     --share=$HOME/.gnupg=$HOME/.gnupg \
      --share=$HOME/dec/fdk=$HOME/dec/fdk \
      --share=$wd/.bash_profile=$HOME/.bash_profile \
      --share=$wd/.bashrc=$HOME/.bashrc \
-     --share=$wd/.envrc=$HOME/.envrc \
+     --share=$HOME/.local/share/direnv=$HOME/.local/share/direnv \
+     --share=$HOME/.envrc=$HOME/.envrc \
      --share=$wd/etc=/usr/etc \
      --share=$wd/map/app-form/node_modules=$HOME/node_modules/map/app-form/ \
      --share=$wd/map/app-map/node_modules=$HOME/node_modules/map/app-map/ \

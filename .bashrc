@@ -1,6 +1,8 @@
 # Bash initialization for interactive non-login shells and
 # for remote shells (info "(bash) Bash Startup Files").
 
+source .envrc
+
 # Export 'SHELL' to child processes.  Programs such as 'screen'
 # honor it and otherwise use /bin/sh.
 export SHELL
@@ -465,9 +467,9 @@ randpw () {
     head /dev/urandom | tr -dc '_?!#A-Za-z0-9' | head -c $1 ; echo ''
 }
 
+set +e # Don't exit immediately if a command exits with a non-zero status.
 set -x # Print commands and their arguments as they are executed.
 # `npm list` terminates with non-zero exit code. We need ignore it:
-set +e # Don't exit immediately if a command exits with a non-zero status.
 cntMatches=$(npm list @angular/cli 2>/dev/null | grep -c "UNMET DEPENDENCY")
 { retval="$?"; set -e; set +x;} 2>/dev/null
 
@@ -609,6 +611,7 @@ if [ $hostName == $ecke ]; then
         populate_db
         mysqladmin --user $USER shutdown
         # printf "[DBG] install MariaDB... done\n"
+        { retval="$?"; set +x; } 2>/dev/null
     else
         printf "[DBG] first run: dbaseDir exists already: %s\n" $dbaseDir
         { retval="$?"; set +x; } 2>/dev/null
@@ -631,9 +634,8 @@ EOF
     else
         test_db
     fi
-
 fi
-set -e # Exit immediately if a command exits with a non-zero status.
+{ set -e; } 2>/dev/null
 
 # see https://meatfighter.com/ascii-silhouettify/color-gallery.html
 guix_prompt () {
@@ -696,11 +698,8 @@ Available commands:
   test_db, test_php, test_wp_dev, test_basic_auth
 EOF
 
-# $GUIX_ENVIRONMENT may not be defined in PROD or TEST environemnt
-# Don't exit on error during the further execution, i.e. on the CLI
-set +e
-
 # Adjust the prompt depending on whether we're in 'guix environment'.
+# $GUIX_ENVIRONMENT may not be defined in PROD or TEST environemnt
 if [ -n "$GUIX_ENVIRONMENT" ]
 then
     PS1='\u@\h \w [env]\$ '
@@ -711,3 +710,8 @@ alias ls='ls -p --color=auto'
 alias ll='ls -l'
 alias grep='grep --color=auto'
 alias clear="printf '\e[2J\e[H'"
+
+# set -e # Exit immediately if a command exits with a non-zero status.
+set +e # Don't exit on error during the further execution, i.e. on the CLI
+
+eval "$(direnv hook bash)"
