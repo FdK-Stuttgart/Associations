@@ -24,7 +24,6 @@ data/*.class
 /var/lib/mysql/data/*
 /var/log/*
 /node_modules/
-/.envrc
 
 /map/database/api/environment.php
 /persistent-profile
