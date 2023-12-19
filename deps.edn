@@ -17,11 +17,11 @@
 
            ;; Ring
  metosin/ring-http-response {:mvn/version "0.9.3"}
- ring/ring-core {:mvn/version "1.10.0"}
+ ring/ring-core {:mvn/version "1.11.0"}
  ring/ring-defaults {:mvn/version "0.4.0"}
 
            ;; Logging
- ch.qos.logback/logback-classic {:mvn/version "1.4.11"}
+ ch.qos.logback/logback-classic {:mvn/version "1.4.14"}
 
            ;; Data coercion
  luminus-transit/luminus-transit {:mvn/version "0.1.6"
@@ -29,11 +29,11 @@
  metosin/muuntaja {:mvn/version "0.6.8"}
 
            ;; kit Libs
- io.github.kit-clj/kit-core {:mvn/version "1.0.5"}
+ io.github.kit-clj/kit-core {:mvn/version "1.0.6"}
  io.github.kit-clj/kit-undertow {:mvn/version "1.0.6"}
- io.github.kit-clj/kit-sql-conman {:mvn/version "1.0.8"}
+ io.github.kit-clj/kit-sql-conman {:mvn/version "1.0.9"}
  io.github.kit-clj/kit-sql-migratus {:mvn/version "1.0.4"}
- org.xerial/sqlite-jdbc {:mvn/version "3.43.0.0"}
+ org.xerial/sqlite-jdbc {:mvn/version "3.44.1.0"}
  io.github.kit-clj/kit-mysql {:mvn/version "1.0.5"}
            ;; From https://github.com/kit-clj/kit/blob/master/libs/kit-mysql/deps.edn
  mysql/mysql-connector-java {:mvn/version "8.0.30"}
@@ -46,31 +46,31 @@
   :outdated {;; Note that it is `:deps`, not `:extra-deps`
              :deps {com.github.liquidz/antq {:mvn/version "RELEASE"}}
              :main-opts ["-m" "antq.core"]}
-  :build {:deps {io.github.clojure/tools.build {:git/sha "24f2894"
-                                                :git/tag "v0.9.5"
+  :build {:deps {io.github.clojure/tools.build {:git/sha "8e78bcc"
+                                                :git/tag "v0.9.6"
                                                 :git/url "https://github.com/clojure/tools.build.git"}
-                 slipset/deps-deploy {:mvn/version "0.2.1"}
+                 slipset/deps-deploy {:mvn/version "0.2.2"}
                  weavejester/dependency {:mvn/version "0.2.1"}
-                 babashka/fs {:mvn/version "0.4.19"}
+                 babashka/fs {:mvn/version "0.5.20"}
                  babashka/process {:mvn/version "0.5.21"}}
           :ns-default build}
 
 
-  :dev  {:extra-deps  {com.lambdaisland/classpath      {:mvn/version "0.4.44"}
+  :dev  {:extra-deps  {com.lambdaisland/classpath      {:mvn/version "0.5.48"}
                        criterium/criterium             {:mvn/version "0.4.6"}
                        expound/expound                 {:mvn/version "0.9.0"}
                        integrant/repl                  {:mvn/version "0.3.3"}
                        pjstadig/humane-test-output     {:mvn/version "0.11.0"}
-                       ring/ring-devel                 {:mvn/version "1.10.0"}
+                       ring/ring-devel                 {:mvn/version "1.11.0"}
                        ring/ring-mock                  {:mvn/version "0.4.0"}
-                       io.github.kit-clj/kit-generator {:mvn/version "0.1.8"}
+                       io.github.kit-clj/kit-generator {:mvn/version "0.2.1"}
                        org.clojure/tools.namespace     {:mvn/version "1.4.4"}
                        }
          :extra-paths ["env/dev/clj" "env/dev/resources" "test/clj" "target/classes/cljsbuild"]}
-  :nrepl {:extra-deps {nrepl/nrepl {:mvn/version "1.0.0"}}
+  :nrepl {:extra-deps {nrepl/nrepl {:mvn/version "1.1.0"}}
           :main-opts  ["-m" "nrepl.cmdline" "-i"]}
-  :cider {:extra-deps {nrepl/nrepl       {:mvn/version "1.0.0"}
-                       cider/cider-nrepl {:mvn/version "0.37.1"}}
+  :cider {:extra-deps {nrepl/nrepl       {:mvn/version "1.1.0"}
+                       cider/cider-nrepl {:mvn/version "0.44.0"}}
           :main-opts  ["-m" "nrepl.cmdline" "--middleware" "[cider.nrepl/cider-middleware]" "-i"]}
 
   :test {:extra-deps  {criterium/criterium                  {:mvn/version "0.4.6"}
@@ -79,11 +79,11 @@
                        io.github.cognitect-labs/test-runner {:git/tag "v0.5.1"
                                                              :git/sha "dfb30dd"}
                        pjstadig/humane-test-output          {:mvn/version "0.11.0"}
-                       ring/ring-devel                      {:mvn/version "1.10.0"}
+                       ring/ring-devel                      {:mvn/version "1.11.0"}
                        ring/ring-mock                       {:mvn/version "0.4.0"}
-                       io.github.kit-clj/kit-generator      {:mvn/version "0.1.8"}
+                       io.github.kit-clj/kit-generator      {:mvn/version "0.2.1"}
                        org.clojure/tools.namespace          {:mvn/version "1.4.4"}
-                       com.lambdaisland/classpath           {:mvn/version "0.4.44"}}
+                       com.lambdaisland/classpath           {:mvn/version "0.5.48"}}
          :exect-fn    cognitect.test-runner.api/test
          :extra-paths ["env/dev/clj" "env/dev/resources" "env/test/resources" "test/clj"]
          :main-opts   ["-e" "(require 'pjstadig.humane-test-output) (pjstadig.humane-test-output/activate!)"
