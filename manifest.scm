@@ -7,7 +7,7 @@
 
 (use-modules
  (guix profiles)
- ((bost packages clojure) #:prefix bstc:))
+ ((bost gnu packages clojure) #:prefix bstc:))
 
 (define project-manifest
   (specifications->manifest
