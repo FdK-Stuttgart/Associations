@@ -93,6 +93,7 @@ alias ng='node $HOME/node_modules/\@angular/cli/bin/ng'
 prjd=~/dec/fdk
 port_map=4201
 port_form=4202
+port_php=4200
 
 p1=$prjd/map/app-map/package.json
 p11=$prjd/map/app-map/package-lock.json
@@ -100,7 +101,7 @@ p2=$prjd/map/app-form/package.json
 p22=$prjd/map/app-form/package-lock.json
 
 test_php () {
-    url=http://localhost:4200/api/associations/read-associations.php
+    url=http://localhost:$port_php/api/associations/read-associations.php
     printf "Testing php WebServer... \n"
     set -x  # Print commands and their arguments as they are executed.
     cnt_chars=$(curl --silent --request GET $url | wc -c)
