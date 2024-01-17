@@ -1,6 +1,6 @@
 {
   "name": "association-map",
-  "version": "0.9.33",
+  "version": "0.9.34",
   "scripts": {
     "app-map:ng": "ng",
     "app-map:start": "ng serve",
