@@ -388,33 +388,54 @@ deploy () {
     local fdk_login=$1
     local fdk_server=$2
     local fdk_home=$3
+    printf "\n"
+    printf "    fdk_login:  %s\n" $fdk_login
+    printf "    fdk_server: %s\n" $fdk_server
+    printf "    fdk_home:   %s\n" $fdk_home
+    printf "\n"
     if [[ -z "$fdk_login" || -z "$fdk_server" || -z "$fdk_home" ]]; then
-        printf "ERR: undefined variable(s):\n"
-        printf "    fdk_login:  '%s'\n" $fdk_login
-        printf "    fdk_server: '%s'\n" $fdk_server
-        printf "    fdk_home:   '%s'\n" $fdk_home
+        printf "ERR: All fdk_ variables must be defined.\n"
     else
-        local AMO=$fdk_test_home/AssociationMap
-        local AMB=$AMO.backup-$(date '+%F_%T')
-        echo "" > /tmp/script.sh
-        echo "set -v"                                                                                                  >> /tmp/script.sh
-        echo "if [ -d $AMO ]; then"                                                                                    >> /tmp/script.sh
-        echo "    cp -r $AMO $AMB"                                                                                     >> /tmp/script.sh
-        echo "    chmod -R -w $AMB"                                                                                    >> /tmp/script.sh
-        echo "    find $AMO -not -name environment.php -delete" >> /tmp/script.sh
-        echo "    find $AMO -empty -type d -delete"                                                                    >> /tmp/script.sh
-        echo "else"                                                                                                    >> /tmp/script.sh
-        echo "    printf \"ERR: Directory doesn't exist: $AMO\\n\""                                                    >> /tmp/script.sh
-        echo "fi"                                                                                                      >> /tmp/script.sh
-        set -x  # Print commands and their arguments as they are executed.
-        ssh -t $fdk_login@$fdk_server < /tmp/script.sh
+        local tstp=$(date '+%F_%T')
+        local dst=/tmp/AssociationMap-$tstp
+
+        # At first transfer everything
         cd $prjd
         # file transfer DEV -> TEST:
         # --archive --verbose --compress
         rsync -avz \
               --exclude="AssociationMap/api/environment.php" \
               ./map/dist/AssociationMap \
-              $fdk_login@$fdk_server:$fdk_home
+              $fdk_login@$fdk_server:$dst
+        local result="$?"
+        if [ "$result" -ne 0 ]; then
+            return $result
+        fi
+
+        local AMO=$fdk_home/AssociationMap
+        local AMB=$AMO.backup-$tstp
+        echo "" > /tmp/script.sh
+        echo "set -v"                                                                           >> /tmp/script.sh
+        echo "host=\$(hostname)"                                                                >> /tmp/script.sh
+        echo "if [ -d $AMO ]; then"                                                             >> /tmp/script.sh
+        echo "    cp -r $AMO $AMB"                                                              >> /tmp/script.sh
+        echo "    local result=\"$?\""                                                          >> /tmp/script.sh
+        echo "    if [ \"$result\" -ne 0 ]; then"                                               >> /tmp/script.sh
+        echo "        return $result"                                                           >> /tmp/script.sh
+        echo "    else"                                                                         >> /tmp/script.sh
+        echo "        printf \"[%s] Backup successful. Emptying %s...\\n\" \$host $AMO"         >> /tmp/script.sh
+        echo "        chmod -R -w $AMB"                                                         >> /tmp/script.sh
+        echo "        find $AMO -not -name environment.php -delete"                             >> /tmp/script.sh
+        echo "        find $AMO -empty -type d -delete"                                         >> /tmp/script.sh
+        echo "        printf \"[%s] Items in %s : %s\\n\" \$host $AMO \$(ls -la $AMO | wc -l)"  >> /tmp/script.sh
+        echo "        cp -r $dst $AMO"                                                          >> /tmp/script.sh
+        echo "        printf \"[%s] Items in %s : %s\\n\" \$host $AMO \$(ls -la $AMO | wc -l)"  >> /tmp/script.sh
+        echo "    fi"                                                                           >> /tmp/script.sh
+        echo "else"                                                                             >> /tmp/script.sh
+        echo "    printf \"[%s] ERR: Directory doesn't exist: %s\\n\" \$host $AMO"              >> /tmp/script.sh
+        echo "fi"                                                                               >> /tmp/script.sh
+        set -x  # Print commands and their arguments as they are executed.
+        # ssh -t $fdk_login@$fdk_server < /tmp/script.sh
         # Don't print commands
         { retval="$?"; set +x; } 2>/dev/null
     fi
