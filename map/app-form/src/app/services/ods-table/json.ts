@@ -188,10 +188,34 @@ function processTableRowAngular(
   }
   // console.log("_address:" + _address)
 
+  let latIdx : number;
+  let lngIdx : number;
   const latLngSplit = coordinates.split(/\s+/).map(parseFloat);
+  const fstVal = latLngSplit[0];
+  const sndVal = latLngSplit[1];
+  const minLat : number = 47.2;
+  const maxLat : number = 55.0;
+
+  const minLng : number = 5.7;
+  const maxLng : number = 15.1;
+
+  if (  fstVal > minLat && fstVal < maxLat
+     && sndVal > minLng && sndVal < maxLng) {
+    latIdx = 0;
+    lngIdx = 1;
+  } else if (    sndVal > minLat && sndVal < maxLat
+              && fstVal > minLng && fstVal < maxLng) {
+    latIdx = 1;
+    lngIdx = 0;
+  }
+  else {
+    console.error(
+    "Coordinates out of range range: ", coordinates,
+    "Latitude <"+minLat+", "+maxLat+">; Longitute <"+minLng+", "+maxLng+">");
+  }
   const latLng: LatLng = {
-    lat: latLngSplit[1],
-    lng: latLngSplit[0],
+    lat: latLngSplit[latIdx],
+    lng: latLngSplit[lngIdx],
   };
 
   const associationId: string = uuidv4();
