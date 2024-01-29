@@ -6,15 +6,16 @@
 export SHELL
 
 # /run is not automatically created by guix
-mkdir /run
+[ ! -d /run ] && mkdir /run
 
 # Quick access to $GUIX_ENVIRONMENT, for usage on config files
 # (currently only /etc/nginx/nginx.conf)
-ln -s $GUIX_ENVIRONMENT /env
+[ ! -L /env ] && ln -s $GUIX_ENVIRONMENT /env
 
 # Link every file in /usr/etc on /etc
 ls -1d /usr/etc/* | while read filepath; do
-    ln -s $filepath /etc/
+    bname=/etc/$(basename $filepath)
+    [ ! -L $bname ] && ln -s $filepath $bname
 done
 
 # nodejsVer=v16.15.0 # LTS version
