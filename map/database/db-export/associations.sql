@@ -26,6 +26,27 @@ CREATE DATABASE IF NOT EXISTS associations;
 use associations;
 
 -- --------------------------------------------------------
+--
+-- Tabellenstruktur für Tabelle `map_settings`
+--
+
+CREATE TABLE `map_settings` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  -- 9 digits in total, 6 digits allowed after the decimal point
+  `center_latitude` DECIMAL(9, 6) NOT NULL,
+  `center_longitude` DECIMAL(9, 6) NOT NULL,
+  `zoom_level` DECIMAL(4, 2) NOT NULL CHECK (`zoom_level` >= 0 AND `zoom_level` <= 21),
+  `description` varchar(64) NOT NULL,
+  `current` tinyint(1) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Daten für Tabelle `map_settings`
+--
+
+INSERT INTO `map_settings` (`center_latitude`, `center_longitude`, `zoom_level`, `description`, `current`) VALUES
+(48.778604,  9.179748, 14.0, 'Stuttgart, GE', 0),
+(51.300000, 10.304040,  6.0, 'Center of Germany', 1);
 
 --
 -- Tabellenstruktur für Tabelle `activities`

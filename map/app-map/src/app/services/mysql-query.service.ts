@@ -1,6 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Observable, throwError} from 'rxjs';
 import {Association} from '../model/association';
+import {MapSettings} from '../model/map-settings';
 import {HttpClient, HttpErrorResponse, HttpHeaders} from '@angular/common/http';
 import {catchError, timeout} from 'rxjs/operators';
 import {MyHttpResponse} from '../model/http-response';
@@ -67,6 +68,17 @@ export class MysqlQueryService {
       });
   }
 
+  private readMapSettings(): Observable<MapSettings[] | null> {
+    return this.httpClient.get<MapSettings[]>(`${this.PHP_API_SERVER_PATH}/read-map-settings.php`,
+                                              {headers: this.HEADERS})
+      .pipe(
+        timeout(this.CONNECTION_TIMEOUT),
+        catchError(err => {
+          console.log(('Karteneinstellungen konnten nicht abgerufen werden.'), err);
+          return throwError(err);
+        })
+      );
+  }
 
   private readDistrictOptions(): Observable<DropdownOption[] | null> {
     return this.httpClient.get<DropdownOption[]>(`${this.PHP_API_SERVER_PATH}/districts-options/read-districts-options.php`,
@@ -78,6 +90,31 @@ export class MysqlQueryService {
           return throwError(err);
         })
       );
+  }
+
+  async getMapSettings(): Promise<MyHttpResponse<MapSettings[]>> {
+    return await this.readMapSettings().toPromise().then(
+      (res) => {
+        if (!res || !res.length) {
+          return {
+            success: false,
+            errorMessage: 'Keine Karteineinstellungen gefunden.'
+          };
+        } else {
+          console.log('getMapSettings - res:', res);
+
+          return {
+            data: res,
+            success: true
+          };
+        }
+      },
+      (rej: HttpErrorResponse) => {
+        return {
+          success: false,
+          errorMessage: rej.message
+        };
+      });
   }
 
   async getDistrictOptions(): Promise<MyHttpResponse<DropdownOption[]>> {

@@ -12,6 +12,7 @@ import OSM from 'ol/source/OSM';
 import {ResizeObserver} from 'resize-observer';
 import {DropdownOption, getAllOptions, getSubOptions
        } from '../model/dropdown-option';
+import {MapSettings} from '../model/map-settings';
 import {AutoComplete} from 'primeng/autocomplete';
 import {MysqlQueryService} from '../services/mysql-query.service';
 import {MyHttpResponse} from '../model/http-response';
@@ -45,7 +46,6 @@ export class OsmMapComponent implements OnInit, OnDestroy {
   sidebarExpanded = true;
   sidebarAnimationDuration = 300;
 
-  zoomDefault = 14;
   zoomViewDetails = 14.5;
 
   blocked = true;
@@ -55,6 +55,7 @@ export class OsmMapComponent implements OnInit, OnDestroy {
 
   advancedSearchVisible = false;
   districtOptions: DropdownOption[] = [];
+  mapSettings: MapSettings[]= [];
   selectedDistricts: any[] = [];
 
   map?: Map;
@@ -110,6 +111,9 @@ export class OsmMapComponent implements OnInit, OnDestroy {
           ? 1 : (name1.toLowerCase() < name2.toLowerCase() ? -1 : 0);
       }
     ) : [];
+
+    this.mapSettings =
+      (await this.mySqlQueryService.getMapSettings())?.data || [];
 
     this.districtOptions =
       (await this.mySqlQueryService.getDistrictOptions())?.data || [];
@@ -167,14 +171,21 @@ export class OsmMapComponent implements OnInit, OnDestroy {
     });
 
     this.clusterLayer = this.initCluster();
+    const mapSettings: MapSettings = this.mapSettings[0];
 
     this.map = new Map({
       target: document.getElementById('osm-map') ?? undefined,
       // controls
       layers: [rasterLayer, this.clusterLayer],
       view: new View({
-        center: fromLonLat([9.179747886339912, 48.77860400126555]),
-        zoom: this.zoomDefault
+        // center: fromLonLat([9.179748, 48.778604]);  // Stuttgart
+        // center: fromLonLat([10.304040, 51.300000]); // Center of Germany
+        center: fromLonLat([mapSettings.center_longitude,
+                            mapSettings.center_latitude]),
+
+        // zoom: 14 // Stuttgart
+        // zoom: 6  // Center of Germany
+        zoom: mapSettings.zoom_level
       })
     });
 
