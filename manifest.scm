@@ -25,6 +25,7 @@
    "git"
    "gnupg"
    "grep"
+   "iproute2" ; contains ss - socket statistics
    "jq"
    "leiningen"
    "less"
