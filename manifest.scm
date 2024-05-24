@@ -47,4 +47,6 @@
    "rsync"
    "sed"
    "which"
+   "zip"
+   "unzip"
    ))
