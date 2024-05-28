@@ -316,13 +316,14 @@ deploy () {
     if [[ -z "$fdk_login" || -z "$fdk_server" || -z "$fdk_home" ]]; then
         printf "ERR: All fdk_* variables must be defined.\n"
     else
+        set -x
         local tstp=$(date '+%F_%T')
         local dst=~/AssociationMap-$tstp
 
         [ ! -d $fdk_home ] && mkdir -p $fdk_home
 
         src="./map/dist/AssociationMap"
-        remote_path=$prjd/$fdk_home
+        remote_path=$fdk_home/tmp/fdk
         version=$(get_version $p1)
         fzip=AssociationMap-$version.zip
 
@@ -345,12 +346,20 @@ deploy () {
         ssh "${fdk_login}@${fdk_server}" -- "[ ! -d $remote_path ] && mkdir -p $remote_path"
         scp "${cfzip}" "${fdk_login}@${fdk_server}:${remote_path}"
 
-        td=$(mktemp --directory)
-        unzip -q $remote_path/$cfzip -d $td
-        mv $td/$(basename "$src") "${remote_path}/$checksum-$(basename "$src")-$version"
-        rm $cfzip
+        script="/tmp/script.$(mktemp XXXXXXXXXX).sh" # `mktemp XXXXXXXXXX` returns a random string
+        if [ ! -d $fdk_home ]; then
+            mkdir -p $fdk_home
+            printf "[ERR] The on-target deployment-script '%s'\n doesn't exist.\n" $script
+        fi
 
-        # ssh "${fdk_login}@${fdk_server}"
+        echo "set -v"                                                                                 >> $script
+        echo "td=tmp/fdk"                                                                             >> $script
+        echo "unzip -q $remote_path/$cfzip -d $td"                                                    >> $script
+        echo "mv $td/$(basename \"$src\") \"${remote_path}/$checksum-$(basename \"$src\")-$version\"" >> $script
+        echo "rm $cfzip"                                                                              >> $script
+        scp $script "${fdk_login}@${fdk_server}:${remote_path}"
+
+        echo ssh "${fdk_login}@${fdk_server}"
 
         # # At first transfer everything
         # cd $prjd
