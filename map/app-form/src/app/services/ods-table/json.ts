@@ -344,11 +344,9 @@ function processTableRowAngular(
   };
 }
 
-export function getAssociations(
-  districts: DropdownOption[],
-  fname
-): Association[] {
-  const odsTable = o.calcReadTable(fname);
+export function getAssociations(districts: DropdownOption[],
+                                workSheet): Association[] {
+  const odsTable = o.calcReadTable(workSheet);
   return odsTable
     .filter((row) => {
       return row[o._coordinates];

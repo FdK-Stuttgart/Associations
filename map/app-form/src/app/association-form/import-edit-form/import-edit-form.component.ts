@@ -68,15 +68,16 @@ export class ImportEditFormComponent implements OnInit {
       const bs = reader.readAsBinaryString(file);
       reader.onload = (e) => {
         const binaryResult = reader.result;
-        const wb: XLSX.WorkBook = XLSX.read(binaryResult, {type: 'binary'});
+        const workBook: XLSX.WorkBook =
+          XLSX.read(binaryResult, {type: 'binary'});
 
-        const wsname: string = wb.SheetNames[0];
-        const ws: XLSX.WorkSheet = wb.Sheets[wsname];
+        // the leftmost sheet is read
+        const workSheetName: string = workBook.SheetNames[0];
+        const workSheet: XLSX.WorkSheet =
+          workBook.Sheets[workSheetName];
 
-        const assocs: Association[] = getAssociations(
-          this.districtOptions,
-          ws
-        );
+        const assocs: Association[] =
+          getAssociations(this.districtOptions, workSheet);
 
         this.mySqlPersistService.deleteAllAssociations(
           this.loginService.username, this.loginService.password).toPromise()
