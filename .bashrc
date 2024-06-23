@@ -532,7 +532,8 @@ EOF
     { retval="$?"; set +x; } 2>/dev/null
 fi
 
-guix_prompt () {
+# see https://meatfighter.com/ascii-silhouettify/color-gallery.html
+project_logo () {
     cat << "EOF"
     ░░░                                     ░░░
     ░░▒▒░░░░░░░░░               ░░░░░░░░░▒▒░░
@@ -552,7 +553,7 @@ guix_prompt () {
    | |  __|  \| | |  | | | |  __ _   _ ___  __
    | | |_ | . ' | |  | | | | |_ | | | | \ \/ /
    | |__| | |\  | |__| | | |__| | |_| | |>  <
-    \_____|_| \_|\____/   \_____|\__,_|_/_/\_\
+    \_____|_| \_|\____/   \_____|\____|_/_/\_\
 
 Available commands:
   start_php, serve_map, serve_form, version, build, deploy_test, deploy_prod
@@ -564,7 +565,7 @@ then
     # We are being invoked from a non-interactive shell.  If this
     # is an SSH session (as in "ssh host command"), source
     # /etc/profile so we get PATH and other essential variables.
-    [[ -n "$SSH_CLIENT" ]] && guix_prompt
+    [[ -n "$SSH_CLIENT" ]] && project_logo
 
     # Don't do anything else.
     return
@@ -582,7 +583,7 @@ alias tphp=test_php
 # alias twt=wp_auth_test
 # alias twd=test_wp_dev
 
-guix_prompt
+project_logo
 
 # Adjust the prompt depending on whether we're in 'guix environment'.
 if [ -n "$GUIX_ENVIRONMENT" ]
