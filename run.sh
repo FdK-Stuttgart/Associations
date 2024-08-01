@@ -42,6 +42,7 @@ done
 # (the ng) itself. Both app-map and app-form have their node_modules-directories
 
 cmd=guix
+# In bash the `command` has no '--search' parameter. Only in fish-shell
 # [[ ! $(command -v $cmd) ]] - '[[' is a bashishm
 if [ ! "$(command -v $cmd)" ]; then
     printf "ERR: Command not available: %s\n" $cmd
