@@ -66,7 +66,7 @@ fi
 # for rlwrap called via `clj -M:dev:nrepl`
 # --preserve=^TERM$
 
-set -x
+set -x # Print commands and their arguments as they are executed.
 guix shell \
      --root=./persistent-profile \
      --manifest=manifest.scm \
