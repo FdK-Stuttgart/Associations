@@ -9,9 +9,8 @@
  (guix profiles)
  ((bost gnu packages clojure) #:prefix bstc:))
 
-(define project-manifest
-  (specifications->manifest
-   (list
+(define general-packages
+  (list
     "bash" ;; see also "bash-minimal"
 
     ;; 1. The `ls' from busybox is causing problems. However it is overshadowed
@@ -20,18 +19,6 @@
     ;; 2. It seems like busybox is not needed if invoked with:
     ;;     guix shell ... --share=/usr/bin
     #;"busybox"
-
-    ;; see also `guix search clojure'
-    ;;
-    ;; https://issues.guix.gnu.org/53765#164
-    ;; * gnu/packages/clojure.scm (clojure-tools) [inputs]: Add dependency on slf4j to silence logging warnings.
-    ;;
-    ;; "clojure"
-    ;; "clojure-lsp" ;; needed only for emacs
-
-    ;; CLI tools to start a Clojure repl, use Clojure and Java libraries, and
-    ;; start Clojure programs. See https://clojure.org/releases/tools
-    ;; "clojure-tools" ; adding this makes clojure binary available on the CLI
 
     "coreutils"
     "curl"
@@ -43,8 +30,10 @@
     "gnupg"
     "grep"
     "iproute2" ; provides `ss' socket statistics
+
+    ;; Command-line JSON processor
     "jq"
-    "leiningen"
+
     "less"
     "mariadb"
     ;; "mariadb:lib" ; see the 'sed ...'-hack in the .bashrc
@@ -60,12 +49,10 @@
     "node"
     "nss-certs"
 
-    ;; `guix shell openjdk@<version>:jdk PACKAGES --export-manifest' ignores the
-    ;; '@<version>' if it matches the installed version.
-    "openjdk:jdk"
-
     "openssh"
+    ;; PostgreSQL CLI with autocompletion and syntax highlighting
     "pgcli"
+
     "php"
     "ripgrep"
     "rsync"
@@ -74,11 +61,39 @@
     "which"
     "zip"
     "unzip"
-    )))
+    ))
+
+(define clojure-packages
+  (list
+   ;; see also `guix search clojure'
+   ;;
+   ;; https://issues.guix.gnu.org/53765#164
+   ;; * gnu/packages/clojure.scm (clojure-tools) [inputs]: Add dependency on slf4j to silence logging warnings.
+   ;;
+   ;; "clojure"
+   ;; "clojure-lsp" ;; needed only for emacs
+
+   ;; CLI tools to start a Clojure repl, use Clojure and Java libraries, and
+   ;; start Clojure programs. See https://clojure.org/releases/tools
+   ;; "clojure-tools" ; adding this makes clojure binary available on the CLI
+
+   "leiningen"
+
+   ;; `guix shell openjdk@<version>:jdk PACKAGES --export-manifest' ignores the
+   ;; '@<version>' if it matches the installed version.
+   "openjdk:jdk"
+   ))
+
+(define clojure-manifest
+  (concatenate-manifests
+   (list
+    (specifications->manifest clojure-packages)
+    (manifest
+     (list
+      (package->manifest-entry bstc:clojure)
+      (package->manifest-entry bstc:clojure-tools))))))
 
 (concatenate-manifests
- (list project-manifest
-       (manifest
-        (list
-         (package->manifest-entry bstc:clojure)
-         (package->manifest-entry bstc:clojure-tools)))))
+ (list
+  (specifications->manifest general-packages)
+  clojure-manifest))
