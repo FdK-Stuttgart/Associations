@@ -16,6 +16,7 @@
    [cljs.pprint :as pp]
    ["react-leaflet" :as rle]
    ["leaflet.markercluster"]
+   ["leaflet.control.resizer"]
    ;; TODO use import instead of <link rel="stylesheet" ...>
    ;; ["semantic-ui-css/components/tab" :as csu]
    ["react" :as react]
@@ -256,9 +257,9 @@
 (defonce chromium? (boolean (.match js/navigator.userAgent
                                     (js/RegExp. "chrome|chromium|crios" "i"))))
 
-(defn on-popup-open-event-fn [map]
+(defn popupopen-fn [map]
   (fn [event]
-    ;; (js/console.log "[on-popup-open-event-fn]" "event" event)
+    ;; (js/console.log "[popupopen-fn]" "event" event)
     (let [
           ;; pixel location on the map where the popup anchor is
           position (.project map (.-_latlng (.-_popup (.-target event))))
@@ -505,9 +506,7 @@
 
 (defn create-markers [db-vals]
   ((comp
-    (fn [v] (js/console.log "2 [create-markers]" v) v)
     (partial reduce into {})
-    (fn [v] (js/console.log "1 [create-markers]" v) v)
     (partial
      map (fn [marker-data]
            (let [k (get marker-data :k)
@@ -525,10 +524,50 @@
                                   #js {:content (rserver/render-to-string
                                                  [popup-content marker-data])}))
                      (.on "click" (click-on-association leaflet-marker k)))]
-             (hash-map k marker-with-popup))))
-    (fn [v] (js/console.log "0 [create-markers]" v) v)
-    )
+             (hash-map k marker-with-popup)))))
    db-vals))
+
+(defn create-map [leaflet-map-elem center-map]
+  (let [leaflet-map (-> leaflet-map-elem
+                        (.setView (let [[longitude latitude] center-map]
+                                    ;; initial zoom needed
+                                    (array latitude longitude)) zoom)
+                        (.on "click" (fn [_] (when @active-atom
+                                               (reset! active-atom nil))))
+                        ;; This moves the map a bit to the bottom so that the
+                        ;; popup is displayed more in the center
+                        (.on "popupopen" (popupopen-fn leaflet-map-elem)))]
+    (.addTo (js/L.tileLayer
+             "https://{s}.tile.OpenStreetMap.org/{z}/{x}/{y}.png"
+             #_
+             #js {:attribution
+                  (gstr/format
+                   "&copy; <a href=\"%s\">%s</a> contributors"
+                   "http://osm.org/copyright"
+                   "OpenStreetMap")})
+            leaflet-map)
+    ;; defining `east` and `south` as a local bindings enables local to
+    ;; differentiate using the js/L.DomEvent.on
+    (let [east  (.addTo (js/L.control.resizer #js {:direction "e"
+                                                   :pan true
+                                                   #_#_
+                                                   :onlyOnHover true})
+                        leaflet-map)
+          south (.addTo (js/L.control.resizer #js {:direction "s"
+                                                   :pan true})
+                        leaflet-map)
+          _     (.addTo (js/L.control.resizer #js {:direction "se"
+                                                   :pan true
+                                                   #_#_
+                                                   :onlyOnHover false})
+                        leaflet-map)]
+      #_
+      (js/setTimeout (fn [] (.fakeHover east 1000)) 1000)
+      #_
+      (js/L.DomEvent.on south "down dragstart predrag drag dragend"
+                        (fn [east]
+                          (js/console.log (.-type east) east))))
+    (reset! map-atom leaflet-map)))
 
 (defn map-with-list [params markers center-map]
   (let [ref (react/createRef)
@@ -538,46 +577,14 @@
       (fn [_this]
         ;; (js/console.log "[:component-did-mount]" "ref" ref)
         ;; (js/console.log "[:component-did-mount]" "_this" _this)
-        (let [
-              node-ref       (.-current ref)
+        (let [node-ref       (.-current ref)
+              #_#_
               node-header    (.item (-> node-ref .-children) 0)
               node-center    (.item (-> node-ref .-children) 1)
+              #_#_
               node-footer    (.item (-> node-ref .-children) 2)]
-          ;; (js/console.log "[:component-did-mount]" "node-ref" node-ref)
-          (let [node-map-style (-> node-center .-children first .-style)]
-            (set! (-> node-map-style .-width)
-                  (str (.-clientWidth node-center) pxu))
-            #_
-            (js/console.log
-             "[: did-mount]"
-             "(.-clientHeight node-ref)" (.-clientHeight node-ref)
-             "(.-clientHeight node-header)" (.-clientHeight node-header)
-             "(.-clientHeight node-center)" (.-clientHeight node-center)
-             "(.-clientHeight node-footer)" (.-clientHeight node-footer))
-            (set! (-> node-map-style .-height)
-                  (str (- (.-clientHeight node-center)
-                          ;; '* 2' b/c padding top and bottom is the same
-                          (* 2 styles/padding)) pxu)))
+          (create-map (-> node-center js/L.map) center-map)))
 
-          (.addTo
-           (js/L.tileLayer
-            "https://{s}.tile.OpenStreetMap.org/{z}/{x}/{y}.png"
-            ;; #js {:attribution
-            ;;      (gstr/format
-            ;;       "&copy; <a href=\"%s\">%s</a> contributors"
-            ;;       "http://osm.org/copyright"
-            ;;       "OpenStreetMap")}
-            )
-           (let [leaflet-map (-> node-center .-children first js/L.map)]
-             (reset! map-atom
-                     (-> leaflet-map
-                         (.setView (let [[longitude latitude] center-map]
-                                     ;; initial zoom needed
-                                     (array latitude longitude)) zoom)
-                         (.on "click" (fn [_] (when @active-atom (reset! active-atom nil))))
-                         ;; This moves the map a bit to the bottom so that the
-                         ;; popup is displayed more in the center
-                         (.on "popupopen" (on-popup-open-event-fn leaflet-map))))))))
       :component-did-update
       (fn [_this _old-argv _old-state _snapshot]
         ;; (js/console.log "[:component-did-update]" "_this" _this)
@@ -586,7 +593,6 @@
         ;; (js/console.log "[:component-did-update]" "_snapshot" _snapshot)
         ((comp
           #_(fn [v] (js/console.log "[:component-did-update]" "v" v) v)
-          #_(partial update-markersn markers re-zoom)
           (fn [v] (nth v 2))
           (fn [v] (get v "argv"))
           js->clj
@@ -604,16 +610,33 @@
         ;; (js/console.log "[:reagent-render]" "center-map" center-map)
         (when @map-atom
           (update-markers markers @db-vals-atom re-zoom))
-        [:div
-         {:ref ref
-          :class (styles/wrapper)}
-         ;; 'header' must be displayed so that the ':grid-template-rows ...'
-         ;; kicks in and the height of the 'center' is maximized
+        [:div#c {:ref ref
+                 :class [(styles/c)]}
          [:div {:class [(styles/header)]} #_"header"]
-         #_[:div {:class [(styles/left)]} #_"left"]
-         [:div {:class [(styles/center)]} #_"center"
-          [:div#map {:style {:height 0 :width 0}}]]
-         [:div {:class [(styles/right)]} (right markers)]
+         [:div#l {:class [(styles/l) (styles/center)]
+                  :on-mouse-move on-mouse-move} #_"left"]
+         [:div#r {:class [(styles/r) (styles/right)]
+                  :on-mouse-move on-mouse-move}
+          [:div#d {:class [(styles/d) (styles/fill)]
+;;; from
+;;; https://stackoverflow.com/questions/26233180/resize-a-div-on-border-drag-and-drop-without-adding-extra-markup
+                   :on-mouse-down
+                   (fn [_]
+                     (js/console.log "start")
+                     (reset! isResizing true))
+                   :on-mouse-up
+                   (fn [_]
+                     (js/console.log "stop")
+                     (reset! isResizing false)
+                     ;; this is not needed when using the
+                     ;; Leaflet.Control.Resizer plugin
+                     #_
+                     (js/window.setTimeout
+                      (fn []
+                        (.invalidateSize @map-atom)
+                        (js/console.log ".invalidateSize"))
+                      200))}
+           (right markers)]]
          [:div {:class [(styles/footer)]}
           (str @(re-frame/subscribe [::subs/name])
                " v"
