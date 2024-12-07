@@ -78,6 +78,15 @@
    :right "400px"
    :background "grey"
    })
+
+(defclass fill []
+  {
+   :min-height "100%"
+   :height "100%"
+   :width "100%"
+   :max-width "100%"
+   })
+
 (defclass r []
   {
    :position "absolute"
