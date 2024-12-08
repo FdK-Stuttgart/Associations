@@ -77,7 +77,7 @@
 
    ;; CLI tools to start a Clojure repl, use Clojure and Java libraries, and
    ;; start Clojure programs. See https://clojure.org/releases/tools
-   "clojure-tools" ; adding this makes clojure binary available on the CLI
+   ;; "clojure-tools" ; adding this makes clojure binary available on the CLI
 
    "leiningen"
 
@@ -92,7 +92,8 @@
     (specifications->manifest clojure-packages)
     (manifest
      (list
-      (package->manifest-entry bstc:clojure))))))
+      (package->manifest-entry bstc:clojure)
+      (package->manifest-entry bstc:clojure-tools))))))
 
 (concatenate-manifests
  (list
