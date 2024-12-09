@@ -1,13 +1,50 @@
 # Bash initialization for interactive non-login shells and
 # for remote shells (info "(bash) Bash Startup Files").
 
+if [ -n "$GUIX_ENVIRONMENT" ]; then
+    PS1='\u@\h \w [env]\$ '   # Adjust the prompt
+else
+    # List of packages to check and install if necessary
+    packages=("direnv" "neofetch" "npm" "mysql-server" "mysql-client"
+              # for clojure:
+              "curl" "rlwrap")
+
+    # Initialize an array to hold missing packages
+    missing_packages=()
+
+    # Check if each package is installed
+    for package in "${packages[@]}"; do
+        if ! dpkg -l | grep -q "^ii  $package "; then
+            missing_packages+=("$package")
+        fi
+    done
+
+    # Install missing packages if any
+    if [ ${#missing_packages[@]} -gt 0 ]; then
+        echo "The following packages are missing and will be installed: ${missing_packages[*]}"
+        sudo apt update
+        sudo apt install -y "${missing_packages[@]}"
+    else
+        echo "All packages are already installed."
+    fi
+
+    # install clojure
+    # curl -L -O https://github.com/clojure/brew-install/releases/latest/download/linux-install.sh
+    # chmod +x linux-install.sh
+    # sudo ./linux-install.sh
+
+    PS1='\u@\h \w\$ '   # Adjust the prompt
+fi
+
 source .envrc
 
 # Export 'SHELL' to child processes.  Programs such as 'screen'
 # honor it and otherwise use /bin/sh.
 export SHELL
 set -u # Treat unset variables as an error when substituting.
-set -e # Exit immediately if a command exits with a non-zero status.
+
+# Can't use 'set -e' because if there's an error then the terminal instantly disappears. Hmm.
+# set -e # Exit immediately if a command exits with a non-zero status.
 
 hostName=$(hostname)
 ecke="ecke"
@@ -467,11 +504,10 @@ randpw () {
     head /dev/urandom | tr -dc '_?!#A-Za-z0-9' | head -c $1 ; echo ''
 }
 
-set +e # Don't exit immediately if a command exits with a non-zero status.
 set -x # Print commands and their arguments as they are executed.
 # `npm list` terminates with non-zero exit code. We need ignore it:
 cntMatches=$(npm list @angular/cli 2>/dev/null | grep -c "UNMET DEPENDENCY")
-{ retval="$?"; set -e; set +x;} 2>/dev/null
+{ retval="$?"; set +x;} 2>/dev/null
 
 ## Install nodejs packages on the first run
 if [ $cntMatches -eq 1 ]; then
@@ -635,7 +671,6 @@ EOF
         test_db
     fi
 fi
-{ set -e; } 2>/dev/null
 
 # see https://meatfighter.com/ascii-silhouettify/color-gallery.html
 guix_prompt () {
@@ -698,20 +733,9 @@ Available commands:
   test_db, test_php, test_wp_dev, test_basic_auth
 EOF
 
-# Adjust the prompt depending on whether we're in 'guix environment'.
-# $GUIX_ENVIRONMENT may not be defined in PROD or TEST environemnt
-if [ -n "$GUIX_ENVIRONMENT" ]
-then
-    PS1='\u@\h \w [env]\$ '
-else
-    PS1='\u@\h \w\$ '
-fi
 alias ls='ls -p --color=auto'
 alias ll='ls -l'
 alias grep='grep --color=auto'
 alias clear="printf '\e[2J\e[H'"
-
-# set -e # Exit immediately if a command exits with a non-zero status.
-set +e # Don't exit on error during the further execution, i.e. on the CLI
 
 eval "$(direnv hook bash)"
