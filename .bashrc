@@ -562,15 +562,28 @@ populate_db () {
 DROP DATABASE IF EXISTS associations;
 CREATE DATABASE IF NOT EXISTS associations;
 DELETE FROM mysql.user WHERE User='';
-GRANT ALL PRIVILEGES ON associations.* TO '$USER'@'localhost' WITH GRANT OPTION;
-CREATE USER IF NOT EXISTS 'foo'@'localhost' IDENTIFIED BY '';
-GRANT ALL PRIVILEGES ON *.* TO 'foo'@'localhost' WITH GRANT OPTION;
+CREATE USER IF NOT EXISTS '$CMAP_MYSQL_USER'@'$CMAP_MYSQL_HOST'
+       IDENTIFIED BY '$CMAP_MYSQL_PASSWORD';
+GRANT ALL PRIVILEGES ON *.* TO '$CMAP_MYSQL_USER'@'$CMAP_MYSQL_HOST'
+       WITH GRANT OPTION;
 FLUSH PRIVILEGES;
-SELECT concat(user, '  \'', password, '\'') FROM mysql.user;
 SELECT '-- Loading test data ...' AS '';
 SOURCE map/database/db-export/associations.sql;
 -- SHOW TABLES;
 -- SHOW COLUMNS IN activities;
+EOF
+    elif [ $hostName == "ubu-edge" ]; then
+        sudo mysql --user root << EOF
+DROP DATABASE IF EXISTS associations;
+CREATE DATABASE IF NOT EXISTS associations;
+DELETE FROM mysql.user WHERE User='';
+CREATE USER IF NOT EXISTS '$CMAP_MYSQL_USER'@'$CMAP_MYSQL_HOST'
+       IDENTIFIED BY '$CMAP_MYSQL_PASSWORD';
+GRANT ALL PRIVILEGES ON *.* TO '$CMAP_MYSQL_USER'@'$CMAP_MYSQL_HOST'
+       WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+SELECT '-- Loading test data ...' AS '';
+SOURCE map/database/db-export/associations.sql;
 EOF
     else
         mysql --verbose \
@@ -579,16 +592,6 @@ EOF
               --database=associations << EOF
 DROP DATABASE IF EXISTS associations;
 CREATE DATABASE IF NOT EXISTS associations;
--- SHOW DATABASES;
----- USE mysql;
----- DELETE FROM mysql.user WHERE User='';
----- -- SELECT User FROM mysql.user;
----- CREATE USER IF NOT EXISTS '$USER'@'localhost' IDENTIFIED BY '';
----- GRANT ALL PRIVILEGES ON associations.* TO '$USER'@'localhost' WITH GRANT OPTION;
----- CREATE USER IF NOT EXISTS 'foo'@'localhost' IDENTIFIED BY '';
----- GRANT ALL PRIVILEGES ON *.* TO 'foo'@'localhost' WITH GRANT OPTION;
----- FLUSH PRIVILEGES;
----- SELECT concat(user, '  \'', password, '\'') FROM mysql.user;
 SELECT '-- Loading test data ...' AS '';
 SOURCE map/database/db-export/associations.sql;
 -- SHOW TABLES;
