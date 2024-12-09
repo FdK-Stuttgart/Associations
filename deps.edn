@@ -3,6 +3,19 @@
 
  :deps
  {
+
+  ;;; "clojure-tools not finding java classes"
+  ;;; https://yhetil.org/guix-user/CAOXoXz0fKD+3B+b_y6A8MPYxZcSRDusby6VWTUy8Nnp4Y0fAzQ@mail.gmail.com/
+  ;; org.jboss.xnio/xnio-api {:mvn/version "3.8.16.Final"}
+  ;; org.jboss.xnio/xnio-nio {:mvn/version "3.8.16.Final"}
+  ;; ;;
+  ;; org.wildfly.common/wildfly-common {:mvn/version "2.0.1"}
+  ;; org.jboss.logging/jboss-logging {:mvn/version "3.6.1.Final"}
+  ;; io.smallrye.config/smallrye-config-common {:mvn/version "3.10.2"}
+  ;; io.smallrye.common/smallrye-common-net {:mvn/version "2.9.0"}
+  ;; org.jboss.threads/jboss-threads {:mvn/version "3.8.0.Final"}
+  ;; io.smallrye.common/smallrye-common-cpu {:mvn/version "2.9.0"}
+
  org.clojure/clojure {:mvn/version "1.12.0"}
 
  ;; character utility functions: https://github.com/daveyarwood/djy
