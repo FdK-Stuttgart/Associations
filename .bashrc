@@ -532,7 +532,8 @@ test_db () {
     set -x  # Print commands and their arguments as they are executed.
     # mysql --user $USER << EOF
     if [ $hostName == $ecke ]; then
-        mysql --user $CMAP_MYSQL_USER \
+        # can't use CMAP_MYSQL_USER
+        mysql --user $USER \
               << EOF
 SELECT count(*) as "count-of-activities (should be ~130):"
 FROM associations.activities;
@@ -558,7 +559,8 @@ populate_db () {
     set -x  # Print commands and their arguments as they are executed.
     # --verbose   show executed SQL commands
     if [ $hostName == $ecke ]; then
-        mysql --user $CMAP_MYSQL_USER << EOF
+        # can't use CMAP_MYSQL_USER
+        mysql --user $USER << EOF
 DROP DATABASE IF EXISTS associations;
 CREATE DATABASE IF NOT EXISTS associations;
 DELETE FROM mysql.user WHERE User='';
