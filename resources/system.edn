@@ -54,14 +54,10 @@
  :db.sql/connection
  #profile
  {:dev {:jdbc-url
-        ;; "jdbc:qlite:cmap_dev.db"
-
-        ;; doesn't work:
-        ;; "mysql://localhost:3306/associations?user=bost&password="
-
-        ;; works:
-        "mysql://localhost:3306/associations?user=foo&password="
-        },
+        #envf ["jdbc:mysql://localhost:%s/associations?user=%s&password=%s"
+               CMAP_MYSQL_PORT
+               CMAP_MYSQL_USER
+               CMAP_MYSQL_PASSWORD]},
   :test {:jdbc-url "jdbc:sqlite:cmap_test.db"},
   ;; https://www.urlencoder.io/ for special chars like '=', '?', '&' in the URL
   ;; export CMAP_PORT=8002
