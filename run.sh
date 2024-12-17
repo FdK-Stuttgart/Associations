@@ -5,7 +5,7 @@
 wd=$(pwd) # WD=$(dirname "$0") # working directory, i.e. path to this file
 
 # MariaDB
-sed -i -e "s|#mysql_user#|$(whoami)|" $wd/etc/my.cnf
+sed -i -e "s|#mysql_user#|$(whoami)|" $wd/usr/etc/my.cnf
 
 # Recreate the dirs destroyed by `git clean --force -dx`. See also .bashrc
 for extraDirs in \
@@ -93,7 +93,7 @@ guix shell \
      --share=$wd/.bashrc=$HOME/.bashrc \
      --share=$HOME/.local/share/direnv=$HOME/.local/share/direnv \
      --share=$HOME/.envrc=$HOME/.envrc \
-     --share=$wd/etc=/usr/etc \
+     --share=$wd/usr/etc=/usr/etc \
      --share=$wd/map/app-form/node_modules=$HOME/node_modules/map/app-form/ \
      --share=$wd/map/app-map/node_modules=$HOME/node_modules/map/app-map/ \
      --share=$wd/node_modules=$HOME/node_modules \
