@@ -1,6 +1,21 @@
 # Bash initialization for interactive non-login shells and
 # for remote shells (info "(bash) Bash Startup Files").
 
+export PATH=$PATH:/usr/local/bin   # /usr/local/bin contains clj and clojure
+
+install_clojure_if_needed () {
+    cmd=clj # clj is just: `rlwrap <rlwrap params> clojure <clojure params>`
+    # In bash the `command` has no '--search' parameter. Only in fish-shell
+    # [[ ! $(command -v $cmd) ]] - using double brackets '[[' / ']]' is a bashishm
+    if [ ! "$(command -v $cmd)" ]; then
+        curl -L -O https://github.com/clojure/brew-install/releases/latest/download/linux-install.sh
+        chmod +x linux-install.sh
+        ./linux-install.sh               # installs clojure to /usr/local/bin
+    else
+        : # `clj` installed already
+    fi
+}
+
 if [ -n "$GUIX_ENVIRONMENT" ]; then
     PS1='\u@\h \w [env]\$ '   # Adjust the prompt
 else
@@ -28,10 +43,7 @@ else
         : # printf "DBG: All packages are already installed.\n"
     fi
 
-    # install clojure
-    # curl -L -O https://github.com/clojure/brew-install/releases/latest/download/linux-install.sh
-    # chmod +x linux-install.sh
-    # sudo ./linux-install.sh
+    install_clojure_if_needed
 
     PS1='\u@\h \w\$ '   # Adjust the prompt
 fi
@@ -645,6 +657,7 @@ if [ $hostName == $ecke ]; then
         mysqladmin --user $USER shutdown
         { retval="$?"; set +x; } 2>/dev/null
     fi
+    install_clojure_if_needed
 else
     printf "Running on machine: %s\n" $hostName
     set -x  # Print commands and their arguments as they are executed.

@@ -94,6 +94,16 @@ guix shell \
      --share=$HOME/.local/share/direnv=$HOME/.local/share/direnv \
      --share=$HOME/.envrc=$HOME/.envrc \
      --share=$wd/usr/etc=/usr/etc \
+     --share=$wd/usr/etc/systemd=/usr/etc/systemd \
+     --share=$wd/usr/etc/systemd/system=/usr/etc/systemd/system \
+     --share=$wd/usr/local=/usr/local \
+     --share=$wd/usr/local/bin=/usr/local/bin \
+     --share=$wd/usr/local/lib=/usr/local/lib \
+     --share=$wd/usr/local/lib/clojure=/usr/local/lib/clojure \
+     --share=$wd/usr/local/lib/clojure/libexec=/usr/local/lib/clojure/libexec \
+     --share=$wd/usr/local/share=/usr/local/share \
+     --share=$wd/usr/local/share/man=/usr/local/share/man \
+     --share=$wd/usr/local/share/man/man1=/usr/local/share/man/man1 \
      --share=$wd/map/app-form/node_modules=$HOME/node_modules/map/app-form/ \
      --share=$wd/map/app-map/node_modules=$HOME/node_modules/map/app-map/ \
      --share=$wd/node_modules=$HOME/node_modules \
