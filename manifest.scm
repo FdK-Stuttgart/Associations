@@ -61,6 +61,9 @@
     "inetutils" ;; provides hostname, etc.
     "which"
     "zip"
+    "tar"       ;; for manual clojure installation
+    "gzip"      ;; for manual clojure installation
+    "rlwrap"    ;; for manual clojure installation
     "unzip"
     "pinentry"
     ))
@@ -92,8 +95,9 @@
     (specifications->manifest clojure-packages)
     (manifest
      (list
-      (package->manifest-entry bstc:clojure)
-      (package->manifest-entry bstc:clojure-tools))))))
+      ;; (package->manifest-entry bstc:clojure)
+      ;; (package->manifest-entry bstc:clojure-tools)
+      )))))
 
 (concatenate-manifests
  (list
