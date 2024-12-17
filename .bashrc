@@ -21,11 +21,11 @@ else
 
     # Install missing packages if any
     if [ ${#missing_packages[@]} -gt 0 ]; then
-        echo "The following packages are missing and will be installed: ${missing_packages[*]}"
+        printf "INF: Installing missing packages: ${missing_packages[*]}\n"
         sudo apt update
         sudo apt install -y "${missing_packages[@]}"
     else
-        echo "All packages are already installed."
+        : # printf "DBG: All packages are already installed.\n"
     fi
 
     # install clojure
@@ -101,13 +101,13 @@ test_php () {
     if [ "$(ss -tulpn | grep $port_php)" ]; then
         printf "INF: PHP port %s opened.\n" $port_php
         url=http://localhost:$port_php/api/associations/read-associations.php
-        printf "[DBG] Testing php WebServer... \n"
+        printf "DBG: Testing php WebServer... \n"
         set -x  # Print commands and their arguments as they are executed.
         cnt_chars=$(curl --silent --request GET $url | wc -c)
         { retval="$?"; set +x; } 2>/dev/null
         printf "    ... %s chars received\n" $cnt_chars
     else
-        printf "[ERR] PHP port %s NOT opened.\n" $port_php
+        printf "ERR: PHP port %s NOT opened.\n" $port_php
         printf "INF: Try to run: start_php\n"
     fi
 }
@@ -511,8 +511,6 @@ cntMatches=$(npm list @angular/cli 2>/dev/null | grep -c "UNMET DEPENDENCY")
 
 ## Install nodejs packages on the first run
 if [ $cntMatches -eq 1 ]; then
-    # printf "[DBG] first run: cntMatches: %s\n" $cntMatches
-    # printf "[DBG] install nodejs packages...\n"
     wd=$(pwd)
     set -x  # Print commands and their arguments as they are executed.
     npm install @angular/cli << EOF
@@ -523,9 +521,6 @@ EOF
     cd $wd
     # Don't print commands
     { retval="$?"; set +x; } 2>/dev/null
-    # printf "[DBG] install nodejs packages... done\n"
-# else
-#     printf "[DBG] consecutive run: cntMatches: %s\n" $cntMatches
 fi
 
 test_db () {
@@ -608,9 +603,6 @@ set +e # Don't exit immediately if a command exits with a non-zero status.
 if [ $hostName == $ecke ]; then
     dbaseDir=/var/lib/mysql/data/mysql
     if [ ! -d $dbaseDir ]; then
-        # printf "DBG: first run: dbaseDir doesn't exist: %s\n" $dbaseDir
-        # printf "DBG: install MariaDB...\n"
-
         ### The 'sed ...'-hack below, required to solve a bug on mariadb guix'
         ### package is not needed.
         ### Regarding locating of a guix package in the store:
@@ -651,10 +643,6 @@ if [ $hostName == $ecke ]; then
         sleep 3
         populate_db
         mysqladmin --user $USER shutdown
-        # printf "[DBG] install MariaDB... done\n"
-        { retval="$?"; set +x; } 2>/dev/null
-    else
-        printf "[DBG] first run: dbaseDir exists already: %s\n" $dbaseDir
         { retval="$?"; set +x; } 2>/dev/null
     fi
 else
@@ -670,16 +658,16 @@ SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA
 EOF
     { retval="$?"; set +x; } 2>/dev/null
     if [ ! $retval -eq 0 ]; then
-        # printf "INF: DBase doesn't exist\n"
         populate_db
     else
         test_db
     fi
 fi
 
-# see https://meatfighter.com/ascii-silhouettify/color-gallery.html
-guix_prompt () {
-    cat << "EOF"
+project_logo () {
+    # see https://meatfighter.com/ascii-silhouettify/color-gallery.html
+    if [ $hostName == $ecke ]; then
+        cat << "EOF"
     ░░░                                     ░░░
     ░░▒▒░░░░░░░░░               ░░░░░░░░░▒▒░░
      ░░▒▒▒▒▒░░░░░░░           ░░░░░░░▒▒▒▒▒░
@@ -700,6 +688,17 @@ guix_prompt () {
    | |__| | |\  | |__| | | |__| | |_| | |>  <
     \_____|_| \_|\____/   \_____|\__,_|_/_/\_\
 EOF
+    else
+        # sudo apt install --yes neofetch
+        neofetch --logo
+    fi
+
+    cat << "EOF"
+Available commands:
+  version, build, deploy_dev, deploy_test, deploy_prod
+  populate_db, start_php, serve_map, serve_form
+  test_db, test_php, test_wp_dev, test_basic_auth
+EOF
 }
 
 if [[ $- != *i* ]]; then
@@ -717,26 +716,14 @@ alias dpt=deploy_test
 alias sfrm=serve_form
 alias smap=serve_map
 alias sphp=start_php
-alias sdb=start_db
-alias mbost='mysql --user bost'
-alias mfoo='mysql --user foo'
 alias tphp=test_php
+
+alias sdb=start_db
+alias tdb=test_db
 # alias twt=wp_auth_test
 # alias twd=test_wp_dev
 
-if [ $hostName == $ecke ]; then
-    guix_prompt
-else
-    # sudo apt install --yes neofetch
-    neofetch --logo
-fi
-
-cat << "EOF"
-Available commands:
-  version, build, deploy_dev, deploy_test, deploy_prod
-  populate_db, start_php, serve_map, serve_form
-  test_db, test_php, test_wp_dev, test_basic_auth
-EOF
+project_logo
 
 alias ls='ls -p --color=auto'
 alias ll='ls -l'
