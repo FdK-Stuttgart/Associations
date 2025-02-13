@@ -19,20 +19,16 @@ ls -1d /usr/etc/* | while read filepath; do
 done
 
 alias ng='node ./node_modules/\@angular/cli/bin/ng.js'
-# node_bin=`which node`
-# ng_bin=$HOME/node_modules/\@angular/cli/bin/ng
-#  serve_map_cmd="$node_bin $ng_bin serve --port 4021"
-# serve_form_cmd="$node_bin $ng_bin serve --port 4022"
 
-prjd=~/dec/fdk
+prjd=.
 port_map=4201
 port_form=4202
 port_php=4200
 
-p1=$prjd/map/app-map/package.json
-p11=$prjd/map/app-map/package-lock.json
-p2=$prjd/map/app-form/package.json
-p22=$prjd/map/app-form/package-lock.json
+p1="$prjd/map/app-map/package.json"
+p11="$prjd/map/app-map/package-lock.json"
+p2="$prjd/map/app-form/package.json"
+p22="$prjd/map/app-form/package-lock.json"
 
 test_php () {
     url=http://localhost:$port_php/api/associations/read-associations.php
@@ -179,22 +175,26 @@ create_environment_php () {
 
 install_node_modules () {
     # test if the directory is empty
-    if [ -z "$(ls -A ./node_modules)" ]; then
+    if [ -z "$(ls -A $1/node_modules)" ]; then
         # do not ask 'Would you like to share anonymous usage data'
+        set -x  # Print commands and their arguments as they are executed.
         ng analytics off
-        npm install
+        npm --prefix "$1" install
+        { retval="$?"; set +x; } 2>/dev/null # Don't print commands
     fi
 }
 
+# Must change current working directory, otherwise `ng serve` errors out with:
+#   Error: This command is not available when running the Angular CLI outside a workspace.
 serve_map () {
     set -x  # Print commands and their arguments as they are executed.
     # test_php
     create_environment_php
-    cd $prjd/map/app-map/ && install_node_modules
+    install_node_modules $prjd/map/app-map
     local logfile=/var/log/serve_map.log
     printf "See %s\n" $logfile
     # ng serve --port $port_map &>$logfile &
-    ng serve --port $port_map
+    cd $prjd/map/app-map && ng serve --port $port_map
     # Don't print commands
     { retval="$?"; set +x; } 2>/dev/null
     # cd -
@@ -207,14 +207,16 @@ serve_map () {
 # " bash'
 }
 
+# Must change current working directory, otherwise `ng serve` errors out with:
+#   Error: This command is not available when running the Angular CLI outside a workspace.
 serve_form () {
     # test_php
     create_environment_php
-    cd $prjd/map/app-form/ && install_node_modules
+    install_node_modules $prjd/map/app-form
     logfile=/var/log/serve_form.log
     printf "See %s\n" $logfile
     # ng serve --port $port_form &>$logfile &
-    ng serve --port $port_form
+    cd $prjd/map/app-form && ng serve --port $port_form
     # cd -
 #     xfce4-terminal \
 #         --working-directory="$prjd/map/app-form/" \
@@ -227,7 +229,12 @@ serve_form () {
 
 start () {
     start_php
-    serve_map
+    set -x  # Print commands and their arguments as they are executed.
+    npm --prefix "$prjd" install
+    { retval="$?"; set +x; } 2>/dev/null # Don't print commands
+
+    # not sure if '& disown' works for functions
+    serve_map & disown
     serve_form
 }
 
@@ -245,51 +252,61 @@ get_version () {
 }
 
 version () {
-    cd $prjd && git stash
+    # Stash changes in the project root directory.
+    git -C "$prjd" stash
 
-    cd $(dirname $p1) && npm run app-map:version  # no autocommit
-    # npm run app-map:version:commit
-    local ver_map=$(get_version $p1)
+    # Run the npm script for app-map versioning without changing directory.
+    npm --prefix "$(dirname "$p1")" run app-map:version  # no autocommit
+    local ver_map
+    ver_map=$(get_version "$p1")
 
-    cd $(dirname $p2) && npm run app-form:version # no autocommit
-    # npm run app-form:version:commit
-    local ver_form=$(get_version $p2)
+    # Run the npm script for app-form versioning without changing directory.
+    npm --prefix "$(dirname "$p2")" run app-form:version  # no autocommit
+    local ver_form
+    ver_form=$(get_version "$p2")
 
-    cd $prjd
-    # -lt 5: all 3 version numbers MAJOR.MINOR.PATCH must be non-empty
+    # Check version numbers (assuming version strings follow MAJOR.MINOR.PATCH).
     if [[ "$ver_form" != "$ver_map" && ${#ver_map} -lt 5 ]]; then
-        printf "Wrong version numbers: ver_form: '%s', ver_map: '%s'\n" \
-               $ver_form $ver_map
+        printf "Wrong version numbers: ver_form: '%s', ver_map: '%s'\n" "$ver_form" "$ver_map"
         printf "Reverting changes."
-        git checkout -- $p1 $p2 $p11 $p22
+        git -C "$prjd" checkout -- "$p1" "$p2" "$p11" "$p22"
         local retval=1
     else
-        git add $p1 $p2 $p11 $p22
-        git commit -m "v${ver_map}"
+        git -C "$prjd" add "$p1" "$p2" "$p11" "$p22"
+        git -C "$prjd" commit -m "v${ver_map}"
         local retval=0
     fi
-    git stash pop
+
+    git -C "$prjd" stash pop
     return $retval
 }
 
 build () {
-    cd $prjd && git stash
-    set_ng $p1
-    cd $prjd/map/app-map && npm run app-map:build:prod
+    # Stash changes in the project root.
+    git -C "$prjd" stash
 
-    set_ng $p2
-    sed -i "s|del-cli --force|rm -rf|" $p2
-    sed -i "s|robocopy \(.*\) \*\.\* \/S \/E \/IS|cp -r \1|" $p2
-    sed -i \
-        "s|\(npm-run-all\)|node $HOME/dec/fdk/map/app-form/node_modules/npm-run-all/bin/npm-run-all/main.js \1|" \
-        $p2
-    cd $prjd/map/app-form && npm run app-form:build:prod
-    distd=$prjd/map/dist
-    rm -rf $distd/AssociationMap/edit/api
-    mv $distd/AssociationMap/edit/.htaccess $distd/AssociationMap/.htaccess
+    # Prepare $p1 and run the build for app-map.
+    set_ng "$p1"
+    npm --prefix "$prjd/map/app-map" run app-map:build:prod
 
-    git checkout -- $p1 $p2 $p11 $p22
-    cd $prjd && git stash pop
+    # Prepare $p2 and modify it as needed.
+    set_ng "$p2"
+    sed -i "s|del-cli --force|rm -rf|" "$p2"
+    sed -i "s|robocopy \(.*\) \*\.\* \/S \/E \/IS|cp -r \1|" "$p2"
+    sed -i "s|\(npm-run-all\)|node \$prjd/map/app-form/node_modules/npm-run-all/bin/npm-run-all/main.js \1|" "$p2"
+
+    # Run the build for app-form.
+    npm --prefix "$prjd/map/app-form" run app-form:build:prod
+
+    # Adjust distribution files.
+    local distd="$prjd/map/dist"
+    rm -rf "$distd/AssociationMap/edit/api"
+    mv "$distd/AssociationMap/edit/.htaccess" "$distd/AssociationMap/.htaccess"
+
+    # Revert any modifications made to the files.
+    git -C "$prjd" checkout -- "$p1" "$p2" "$p11" "$p22"
+    git -C "$prjd" stash pop
+
     return 0
 }
 
@@ -320,7 +337,7 @@ deploy () {
         local tstp=$(date '+%F_%T')
         local dst=~/AssociationMap-$tstp
 
-        [ ! -d $fdk_home ] && mkdir -p $fdk_home
+        mkdir -p $fdk_home # make sure the $fdk_home exists
 
         src="./map/dist/AssociationMap"
         remote_path=$fdk_home/tmp/fdk
@@ -360,49 +377,6 @@ deploy () {
         scp $script "${fdk_login}@${fdk_server}:${remote_path}"
 
         echo ssh "${fdk_login}@${fdk_server}"
-
-        # # At first transfer everything
-        # cd $prjd
-        # # file transfer DEV -> TEST:
-        # # --archive --verbose --compress
-        # set -x  # Print commands and their arguments as they are executed.
-        # rsync -az \
-        #       --exclude="AssociationMap/api/environment.php" \
-        #       ./map/dist/AssociationMap \
-        #       $fdk_login@$fdk_server:$dst
-        # local result="$?"
-        # if [ "$result" -ne 0 ]; then
-        #     return $result
-        # fi
-        # # Don't print commands
-        # { retval="$?"; set +x; } 2>/dev/null
-
-        # local AMO=$fdk_home/AssociationMap
-        # local AMB=$AMO.backup-$tstp
-        # echo "" > /tmp/script.sh
-        # echo "set -v"                                                                           >> /tmp/script.sh
-        # echo "host=\$(hostname)"                                                                >> /tmp/script.sh
-        # echo "if [ -d $AMO ]; then"                                                             >> /tmp/script.sh
-        # echo "    cp -r $AMO $AMB"                                                              >> /tmp/script.sh
-        # echo "    local result=\"$?\""                                                          >> /tmp/script.sh
-        # echo "    if [ \"$result\" -ne 0 ]; then"                                               >> /tmp/script.sh
-        # echo "        return $result"                                                           >> /tmp/script.sh
-        # echo "    else"                                                                         >> /tmp/script.sh
-        # echo "        printf \"[%s] Backup successful. Emptying %s...\\n\" \$host $AMO"         >> /tmp/script.sh
-        # echo "        chmod -R -w $AMB"                                                         >> /tmp/script.sh
-        # echo "        find $AMO -not -name environment.php -delete"                             >> /tmp/script.sh
-        # echo "        find $AMO -empty -type d -delete"                                         >> /tmp/script.sh
-        # echo "        printf \"[%s] Items in %s : %s\\n\" \$host $AMO \$(ls -la $AMO | wc -l)"  >> /tmp/script.sh
-        # echo "        cp -r $dst $AMO"                                                          >> /tmp/script.sh
-        # echo "        printf \"[%s] Items in %s : %s\\n\" \$host $AMO \$(ls -la $AMO | wc -l)"  >> /tmp/script.sh
-        # echo "    fi"                                                                           >> /tmp/script.sh
-        # echo "else"                                                                             >> /tmp/script.sh
-        # echo "    printf \"[%s] ERR: Directory doesn't exist: %s\\n\" \$host $AMO"              >> /tmp/script.sh
-        # echo "fi"                                                                               >> /tmp/script.sh
-        # set -x  # Print commands and their arguments as they are executed.
-        # # ssh -t $fdk_login@$fdk_server < /tmp/script.sh
-        # # Don't print commands
-        # { retval="$?"; set +x; } 2>/dev/null
     fi
 }
 
@@ -452,8 +426,8 @@ if [ $cntMatches -eq 1 ]; then
     npm install @angular/cli << EOF
 N
 EOF
-    cd $prjd/map/app-form/ && npm install
-    cd $prjd/map/app-map/  && npm install
+    npm --prefix $prdj/map/app-form install
+    npm --prefix $prdj/map/app-map/ install
     cd $wd
     # Don't print commands
     { retval="$?"; set +x; } 2>/dev/null
