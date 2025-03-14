@@ -50,7 +50,6 @@ wp_auth_test () {
          $fdk_test_wp_authApi_basePath/jwt-auth/v1/token
     # --head  print only the headers
     # curl --head $fdk_test_wp_authApi_basePath/jwt-auth/v1/token
-    # Don't print commands
     { retval="$?"; set +x; } 2>/dev/null
     printf "\n"
 }
@@ -62,7 +61,6 @@ wp_auth_prod () {
     curl -H 'Content-Type: application/json' \
          --data $(data $fdk_prod_wp_username $fdk_prod_wp_password) \
          $fdk_prod_wp_authApi_basePath/jwt-auth/v1/token
-    # Don't print commands
     { retval="$?"; set +x; } 2>/dev/null
     printf "\n"
 }
@@ -100,7 +98,6 @@ download () {
     #       --directory-prefix=$prjd/map/database
     # unzip phpMyAdmin-5.1.3-all-languages.zip
     # unzip latest.zip
-    # Don't print commands
     { retval="$?"; set +x; } 2>/dev/null
     printf "Open:\n"
     printf "  http://localhost:%s/wordpress/wp-admin/install.php\n" $port_php
@@ -113,7 +110,6 @@ download () {
 start_db () {
     set -x  # Print commands and their arguments as they are executed.
     mysqld_safe 1>/dev/null &
-    # Don't print commands
     { retval="$?"; set +x; } 2>/dev/null
 }
 
@@ -135,7 +131,6 @@ start_php () {
         -S localhost:$port_php \
         -t $prjd/map/database/ \
         &>/var/log/php_stdout.log &
-    # Don't print commands
     { retval="$?"; set +x; } 2>/dev/null
 
 #     xterm -e 'env DISPLAY=":1.0" PROMPT_COMMAND="unset PROMPT_COMMAND
@@ -160,7 +155,6 @@ kill_all () {
     killall php
     pkill -f "ng serve --port $port_map"
     pkill -f "ng serve --port $port_form"
-    # # Don't print commands
     # { retval="$?"; set +x; } 2>/dev/null
 }
 
@@ -180,7 +174,7 @@ install_node_modules () {
         set -x  # Print commands and their arguments as they are executed.
         ng analytics off
         npm --prefix "$1" install
-        { retval="$?"; set +x; } 2>/dev/null # Don't print commands
+        { retval="$?"; set +x; } 2>/dev/null
     fi
 }
 
@@ -195,7 +189,6 @@ serve_map () {
     printf "See %s\n" $logfile
     # ng serve --port $port_map &>$logfile &
     cd $prjd/map/app-map && ng serve --port $port_map
-    # Don't print commands
     { retval="$?"; set +x; } 2>/dev/null
     # cd -
 #     xfce4-terminal \
@@ -231,7 +224,7 @@ start () {
     start_php
     set -x  # Print commands and their arguments as they are executed.
     npm --prefix "$prjd" install
-    { retval="$?"; set +x; } 2>/dev/null # Don't print commands
+    { retval="$?"; set +x; } 2>/dev/null
 
     # not sure if '& disown' works for functions
     serve_map & disown
@@ -429,7 +422,6 @@ EOF
     npm --prefix $prdj/map/app-form install
     npm --prefix $prdj/map/app-map/ install
     cd $wd
-    # Don't print commands
     { retval="$?"; set +x; } 2>/dev/null
     # printf "DBG: install nodejs packages... done\n"
 # else
@@ -549,9 +541,7 @@ then
     # is an SSH session (as in "ssh host command"), source
     # /etc/profile so we get PATH and other essential variables.
     [[ -n "$SSH_CLIENT" ]] && project_logo
-
-    # Don't do anything else.
-    return
+    return # Don't do anything else.
 fi
 
 alias dpd=deploy_dev
