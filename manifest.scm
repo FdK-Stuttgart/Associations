@@ -22,7 +22,8 @@
 
     "coreutils"
     "curl"
-    "direnv"
+    "direnv"    ; see https://guix.gnu.org/cookbook/en/guix-cookbook.html#Guix-environment-via-direnv
+    "fd"        ; simple, fast and user-friendly alternative to `find'
     "findutils" ; provides: find, updatedb, xargs
     "procps"    ; provides: free, pgrep, pidof, pkill, pmap, ps, pwdx, slabtop,
                                         ;           tload, top, vmstat, w, watch and sysctl
