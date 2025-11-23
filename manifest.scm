@@ -14,7 +14,7 @@
    ;;
    ;; 2. It seems like busybox is not needed if invoked with:
    ;;     guix shell ... --share=/usr/bin
-   #;"busybox"
+   ;; "busybox"
 
    "coreutils"
    "curl"
@@ -25,6 +25,8 @@
    "git"
    "gnupg"
    "grep"
+   "inetutils" ; provides: hostname
+   ;; "hosts"    ; command line program for managing `/etc/hosts' entries
    "iproute2" ; contains ss - socket statistics
    "jq"
    "leiningen"

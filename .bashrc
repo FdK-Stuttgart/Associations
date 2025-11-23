@@ -1,22 +1,9 @@
-# Bash initialization for interactive non-login shells and
-# for remote shells (info "(bash) Bash Startup Files").
+# Bash initialization for interactive non-login shells and for remote shells
+# (info "(bash) Bash Startup Files").
 
-# Export 'SHELL' to child processes.  Programs such as 'screen'
-# honor it and otherwise use /bin/sh.
+# Export 'SHELL' to child processes. Programs such as 'screen' honor it and
+# otherwise use /bin/sh.
 export SHELL
-
-# /run is not automatically created by guix
-[ ! -d /run ] && mkdir /run
-
-# Quick access to $GUIX_ENVIRONMENT, for usage on config files
-# (currently only /etc/nginx/nginx.conf)
-[ ! -L /env ] && ln -s $GUIX_ENVIRONMENT /env
-
-# Link every file in /usr/etc on /etc
-ls -1d /usr/etc/* | while read filepath; do
-    bname=/etc/$(basename $filepath)
-    [ ! -L $bname ] && ln -s $filepath $bname
-done
 
 alias ng='node ./node_modules/\@angular/cli/bin/ng.js'
 
@@ -109,6 +96,8 @@ download () {
 
 start_db () {
     set -x  # Print commands and their arguments as they are executed.
+    # mysqld_safe --datadir='/var/lib/mysql/' --port=3307 --user=$USER \
+    #             --group=users --nowatch --socket=/var/run/mysqld/mysqld.sock
     mysqld_safe 1>/dev/null &
     { retval="$?"; set +x; } 2>/dev/null
 }
@@ -120,14 +109,14 @@ start_php () {
         $prjd/map/app-map/src/environments/environment.ts \
         $prjd/map/app-form/src/environments/environment.ts
 
-    # php -c /usr/etc -f /usr/etc/db-connect-test.php
+    # php -c /etc -f /etc/db-connect-test.php
 
     # --no-header / -q  means quiet-mode
     # -c <path>|<file>  Look for php.ini file in this directory
     # -t <docroot>      Specify document root <docroot> for built-in web server.
     # redirection '... 1>/var/log/php_stdout.log &' doesn't work
     set -x  # Print commands and their arguments as they are executed.
-    php -q -c /usr/etc \
+    php -q -c /etc \
         -S localhost:$port_php \
         -t $prjd/map/database/ \
         &>/var/log/php_stdout.log &
@@ -142,8 +131,8 @@ start_php () {
 #     xfce4-terminal \
 #         --title="php" \
 #         --command='env PROMPT_COMMAND="unset PROMPT_COMMAND
-# # php -c /usr/etc -f /usr/etc/db-connect-test.php
-# php -c /usr/etc -S localhost:4200 -t $prjd/map/database/ 1>/dev/null &
+# # php -c /etc -f /etc/db-connect-test.php
+# php -c /etc -S localhost:4200 -t $prjd/map/database/ 1>/dev/null &
 # " bash'
 }
 
@@ -359,7 +348,7 @@ deploy () {
         script="/tmp/script.$(mktemp XXXXXXXXXX).sh" # `mktemp XXXXXXXXXX` returns a random string
         if [ ! -d $fdk_home ]; then
             mkdir -p $fdk_home
-            printf "[ERR] The on-target deployment-script '%s'\n doesn't exist.\n" $script
+            printf "ERR: The on-target deployment-script '%s'\n doesn't exist.\n" $script
         fi
 
         echo "set -v"                                                                                 >> $script
@@ -465,7 +454,7 @@ if [ ! -d $dbd ]; then
                                 $(dirname \
                                       $(which mariadb)))/share/mysql/english)
     printf "lc_messages_dir: %s\n" $lc_messages_dir
-    sed -i -e "s|#lc_messages_dir#|$lc_messages_dir|" /usr/etc/my.cnf
+    sed -i -e "s|#lc_messages_dir#|$lc_messages_dir|" /etc/my.cnf
 
     # TODO if the PAM authentication plugin is needed
     # guix_plugind=$(find /gnu/store/ -name auth_pam.so -type f | xargs dirname)
@@ -483,6 +472,7 @@ if [ ! -d $dbd ]; then
     set -x
     mysql_install_db 2>&1 | sed '/^chown: cannot access/,/try again\.$/d'
     mysqld_safe &
+    printf "########## start_db ... done.\n"
     # execution of `mysql_secure_installation` is not needed
     sleep 3
     # --verbose   show executed SQL commands
@@ -558,13 +548,6 @@ alias tphp=test_php
 
 project_logo
 
-# Adjust the prompt depending on whether we're in 'guix environment'.
-if [ -n "$GUIX_ENVIRONMENT" ]
-then
-    PS1='\u@\h \w [env]\$ '
-else
-    PS1='\u@\h \w\$ '
-fi
 alias ls='ls -p --color=auto'
 alias ll='ls -l'
 alias grep='grep --color=auto'

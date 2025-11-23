@@ -89,11 +89,12 @@ guix shell \
      --share=$wd/.bash_profile=$HOME/.bash_profile \
      --share=$wd/.bashrc=$HOME/.bashrc \
      --share=$wd/.envrc=$HOME/.envrc \
-     --share=$wd/etc=/usr/etc \
+     --share=$wd/etc=/etc \
      --share=$wd/map/app-form/node_modules=$HOME/node_modules/map/app-form/ \
      --share=$wd/map/app-map/node_modules=$HOME/node_modules/map/app-map/ \
      --share=$wd/node_modules=$HOME/node_modules \
      --share=$wd/var/lib/mysql/data=/var/lib/mysql/data \
      --share=$wd/var/log=/var/log \
+     --share=$wd/var/run/mysqld=/var/run/mysqld \
      --share=$wd \
      -- bash
